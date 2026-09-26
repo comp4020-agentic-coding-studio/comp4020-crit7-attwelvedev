@@ -103,7 +103,7 @@ export default function CourseCard({
           ))}
         </ul>
       )}
-      <PlaceInMenu view={view} code={placement.code} onPlace={move} disabled={readOnly} />
+      <PlaceInMenu view={view} code={placement.code} onPlace={move} disabled={readOnly} placed />
       <button type="button" onClick={() => setDetailsOpen(true)}>
         Details
       </button>
