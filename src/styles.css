@@ -340,7 +340,11 @@ body:has(.planner) main {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 0.9rem;
-  padding: 0.9rem 1rem;
+  /* Inline padding kept to 0.75rem a side, not the block padding's 0.9rem:
+     the desktop aside is a fixed 42rem, sized (see that media query) for
+     exactly three 13rem cards + two 0.6rem gaps + this padding — any more
+     and a full row of three cards overflows the group's own border. */
+  padding: 0.9rem 0.75rem;
 }
 
 .group-children,
@@ -485,7 +489,7 @@ dialog::backdrop {
 
 .term-cards .course-card,
 .available-courses .course-card {
-  width: 13.5rem;
+  width: 13rem;
   flex-shrink: 0;
 }
 
@@ -510,7 +514,7 @@ dialog::backdrop {
   margin: 0.6rem 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 13.5rem;
+  grid-template-columns: 13rem;
   gap: 0.6rem;
 }
 
@@ -733,6 +737,6 @@ dialog::backdrop {
   }
 
   .available-courses {
-    grid-template-columns: repeat(var(--group-columns, 1), 13.5rem);
+    grid-template-columns: repeat(var(--group-columns, 1), 13rem);
   }
 }
