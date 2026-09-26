@@ -1,11 +1,11 @@
-import { readFileSync } from "node:fs";
 import type { GroupDef, ProgramDef } from "../lib/domain/types";
+// A static import, not readFileSync: the Dockerfile only copies
+// node_modules, dist and drizzle (see astro.config.ts / NFR "bundled data"),
+// so a runtime fs read of data/2027/tdp.json ENOENTs in production. The
+// bundler inlines a static JSON import into dist instead.
+import tdp from "../../data/2027/tdp.json";
 
 export const KNOWN_MISSING: string[] = [];
-
-const tdp: { source: string | null; courses: string[] | null; note: string } = JSON.parse(
-  readFileSync("data/2027/tdp.json", "utf-8"),
-);
 
 const COMP_4000: GroupDef["filter"] = { prefixes: ["COMP"], minLevel: 4000, maxLevel: 4000 };
 
