@@ -361,6 +361,48 @@ body:has(.planner) main {
   padding: 0.9rem 0.75rem;
 }
 
+/* The one requirement-group styled to stand out from the rest — everything
+   else in the sidebar is "one requirement, scan its own bar"; this is the
+   dashboard-style rollup answering "what's actually left" across all of
+   them at once, so it gets the gold accent normally reserved for actions. */
+.outstanding-panel {
+  border-color: var(--gold);
+  border-width: 1px;
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.outstanding-list {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.outstanding-list li {
+  font-size: 0.9rem;
+  padding-inline-start: 0.9rem;
+  position: relative;
+}
+
+.outstanding-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.outstanding-done {
+  color: var(--moss);
+  font-weight: 600;
+  margin: 0.6rem 0 0;
+}
+
 .group-children,
 .checks-list {
   list-style: none;

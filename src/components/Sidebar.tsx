@@ -3,6 +3,7 @@ import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, removeCourse, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
+import { outstandingItems } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 
 interface Props {
@@ -163,6 +164,7 @@ export default function Sidebar({
   onLocateCourse,
 }: Props) {
   const readOnly = view.plan.readOnly;
+  const outstanding = outstandingItems(view);
 
   return (
     <aside
@@ -180,6 +182,20 @@ export default function Sidebar({
       }}
     >
       <ul class="requirements-scroll">
+        <li class="requirement-group outstanding-panel">
+          <h2>What's left</h2>
+          {outstanding.length === 0 ? (
+            <p class="outstanding-done">
+              Every requirement is satisfied or planned — nothing outstanding here.
+            </p>
+          ) : (
+            <ul class="outstanding-list">
+              {outstanding.map((item) => (
+                <li key={item.id}>{item.text}</li>
+              ))}
+            </ul>
+          )}
+        </li>
         <li class="requirement-group">
           <CourseSearch
             view={view}

@@ -5,7 +5,7 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/f
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
-import { dropTargets, overlayEdges, progressSegments, unplacedCount } from "./planner-logic";
+import { dropTargets, outstandingItems, overlayEdges, progressSegments, unplacedCount } from "./planner-logic";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -130,5 +130,55 @@ describe("unplacedCount", () => {
   it("is 0 for a course that isn't placed", () => {
     const view = buildPlanView(cat, AACOM_2027, emptyPlan());
     expect(unplacedCount(view, "COMP2100")).toBe(0);
+  });
+});
+
+describe("outstandingItems", () => {
+  it("lists an unsatisfied leaf group with its missing courses named", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const items = outstandingItems(view);
+    const progItem = items.find((i) => i.id === "group-prog-a");
+    expect(progItem?.text).toContain("COMP1100");
+    expect(progItem?.text).toContain("COMP1130");
+  });
+
+  it("drops a group once it's satisfied", () => {
+    const plan: PlanState = {
+      ...emptyPlan(),
+      placements: [{ code: "COMP1100", term: 0, pinnedGroupId: null }],
+    };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    expect(view.groups.some((g) => g.id === "prog-a" && g.satisfied)).toBe(true);
+    expect(outstandingItems(view).some((i) => i.id === "group-prog-a")).toBe(false);
+  });
+
+  it("flags a selectable group with no choice made yet", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    expect(outstandingItems(view)).toContainEqual({ id: "choice-spec", text: "Choose your Specialisation" });
+  });
+
+  it("drops the choice item once one is made", () => {
+    const plan: PlanState = { ...emptyPlan(), choices: { spec: "arin" } };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    expect(outstandingItems(view).some((i) => i.id === "choice-spec")).toBe(false);
+  });
+
+  it("falls back to a plain unit shortfall for a filter-based group with nothing named missing", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const electives = outstandingItems(view).find((i) => i.id === "group-electives");
+    expect(electives?.text).toMatch(/\d+ more units? needed/);
+  });
+
+  it("reports a failing check as not yet satisfied, and an untracked one separately", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const items = outstandingItems(view);
+    expect(items).toContainEqual({
+      id: "check-comp4000-min",
+      text: "At least 48 units of 4000-level COMP: not yet satisfied",
+    });
+    expect(items).toContainEqual({
+      id: "check-tdp-min",
+      text: "At least 12 units of TDP-tagged courses — not tracked, verify on P&C",
+    });
   });
 });
