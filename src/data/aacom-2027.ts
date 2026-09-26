@@ -246,7 +246,11 @@ export const AACOM_2027: ProgramDef = {
       kind: "elective",
       ruleType: "UNITS",
       unitsRequired: 18,
-      filter: { prefixes: ["COMP"], minLevel: 3000, maxLevel: 4000 },
+      // The capstone project courses are reserved for the capstone
+      // requirement, not double-purposed as generic COMP electives (they'd
+      // otherwise also match this filter and compete with `capstone` for
+      // allocation — see Phase 05's allocation solver).
+      filter: { prefixes: ["COMP"], minLevel: 3000, maxLevel: 4000, excludeCodes: ["COMP4550", "COMP4500", "COMP4820"] },
     },
     {
       id: "ict",
