@@ -1,6 +1,12 @@
-import type { PlanView } from "../lib/domain/view";
+import type { CourseCard, PlanView } from "../lib/domain/view";
 
 export type ApiResult = PlanView | { error: string };
+
+export type SearchResult = {
+  status: "found" | "fetched" | "not_found" | "error" | "invalid";
+  courses: CourseCard[];
+  message?: string;
+};
 
 async function request(path: string, init: RequestInit): Promise<ApiResult> {
   const res = await fetch(path, init);
@@ -37,4 +43,11 @@ export function setPin(planId: string, code: string, groupId: string | null): Pr
 
 export function isError(result: ApiResult): result is { error: string } {
   return "error" in result;
+}
+
+export async function searchCourses(q: string, planId?: string): Promise<SearchResult> {
+  const params = new URLSearchParams({ q });
+  if (planId) params.set("plan", planId);
+  const res = await fetch(`/api/courses/search?${params.toString()}`);
+  return (await res.json()) as SearchResult;
 }

@@ -267,6 +267,28 @@ dialog::backdrop {
   gap: 0.5rem;
 }
 
+.course-search form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.course-search label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.course-search-results {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 /* Solid, not dotted — a dotted border can look, especially once a screenshot
    is scaled or compressed, like it "bleeds" past its own box near a rounded
    corner, which was mistaken for a layout overflow bug (it wasn't: measured

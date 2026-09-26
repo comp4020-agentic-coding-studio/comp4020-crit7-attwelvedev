@@ -1,6 +1,7 @@
 import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, removeCourse, setChoice } from "./api";
+import CourseSearch from "./CourseSearch";
 import ProgressBar from "./ProgressBar";
 
 interface Props {
@@ -171,6 +172,18 @@ export default function Sidebar({
       }}
     >
       <ul class="requirements-scroll">
+        <li class="requirement-group">
+          <CourseSearch
+            view={view}
+            planId={planId}
+            onChanged={onChanged}
+            onAnnounce={onAnnounce}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            openMenuCode={openMenuCode}
+            onMenuOpenChange={onMenuOpenChange}
+          />
+        </li>
         <li class="requirement-group">
           <ProgressBar
             label="Total"
