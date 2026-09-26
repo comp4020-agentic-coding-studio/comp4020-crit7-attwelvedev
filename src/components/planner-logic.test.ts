@@ -134,12 +134,15 @@ describe("unplacedCount", () => {
 });
 
 describe("outstandingItems", () => {
-  it("lists an unsatisfied leaf group with its missing courses named", () => {
+  it("gives an unsatisfied leaf group's unit shortfall, not its missing courses", () => {
     const view = buildPlanView(cat, AACOM_2027, emptyPlan());
     const items = outstandingItems(view);
     const progItem = items.find((i) => i.id === "group-prog-a");
-    expect(progItem?.text).toContain("COMP1100");
-    expect(progItem?.text).toContain("COMP1130");
+    // "needs COMP1100, COMP1130" would read as "you need both", when
+    // placing either one alone (6 of the 6 required units) satisfies it —
+    // naming specific courses overclaims for anything but an ALL-rule group.
+    expect(progItem?.text).toBe("Programming as Problem Solving: 6 more units needed");
+    expect(progItem?.text).not.toContain("COMP1100");
   });
 
   it("drops a group once it's satisfied", () => {
@@ -163,7 +166,7 @@ describe("outstandingItems", () => {
     expect(outstandingItems(view).some((i) => i.id === "choice-spec")).toBe(false);
   });
 
-  it("falls back to a plain unit shortfall for a filter-based group with nothing named missing", () => {
+  it("gives a filter-based group (no fixed course list at all) the same unit-shortfall treatment", () => {
     const view = buildPlanView(cat, AACOM_2027, emptyPlan());
     const electives = outstandingItems(view).find((i) => i.id === "group-electives");
     expect(electives?.text).toMatch(/\d+ more units? needed/);

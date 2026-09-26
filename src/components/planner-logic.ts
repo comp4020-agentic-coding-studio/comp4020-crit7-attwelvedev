@@ -94,23 +94,20 @@ function collectGroupItems(groups: GroupView[], out: OutstandingItem[]): void {
       out.push({ id: `choice-${group.id}`, text: `Choose your ${group.label}` });
     }
     if (group.children.length === 0 && !group.satisfied) {
-      if (group.missing.length > 0) {
-        const shown = group.missing.slice(0, 3).join(", ");
-        const rest = group.missing.length > 3 ? `, +${group.missing.length - 3} more` : "";
-        out.push({ id: `group-${group.id}`, text: `${group.label}: needs ${shown}${rest}` });
-      } else {
-        // A filter-based group (e.g. "any 3000/4000-level COMP") has no
-        // fixed course list to name as missing, so fall back to the plain
-        // unit shortfall — still the most useful thing to say about it.
-        const shortfall = group.unitsRequired - group.completed - group.planned;
-        out.push({
-          id: `group-${group.id}`,
-          text:
-            shortfall > 0
-              ? `${group.label}: ${shortfall} more unit${shortfall === 1 ? "" : "s"} needed`
-              : `${group.label}: not yet satisfied`,
-        });
-      }
+      // Deliberately never names group.missing here: for anything but an
+      // ALL-rule group, satisfying the requirement only ever needs a
+      // subset of its listed courses (e.g. "24 units from this list of
+      // 12"), so naming the full missing list reads as "you need all of
+      // these," which is wrong more often than it's right. The unit
+      // shortfall is the one thing that's true regardless of rule type.
+      const shortfall = group.unitsRequired - group.completed - group.planned;
+      out.push({
+        id: `group-${group.id}`,
+        text:
+          shortfall > 0
+            ? `${group.label}: ${shortfall} more unit${shortfall === 1 ? "" : "s"} needed`
+            : `${group.label}: not yet satisfied`,
+      });
     }
     collectGroupItems(group.children, out);
   }
