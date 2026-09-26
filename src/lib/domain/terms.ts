@@ -1,4 +1,4 @@
-import type { Session, Term } from "./types";
+import type { CatalogueCourse, OfferingStatus, Session, Term } from "./types";
 
 function buildTerms(): Term[] {
   const terms: Term[] = [];
@@ -24,4 +24,57 @@ export function termLabel(index: number): string {
     throw new RangeError(`term index out of range: ${index}`);
   }
   return term.label;
+}
+
+// "Other" sessions (Summer, Winter, Spring) don't have a slot on the 8-term
+// S1/S2 timeline, so they're ignored here (FR13, FR14).
+function sessionOf(semester: string): Session | null {
+  if (semester === "First Semester") return "S1";
+  if (semester === "Second Semester") return "S2";
+  return null;
+}
+
+export function horizonYear(courses: Iterable<CatalogueCourse>): number {
+  let max = 0;
+  for (const course of courses) {
+    for (const offering of course.offerings) {
+      if (offering.year > max) max = offering.year;
+    }
+  }
+  return max;
+}
+
+function sessionsInYear(course: CatalogueCourse, year: number): Set<Session> {
+  const sessions = new Set<Session>();
+  for (const offering of course.offerings) {
+    if (offering.year !== year) continue;
+    const session = sessionOf(offering.session);
+    if (session) sessions.add(session);
+  }
+  return sessions;
+}
+
+// Hard-blocking (Phase 04) needs this to be a pure function of the course,
+// the term and the catalogue horizon — it never looks at a specific plan.
+export function offeringStatus(course: CatalogueCourse, term: Term, horizon: number): OfferingStatus {
+  if (course.offerings.length === 0) return "unknown";
+
+  if (term.year <= horizon) {
+    return sessionsInYear(course, term.year).has(term.session) ? "offered" : "not-offered";
+  }
+
+  // Years beyond the horizon copy the sessions of the course's latest year
+  // that has rows, marked "projected" (FR14).
+  const latestYear = Math.max(...course.offerings.map((o) => o.year));
+  return sessionsInYear(course, latestYear).has(term.session) ? "projected" : "not-offered";
+}
+
+export function offeredLabel(course: CatalogueCourse): string {
+  const sessions = new Set<Session>();
+  for (const offering of course.offerings) {
+    const session = sessionOf(offering.session);
+    if (session) sessions.add(session);
+  }
+  if (sessions.size === 0) return "No published offering";
+  return (["S1", "S2"] as const).filter((s) => sessions.has(s)).join(", ");
 }
