@@ -341,9 +341,10 @@ body:has(.planner) main {
   border: 1px solid var(--line);
   border-radius: 0.9rem;
   /* Inline padding kept to 0.75rem a side, not the block padding's 0.9rem:
-     the desktop aside is a fixed 42rem, sized (see that media query) for
-     exactly three 13rem cards + two 0.6rem gaps + this padding — any more
-     and a full row of three cards overflows the group's own border. */
+     the desktop aside is a fixed 44rem with its scrollbar gutter reserved
+     (see that media query), sized for exactly three 13rem cards + two
+     0.6rem gaps + this padding, with headroom to spare — any less headroom
+     and a full row of three cards risks overflowing the group's border. */
   padding: 0.9rem 0.75rem;
 }
 
@@ -709,12 +710,20 @@ dialog::backdrop {
 
   .planner > aside {
     order: -1;
-    flex: 0 0 42rem;
-    width: 42rem;
+    flex: 0 0 44rem;
+    width: 44rem;
     position: sticky;
     top: 1rem;
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
+    /* Always reserves the scrollbar's track, whether or not this particular
+       group's content is currently tall enough to scroll: without it, the
+       three-card grid below fits its 13rem columns exactly against the full
+       44rem only when no scrollbar is drawn, and overflows the moment one
+       appears (a real scrollbar eats into content width, it doesn't sit
+       outside the border box) — every group's fit would depend on whatever
+       else in the sidebar happens to be scrolled at that instant. */
+    scrollbar-gutter: stable;
   }
 
   .planner-timeline-area {
