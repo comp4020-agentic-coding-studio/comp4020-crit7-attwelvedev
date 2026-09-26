@@ -75,12 +75,19 @@ p {
   max-width: 65ch;
 }
 
-main :is(ul, ol) {
+/* Scoped to the rendered README, not `main ul` generally: the planner's own
+   lists (.requirements-scroll, .available-courses, .term-cards, ...) are
+   also <ul>s, and a max-width here silently caps their layout width too —
+   that's exactly what squeezed the sidebar's course-card grid narrower
+   than the space it was budgeted for and made it overflow its own group
+   border (see spec's readme-content.test.ts + the sidebar grid rules
+   below for the two different budgets this used to conflate). */
+.readme-content :is(ul, ol) {
   padding-inline-start: 1.25rem;
   max-width: 65ch;
 }
 
-main li {
+.readme-content li {
   margin-block-end: 0.35rem;
 }
 
