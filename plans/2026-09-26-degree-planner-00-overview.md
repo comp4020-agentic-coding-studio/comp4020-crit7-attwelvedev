@@ -454,7 +454,7 @@ committed.
 | Phase | File | Tasks | Needs | Ends with | Done |
 | --- | --- | --- | --- | --- | --- |
 | 01 | `…-01-data-foundations.md` | 1–4 | — | Committed 2027 data, the AACOM tree file, and the Vitest unit project; **user reviews the tree** | [x] |
-| 02 | `…-02-persistent-skeleton.md` | 5–7 | 01 | Schema, seed, example plan, plan CRUD, first Preact page; **deploy checkpoint** (the crit's mechanical spec lines are met) | [ ] |
+| 02 | `…-02-persistent-skeleton.md` | 5–7 | 01 | Schema, seed, example plan, plan CRUD, first Preact page; **deploy checkpoint** (the crit's mechanical spec lines are met) | [x] |
 | 03 | `…-03-requisites-offerings.md` | 8–9 | 01, 02 | Requisite parser (wired into the seed) and offering status/projection | [ ] |
 | 04 | `…-04-feasibility.md` | 10–11 | 03 | Hard/soft blocking, conflicts, suggestions, load; the API refuses hard-blocked placements | [ ] |
 | 05 | `…-05-allocation-view.md` | 12–13 | 04 | Allocation solver, the full `PlanView`, and the cutoff/choice/pin APIs | [ ] |
