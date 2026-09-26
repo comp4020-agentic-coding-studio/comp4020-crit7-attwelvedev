@@ -19,38 +19,6 @@ const title = !view ? "Plan not found" : view.plan.readOnly ? "Example plan" : "
       <>
         <h1>{title}</h1>
         {view.plan.readOnly && <p role="note">This is an example — Start your own plan</p>}
-        <details class="glossary">
-          <summary>New here? What the labels on this page mean</summary>
-          <dl>
-            <dt>Available / Needs prerequisites / Blocked</dt>
-            <dd>
-              A course card is in one of three states: available to place, needing its prerequisite courses planned
-              first (allowed — you can plan backwards from a course you want), or blocked because there's no way to
-              fit it into that semester at all.
-            </dd>
-            <dt>Completion cutoff</dt>
-            <dd>
-              Everything before the point set by "Move cutoff earlier/later" counts as completed; everything from
-              there onward is still planned. The gold line on the timeline marks that boundary.
-            </dd>
-            <dt>P&amp;C</dt>
-            <dd>
-              Programs &amp; Courses (programsandcourses.anu.edu.au) is ANU's official course catalogue. "Verify on
-              P&amp;C" means this app couldn't fully confirm a rule automatically — check that course's own P&amp;C
-              page before relying on it.
-            </dd>
-            <dt>TDP</dt>
-            <dd>
-              Transdisciplinary Problem-Solving — a small set of ANU courses with delivery conditions this app doesn't track
-              automatically. Check P&amp;C directly for these.
-            </dd>
-            <dt>Pin to</dt>
-            <dd>
-              A course can sometimes count toward more than one requirement. "Automatic" lets the plan choose
-              whichever fits best overall; pin it to a specific requirement only if you want to override that choice.
-            </dd>
-          </dl>
-        </details>
         <Planner client:load view={view} />
       </>
     ) : (
