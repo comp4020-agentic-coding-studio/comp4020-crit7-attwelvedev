@@ -263,6 +263,36 @@ dialog::backdrop {
   border-color: #bbb;
 }
 
+/* A course already placed elsewhere stays in its group's list (rather than
+   disappearing) so it can still be compared against the group's unplaced
+   courses, but reads as settled: dimmed, and its "Place in…" menu replaced
+   by a tick and a link back to where it landed. */
+.course-card-sidebar-placed {
+  opacity: 0.55;
+  border-color: #bbb;
+}
+
+.course-card-tick {
+  color: #2e7d32;
+  font-weight: bold;
+  margin-inline-end: 0.25rem;
+}
+
+.badge-term-link {
+  cursor: pointer;
+  background: none;
+  font: inherit;
+  font-size: 0.8em;
+}
+
+/* A brief highlight when the sidebar's "locate on timeline" badge scrolls
+   a card into view, so the student can actually find it among the other
+   cards in that term instead of just landing on the right column. */
+.course-card-highlighted {
+  outline: 3px solid #1565c0;
+  outline-offset: 2px;
+}
+
 /* `block`, not `inline-block`: a badge sits right after the code/title,
    which is raw inline content with no block wrapper of its own, so an
    inline-level badge flows onto the same line as the tail of a long title

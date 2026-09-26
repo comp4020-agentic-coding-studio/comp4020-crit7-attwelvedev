@@ -1,3 +1,4 @@
+import { useEffect } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard from "./CourseCard";
@@ -15,6 +16,10 @@ interface Props {
   showPrereqLinks: boolean;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  // Set from the sidebar's "Placed in <term>" badge, to scroll to and
+  // flash the matching card; a token so clicking the same badge twice in a
+  // row re-triggers the effect even though the code didn't change.
+  locateRequest: { code: string; token: number } | null;
 }
 
 export default function Timeline({
@@ -28,7 +33,17 @@ export default function Timeline({
   showPrereqLinks,
   openMenuCode,
   onMenuOpenChange,
+  locateRequest,
 }: Props) {
+  useEffect(() => {
+    if (!locateRequest) return;
+    const el = document.querySelector(`[data-placed="${locateRequest.code}"]`);
+    if (!(el instanceof HTMLElement)) return;
+    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    el.classList.add("course-card-highlighted");
+    const timer = setTimeout(() => el.classList.remove("course-card-highlighted"), 2000);
+    return () => clearTimeout(timer);
+  }, [locateRequest]);
   const placementsByTerm = new Map<number, PlacementView[]>();
   for (const placement of view.placements) {
     const list = placementsByTerm.get(placement.term) ?? [];

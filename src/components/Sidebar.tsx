@@ -12,6 +12,7 @@ interface Props {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  onLocateCourse: (code: string) => void;
 }
 
 interface GroupProps {
@@ -26,6 +27,7 @@ interface GroupProps {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  onLocateCourse: (code: string) => void;
 }
 
 // A group with more courses than fit one row would otherwise get an
@@ -48,6 +50,7 @@ function Group({
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
+  onLocateCourse,
 }: GroupProps) {
   async function choose(childId: string | null) {
     const result = await setChoice(planId, group.id, childId);
@@ -55,9 +58,13 @@ function Group({
     else onChanged(result);
   }
 
-  const placedCodes = new Set(view.placements.map((p) => p.code));
-  const available = group.children.length === 0 ? group.courses.filter((code) => !placedCodes.has(code)) : [];
-  const columns = Math.min(available.length, MAX_COLUMNS) || 1;
+  // Placed courses stay in the list (dimmed, ticked, non-draggable) rather
+  // than disappearing, so a student can still compare them against the
+  // group's unplaced courses instead of losing track of which ones they'd
+  // already decided on.
+  const placedByCode = new Map(view.placements.map((p) => [p.code, p]));
+  const courses = group.children.length === 0 ? group.courses : [];
+  const columns = Math.min(courses.length, MAX_COLUMNS) || 1;
 
   // Depth becomes the heading level (h2 for top-level, following the page's
   // single h1, h3 for its children, etc.) instead of a bullet list — every
@@ -90,13 +97,14 @@ function Group({
           ))}
         </fieldset>
       )}
-      {available.length > 0 && (
+      {courses.length > 0 && (
         <ul class="available-courses" style={{ gridTemplateColumns: `repeat(${columns}, 13rem)` }}>
-          {available.map((code) => (
+          {courses.map((code) => (
             <AvailableCourseCard
               key={code}
               view={view}
               code={code}
+              placement={placedByCode.get(code) ?? null}
               planId={planId}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
@@ -104,6 +112,7 @@ function Group({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+              onLocateCourse={onLocateCourse}
             />
           ))}
         </ul>
@@ -124,6 +133,7 @@ function Group({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+              onLocateCourse={onLocateCourse}
             />
           ))}
         </ul>
@@ -141,6 +151,7 @@ export default function Sidebar({
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
+  onLocateCourse,
 }: Props) {
   const readOnly = view.plan.readOnly;
 
@@ -182,6 +193,7 @@ export default function Sidebar({
             onDragEnd={onDragEnd}
             openMenuCode={openMenuCode}
             onMenuOpenChange={onMenuOpenChange}
+            onLocateCourse={onLocateCourse}
           />
         ))}
         <li class="requirement-group">
