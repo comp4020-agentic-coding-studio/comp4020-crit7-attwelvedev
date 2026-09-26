@@ -72,6 +72,13 @@ body:has(.planner) main {
   gap: 1rem;
 }
 
+/* Capped and independently scrollable: without a limit, a sticky element
+   taller than the viewport (several placed courses stacked in a term) stays
+   pinned covering the whole screen until the page scrolls past its full
+   height — on a small screen, that means the requirements list below it
+   never becomes visible at all. The desktop media query below gives it far
+   more room (the sidebar sits beside it, not below), so this cap only
+   matters up to that breakpoint. */
 .planner-timeline-area {
   position: sticky;
   top: 0;
@@ -79,6 +86,8 @@ body:has(.planner) main {
   background: #fff;
   padding-block-end: 0.5rem;
   border-block-end: 1px solid #ddd;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .planner > aside {
