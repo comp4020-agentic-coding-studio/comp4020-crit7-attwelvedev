@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "typecheck": "astro check",
     "check": "pnpm typecheck && pnpm test",
+    "test:unit": "vitest run --project unit",
     "check:evidence": "node scripts/check-evidence.ts",
     "test": "astro build && vitest run",
     "db:generate": "drizzle-kit generate"
