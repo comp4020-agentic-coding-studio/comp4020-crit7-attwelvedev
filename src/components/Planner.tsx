@@ -25,6 +25,14 @@ export default function Planner({ view: initialView }: Props) {
     else setView(result);
   }
 
+  const cutoff = view.plan.cutoff;
+  const cutoffReadout =
+    cutoff <= 0
+      ? "Nothing on the timeline counts as completed yet."
+      : cutoff >= view.terms.length
+        ? "Every semester on the timeline counts as completed."
+        : `Completed through ${view.terms[cutoff - 1].label} — planned from ${view.terms[cutoff].label} onward.`;
+
   return (
     <div class="planner" data-cutoff={view.plan.cutoff}>
       <p aria-live="polite" class="visually-hidden">
@@ -47,6 +55,7 @@ export default function Planner({ view: initialView }: Props) {
             Show prerequisite links
           </label>
         </div>
+        <p class="cutoff-readout">{cutoffReadout} The gold line on the timeline marks that boundary.</p>
         <Timeline
           view={view}
           planId={view.plan.id}

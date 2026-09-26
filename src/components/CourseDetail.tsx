@@ -92,6 +92,11 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
               ))}
             </select>
           </label>
+          <br />
+          <small>
+            This course can count toward more than one requirement — "Automatic" lets the plan choose whichever fits
+            best overall; pin it here only if you want it to count toward a specific one instead.
+          </small>
         </p>
       )}
     </dialog>
