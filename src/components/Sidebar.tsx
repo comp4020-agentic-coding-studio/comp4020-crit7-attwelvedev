@@ -98,7 +98,7 @@ function Group({
         </fieldset>
       )}
       {courses.length > 0 && (
-        <ul class="available-courses" style={{ gridTemplateColumns: `repeat(${columns}, 13rem)` }}>
+        <ul class="available-courses" style={{ "--group-columns": columns }}>
           {courses.map((code) => (
             <AvailableCourseCard
               key={code}

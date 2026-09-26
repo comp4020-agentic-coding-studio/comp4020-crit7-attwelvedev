@@ -249,18 +249,21 @@ dialog::backdrop {
   border-style: dashed;
 }
 
-/* A grid of fixed-width (13rem) cards. `grid-template-columns` is set inline
-   per group (Sidebar.tsx) to `repeat(min(courseCount, MAX_COLUMNS), 13rem)`
-   — an explicit count, not `auto-fill`, so a group with fewer courses than
-   MAX_COLUMNS gets a grid exactly as wide as its own content (left-aligned,
-   flush against the group card's padding — not centered, which would leave
-   uneven, growing padding around a sparser group inside the shared,
-   uniform-width sidebar). */
+/* A grid of fixed-width (13rem) cards, single-column below the desktop
+   breakpoint regardless of how many courses the group has: the mobile
+   horizontal strip's group card (`.requirement-group`, 16rem) is only wide
+   enough for one 13rem card, and a `repeat(N, 13rem)` grid doesn't shrink
+   its explicit tracks to fit — extra columns spill out over the neighbouring
+   group instead of wrapping. `--group-columns` (Sidebar.tsx, `min(courseCount,
+   MAX_COLUMNS)`) only takes effect once the desktop media query below
+   opts back into it, where the sidebar is actually sized for it (see that
+   query's own comment). */
 .available-courses {
   list-style: none;
   margin: 0.25rem 0;
   padding: 0;
   display: grid;
+  grid-template-columns: 13rem;
   gap: 0.5rem;
 }
 
@@ -406,6 +409,12 @@ dialog::backdrop {
     flex: 0 0 auto;
     width: 100%;
     min-width: 0;
+  }
+
+  /* Only here is the sidebar wide enough (42rem, sized for exactly this —
+     see .planner > aside above) for more than one 13rem column. */
+  .available-courses {
+    grid-template-columns: repeat(var(--group-columns, 1), 13rem);
   }
 }
 
