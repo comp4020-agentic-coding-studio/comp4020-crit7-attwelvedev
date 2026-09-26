@@ -463,6 +463,15 @@ body:has(.planner) main {
   opacity: 0.75;
 }
 
+/* Hovering one placed course draws just its own chain — bolder than the
+   "show everything" toggle's uniform lines, since there's only ever a
+   handful of them at once and they're the direct answer to "what does
+   *this* course depend on," not a dense trace to pick a path out of. */
+.prereq-overlay-focused line {
+  stroke-width: 3;
+  opacity: 1;
+}
+
 .prereq-overlay {
   position: absolute;
   top: 0;
@@ -557,6 +566,13 @@ dialog::backdrop {
 
 .term h2 {
   font-size: 0.95rem;
+  margin-block-end: 0.15rem;
+}
+
+.term-units {
+  font-size: 0.82rem;
+  color: var(--unigrey);
+  margin: 0 0 0.5rem;
 }
 
 .term-cards {
@@ -627,6 +643,21 @@ aside.drag-hover-target {
    the column (the padding around them, the term heading) still works. */
 [data-drag-code] {
   touch-action: none;
+}
+
+/* The only signal (short of trying it) that a card can be dragged at all —
+   without it, nothing about a card's appearance suggests drag-and-drop is
+   an option versus the buttons being the only way to move it. */
+[draggable="true"] {
+  cursor: grab;
+}
+
+[draggable="true"]:hover {
+  border-color: var(--ink);
+}
+
+[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 /* A request is in flight for this exact card/control — not a spinner (most

@@ -230,6 +230,7 @@ export default function Sidebar({
                       completed={check.completed}
                       planned={check.planned}
                       required={check.units}
+                      bound={check.bound}
                     />
                   )}
                 </li>

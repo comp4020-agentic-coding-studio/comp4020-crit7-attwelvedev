@@ -5,6 +5,11 @@ import { overlayEdges } from "./planner-logic";
 interface Props {
   view: PlanView;
   show: boolean;
+  // Hovering a placed card shows just its own chain even with the toggle
+  // off — the toggle is for "trace everything at once"; this is for "what
+  // does *this* course actually depend on," which most of the time is the
+  // question a student actually has.
+  hoveredCode: string | null;
 }
 
 interface Line {
@@ -22,7 +27,7 @@ interface Line {
 // `.timeline-scroll` (its `position: relative` containing block), sized to
 // the full scrollable content so lines stay put under the cards as the
 // timeline scrolls.
-export default function PrereqOverlay({ view, show }: Props) {
+export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [lines, setLines] = useState<Line[]>([]);
 
@@ -56,7 +61,12 @@ export default function PrereqOverlay({ view, show }: Props) {
       };
     }
 
-    const edges = show ? view.placements.flatMap((p) => overlayEdges(view, p.code)) : [];
+    const allEdges = view.placements.flatMap((p) => overlayEdges(view, p.code));
+    const edges = hoveredCode
+      ? allEdges.filter((e) => e.from === hoveredCode || e.to === hoveredCode)
+      : show
+        ? allEdges
+        : [];
     const next: Line[] = [];
     for (const edge of edges) {
       const from = centreOf(edge.from);
@@ -64,10 +74,10 @@ export default function PrereqOverlay({ view, show }: Props) {
       if (from && to) next.push({ key: `${edge.from}-${edge.to}`, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
     }
     setLines(next);
-  }, [view, show]);
+  }, [view, show, hoveredCode]);
 
   return (
-    <svg ref={svgRef} class="prereq-overlay" aria-hidden="true">
+    <svg ref={svgRef} class={`prereq-overlay${hoveredCode ? " prereq-overlay-focused" : ""}`} aria-hidden="true">
       {lines.map((line) => (
         <line key={line.key} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
       ))}

@@ -1,4 +1,4 @@
-import { useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
@@ -37,6 +37,8 @@ export default function Timeline({
   onRemoved,
   locateRequest,
 }: Props) {
+  const [hoveredCode, setHoveredCode] = useState<string | null>(null);
+
   useEffect(() => {
     if (!locateRequest) return;
     const el = document.querySelector(`[data-placed="${locateRequest.code}"]`);
@@ -75,8 +77,18 @@ export default function Timeline({
       {view.placements.length === 0 && (
         <p class="timeline-hint">Drag a course onto a semester, or use Place in…</p>
       )}
-      <div class="timeline-scroll">
-        <PrereqOverlay view={view} show={showPrereqLinks} />
+      <div
+        class="timeline-scroll"
+        onMouseOver={(event) => {
+          const card = (event.target as Element).closest("[data-placed]");
+          if (card) setHoveredCode(card.getAttribute("data-placed"));
+        }}
+        onMouseOut={(event) => {
+          const related = event.relatedTarget as Element | null;
+          if (!related?.closest("[data-placed]")) setHoveredCode(null);
+        }}
+      >
+        <PrereqOverlay view={view} show={showPrereqLinks} hoveredCode={hoveredCode} />
         {view.terms.map((term) => {
           const target = dragTargets?.find((t) => t.term === term.index) ?? null;
           const greyed = draggingCode !== null && target !== null && !target.allowed;
@@ -97,9 +109,12 @@ export default function Timeline({
               }}
             >
               <h2>{term.label}</h2>
+              <p class="term-units">
+                {term.units} unit{term.units === 1 ? "" : "s"}
+              </p>
               {term.overload && (
                 <p role="status" class="badge badge-overload">
-                  {term.units} units is a heavier load than usual for one semester
+                  Heavier load than usual for one semester
                 </p>
               )}
               {greyed && target?.reason && <p class="term-reason">{target.reason}</p>}
