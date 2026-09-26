@@ -485,6 +485,42 @@ dialog::backdrop {
   background: rgb(23 24 26 / 0.55);
 }
 
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: calc(100vw - 2rem);
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.8rem 0.7rem 1rem;
+  box-shadow: 0 12px 32px -12px rgb(23 24 26 / 0.45);
+}
+
+.undo-toast span {
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.undo-toast button {
+  flex: 0 0 auto;
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #17130a;
+}
+
+.undo-toast button:hover:not(:disabled) {
+  background: #a8790d;
+  border-color: #a8790d;
+}
+
 /* A gold rule marks where the plan's completion cutoff sits: everything to
    its left counts as completed, everything from here on is still planned.
    Written per exact cutoff/term-position pair rather than computed, since

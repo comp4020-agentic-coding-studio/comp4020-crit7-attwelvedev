@@ -1,8 +1,14 @@
-import { useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
-import { isError, setCutoff } from "./api";
+import { isError, placeCourse, setCutoff, setPin } from "./api";
+import type { RemovedPlacement } from "./CourseCard";
 import Sidebar from "./Sidebar";
 import Timeline from "./Timeline";
+
+// How long "Undo" stays offered after a Remove — long enough to notice and
+// act on without thinking, short enough that it isn't still sitting there
+// (offering to restore a now-stale course) minutes into unrelated work.
+const UNDO_TIMEOUT_MS = 8000;
 
 interface Props {
   view: PlanView;
@@ -15,6 +21,8 @@ export default function Planner({ view: initialView }: Props) {
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const [locateRequest, setLocateRequest] = useState<{ code: string; token: number } | null>(null);
+  const [removed, setRemoved] = useState<RemovedPlacement | null>(null);
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readOnly = view.plan.readOnly;
 
   async function moveCutoff(delta: 1 | -1) {
@@ -23,6 +31,34 @@ export default function Planner({ view: initialView }: Props) {
     const result = await setCutoff(view.plan.id, next);
     if (isError(result)) setAnnouncement(result.error);
     else setView(result);
+  }
+
+  function handleRemoved(info: RemovedPlacement) {
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setRemoved(info);
+    undoTimer.current = setTimeout(() => setRemoved(null), UNDO_TIMEOUT_MS);
+  }
+
+  // Re-placing a course always lands it unpinned (placeCourse's insert
+  // always does) — restoring the pin it had, if any, is a deliberate
+  // second call, not a side effect of the first.
+  async function handleUndo() {
+    if (!removed) return;
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    const { code, term, pinnedGroupId, label } = removed;
+    setRemoved(null);
+    const placed = await placeCourse(view.plan.id, code, term);
+    if (isError(placed)) {
+      setAnnouncement(placed.error);
+      return;
+    }
+    if (!pinnedGroupId) {
+      setView(placed);
+    } else {
+      const pinned = await setPin(view.plan.id, code, pinnedGroupId);
+      setView(isError(pinned) ? placed : pinned);
+    }
+    setAnnouncement(`Restored ${label}`);
   }
 
   const cutoff = view.plan.cutoff;
@@ -67,9 +103,18 @@ export default function Planner({ view: initialView }: Props) {
           showPrereqLinks={showPrereqLinks}
           openMenuCode={openMenuCode}
           onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
+          onRemoved={handleRemoved}
           locateRequest={locateRequest}
         />
       </div>
+      {removed && (
+        <div class="undo-toast" role="status">
+          <span>Removed {removed.label}.</span>
+          <button type="button" onClick={handleUndo}>
+            Undo
+          </button>
+        </div>
+      )}
       <Sidebar
         view={view}
         planId={view.plan.id}

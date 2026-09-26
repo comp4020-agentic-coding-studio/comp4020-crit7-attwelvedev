@@ -5,6 +5,17 @@ import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
 import { groupLabel, unplacedCount } from "./planner-logic";
 
+// What removing this exact placement needs to undo it: not just the code
+// and term, but whether it was pinned — placeCourse always inserts a fresh,
+// unpinned placement, so restoring the pin (if there was one) takes a
+// separate setPin call the undo handler makes only when this is non-null.
+export interface RemovedPlacement {
+  code: string;
+  term: number;
+  pinnedGroupId: string | null;
+  label: string;
+}
+
 interface Props {
   view: PlanView;
   placement: PlacementView;
@@ -15,6 +26,7 @@ interface Props {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  onRemoved: (removed: RemovedPlacement) => void;
 }
 
 export default function CourseCard({
@@ -27,6 +39,7 @@ export default function CourseCard({
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
+  onRemoved,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
@@ -45,9 +58,18 @@ export default function CourseCard({
   }
 
   async function remove() {
+    const removed: RemovedPlacement = {
+      code: placement.code,
+      term: placement.term,
+      pinnedGroupId: placement.pinned ? (placement.countsToward ?? null) : null,
+      label: course ? `${placement.code} — ${course.title}` : placement.code,
+    };
     const result = await removeCourse(planId, placement.code);
     if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    else {
+      onChanged(result);
+      onRemoved(removed);
+    }
   }
 
   const stateText =

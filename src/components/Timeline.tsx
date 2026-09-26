@@ -1,7 +1,7 @@
 import { useEffect } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
-import CourseCard from "./CourseCard";
+import CourseCard, { type RemovedPlacement } from "./CourseCard";
 import { dropTargets } from "./planner-logic";
 import PrereqOverlay from "./PrereqOverlay";
 
@@ -16,6 +16,7 @@ interface Props {
   showPrereqLinks: boolean;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  onRemoved: (removed: RemovedPlacement) => void;
   // Set from the sidebar's "Placed in <term>" badge, to scroll to and
   // flash the matching card; a token so clicking the same badge twice in a
   // row re-triggers the effect even though the code didn't change.
@@ -33,6 +34,7 @@ export default function Timeline({
   showPrereqLinks,
   openMenuCode,
   onMenuOpenChange,
+  onRemoved,
   locateRequest,
 }: Props) {
   useEffect(() => {
@@ -114,6 +116,7 @@ export default function Timeline({
                     onDragEnd={onDragEnd}
                     openMenuCode={openMenuCode}
                     onMenuOpenChange={onMenuOpenChange}
+                    onRemoved={onRemoved}
                   />
                 ))}
               </ul>
