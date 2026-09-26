@@ -514,7 +514,7 @@ committed.
 | FR24 pins | Tasks 12, 13, 15 |
 | FR25 selectable groups | Tasks 12, 13, 14 |
 | FR26 two-segment bars | Tasks 13, 14 |
-| FR27 program checks | Task 13 |
+| FR27 program checks | Task 13 (data), Task 14 (UI) |
 | FR28 sidebar | Task 14 |
 | FR29 course card | Task 14 |
 | FR30 detail panel | Task 15 |
