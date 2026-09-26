@@ -36,11 +36,16 @@ export default function PlaceInMenu({
   // Only offer terms that are actually reachable — the same rule a drag
   // enforces (a disallowed drop is refused) — rather than listing every
   // term with the blocked ones merely marked unusable.
-  const targets = dropTargets(view, code, hardBlockedOverride).filter(
-    (target) => target.allowed && target.term !== currentTerm,
-  );
+  const allTargets = dropTargets(view, code, hardBlockedOverride).filter((target) => target.term !== currentTerm);
+  const targets = allTargets.filter((target) => target.allowed);
   const buttonLabel = placed ? "Move to…" : "Place in…";
   const menuLabel = placed ? `Move ${code} to` : `Place ${code} in`;
+  // When nothing's available, say why rather than leaving a dead end — the
+  // same reason a drag onto a greyed-out term already shows, deduplicated
+  // since several terms often share one (e.g. "not offered this semester").
+  const blockedReasons = Array.from(
+    new Set(allTargets.filter((target) => !target.allowed && target.reason).map((target) => target.reason as string)),
+  );
 
   return (
     <div class="place-in-menu">
@@ -54,7 +59,12 @@ export default function PlaceInMenu({
         {buttonLabel}
       </button>
       <ul hidden={!open} role="menu" aria-label={menuLabel}>
-        {targets.length === 0 && <li role="none">No available terms</li>}
+        {targets.length === 0 && (
+          <li role="none">
+            No available terms
+            {blockedReasons.length > 0 && <> — {blockedReasons.join("; ")}</>}
+          </li>
+        )}
         {targets.map((target) => (
           <li key={target.term} role="none">
             <button

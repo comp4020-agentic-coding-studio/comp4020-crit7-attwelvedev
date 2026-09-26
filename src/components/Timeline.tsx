@@ -95,7 +95,11 @@ export default function Timeline({
               }}
             >
               <h2>{term.label}</h2>
-              {term.overload && <p role="status">Overload: {term.units} units</p>}
+              {term.overload && (
+                <p role="status" class="badge badge-overload">
+                  {term.units} units is a heavier load than usual for one semester
+                </p>
+              )}
               {greyed && target?.reason && <p class="term-reason">{target.reason}</p>}
               <ul class="term-cards">
                 {(placementsByTerm.get(term.index) ?? []).map((placement) => (

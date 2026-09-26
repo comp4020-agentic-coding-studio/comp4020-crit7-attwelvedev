@@ -100,7 +100,10 @@ export default function CourseCard({
           : "Not counting toward any requirement"}
       </p>
       {placement.state === "soft" && unplacedCount(view, placement.code) > 0 && (
-        <p class="badge badge-unplaced-prereqs">{unplacedCount(view, placement.code)} prereqs not placed</p>
+        <p class="badge badge-unplaced-prereqs">
+          {unplacedCount(view, placement.code)} prerequisite{unplacedCount(view, placement.code) === 1 ? "" : "s"} not
+          placed
+        </p>
       )}
       {placement.state === "soft" && placement.suggestions.length > 0 && (
         <ul class="course-card-suggestions">

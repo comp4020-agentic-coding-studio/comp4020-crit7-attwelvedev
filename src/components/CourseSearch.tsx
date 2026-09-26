@@ -155,7 +155,12 @@ export default function CourseSearch({
       <form onSubmit={onSubmit}>
         <label>
           Course code or title
-          <input type="text" value={query} onInput={(event) => setQuery((event.target as HTMLInputElement).value)} />
+          <input
+            type="text"
+            placeholder="e.g. COMP1100 or Software Engineering"
+            value={query}
+            onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
+          />
         </label>
         <button type="submit" disabled={pending}>
           Search
