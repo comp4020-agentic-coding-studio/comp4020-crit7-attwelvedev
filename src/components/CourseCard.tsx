@@ -67,7 +67,7 @@ export default function CourseCard({
     >
       <strong>{placement.code}</strong>
       {course && <span> — {course.title}</span>}
-      <p class="course-card-state">{stateText}</p>
+      <p class={`course-card-state${placement.state === "available" ? " visually-hidden" : ""}`}>{stateText}</p>
       {placement.reasons.length > 0 && <p class="course-card-reason">{placement.reasons.join("; ")}</p>}
       {placement.verify.length > 0 && (
         <p class="badge badge-verify">Verify on P&C: {placement.verify.join("; ")}</p>
