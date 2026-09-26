@@ -185,12 +185,33 @@ export default function Sidebar({
           />
         </li>
         <li class="requirement-group">
+          <h2>Total</h2>
           <ProgressBar
             label="Total"
             completed={view.total.completed}
             planned={view.total.planned}
             required={view.total.required}
           />
+          <section aria-label="program checks">
+            <h3>Checks</h3>
+            <ul class="checks-list">
+              {view.checks.map((check) => (
+                <li key={check.id}>
+                  <h4>{check.label}</h4>
+                  {check.ok === null ? (
+                    <p>not tracked — verify on P&C</p>
+                  ) : (
+                    <ProgressBar
+                      label={check.label}
+                      completed={check.completed}
+                      planned={check.planned}
+                      required={check.units}
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
         </li>
         {view.groups.map((group) => (
           <Group
@@ -209,27 +230,6 @@ export default function Sidebar({
             onLocateCourse={onLocateCourse}
           />
         ))}
-        <li class="requirement-group">
-          <section aria-label="program checks">
-            <h2>Checks</h2>
-            <ul class="checks-list">
-              {view.checks.map((check) => (
-                <li key={check.id}>
-                  {check.ok === null ? (
-                    <p>{check.label}: not tracked — verify on P&C</p>
-                  ) : (
-                    <ProgressBar
-                      label={check.label}
-                      completed={check.completed}
-                      planned={check.planned}
-                      required={check.units}
-                    />
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        </li>
       </ul>
     </aside>
   );
