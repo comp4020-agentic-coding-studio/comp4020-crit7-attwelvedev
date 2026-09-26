@@ -3,7 +3,7 @@ import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse } from "./api";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
-import { unplacedCount } from "./planner-logic";
+import { groupLabel, unplacedCount } from "./planner-logic";
 
 interface Props {
   view: PlanView;
@@ -81,7 +81,9 @@ export default function CourseCard({
       {course?.offeringUnknown && <p class="badge badge-unknown">No published offering — verify on P&C</p>}
       {course?.projectedTerms.includes(placement.term) && <p class="badge badge-projected">Projected offering</p>}
       <p class="course-card-allocation">
-        {placement.countsToward ? `Counts toward ${placement.countsToward}` : "Not counting toward any requirement"}
+        {placement.countsToward
+          ? `Counts toward ${groupLabel(view, placement.countsToward)}`
+          : "Not counting toward any requirement"}
       </p>
       {placement.state === "soft" && unplacedCount(view, placement.code) > 0 && (
         <p class="badge badge-unplaced-prereqs">{unplacedCount(view, placement.code)} prereqs not placed</p>
