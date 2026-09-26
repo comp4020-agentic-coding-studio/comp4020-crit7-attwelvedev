@@ -1,9 +1,19 @@
 import { db } from "./db";
+import { eligibleLeaves } from "./domain/allocation";
 import { createFeasibility } from "./domain/feasibility";
 import { buildPlanView, type PlanView } from "./domain/view";
 import { TERMS } from "./domain/terms";
-import type { Catalogue } from "./domain/types";
-import { deletePlacement, getPlan, loadCatalogue, loadProgram, upsertPlacement } from "./repo";
+import type { Catalogue, GroupDef } from "./domain/types";
+import {
+  deletePlacement,
+  getPlan,
+  loadCatalogue,
+  loadProgram,
+  setChoice as repoSetChoice,
+  setCutoff as repoSetCutoff,
+  setPin as repoSetPin,
+  upsertPlacement,
+} from "./repo";
 
 export type ServiceResult = { status: 200; view: PlanView } | { status: 400 | 403 | 404 | 409; error: string };
 
@@ -53,5 +63,68 @@ export function removeCourse(planId: string, code: string): ServiceResult {
   if (plan.readOnly) return { status: 403, error: "this plan is read-only" };
 
   deletePlacement(db, planId, code);
+  return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
+}
+
+function findGroup(groups: GroupDef[], groupId: string): GroupDef | null {
+  for (const group of groups) {
+    if (group.id === groupId) return group;
+    const found = findGroup(group.children ?? [], groupId);
+    if (found) return found;
+  }
+  return null;
+}
+
+export function setCutoff(planId: string, cutoff: number): ServiceResult {
+  const plan = getPlan(db, planId);
+  if (!plan) return { status: 404, error: "plan not found" };
+  if (plan.readOnly) return { status: 403, error: "this plan is read-only" };
+  if (!Number.isInteger(cutoff) || cutoff < 0 || cutoff > TERMS.length) {
+    return { status: 400, error: `cutoff must be 0..${TERMS.length}` };
+  }
+
+  repoSetCutoff(db, planId, cutoff);
+  return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
+}
+
+export function setChoice(planId: string, groupId: string, childId: string | null): ServiceResult {
+  const plan = getPlan(db, planId);
+  if (!plan) return { status: 404, error: "plan not found" };
+  if (plan.readOnly) return { status: 403, error: "this plan is read-only" };
+
+  const program = loadProgram(db);
+  const group = findGroup(program.groups, groupId);
+  if (!group || !group.selectable) {
+    return { status: 400, error: `${groupId} is not a selectable group` };
+  }
+  if (childId !== null && !(group.children ?? []).some((c) => c.id === childId)) {
+    return { status: 400, error: `${childId} is not an option of ${groupId}` };
+  }
+
+  repoSetChoice(db, planId, groupId, childId);
+  return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
+}
+
+export function setPin(planId: string, code: string, groupId: string | null): ServiceResult {
+  const plan = getPlan(db, planId);
+  if (!plan) return { status: 404, error: "plan not found" };
+  if (plan.readOnly) return { status: 403, error: "this plan is read-only" };
+
+  const placement = plan.placements.find((p) => p.code === code);
+  if (!placement) return { status: 400, error: `${code} is not placed in this plan` };
+
+  if (groupId !== null) {
+    const catalogue = loadCatalogue(db);
+    const course = catalogue.courses.get(code);
+    if (!course) return { status: 400, error: `unknown course ${code}` };
+    const program = loadProgram(db);
+    const tdp = program.tdpCourses ? new Set(program.tdpCourses) : null;
+    const eligible = eligibleLeaves(program, plan.choices, course, tdp);
+    if (!eligible.includes(groupId)) {
+      return { status: 409, error: `${code} cannot be pinned to ${groupId}: not an eligible group` };
+    }
+  }
+
+  repoSetPin(db, planId, code, groupId);
   return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
 }

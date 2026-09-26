@@ -16,6 +16,13 @@ const postJson = (path: string, body: unknown) =>
 
 const del = (path: string) => fetch(new URL(path, baseUrl), { method: "DELETE", headers: { origin: baseUrl } });
 
+const putJson = (path: string, body: unknown) =>
+  fetch(new URL(path, baseUrl), {
+    method: "PUT",
+    headers: { origin: baseUrl, "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
 async function createPlan(): Promise<string> {
   const res = await postForm("/api/plans");
   const location = res.headers.get("location") ?? "";
@@ -105,5 +112,52 @@ describe("planner", () => {
     const html = await res.text();
     expect(html).toContain('href="/plan/example"');
     expect(html).toContain('action="/api/plans"');
+  });
+
+  it("PUT cutoff persists (reload shows data-cutoff=\"3\")", async () => {
+    const id = await createPlan();
+    const res = await putJson(`/api/plans/${id}/cutoff`, { cutoff: 3 });
+    expect(res.status).toBe(200);
+
+    const page = await fetch(new URL(`/plan/${id}`, baseUrl));
+    const html = await page.text();
+    expect(html).toContain('data-cutoff="3"');
+  });
+
+  it("cutoff 9 returns 400", async () => {
+    const id = await createPlan();
+    const res = await putJson(`/api/plans/${id}/cutoff`, { cutoff: 9 });
+    expect(res.status).toBe(400);
+  });
+
+  it("PUT choices persists and re-allocates", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "COMP2620", term: 2 });
+
+    const arin = await putJson(`/api/plans/${id}/choices`, { groupId: "spec", childId: "arin" });
+    const arinView = await arin.json();
+    expect(arinView.placements.find((p: { code: string }) => p.code === "COMP2620").countsToward).toBe("arin-a");
+
+    const thcs = await putJson(`/api/plans/${id}/choices`, { groupId: "spec", childId: "thcs" });
+    const thcsView = await thcs.json();
+    expect(thcsView.placements.find((p: { code: string }) => p.code === "COMP2620").countsToward).toBe("thcs-a");
+  });
+
+  it("PUT pin to an ineligible group returns 409", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "MATH1013", term: 2 });
+    const res = await putJson(`/api/plans/${id}/pins`, { code: "MATH1013", groupId: "math-disc" });
+    expect(res.status).toBe(409);
+  });
+
+  it("all mutations on the example plan return 403", async () => {
+    const cutoffRes = await putJson("/api/plans/example/cutoff", { cutoff: 1 });
+    expect(cutoffRes.status).toBe(403);
+
+    const choiceRes = await putJson("/api/plans/example/choices", { groupId: "spec", childId: "hccc" });
+    expect(choiceRes.status).toBe(403);
+
+    const pinRes = await putJson("/api/plans/example/pins", { code: "COMP1130", groupId: null });
+    expect(pinRes.status).toBe(403);
   });
 });

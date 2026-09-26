@@ -231,3 +231,27 @@ export function upsertPlacement(db: Db, planId: string, code: string, term: numb
 export function deletePlacement(db: Db, planId: string, code: string): void {
   db.delete(planCourses).where(and(eq(planCourses.planId, planId), eq(planCourses.courseCode, code))).run();
 }
+
+export function setCutoff(db: Db, planId: string, cutoff: number): void {
+  db.update(plans).set({ cutoff }).where(eq(plans.id, planId)).run();
+}
+
+// planChoices.childId is NOT NULL (schema): "no choice recorded" is
+// represented by row absence, not a null column.
+export function setChoice(db: Db, planId: string, groupId: string, childId: string | null): void {
+  if (childId === null) {
+    db.delete(planChoices).where(and(eq(planChoices.planId, planId), eq(planChoices.groupId, groupId))).run();
+    return;
+  }
+  db.insert(planChoices)
+    .values({ planId, groupId, childId })
+    .onConflictDoUpdate({ target: [planChoices.planId, planChoices.groupId], set: { childId } })
+    .run();
+}
+
+export function setPin(db: Db, planId: string, code: string, groupId: string | null): void {
+  db.update(planCourses)
+    .set({ pinnedGroupId: groupId })
+    .where(and(eq(planCourses.planId, planId), eq(planCourses.courseCode, code)))
+    .run();
+}

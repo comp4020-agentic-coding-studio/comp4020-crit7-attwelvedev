@@ -13,10 +13,10 @@ export default function Planner({ view }: Props) {
   }
 
   return (
-    <div class="planner">
+    <div class="planner" data-cutoff={view.plan.cutoff}>
       <aside aria-label="requirements">
         <ol>
-          {view.groupLabels.map((group) => (
+          {view.groups.map((group) => (
             <li key={group.id}>{group.label}</li>
           ))}
         </ol>
