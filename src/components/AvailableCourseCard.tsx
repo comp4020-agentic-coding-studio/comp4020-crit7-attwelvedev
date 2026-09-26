@@ -73,6 +73,9 @@ export default function AvailableCourseCard({
     <li
       class={`course-card ${placement ? "course-card-sidebar-placed" : allBlocked ? "course-card-hard" : "course-card-unplaced"}`}
       draggable={draggable}
+      // See CourseCard's identical attribute: native drag doesn't work from
+      // touch, so Planner's touch-drag effect looks for this instead.
+      data-drag-code={draggable ? code : undefined}
       aria-busy={pending}
       title={blockedReason ?? undefined}
       onDragStart={(event) => {

@@ -105,6 +105,12 @@ export default function CourseCard({
       // badge can move focus here, not just scroll it into view.
       tabIndex={-1}
       draggable={!readOnly}
+      // Native HTML5 drag never fires from a touch gesture on any mobile
+      // browser (it's mouse-only) — Planner's touch-drag effect finds
+      // draggable cards through this attribute instead, delegated from the
+      // planner root so touch dragging works without a second copy of
+      // per-card listeners.
+      data-drag-code={readOnly ? undefined : placement.code}
       title={placement.reasons.join("; ") || undefined}
       onDragStart={(event) => {
         if (readOnly) {

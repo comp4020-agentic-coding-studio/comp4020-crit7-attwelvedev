@@ -573,6 +573,36 @@ dialog::backdrop {
   color: var(--unigrey);
 }
 
+/* Touch drag-and-drop (touch-drag.ts) — a floating clone of the card being
+   dragged, since native HTML5 drag (which draws its own drag image) never
+   fires from a touch gesture in the first place. */
+.drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.92;
+  box-shadow: 0 16px 40px -16px rgb(23 24 26 / 0.5);
+}
+
+.drag-source-active {
+  opacity: 0.4;
+}
+
+/* The term column (or the requirements aside, to remove) currently under
+   the finger — touch's substitute for the browser's native drag-over
+   outline, which (like the rest of HTML5 drag-and-drop) doesn't exist for
+   a touch-driven drag. */
+.term.drag-hover-target {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+aside.drag-hover-target {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
 .term-reason {
   font-size: 0.85em;
   color: var(--rust);
@@ -584,6 +614,19 @@ dialog::backdrop {
   border: 1px solid var(--line);
   border-radius: 0.7rem;
   padding: 0.7rem 0.8rem;
+}
+
+/* Without this, Chrome commits a touch that starts on a card to native
+   scrolling the moment it sees any movement, before touch-drag.ts's own
+   pointermove handler ever gets a chance to call preventDefault — the
+   card's own pointer sequence gets cancelled out from under it mid-hold.
+   Declaring "no default touch behaviour here" up front (rather than trying
+   to fight for it after the fact) is what makes the held-then-drag gesture
+   actually reach pointerup instead of aborting into a pointercancel. Cards
+   fill most of a term/requirements column, so scrolling from elsewhere in
+   the column (the padding around them, the term heading) still works. */
+[data-drag-code] {
+  touch-action: none;
 }
 
 /* A request is in flight for this exact card/control — not a spinner (most

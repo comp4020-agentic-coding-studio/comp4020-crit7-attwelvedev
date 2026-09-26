@@ -1,9 +1,11 @@
 import { useRef, useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
-import { isError, placeCourse, setCutoff, setPin } from "./api";
+import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
+import { dropTargets } from "./planner-logic";
 import Sidebar from "./Sidebar";
 import Timeline from "./Timeline";
+import { useTouchDrag } from "./touch-drag";
 
 // How long "Undo" stays offered after a Remove — long enough to notice and
 // act on without thinking, short enough that it isn't still sitting there
@@ -25,6 +27,7 @@ export default function Planner({ view: initialView }: Props) {
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const plannerRef = useRef<HTMLDivElement>(null);
   const readOnly = view.plan.readOnly;
 
   async function moveCutoff(delta: 1 | -1) {
@@ -44,6 +47,41 @@ export default function Planner({ view: initialView }: Props) {
     if (undoTimer.current) clearTimeout(undoTimer.current);
     setRemoved(info);
     undoTimer.current = setTimeout(() => setRemoved(null), UNDO_TIMEOUT_MS);
+  }
+
+  // The touch-drag drop handler for both "place/move" and "remove" — the
+  // same two mutations Timeline's native onDrop and Sidebar's native onDrop
+  // already perform for a mouse drag, reimplemented here rather than shared
+  // because touch dragging resolves its drop target through elementFromPoint
+  // at the planner level, not inside whichever card or column the pointer
+  // happens to be over.
+  async function performPlace(term: number, code: string) {
+    const target = dropTargets(view, code).find((t) => t.term === term);
+    if (target && !target.allowed) {
+      if (target.reason) setAnnouncement(target.reason);
+      return;
+    }
+    const result = await placeCourse(view.plan.id, code, term);
+    if (isError(result)) setAnnouncement(result.error);
+    else setView(result);
+  }
+
+  async function performRemove(code: string) {
+    const placement = view.placements.find((p) => p.code === code);
+    if (!placement) return;
+    const course = view.courses[code];
+    const info: RemovedPlacement = {
+      code,
+      term: placement.term,
+      pinnedGroupId: placement.pinned ? (placement.countsToward ?? null) : null,
+      label: course ? `${code} — ${course.title}` : code,
+    };
+    const result = await removeCourse(view.plan.id, code);
+    if (isError(result)) setAnnouncement(result.error);
+    else {
+      setView(result);
+      handleRemoved(info);
+    }
   }
 
   // Re-placing a course always lands it unpinned (placeCourse's insert
@@ -81,8 +119,17 @@ export default function Planner({ view: initialView }: Props) {
         ? "Every semester on the timeline counts as completed."
         : `Completed through ${view.terms[cutoff - 1].label} — planned from ${view.terms[cutoff].label} onward.`;
 
+  useTouchDrag(plannerRef, {
+    onDragStart: setDraggingCode,
+    onDragEnd: () => setDraggingCode(null),
+    onDrop: (target, code) => {
+      if (target.kind === "term") void performPlace(target.term, code);
+      else void performRemove(code);
+    },
+  });
+
   return (
-    <div class="planner" data-cutoff={view.plan.cutoff}>
+    <div class="planner" data-cutoff={view.plan.cutoff} ref={plannerRef}>
       <p aria-live="polite" class="visually-hidden">
         {announcement}
       </p>
