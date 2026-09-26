@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "preact/hooks";
-import type { PlanView } from "../lib/domain/view";
+import type { CourseCard, PlanView } from "../lib/domain/view";
 import { isError, setPin } from "./api";
 import { groupLabel } from "./planner-logic";
 import RequisiteTree from "./RequisiteTree";
@@ -7,6 +7,10 @@ import RequisiteTree from "./RequisiteTree";
 interface Props {
   view: PlanView;
   code: string;
+  // For a code that isn't (yet) in view.courses — a search result outside
+  // the plan's tree — the card the search API already returned is passed
+  // directly, rather than the (missing) view.courses[code] lookup.
+  course?: CourseCard;
   planId: string;
   open: boolean;
   onChanged: (view: PlanView) => void;
@@ -20,9 +24,9 @@ interface Props {
 // invariants suite's jsdom, which never runs client JS) render as closed.
 // Client-side, `open` toggles the imperative showModal()/close() calls that
 // give it focus-trapping and Esc-to-close.
-export default function CourseDetail({ view, code, planId, open, onChanged, onAnnounce, onClose }: Props) {
+export default function CourseDetail({ view, code, course: courseOverride, planId, open, onChanged, onAnnounce, onClose }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const course = view.courses[code];
+  const course = courseOverride ?? view.courses[code];
   const placement = view.placements.find((p) => p.code === code);
   const readOnly = view.plan.readOnly;
 

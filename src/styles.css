@@ -280,13 +280,14 @@ dialog::backdrop {
   flex: 1;
 }
 
-.course-search-results {
-  list-style: none;
+.course-search-status {
   margin: 0.5rem 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+}
+
+/* Reuses .available-courses' grid so a search result card is sized and laid
+   out identically to the requirement groups' own cards below it. */
+.course-search-results {
+  margin-top: 0.5rem;
 }
 
 /* Solid, not dotted — a dotted border can look, especially once a screenshot

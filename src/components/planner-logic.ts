@@ -7,8 +7,12 @@ export interface DropTarget {
   reason: string | null;
 }
 
-export function dropTargets(view: PlanView, code: string): DropTarget[] {
-  const hardBlocked = view.courses[code]?.hardBlocked ?? {};
+// `hardBlockedOverride` is for a course that isn't (yet) in `view.courses` at
+// all — a search result outside the plan's tree — where falling back to `{}`
+// would wrongly show every term as allowed instead of the code's own,
+// already-computed hardBlocked map.
+export function dropTargets(view: PlanView, code: string, hardBlockedOverride?: Record<number, string>): DropTarget[] {
+  const hardBlocked = hardBlockedOverride ?? view.courses[code]?.hardBlocked ?? {};
   return view.terms.map((term) => {
     if (view.plan.readOnly) {
       return { term: term.index, allowed: false, reason: "This plan is read-only" };

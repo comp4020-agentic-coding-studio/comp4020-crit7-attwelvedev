@@ -51,6 +51,16 @@ describe("dropTargets", () => {
     expect(targets.every((t) => t.allowed === false)).toBe(true);
     expect(targets.every((t) => typeof t.reason === "string")).toBe(true);
   });
+
+  it("uses a given hardBlockedOverride instead of view.courses[code] — for a search result not (yet) in the plan's tree", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    // PSYC1004 isn't in the AACOM tree, so it isn't in view.courses at all;
+    // dropTargets must not silently treat that as "every term allowed".
+    expect(view.courses.PSYC1004).toBeUndefined();
+    const targets = dropTargets(view, "PSYC1004", { 0: "not offered in S1 2027" });
+    expect(targets[0]).toEqual({ term: 0, allowed: false, reason: "not offered in S1 2027" });
+    expect(targets[1]).toEqual({ term: 1, allowed: true, reason: null });
+  });
 });
 
 describe("progressSegments", () => {

@@ -12,6 +12,10 @@ interface Props {
   // The term the course is already sitting in, so the menu doesn't offer
   // it as a destination.
   currentTerm?: number;
+  // For a code that isn't (yet) in view.courses — a search result outside
+  // the plan's tree — dropTargets can't look up its hardBlocked map from
+  // the plan view, so the caller supplies it directly.
+  hardBlockedOverride?: Record<number, string>;
   // Controlled from Planner.tsx, keyed by course code, so opening one
   // menu anywhere on the page closes whichever other one was open.
   open: boolean;
@@ -25,13 +29,16 @@ export default function PlaceInMenu({
   disabled = false,
   placed = false,
   currentTerm,
+  hardBlockedOverride,
   open,
   onOpenChange,
 }: Props) {
   // Only offer terms that are actually reachable — the same rule a drag
   // enforces (a disallowed drop is refused) — rather than listing every
   // term with the blocked ones merely marked unusable.
-  const targets = dropTargets(view, code).filter((target) => target.allowed && target.term !== currentTerm);
+  const targets = dropTargets(view, code, hardBlockedOverride).filter(
+    (target) => target.allowed && target.term !== currentTerm,
+  );
   const buttonLabel = placed ? "Move to…" : "Place in…";
   const menuLabel = placed ? `Move ${code} to` : `Place ${code} in`;
 
