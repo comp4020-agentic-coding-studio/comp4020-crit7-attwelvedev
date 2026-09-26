@@ -53,7 +53,7 @@ lists.
   hard-blocked — the app can't tell the difference between "not running" and
   "not yet on P&C", so it stays placeable with a "No published offering —
   verify on P&C" badge rather than refusing it outright.
-- **TDP (Targeted Delivery Program) tracking is untracked, not "0 of 12
+- **TDP (Transdisciplinary Problem-Solving) tracking is untracked, not "0 of 12
   units"**: the scrape task spent a time-boxed hour searching for a
   machine-readable TD tag on P&C's course search API and found none. No TD
   status is ever guessed, so the program check shows as "not tracked — verify
