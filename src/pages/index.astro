@@ -1,22 +1,16 @@
 ---
-import "../styles.css";
+import Base from "../layouts/Base.astro";
 ---
 
-<!doctype html>
-<html lang="en-AU">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ANU Degree Planner</title>
-  </head>
-  <body>
-    <nav aria-label="site">
-      <a href="/">Home</a>
-      <a href="/readme/">About</a>
-    </nav>
-    <main>
-      <h1>ANU Degree Planner</h1>
-      <p>The planner itself lands in Task 7.</p>
-    </main>
-  </body>
-</html>
+<Base title="ANU Degree Planner">
+  <h1>ANU Degree Planner</h1>
+  <p>
+    A degree planner for ANU's Bachelor of Advanced Computing (Honours), 2027
+    cohort. Place courses onto an 8-semester timeline, and start a plan to
+    make it your own — no account needed.
+  </p>
+  <form method="post" action="/api/plans">
+    <button>Start a new plan</button>
+  </form>
+  <p><a href="/plan/example">See the example plan</a></p>
+</Base>

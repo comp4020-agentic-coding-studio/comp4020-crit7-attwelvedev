@@ -1,4 +1,5 @@
-import { eq, inArray } from "drizzle-orm";
+import { randomBytes } from "node:crypto";
+import { and, eq, inArray } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import { emptyParse } from "./catalogue/from-pandc";
 import type {
@@ -196,4 +197,37 @@ export function getPlan(db: Db, id: string): PlanState | null {
       pinnedGroupId: row.pinnedGroupId,
     })),
   };
+}
+
+export function createPlan(db: Db): string {
+  const programRow = db.select().from(programs).get();
+  if (!programRow) {
+    throw new Error("no program has been seeded");
+  }
+  const id = randomBytes(16).toString("base64url");
+  db.insert(plans)
+    .values({
+      id,
+      programCode: programRow.code,
+      cohortYear: programRow.year,
+      startSession: "S1",
+      cutoff: 0,
+      readOnly: 0,
+    })
+    .run();
+  return id;
+}
+
+export function upsertPlacement(db: Db, planId: string, code: string, term: number): void {
+  db.insert(planCourses)
+    .values({ planId, courseCode: code, termIndex: term, pinnedGroupId: null })
+    .onConflictDoUpdate({
+      target: [planCourses.planId, planCourses.courseCode],
+      set: { termIndex: term },
+    })
+    .run();
+}
+
+export function deletePlacement(db: Db, planId: string, code: string): void {
+  db.delete(planCourses).where(and(eq(planCourses.planId, planId), eq(planCourses.courseCode, code))).run();
 }
