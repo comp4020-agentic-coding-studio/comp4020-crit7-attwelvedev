@@ -3,7 +3,7 @@ import { dirname } from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { emptyParse } from "./catalogue/from-pandc";
+import { parseRequisites } from "./domain/requisites";
 import { loadSeedInput } from "./seed-input";
 import { seedReferenceData } from "./seed";
 
@@ -26,7 +26,5 @@ export const db = drizzle(client);
 migrate(db, { migrationsFolder: "./drizzle" });
 
 // Reference data (program, catalogue, example plan) is reseeded from
-// committed data on every boot; user plans are untouched. The real requisite
-// parser is wired in here in Phase 03 — until then requisites parse to
-// `emptyParse`.
-seedReferenceData(db, loadSeedInput(), emptyParse);
+// committed data on every boot; user plans are untouched.
+seedReferenceData(db, loadSeedInput(), parseRequisites);
