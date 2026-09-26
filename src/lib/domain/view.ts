@@ -1,4 +1,5 @@
-import { TERMS } from "./terms";
+import { createFeasibility } from "./feasibility";
+import { offeredLabel, offeringStatus, TERMS } from "./terms";
 import type { Catalogue, GroupDef, PlanState, ProgramDef } from "./types";
 
 // The full PlanView (overview §4.3 — groups with progress, checks, badges,
@@ -23,6 +24,10 @@ export interface CourseCardView {
   units: number;
   url: string;
   description: string;
+  hardBlocked: Record<number, string>;
+  projectedTerms: number[];
+  offeredLabel: string;
+  offeringUnknown: boolean;
 }
 
 export interface PlanView {
@@ -41,6 +46,7 @@ function collectGroupCourses(group: GroupDef, out: Set<string>): void {
 }
 
 export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanState): PlanView {
+  const feasibility = createFeasibility(cat);
   const unitsByTerm = new Map<number, number>();
   const placements: PlacementView[] = plan.placements.map((placement) => {
     const course = cat.courses.get(placement.code);
@@ -63,7 +69,19 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
   for (const code of relevantCodes) {
     const course = cat.courses.get(code);
     if (!course) continue;
-    courses[code] = { title: course.title, units: course.units, url: course.url, description: course.description };
+    const projectedTerms = TERMS.filter((term) => offeringStatus(course, term, cat.horizonYear) === "projected").map(
+      (term) => term.index,
+    );
+    courses[code] = {
+      title: course.title,
+      units: course.units,
+      url: course.url,
+      description: course.description,
+      hardBlocked: feasibility.hardBlockedTerms(code),
+      projectedTerms,
+      offeredLabel: offeredLabel(course),
+      offeringUnknown: course.offerings.length === 0,
+    };
   }
 
   return {

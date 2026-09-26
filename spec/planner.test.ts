@@ -72,6 +72,14 @@ describe("planner", () => {
     expect(res.status).toBe(400);
   });
 
+  it("placing COMP3630 in term 0 returns 409 (hard-blocked by the 24-unit clause)", async () => {
+    const id = await createPlan();
+    const res = await postJson(`/api/plans/${id}/placements`, { code: "COMP3630", term: 0 });
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error).toContain("24 units");
+  });
+
   it("unknown plan returns 404 for both the page and the API", async () => {
     const pageRes = await fetch(new URL("/plan/does-not-exist", baseUrl));
     expect(pageRes.status).toBe(404);
