@@ -26,6 +26,7 @@ export default function Planner({ view: initialView }: Props) {
   const [removed, setRemoved] = useState<RemovedPlacement | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const plannerRef = useRef<HTMLDivElement>(null);
   const readOnly = view.plan.readOnly;
@@ -40,6 +41,22 @@ export default function Planner({ view: initialView }: Props) {
       else setView(result);
     } finally {
       setCutoffPending(false);
+    }
+  }
+
+  // The plan's own URL is the only way back to it (see the homepage and
+  // Help copy) — this is the in-planner equivalent of "bookmark this",
+  // for whoever's already here and would rather not hunt in the address
+  // bar. navigator.clipboard needs a secure context; on the rare browser
+  // where it's unavailable, say so rather than pretend it worked.
+  async function copyPlanLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setLinkCopied(true);
+      setAnnouncement("Plan link copied to clipboard");
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      setAnnouncement("Couldn't copy the link automatically — copy it from the address bar instead");
     }
   }
 
@@ -157,6 +174,11 @@ export default function Planner({ view: initialView }: Props) {
             />
             Show prerequisite links
           </label>
+          {!readOnly && (
+            <button type="button" onClick={copyPlanLink}>
+              {linkCopied ? "Copied!" : "Copy plan link"}
+            </button>
+          )}
         </div>
         <p class="cutoff-readout">{cutoffReadout} The gold line on the timeline marks that boundary.</p>
         <Timeline
