@@ -67,3 +67,35 @@ widths until a screenshot looked right — and the sibling fix from the
 same session (a global `box-sizing: border-box` reset, since one card's
 own padding+border was similarly invisible to a plain `width` check)
 closes the same class of bug everywhere, not just here.
+
+## 2026-09-26 — A hover-triggered overlay that only failed under real use
+
+Resolved by 2f58380.
+
+Task 15's plan specified the prerequisite overlay as hover/focus-only:
+show lines from a card to its placed prerequisites while hovering or
+focused, clear them on leave or blur. It matched the spec, passed axe,
+and every `overlayEdges` unit test (the pure edge-selection logic) held.
+It only broke under the one thing a unit test can't exercise: a human
+actually tracing a link. When a prerequisite sat several terms away, the
+natural move — scroll the timeline to see both ends of the line — is
+also the thing that fires `mouseleave`/blur on the source card, so the
+line vanished exactly when the user tried to follow it off-screen.
+
+The fix wasn't in `overlayEdges` at all (which was already correct and
+stayed untouched) but in the trigger: replaced hover/focus with an
+explicit "Show prerequisite links" checkbox in `Planner.tsx` that draws
+every placed course's edges at once (`view.placements.flatMap(p =>
+overlayEdges(view, p.code))`). That removes the transient hover state
+that caused the loss, rather than trying to patch the timing (e.g.
+delaying clear-on-leave, which would just trade "vanishes on scroll" for
+"stale line lingers after moving to a different card").
+
+This is exactly the class of bug the plan's own Human Review step exists
+to catch: nothing about it shows up in a jsdom test (no scrolling, no
+real hover timing), only in a person actually using the built page. The
+correction landed in the plan itself, not just the code — Task 15's
+acceptance criteria and human-review script were rewritten to describe
+the checkbox, so a future reader of the plan sees the real interaction
+contract instead of a stale hover description that no longer matches
+what ships.
