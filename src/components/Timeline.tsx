@@ -40,6 +40,9 @@ export default function Timeline({
     const el = document.querySelector(`[data-placed="${locateRequest.code}"]`);
     if (!(el instanceof HTMLElement)) return;
     el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    // preventScroll: the smooth scrollIntoView above is already under way;
+    // focus()'s own default jump-to-element would fight it.
+    el.focus({ preventScroll: true });
     el.classList.add("course-card-highlighted");
     const timer = setTimeout(() => el.classList.remove("course-card-highlighted"), 2000);
     return () => clearTimeout(timer);

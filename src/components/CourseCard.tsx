@@ -57,6 +57,10 @@ export default function CourseCard({
     <li
       class={`course-card course-card-${placement.state}`}
       data-placed={placement.code}
+      // Not in the tab order (no ordinary reason to tab onto a card), but
+      // focusable programmatically so the sidebar's "locate on timeline"
+      // badge can move focus here, not just scroll it into view.
+      tabIndex={-1}
       draggable={!readOnly}
       title={placement.reasons.join("; ") || undefined}
       onDragStart={(event) => {
