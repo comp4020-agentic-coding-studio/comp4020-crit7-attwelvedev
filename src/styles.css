@@ -263,12 +263,18 @@ dialog::backdrop {
   border-color: #bbb;
 }
 
+/* `block`, not `inline-block`: a badge sits right after the code/title,
+   which is raw inline content with no block wrapper of its own, so an
+   inline-level badge flows onto the same line as the tail of a long title
+   instead of starting a new one. `width: fit-content` keeps it sized to its
+   own text rather than stretching the full card width. */
 .badge {
   font-size: 0.8em;
   border: 1px solid currentColor;
   border-radius: 0.25rem;
   padding: 0.1rem 0.3rem;
-  display: inline-block;
+  display: block;
+  width: fit-content;
   margin-block-start: 0.25rem;
 }
 
