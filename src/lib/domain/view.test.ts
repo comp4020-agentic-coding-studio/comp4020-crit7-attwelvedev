@@ -84,6 +84,17 @@ describe("buildPlanView (example plan)", () => {
     expect(comp1130.countsToward).toBe("prog-a");
     expect(comp1130.pinned).toBe(false);
   });
+
+  it("performance: building the example plan's view takes under 50ms (median of 5 runs)", () => {
+    const durations: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      const start = performance.now();
+      buildPlanView(cat, AACOM_2027, EXAMPLE_PLAN);
+      durations.push(performance.now() - start);
+    }
+    durations.sort((a, b) => a - b);
+    expect(durations[2]).toBeLessThan(50);
+  });
 });
 
 describe("buildPlanView (empty plan)", () => {
