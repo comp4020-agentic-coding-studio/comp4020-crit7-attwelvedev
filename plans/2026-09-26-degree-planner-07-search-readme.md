@@ -149,7 +149,7 @@ de-duplicates concurrent fetches through a `Map<string, Promise<FetchOutcome>>`.
     `PHIL1001`) fetches, caches, and is placeable after a reload.
 - **Depends on:** 8, 13, 14.
 
-### Task 17: README: what it is, what good means, limitations, attribution
+### Task 17: README: what it is, what good means, limitations, attribution [x]
 
 - **Description:** Replace the starter README (served in full at `/readme/`).
 - **Files touched:** `README.md`, optionally `public/*.png` screenshots.
