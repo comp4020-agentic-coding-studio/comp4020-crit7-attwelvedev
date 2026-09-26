@@ -3,6 +3,7 @@ import type { CourseCard as CourseCardData, PlanView } from "../lib/domain/view"
 import { isError, placeCourse, searchCourses, type SearchResult } from "./api";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
+import { dropTargets } from "./planner-logic";
 
 interface Props {
   view: PlanView;
@@ -66,6 +67,16 @@ function SearchResultCard({
   const [pending, setPending] = useState(false);
   const draggable = !readOnly;
 
+  // See AvailableCourseCard's identical guard: on a read-only plan every
+  // term is reported disallowed for every course (the plan, not the
+  // course, is why), which isn't the "genuinely infeasible" signal this is
+  // meant to be.
+  const targets = readOnly ? [] : dropTargets(view, course.code, course.hardBlocked);
+  const allBlocked = !readOnly && targets.length > 0 && targets.every((t) => !t.allowed);
+  const blockedReason = allBlocked
+    ? Array.from(new Set(targets.map((t) => t.reason).filter((r): r is string => !!r))).join("; ")
+    : null;
+
   async function place(term: number) {
     setPending(true);
     try {
@@ -79,9 +90,10 @@ function SearchResultCard({
 
   return (
     <li
-      class="course-card course-card-unplaced"
+      class={`course-card ${allBlocked ? "course-card-hard" : "course-card-unplaced"}`}
       aria-busy={pending}
       draggable={draggable}
+      title={blockedReason ?? undefined}
       onDragStart={(event) => {
         if (!draggable) {
           event.preventDefault();
@@ -97,6 +109,8 @@ function SearchResultCard({
       <p class="course-card-units">
         {course.units} units, {course.offeredLabel}
       </p>
+      {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
+      {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
       <PlaceInMenu
         view={view}
         code={course.code}

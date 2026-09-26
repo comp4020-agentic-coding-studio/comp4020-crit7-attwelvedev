@@ -3,6 +3,7 @@ import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
+import { dropTargets } from "./planner-logic";
 
 interface Props {
   view: PlanView;
@@ -43,6 +44,20 @@ export default function AvailableCourseCard({
 
   const draggable = !readOnly && !placement;
 
+  // A course still has to be actively discovered as a dead end today (open
+  // its Place in… menu, read "No available terms"), rather than the sidebar
+  // just telling you up front — checked here the same way that menu already
+  // does, so the two never disagree. Doesn't apply once it's placed (that
+  // course's own card already carries its real state), or on a read-only
+  // plan — there, dropTargets reports every term as disallowed for every
+  // course (the plan itself, not this course, is why), which would flag the
+  // entire sidebar as "Blocked" and say nothing useful.
+  const targets = placement || readOnly ? [] : dropTargets(view, code);
+  const allBlocked = !placement && !readOnly && targets.length > 0 && targets.every((t) => !t.allowed);
+  const blockedReason = allBlocked
+    ? Array.from(new Set(targets.map((t) => t.reason).filter((r): r is string => !!r))).join("; ")
+    : null;
+
   async function place(term: number) {
     setPending(true);
     try {
@@ -56,9 +71,10 @@ export default function AvailableCourseCard({
 
   return (
     <li
-      class={`course-card ${placement ? "course-card-sidebar-placed" : "course-card-unplaced"}`}
+      class={`course-card ${placement ? "course-card-sidebar-placed" : allBlocked ? "course-card-hard" : "course-card-unplaced"}`}
       draggable={draggable}
       aria-busy={pending}
+      title={blockedReason ?? undefined}
       onDragStart={(event) => {
         if (!draggable) {
           event.preventDefault();
@@ -74,6 +90,8 @@ export default function AvailableCourseCard({
       <p class="course-card-units">
         {course.units} units, {course.offeredLabel}
       </p>
+      {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
+      {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
       {placement ? (
         <p class="course-card-placed-status">
           <span class="course-card-tick" aria-hidden="true">
