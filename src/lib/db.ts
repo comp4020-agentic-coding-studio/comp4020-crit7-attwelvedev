@@ -3,6 +3,9 @@ import { dirname } from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { emptyParse } from "./catalogue/from-pandc";
+import { loadSeedInput } from "./seed-input";
+import { seedReferenceData } from "./seed";
 
 // One SQLite file is the app's whole persistent state. In production
 // fly.toml points DATABASE_PATH at the machine's volume (/data), which is
@@ -21,3 +24,9 @@ export const db = drizzle(client);
 // run them from. The flow: edit src/lib/schema.ts, `pnpm db:generate`,
 // commit the migration it writes to drizzle/.
 migrate(db, { migrationsFolder: "./drizzle" });
+
+// Reference data (program, catalogue, example plan) is reseeded from
+// committed data on every boot; user plans are untouched. The real requisite
+// parser is wired in here in Phase 03 — until then requisites parse to
+// `emptyParse`.
+seedReferenceData(db, loadSeedInput(), emptyParse);
