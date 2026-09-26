@@ -1,5 +1,7 @@
+import { useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
+import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
 
 interface Props {
@@ -23,6 +25,7 @@ export default function AvailableCourseCard({
 }: Props) {
   const course = view.courses[code];
   const readOnly = view.plan.readOnly;
+  const [detailsOpen, setDetailsOpen] = useState(false);
   if (!course) return null;
 
   async function place(term: number) {
@@ -51,6 +54,18 @@ export default function AvailableCourseCard({
         {course.units} units, {course.offeredLabel}
       </p>
       <PlaceInMenu view={view} code={code} onPlace={place} disabled={readOnly} />
+      <button type="button" onClick={() => setDetailsOpen(true)}>
+        Details
+      </button>
+      <CourseDetail
+        view={view}
+        code={code}
+        planId={planId}
+        open={detailsOpen}
+        onChanged={onChanged}
+        onAnnounce={onAnnounce}
+        onClose={() => setDetailsOpen(false)}
+      />
     </li>
   );
 }

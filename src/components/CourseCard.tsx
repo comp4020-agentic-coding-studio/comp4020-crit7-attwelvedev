@@ -1,6 +1,9 @@
+import { useState } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse } from "./api";
+import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
+import { unplacedCount } from "./planner-logic";
 
 interface Props {
   view: PlanView;
@@ -23,6 +26,7 @@ export default function CourseCard({
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   async function move(term: number) {
     const result = await placeCourse(planId, placement.code, term);
@@ -79,6 +83,9 @@ export default function CourseCard({
       <p class="course-card-allocation">
         {placement.countsToward ? `Counts toward ${placement.countsToward}` : "Not counting toward any requirement"}
       </p>
+      {placement.state === "soft" && unplacedCount(view, placement.code) > 0 && (
+        <p class="badge badge-unplaced-prereqs">{unplacedCount(view, placement.code)} prereqs not placed</p>
+      )}
       {placement.state === "soft" && placement.suggestions.length > 0 && (
         <ul class="course-card-suggestions">
           {placement.suggestions.map((suggestion) => (
@@ -95,9 +102,21 @@ export default function CourseCard({
         </ul>
       )}
       <PlaceInMenu view={view} code={placement.code} onPlace={move} disabled={readOnly} />
+      <button type="button" onClick={() => setDetailsOpen(true)}>
+        Details
+      </button>
       <button type="button" disabled={readOnly} onClick={remove}>
         Remove
       </button>
+      <CourseDetail
+        view={view}
+        code={placement.code}
+        planId={planId}
+        open={detailsOpen}
+        onChanged={onChanged}
+        onAnnounce={onAnnounce}
+        onClose={() => setDetailsOpen(false)}
+      />
     </li>
   );
 }

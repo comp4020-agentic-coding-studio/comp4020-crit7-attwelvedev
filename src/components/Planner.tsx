@@ -12,6 +12,7 @@ export default function Planner({ view: initialView }: Props) {
   const [view, setView] = useState(initialView);
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
+  const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const readOnly = view.plan.readOnly;
 
   async function moveCutoff(delta: 1 | -1) {
@@ -35,6 +36,14 @@ export default function Planner({ view: initialView }: Props) {
           <button type="button" disabled={readOnly || view.plan.cutoff >= 8} onClick={() => moveCutoff(1)}>
             Move cutoff later
           </button>
+          <label class="show-links-toggle">
+            <input
+              type="checkbox"
+              checked={showPrereqLinks}
+              onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
+            />
+            Show prerequisite links
+          </label>
         </div>
         <Timeline
           view={view}
@@ -44,6 +53,7 @@ export default function Planner({ view: initialView }: Props) {
           onAnnounce={setAnnouncement}
           onDragStart={setDraggingCode}
           onDragEnd={() => setDraggingCode(null)}
+          showPrereqLinks={showPrereqLinks}
         />
       </div>
       <Sidebar

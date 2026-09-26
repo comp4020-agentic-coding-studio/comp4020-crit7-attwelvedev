@@ -5,7 +5,7 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/f
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
-import { dropTargets, progressSegments } from "./planner-logic";
+import { dropTargets, overlayEdges, progressSegments, unplacedCount } from "./planner-logic";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -70,5 +70,55 @@ describe("progressSegments", () => {
     const result = progressSegments(0, 0, 0);
     expect(result.completedPct).toBe(0);
     expect(result.plannedPct).toBe(0);
+  });
+});
+
+describe("overlayEdges", () => {
+  it("returns an edge only for a prereq placed in an earlier term", () => {
+    const plan: PlanState = {
+      ...emptyPlan(),
+      placements: [
+        { code: "COMP1140", term: 1, pinnedGroupId: null },
+        { code: "COMP2100", term: 2, pinnedGroupId: null },
+      ],
+    };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    const edges = overlayEdges(view, "COMP2100");
+    expect(edges).toContainEqual({ from: "COMP1140", to: "COMP2100" });
+    expect(edges.some((e) => e.from === "COMP1110")).toBe(false);
+  });
+
+  it("excludes a prereq placed in the same or a later term unless concurrent", () => {
+    const plan: PlanState = {
+      ...emptyPlan(),
+      placements: [
+        { code: "COMP1140", term: 2, pinnedGroupId: null },
+        { code: "COMP2100", term: 2, pinnedGroupId: null },
+      ],
+    };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    expect(overlayEdges(view, "COMP2100")).toEqual([]);
+  });
+
+  it("returns nothing for an unplaced course", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    expect(overlayEdges(view, "COMP2100")).toEqual([]);
+  });
+});
+
+describe("unplacedCount", () => {
+  it("counts COMP2100's unplaced prereqs when it's placed alone", () => {
+    const plan: PlanState = {
+      ...emptyPlan(),
+      placements: [{ code: "COMP2100", term: 2, pinnedGroupId: null }],
+    };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    expect(unplacedCount(view, "COMP2100")).toBe(view.placements[0].unplacedPrereqs.length);
+    expect(unplacedCount(view, "COMP2100")).toBeGreaterThan(0);
+  });
+
+  it("is 0 for a course that isn't placed", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    expect(unplacedCount(view, "COMP2100")).toBe(0);
   });
 });

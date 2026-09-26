@@ -216,6 +216,41 @@ describe("planner", () => {
     expect(checksHtml).toContain("not tracked — verify on P&amp;C");
   });
 
+  it("the example page renders the verify badge on COMP4550", async () => {
+    const res = await fetch(new URL("/plan/example", baseUrl));
+    const html = await res.text();
+    expect(html).toMatch(/data-placed="COMP4550"[\s\S]{0,400}Verify on P&amp;C/);
+  });
+
+  it("the 'No published offering' badge appears on a placed COMP4600 in a new plan", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "COMP4600", term: 2 });
+    const page = await fetch(new URL(`/plan/${id}`, baseUrl));
+    const html = await page.text();
+    expect(html).toMatch(/data-placed="COMP4600"[\s\S]{0,400}No published offering/);
+  });
+
+  it("each placed card has a Details button", async () => {
+    const res = await fetch(new URL("/plan/example", baseUrl));
+    const html = await res.text();
+    expect(html).toMatch(/data-placed="COMP1130"[\s\S]{0,600}>Details</);
+  });
+
+  it("the details dialog is closed in the server render", async () => {
+    const res = await fetch(new URL("/plan/example", baseUrl));
+    const html = await res.text();
+    expect(html).toContain("<dialog");
+    expect(html).not.toMatch(/<dialog[^>]*\bopen\b/);
+  });
+
+  it("the details for COMP4550 contain its P&C URL", async () => {
+    const res = await fetch(new URL("/plan/example", baseUrl));
+    const html = await res.text();
+    const dialogMatch = html.match(/<dialog aria-label="COMP4550 details"[\s\S]*?<\/dialog>/);
+    expect(dialogMatch).not.toBeNull();
+    expect(dialogMatch![0]).toContain("https://programsandcourses.anu.edu.au/2027/course/COMP4550");
+  });
+
   it("all mutations on the example plan return 403", async () => {
     const cutoffRes = await putJson("/api/plans/example/cutoff", { cutoff: 1 });
     expect(cutoffRes.status).toBe(403);

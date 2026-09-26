@@ -2,6 +2,7 @@ import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard from "./CourseCard";
 import { dropTargets } from "./planner-logic";
+import PrereqOverlay from "./PrereqOverlay";
 
 interface Props {
   view: PlanView;
@@ -11,9 +12,19 @@ interface Props {
   onAnnounce: (message: string) => void;
   onDragStart: (code: string) => void;
   onDragEnd: () => void;
+  showPrereqLinks: boolean;
 }
 
-export default function Timeline({ view, planId, draggingCode, onChanged, onAnnounce, onDragStart, onDragEnd }: Props) {
+export default function Timeline({
+  view,
+  planId,
+  draggingCode,
+  onChanged,
+  onAnnounce,
+  onDragStart,
+  onDragEnd,
+  showPrereqLinks,
+}: Props) {
   const placementsByTerm = new Map<number, PlacementView[]>();
   for (const placement of view.placements) {
     const list = placementsByTerm.get(placement.term) ?? [];
@@ -41,6 +52,7 @@ export default function Timeline({ view, planId, draggingCode, onChanged, onAnno
         <p class="timeline-hint">Drag a course onto a semester, or use Place in…</p>
       )}
       <div class="timeline-scroll">
+        <PrereqOverlay view={view} show={showPrereqLinks} />
         {view.terms.map((term) => {
           const target = dragTargets?.find((t) => t.term === term.index) ?? null;
           const greyed = draggingCode !== null && target !== null && !target.allowed;

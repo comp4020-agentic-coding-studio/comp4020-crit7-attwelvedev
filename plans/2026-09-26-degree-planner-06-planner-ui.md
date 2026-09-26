@@ -185,8 +185,9 @@ which reads `hardBlocked`.
     checked" text), incompatibilities, `otherPrograms` notes, and a pin
     `<select>` of eligible groups plus "Automatic".
   - `PrereqOverlay`: an absolutely positioned SVG over the timeline, drawing thin
-    lines between card centres from `overlayEdges`, on `mouseenter` or `focus` of
-    a placed card, and clearing them on leave or blur.
+    lines between card centres from `overlayEdges`, for every placed course at
+    once when a "Show prerequisite links" checkbox (`Planner.tsx`) is on
+    (changed post-review — see §8 note; originally hover/focus-only).
 - **Refactor:** None expected.
 - **Acceptance criteria:** the tests pass, and axe passes (the dialog is closed in
   the server render).
@@ -194,6 +195,7 @@ which reads `hardBlocked`.
   confirms the lines are legible and not noisy. They open the details for
   COMP4550 and confirm the requisite tree reads clearly, then pin MATH1013 and
   see its allocation label change. It passes when the user explicitly accepts it.
+  (Superseded post-review by the "Show prerequisite links" checkbox — see §8.)
 - **Depends on:** 14.
 
 
@@ -347,3 +349,17 @@ None. (Execution notes, 2026-09-26:
      The underlying claim (a suggestion always targets a non-hard-blocked
      term) still holds — the bug was the UI calling it with the wrong
      course, not evaluate.ts computing the wrong term.)
+9. Task 15 human review, one round: three fixes, one design change.
+   - The "N prereqs not placed" badge (FR31) showed on every card with any
+     unplaced prereq, including `state: "available"` cards where an OR
+     alternative was already satisfied — read as an error when it wasn't
+     one. Scoped to `placement.state === "soft"` only.
+   - `AvailableCourseCard.tsx` (unplaced/sidebar cards) had no "Details"
+     button — added one, reusing `CourseDetail` (already handled a missing
+     `placement` for the pin control and requisite-status display).
+   - Design change: hover/focus-only prerequisite lines (as planned above)
+     made a link spanning several off-screen terms hard to trace — hovering
+     the source card to scroll away lost the line. Replaced with a
+     "Show prerequisite links" checkbox (`Planner.tsx`) that, when on, draws
+     every placed course's edges at once via `view.placements.flatMap(p =>
+     overlayEdges(view, p.code))`, rather than only the hovered course's.)
