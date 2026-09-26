@@ -1,0 +1,68 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Help">
+  <h1>Help</h1>
+  <p>
+    This tool helps you plan the <strong>Bachelor of Advanced Computing (Honours)</strong>, for students starting
+    Semester 1, 2027 — it doesn't yet cover other programs, cohort years, or a Semester 2 start.
+  </p>
+
+  <h2>The basics</h2>
+  <p>
+    Courses live in two places: the <strong>requirements list</strong> (what your degree needs) and the <strong>timeline</strong> (the semesters you'll actually take them in). Drag a course from one to the other, or use its "Place
+    in…" button. A <strong>unit</strong> is ANU's measure of course weight — most courses are 6 units, and a normal
+    full-time semester is around 24 units (four courses).
+  </p>
+
+  <h2>What a course card is telling you</h2>
+  <dl>
+    <dt>Available</dt>
+    <dd>Nothing's stopping you from placing this course in this semester.</dd>
+    <dt>Needs prerequisites</dt>
+    <dd>
+      You've placed it, but the courses it requires first haven't been planned yet. This is allowed — students often
+      plan backward from a course they want before filling in the path to it — but it's flagged so you notice.
+    </dd>
+    <dt>Blocked</dt>
+    <dd>
+      There's genuinely no way to take this course in that semester — it isn't offered then, or there's no valid
+      order that satisfies its prerequisites in time. The reason is always specific, shown when you hover the card.
+    </dd>
+  </dl>
+
+  <h2>The completion cutoff</h2>
+  <p>
+    The planner needs to know which of your placed courses are already done versus still planned, but it doesn't
+    track individual grades or results — instead, you set one boundary with "Move cutoff earlier/later". Everything
+    before it counts as completed; everything from there on is still planned. It's a simplification: it doesn't
+    handle a failed or repeated course, part-time study, or leave of absence.
+  </p>
+
+  <h2>P&amp;C and TDP</h2>
+  <p>
+    <strong>P&amp;C</strong> is Programs &amp; Courses (programsandcourses.anu.edu.au), ANU's official course
+    catalogue — the source this app scrapes its data from. When a badge says "Verify on P&amp;C", it means this app
+    couldn't fully confirm that rule automatically (the wording on P&amp;C was ambiguous, or it's data this app
+    doesn't track), so check that course's own P&amp;C page before relying on it.
+  </p>
+  <p>
+    <strong>TDP</strong> (Targeted Delivery Program) is a small set of ANU courses with delivery conditions this app
+    doesn't track at all — if a requirement mentions TDP, you'll need to check P&amp;C directly for whether a
+    course qualifies.
+  </p>
+
+  <h2>Pinning a course</h2>
+  <p>
+    Some courses could count toward more than one requirement. By default the plan chooses whichever placement
+    satisfies the most of your degree overall — a course's "Pin to" option (in its Details dialog) lets you override
+    that and lock it to one requirement instead.
+  </p>
+
+  <h2>Keeping your plan</h2>
+  <p>
+    Starting a plan doesn't need an account — but that also means <strong>the plan's own web address is the only
+    way back to it</strong>. Bookmark it, or save the link somewhere, before you close the tab.
+  </p>
+</Base>

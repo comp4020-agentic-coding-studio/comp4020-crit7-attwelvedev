@@ -5,12 +5,20 @@ import Base from "../layouts/Base.astro";
 <Base title="ANU Degree Planner">
   <h1>ANU Degree Planner</h1>
   <p>
-    A degree planner for ANU's Bachelor of Advanced Computing (Honours), 2027
-    cohort. Place courses onto an 8-semester timeline, and start a plan to
-    make it your own — no account needed.
+    A degree planner for ANU's Bachelor of Advanced Computing (Honours),
+    starting Semester 1, 2027 — it doesn't yet cover other programs, cohort
+    years, or a Semester 2 start. Place courses onto an 8-semester timeline,
+    and start a plan to make it your own — no account needed.
+  </p>
+  <p>
+    New to ANU degree planning? <a href="/help/">Read what the labels mean</a> before you start.
   </p>
   <form method="post" action="/api/plans">
     <button>Start a new plan</button>
   </form>
+  <p>
+    No account means no login either — bookmark your plan's own page once
+    it's created, since that web address is the only way back to it.
+  </p>
   <p><a href="/plan/example">See the example plan</a></p>
 </Base>
