@@ -63,6 +63,17 @@ describe("offeringStatus", () => {
       expect(offeringStatus(c, t, horizon)).toBe("unknown");
     }
   });
+
+  it("a course offered only in an out-of-scope session (e.g. Winter) is unknown, not not-offered", () => {
+    // Real shape: P&C published rows, but none in First/Second Semester —
+    // e.g. CRIM2010, offered only in Winter Session. `offerings` is
+    // non-empty, so this must not fall through to "not-offered".
+    const c = loadCourse("COMP2100");
+    const winterOnly = { ...c, offerings: [{ year: 2027, session: "Winter Session" }] };
+    for (const t of TERMS) {
+      expect(offeringStatus(winterOnly, t, horizon)).toBe("unknown");
+    }
+  });
 });
 
 describe("offeredLabel", () => {

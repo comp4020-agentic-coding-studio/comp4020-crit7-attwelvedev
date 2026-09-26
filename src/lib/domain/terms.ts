@@ -54,10 +54,22 @@ function sessionsInYear(course: CatalogueCourse, year: number): Set<Session> {
   return sessions;
 }
 
+// A course scraped or fetched with rows only in an out-of-scope session
+// (Summer, Winter, Spring — overview §2.3) has a non-empty `offerings`
+// array but no S1/S2 row at all, which is exactly the situation FR34 means
+// by "no published offering": it never blocks on offering, same as a course
+// with a genuinely empty `offerings` array. `offeredLabel` below already
+// checks S1/S2 sessions the same way; this keeps the two in agreement,
+// rather than the badge reading "No published offering" while the term
+// grid quietly hard-blocks the course anyway.
+function hasAnyS1OrS2Offering(course: CatalogueCourse): boolean {
+  return course.offerings.some((offering) => sessionOf(offering.session) !== null);
+}
+
 // Hard-blocking (Phase 04) needs this to be a pure function of the course,
 // the term and the catalogue horizon — it never looks at a specific plan.
 export function offeringStatus(course: CatalogueCourse, term: Term, horizon: number): OfferingStatus {
-  if (course.offerings.length === 0) return "unknown";
+  if (!hasAnyS1OrS2Offering(course)) return "unknown";
 
   if (term.year <= horizon) {
     return sessionsInYear(course, term.year).has(term.session) ? "offered" : "not-offered";
