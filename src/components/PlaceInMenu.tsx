@@ -1,4 +1,3 @@
-import { useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
 import { dropTargets } from "./planner-logic";
 
@@ -13,10 +12,22 @@ interface Props {
   // The term the course is already sitting in, so the menu doesn't offer
   // it as a destination.
   currentTerm?: number;
+  // Controlled from Planner.tsx, keyed by course code, so opening one
+  // menu anywhere on the page closes whichever other one was open.
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export default function PlaceInMenu({ view, code, onPlace, disabled = false, placed = false, currentTerm }: Props) {
-  const [open, setOpen] = useState(false);
+export default function PlaceInMenu({
+  view,
+  code,
+  onPlace,
+  disabled = false,
+  placed = false,
+  currentTerm,
+  open,
+  onOpenChange,
+}: Props) {
   // Only offer terms that are actually reachable — the same rule a drag
   // enforces (a disallowed drop is refused) — rather than listing every
   // term with the blocked ones merely marked unusable.
@@ -31,7 +42,7 @@ export default function PlaceInMenu({ view, code, onPlace, disabled = false, pla
         aria-haspopup="true"
         aria-expanded={open}
         disabled={disabled}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => onOpenChange(!open)}
       >
         {buttonLabel}
       </button>
@@ -46,7 +57,7 @@ export default function PlaceInMenu({ view, code, onPlace, disabled = false, pla
               onClick={() => {
                 if (disabled) return;
                 onPlace(target.term);
-                setOpen(false);
+                onOpenChange(false);
               }}
             >
               {view.terms[target.term].label}

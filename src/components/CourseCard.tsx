@@ -13,6 +13,8 @@ interface Props {
   onAnnounce: (message: string) => void;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
+  openMenuCode: string | null;
+  onMenuOpenChange: (code: string, open: boolean) => void;
 }
 
 export default function CourseCard({
@@ -23,6 +25,8 @@ export default function CourseCard({
   onAnnounce,
   onDragStart,
   onDragEnd,
+  openMenuCode,
+  onMenuOpenChange,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
@@ -110,6 +114,8 @@ export default function CourseCard({
         disabled={readOnly}
         placed
         currentTerm={placement.term}
+        open={openMenuCode === placement.code}
+        onOpenChange={(open) => onMenuOpenChange(placement.code, open)}
       />
       <button type="button" onClick={() => setDetailsOpen(true)}>
         Details

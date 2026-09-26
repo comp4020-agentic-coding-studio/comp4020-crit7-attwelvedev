@@ -13,6 +13,7 @@ export default function Planner({ view: initialView }: Props) {
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
+  const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const readOnly = view.plan.readOnly;
 
   async function moveCutoff(delta: 1 | -1) {
@@ -54,6 +55,8 @@ export default function Planner({ view: initialView }: Props) {
           onDragStart={setDraggingCode}
           onDragEnd={() => setDraggingCode(null)}
           showPrereqLinks={showPrereqLinks}
+          openMenuCode={openMenuCode}
+          onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
         />
       </div>
       <Sidebar
@@ -63,6 +66,8 @@ export default function Planner({ view: initialView }: Props) {
         onAnnounce={setAnnouncement}
         onDragStart={setDraggingCode}
         onDragEnd={() => setDraggingCode(null)}
+        openMenuCode={openMenuCode}
+        onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
       />
     </div>
   );

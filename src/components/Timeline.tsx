@@ -13,6 +13,8 @@ interface Props {
   onDragStart: (code: string) => void;
   onDragEnd: () => void;
   showPrereqLinks: boolean;
+  openMenuCode: string | null;
+  onMenuOpenChange: (code: string, open: boolean) => void;
 }
 
 export default function Timeline({
@@ -24,6 +26,8 @@ export default function Timeline({
   onDragStart,
   onDragEnd,
   showPrereqLinks,
+  openMenuCode,
+  onMenuOpenChange,
 }: Props) {
   const placementsByTerm = new Map<number, PlacementView[]>();
   for (const placement of view.placements) {
@@ -86,6 +90,8 @@ export default function Timeline({
                     onAnnounce={onAnnounce}
                     onDragStart={onDragStart}
                     onDragEnd={onDragEnd}
+                    openMenuCode={openMenuCode}
+                    onMenuOpenChange={onMenuOpenChange}
                   />
                 ))}
               </ul>

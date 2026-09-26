@@ -10,6 +10,8 @@ interface Props {
   onAnnounce: (message: string) => void;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
+  openMenuCode: string | null;
+  onMenuOpenChange: (code: string, open: boolean) => void;
 }
 
 interface GroupProps {
@@ -22,6 +24,8 @@ interface GroupProps {
   onAnnounce: (message: string) => void;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
+  openMenuCode: string | null;
+  onMenuOpenChange: (code: string, open: boolean) => void;
 }
 
 // A group with more courses than fit one row would otherwise get an
@@ -32,7 +36,19 @@ interface GroupProps {
 // its own content, still centered within the shared sidebar width.
 const MAX_COLUMNS = 3;
 
-function Group({ view, group, planId, readOnly, depth, onChanged, onAnnounce, onDragStart, onDragEnd }: GroupProps) {
+function Group({
+  view,
+  group,
+  planId,
+  readOnly,
+  depth,
+  onChanged,
+  onAnnounce,
+  onDragStart,
+  onDragEnd,
+  openMenuCode,
+  onMenuOpenChange,
+}: GroupProps) {
   async function choose(childId: string | null) {
     const result = await setChoice(planId, group.id, childId);
     if (isError(result)) onAnnounce(result.error);
@@ -86,6 +102,8 @@ function Group({ view, group, planId, readOnly, depth, onChanged, onAnnounce, on
               onAnnounce={onAnnounce}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
+              openMenuCode={openMenuCode}
+              onMenuOpenChange={onMenuOpenChange}
             />
           ))}
         </ul>
@@ -104,6 +122,8 @@ function Group({ view, group, planId, readOnly, depth, onChanged, onAnnounce, on
               onAnnounce={onAnnounce}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
+              openMenuCode={openMenuCode}
+              onMenuOpenChange={onMenuOpenChange}
             />
           ))}
         </ul>
@@ -112,7 +132,16 @@ function Group({ view, group, planId, readOnly, depth, onChanged, onAnnounce, on
   );
 }
 
-export default function Sidebar({ view, planId, onChanged, onAnnounce, onDragStart, onDragEnd }: Props) {
+export default function Sidebar({
+  view,
+  planId,
+  onChanged,
+  onAnnounce,
+  onDragStart,
+  onDragEnd,
+  openMenuCode,
+  onMenuOpenChange,
+}: Props) {
   const readOnly = view.plan.readOnly;
 
   return (
@@ -151,6 +180,8 @@ export default function Sidebar({ view, planId, onChanged, onAnnounce, onDragSta
             onAnnounce={onAnnounce}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            openMenuCode={openMenuCode}
+            onMenuOpenChange={onMenuOpenChange}
           />
         ))}
         <li class="requirement-group">
