@@ -201,13 +201,13 @@ which reads `hardBlocked`.
 
 ## 6. Phase Definition of Done
 
-- [ ] Every task in §5 is complete and its tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Invariants and axe pass on `/plan/example`
-- [ ] In Chrome at 1280 px and 375 px: drag in, a hard-blocked term is refused with a reason, keyboard-only Place in…, cutoff move, choose ARIN, pin a course, open details, overlay on hover and focus, no horizontal page scroll
-- [ ] Tasks 14 and 15's human reviews have been explicitly accepted by the user
-- [ ] Tick this phase in overview §5 and commit
+- [x] Every task in §5 is complete and its tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Invariants and axe pass on `/plan/example`
+- [x] In Chrome at 1280 px and 375 px: drag in, a hard-blocked term is refused with a reason, keyboard-only Place in…, cutoff move, choose ARIN, pin a course, open details, overlay on hover and focus, no horizontal page scroll (superseded by the "Show prerequisite links" checkbox — see §8)
+- [x] Tasks 14 and 15's human reviews have been explicitly accepted by the user
+- [x] Tick this phase in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
