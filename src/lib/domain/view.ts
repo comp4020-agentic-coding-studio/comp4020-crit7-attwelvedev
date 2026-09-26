@@ -15,6 +15,11 @@ import type {
   RuleType,
 } from "./types";
 
+// A normal full-time semester's load, not a hard cap — a term can go over
+// it (see TermView.overload), this is just the reference point both the
+// overload flag and the UI's own "X/24 units" display are stated against.
+export const NORMAL_TERM_UNITS = 24;
+
 export interface TermView {
   index: number;
   label: string;
@@ -225,7 +230,7 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
   }
   const terms: TermView[] = TERMS.map((term) => {
     const units = unitsByTerm.get(term.index) ?? 0;
-    return { index: term.index, label: term.label, units, overload: units > 24 };
+    return { index: term.index, label: term.label, units, overload: units > NORMAL_TERM_UNITS };
   });
 
   const placements: PlacementView[] = placementEvals.map((p) => ({

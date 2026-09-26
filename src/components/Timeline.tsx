@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import type { PlacementView, PlanView } from "../lib/domain/view";
+import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
 import { dropTargets } from "./planner-logic";
@@ -110,7 +110,7 @@ export default function Timeline({
             >
               <h2>{term.label}</h2>
               <p class="term-units">
-                {term.units} unit{term.units === 1 ? "" : "s"}
+                {term.units}/{NORMAL_TERM_UNITS} units
               </p>
               {term.overload && (
                 <p role="status" class="badge badge-overload">
