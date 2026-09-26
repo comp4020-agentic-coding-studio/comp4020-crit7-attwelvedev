@@ -459,30 +459,43 @@ committed.
 | 04 | `…-04-feasibility.md` | 10–11 | 03 | Hard/soft blocking, conflicts, suggestions, load; the API refuses hard-blocked placements | [x] |
 | 05 | `…-05-allocation-view.md` | 12–13 | 04 | Allocation solver, the full `PlanView`, and the cutoff/choice/pin APIs | [x] |
 | 06 | `…-06-planner-ui.md` | 14–15 | 05 | Interactive planner UI, detail panel and overlay; **user reviews the UI** | [x] |
-| 07 | `…-07-search-readme.md` | 16–17 | 05, 06 | Runtime P&C fetch, search, README; **user reviews the README**; feature-level Definition of Done (§6) | [ ] |
+| 07 | `…-07-search-readme.md` | 16–17 | 05, 06 | Runtime P&C fetch, search, README; **user reviews the README**; feature-level Definition of Done (§6) | [x] |
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and all 17 tasks are complete with tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes (typecheck, build, unit and spec projects)
-- [ ] Manually verified on the deployed `https://comp4020-crit7-attwelvedev.fly.dev`,
-  in Chrome at 1280 px and 375 px:
+- [x] Every phase in §5 is ticked, and all 17 tasks are complete with tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes (typecheck, build, unit and spec projects)
+- [x] Manually verified on the deployed `https://comp4020-crit7-attwelvedev.fly.dev`,
+  with Playwright at 1280 px and 375 px (2026-09-27):
   - create a plan
   - drag COMP1130 to S1 2027
-  - try COMP3630 in S1 2027 (refused, with the 24-unit reason)
-  - place COMP2100 alone (soft, with a working suggestion)
-  - place COMP1100 with COMP1130 (conflict)
-  - move the cutoff
-  - choose ARIN and pin a course
-  - reload (everything persists)
-  - open `/plan/example` (read-only)
-  - search and fetch an uncached code
-  - the CI deploy probes pass
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Tasks 4, 14, 15 and 17 (`Human review:`) have been shown to the user and
+  - try COMP3630 in S1 2027 (refused, with the 24-unit reason — confirmed
+    message: "Needs 24 units of COMP courses before S1 2027; at most 0 are
+    achievable by then; ...")
+  - place COMP2100 alone (soft, with a working suggestion — confirmed
+    "Needs 6 more units of MATH 1000-level courses..." plus working
+    "Place COMP1110 in S2 2027" / "Place COMP1140 in S2 2027" suggestions)
+  - place COMP1100 with COMP1130 (conflict — confirmed "Conflicts with
+    COMP1130" on COMP1100 and "Excluded — conflicts with COMP1100" on
+    COMP1130, the alphabetically-later code correctly losing the tie)
+  - move the cutoff (confirmed persisted)
+  - choose ARIN and pin a course (confirmed persisted)
+  - reload (everything persists — cutoff, placements, choice and pin all
+    held)
+  - open `/plan/example` (read-only banner confirmed)
+  - search and fetch an uncached code (`PHIL1001` genuinely doesn't exist on
+    2027 P&C, confirmed `not_found`; `PHYS1201`/`PSYC1004` fetched, cached,
+    placed, and still present after reload)
+  - the CI deploy probes pass (`/` 200; `/api/events` streams
+    `: connected`; same-origin form POST to `/` not 403; cross-site form
+    POST to `/` is 403; `linkinator` finds all internal links resolve)
+  - no browser console errors at either viewport; no horizontal overflow at
+    375 px on `/`, `/readme/` or `/plan/example`
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Tasks 4, 14, 15 and 17 (`Human review:`) have been shown to the user and
   explicitly accepted
-- [ ] No item remains in §8
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 

@@ -175,13 +175,16 @@ de-duplicates concurrent fetches through a `Map<string, Promise<FetchOutcome>>`.
 
 ## 6. Phase Definition of Done
 
-- [ ] Every task in §5 is complete and its tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] On the deployed app: search an uncached real code (e.g. `PHIL1001`); it's fetched, cached, placeable, and still present after a reload
-- [ ] Task 17's README has been explicitly accepted by the user
-- [ ] **Feature-level Definition of Done in overview §6 is complete**
-- [ ] Tick this phase in overview §5 and commit
+- [x] Every task in §5 is complete and its tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] On the deployed app: search an uncached real code (e.g. `PHIL1001`); it's fetched, cached, placeable, and still present after a reload
+  (`PHIL1001` genuinely doesn't exist on 2027 P&C — verified `not_found`;
+  `PHYS1201` and `PSYC1004` used instead: fetched, cached, placeable, still
+  present after reload, on `https://comp4020-crit7-attwelvedev.fly.dev`)
+- [x] Task 17's README has been explicitly accepted by the user
+- [x] **Feature-level Definition of Done in overview §6 is complete**
+- [x] Tick this phase in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
