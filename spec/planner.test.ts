@@ -157,7 +157,7 @@ describe("planner", () => {
     expect(html).toMatch(/\d+ completed, \d+ planned of \d+/);
   });
 
-  it("Move to… for a placed COMP3630 omits S1 2027, the term it can't be placed in", async () => {
+  it("Move to… for a placed COMP3630 omits both S1 2027 (can't be placed there) and S1 2028 (already there)", async () => {
     const id = await createPlan();
     await postJson(`/api/plans/${id}/placements`, { code: "COMP3630", term: 2 });
 
@@ -167,7 +167,8 @@ describe("planner", () => {
     expect(menuMatch).not.toBeNull();
     const menuHtml = menuMatch![0];
     expect(menuHtml).not.toContain("S1 2027");
-    expect(menuHtml).toContain("S1 2028");
+    expect(menuHtml).not.toContain("S1 2028");
+    expect(menuHtml).toContain("S1 2029");
   });
 
   it("soft-blocked cards expose their state as text", async () => {

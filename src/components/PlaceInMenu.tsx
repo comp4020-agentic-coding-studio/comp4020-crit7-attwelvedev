@@ -10,14 +10,17 @@ interface Props {
   // A course already on the timeline is being relocated, not placed for
   // the first time — "Move to…" reads clearer than "Place in…" there.
   placed?: boolean;
+  // The term the course is already sitting in, so the menu doesn't offer
+  // it as a destination.
+  currentTerm?: number;
 }
 
-export default function PlaceInMenu({ view, code, onPlace, disabled = false, placed = false }: Props) {
+export default function PlaceInMenu({ view, code, onPlace, disabled = false, placed = false, currentTerm }: Props) {
   const [open, setOpen] = useState(false);
   // Only offer terms that are actually reachable — the same rule a drag
   // enforces (a disallowed drop is refused) — rather than listing every
   // term with the blocked ones merely marked unusable.
-  const targets = dropTargets(view, code).filter((target) => target.allowed);
+  const targets = dropTargets(view, code).filter((target) => target.allowed && target.term !== currentTerm);
   const buttonLabel = placed ? "Move to…" : "Place in…";
   const menuLabel = placed ? `Move ${code} to` : `Place ${code} in`;
 
