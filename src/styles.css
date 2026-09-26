@@ -1,24 +1,107 @@
+/* ---------------------------------------------------------------------
+   Tokens
+   Palette sourced from ANU's Web Style Guide (gold + black/white as the
+   primary pair, gold used sparingly as a highlight, never as a field of
+   colour): https://webpublishing.anu.edu.au/web-style-guide/colours
+   ------------------------------------------------------------------- */
+:root {
+  --ink: #17181a;
+  --unigrey: #333333;
+  --paper: #f5f6f8;
+  --surface: #ffffff;
+  --line: #e0e2e7;
+  --gold: #be830e;
+  --gold-tint: #f5edde;
+  --gold-ink: #4d3505;
+  --moss: #3f7d5c;
+  --moss-tint: #e7f1ec;
+  --amber: #a15d10;
+  --amber-tint: #faf0e0;
+  --rust: #ab3a2e;
+  --rust-tint: #fbeae8;
+
+  --font: "Public Sans", system-ui, sans-serif;
+  --radius: 0.6rem;
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  padding: 2rem;
-  font-family: system-ui, sans-serif;
-  line-height: 1.6;
-  color: #1a1a1a;
+html {
+  color-scheme: light;
 }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
+body {
+  margin: 0;
+  font-family: var(--font);
+  line-height: 1.5;
+  color: var(--unigrey);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+h3,
+h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 0.75rem;
+  max-width: 65ch;
+}
+
+main :is(ul, ol) {
+  padding-inline-start: 1.25rem;
+  max-width: 65ch;
+}
+
+main li {
+  margin-block-end: 0.35rem;
 }
 
 a {
-  color: #0b5fff;
+  color: var(--ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: var(--gold-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--gold);
 }
 
 form {
@@ -26,26 +109,62 @@ form {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-  margin-block: 1.5rem;
+  margin-block: 1.25rem;
 }
 
-input {
+input[type="text"] {
   flex: 1;
   min-width: 12rem;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.7rem;
   font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+input[type="text"]:focus-visible {
+  border-color: var(--gold);
 }
 
 button {
-  padding: 0.4rem 1rem;
+  padding: 0.5rem 0.9rem;
   font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
-/* Planner */
+button:hover:not(:disabled) {
+  border-color: var(--ink);
+}
 
-body:has(.planner) main {
-  max-width: none;
-  width: 100%;
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The one deliberate use of gold as a fill: the primary action in a form
+   (start a plan, run a search). Every other button stays neutral ink-on-
+   white, so gold keeps meaning "the thing to do next" instead of blending
+   into general chrome. Black text on gold, not white — white fails
+   WCAG AA text contrast against ANU gold at this size, black clears it. */
+form button[type="submit"],
+form button:not([type]) {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #17130a;
+}
+
+form button[type="submit"]:hover:not(:disabled),
+form button:not([type]):hover:not(:disabled) {
+  background: #a8790d;
+  border-color: #a8790d;
 }
 
 .visually-hidden {
@@ -60,32 +179,119 @@ body:has(.planner) main {
   border: 0;
 }
 
-/* Mobile-first: timeline on top, sticky, with the requirements below it as a
-   horizontal strip (so a course found there can be dragged straight up
-   without scrolling back). Desktop (below, min-width: 1100px) instead puts
-   the requirements in a wide vertical list beside the timeline, since a full
-   semester column is easier to read that way — the timeline stays sticky
-   there too, pinned while the (often taller) requirements list scrolls. */
+/* ---------------------------------------------------------------------
+   Shell: a dark rail (site nav) beside light content, the one structural
+   idea carried through every page — the rail becomes a top bar below the
+   planner's own 1100px breakpoint, so the two never fight for the same
+   vertical space on a phone.
+   ------------------------------------------------------------------- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+nav[aria-label="site"] {
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.85rem 1.25rem;
+  flex-wrap: wrap;
+}
+
+nav[aria-label="site"] .brand {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+nav[aria-label="site"] .nav-links {
+  display: flex;
+  flex: 1 1 100%;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+nav[aria-label="site"] .nav-links a {
+  color: rgb(255 255 255 / 0.75);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.4rem;
+}
+
+nav[aria-label="site"] .nav-links a:hover {
+  color: #fff;
+  background: rgb(255 255 255 / 0.08);
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+body:has(.planner) main {
+  max-width: none;
+  width: 100%;
+  padding: 1.25rem;
+}
+
+@media (min-width: 1100px) {
+  .app-shell {
+    flex-direction: row;
+  }
+
+  nav[aria-label="site"] {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    width: 13rem;
+    flex: 0 0 13rem;
+    padding: 1.5rem 1.1rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  nav[aria-label="site"] .nav-links {
+    flex: 0 1 auto;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  main {
+    padding: 2.5rem 3rem;
+  }
+
+  body:has(.planner) main {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Planner
+   ------------------------------------------------------------------- */
 .planner {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* Capped and independently scrollable: without a limit, a sticky element
-   taller than the viewport (several placed courses stacked in a term) stays
-   pinned covering the whole screen until the page scrolls past its full
-   height — on a small screen, that means the requirements list below it
-   never becomes visible at all. The desktop media query below gives it far
-   more room (the sidebar sits beside it, not below), so this cap only
-   matters up to that breakpoint. */
 .planner-timeline-area {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #fff;
-  padding-block-end: 0.5rem;
-  border-block-end: 1px solid #ddd;
+  background: var(--paper);
+  padding-block-end: 0.75rem;
+  border-block-end: 1px solid var(--line);
   max-height: 50vh;
   overflow-y: auto;
 }
@@ -98,13 +304,16 @@ body:has(.planner) main {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-block-end: 0.5rem;
+  margin-block-end: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .show-links-toggle {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--unigrey);
 }
 
 .show-links-toggle input {
@@ -112,6 +321,10 @@ body:has(.planner) main {
   min-width: 0;
 }
 
+/* Mobile-first: a horizontal strip, so a course found here can be dragged
+   straight up onto the (sticky, above) timeline without scrolling back.
+   The desktop media query below switches this to a vertical list once the
+   sidebar has its own wide column beside the timeline instead of above it. */
 .requirements-scroll {
   display: flex;
   gap: 0.75rem;
@@ -122,23 +335,40 @@ body:has(.planner) main {
 }
 
 .requirement-group {
-  flex: 0 0 16rem;
-  min-width: 16rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
+  flex: 0 0 17rem;
+  min-width: 17rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 0.9rem 1rem;
 }
 
 .group-children,
 .checks-list {
   list-style: none;
-  margin: 0.25rem 0 0;
+  margin: 0.6rem 0 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.group-children > li {
+  border-inline-start: 2px solid var(--line);
+  padding-inline-start: 0.75rem;
 }
 
 .requirement-group fieldset {
   margin: 0.5rem 0 0;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+.requirement-group legend {
+  font-size: 0.8rem;
+  color: var(--unigrey);
+  padding: 0 0.3rem;
 }
 
 .requirement-group label {
@@ -146,12 +376,9 @@ body:has(.planner) main {
   align-items: center;
   gap: 0.4rem;
   margin-block: 0.25rem;
+  font-size: 0.9rem;
 }
 
-/* Overrides the site-wide `input { flex: 1; min-width: 12rem }` rule (meant
-   for the homepage's text input), which was stretching these radio buttons
-   into ~12rem-wide invisible boxes with the small circle painted at their
-   start — exactly the "big gap before the label text" bug. */
 .requirement-group label input {
   flex: 0 0 auto;
   min-width: 0;
@@ -159,6 +386,7 @@ body:has(.planner) main {
 
 .timeline-hint {
   font-style: italic;
+  color: var(--unigrey);
 }
 
 .timeline-scroll {
@@ -169,6 +397,12 @@ body:has(.planner) main {
   padding-block-end: 0.5rem;
 }
 
+.prereq-overlay line {
+  stroke: var(--gold);
+  stroke-width: 2;
+  opacity: 0.75;
+}
+
 .prereq-overlay {
   position: absolute;
   top: 0;
@@ -177,30 +411,49 @@ body:has(.planner) main {
   z-index: 1;
 }
 
-.prereq-overlay line {
-  stroke: #0b5fff;
-  stroke-width: 2;
-  opacity: 0.7;
-}
-
 dialog {
   max-width: 40rem;
   width: 90vw;
-  border: 1px solid #999;
-  border-radius: 0.5rem;
-  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 20px 60px -20px rgb(23 24 26 / 0.35);
+  color: var(--unigrey);
 }
 
 dialog::backdrop {
-  background: rgb(0 0 0 / 0.4);
+  background: rgb(23 24 26 / 0.55);
+}
+
+/* A gold rule marks where the plan's completion cutoff sits: everything to
+   its left counts as completed, everything from here on is still planned.
+   Written per exact cutoff/term-position pair rather than computed, since
+   CSS has no way to compare a parent's data-cutoff value against a
+   sibling's position — nine cutoff values (0-8, see Planner.tsx's clamp)
+   against up to eight terms is a short, fixed list. */
+.planner[data-cutoff="0"] .term:nth-of-type(1),
+.planner[data-cutoff="1"] .term:nth-of-type(2),
+.planner[data-cutoff="2"] .term:nth-of-type(3),
+.planner[data-cutoff="3"] .term:nth-of-type(4),
+.planner[data-cutoff="4"] .term:nth-of-type(5),
+.planner[data-cutoff="5"] .term:nth-of-type(6),
+.planner[data-cutoff="6"] .term:nth-of-type(7),
+.planner[data-cutoff="7"] .term:nth-of-type(8) {
+  border-inline-start: 3px solid var(--gold);
+  padding-inline-start: calc(1rem - 2px);
 }
 
 .term {
-  flex: 0 0 14rem;
-  min-width: 14rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
+  flex: 0 0 15rem;
+  min-width: 15rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+}
+
+.term h2 {
+  font-size: 0.95rem;
 }
 
 .term-cards {
@@ -209,34 +462,36 @@ dialog::backdrop {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .term-disallowed {
-  background: #eee;
-  color: #666;
+  background: var(--paper);
+  color: var(--unigrey);
 }
 
 .term-reason {
   font-size: 0.85em;
-  color: #444;
+  color: var(--rust);
+  margin: 0.35rem 0 0;
 }
 
 .course-card {
-  border: 1px solid #999;
-  border-radius: 0.25rem;
-  padding: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.8rem;
 }
 
-/* In the timeline, and in the mobile horizontal requirements strip, cards are
-   fixed to the term's content width (14rem term minus its 0.5rem padding
-   each side) so a card dragged from the requirements list is visually the
-   same size as its drop target. The desktop vertical sidebar (media query
-   below) instead fills its own, wider column. */
 .term-cards .course-card,
 .available-courses .course-card {
-  width: 13rem;
+  width: 13.5rem;
   flex-shrink: 0;
+}
+
+.course-card strong {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .course-card-hard {
@@ -245,26 +500,18 @@ dialog::backdrop {
 }
 
 .course-card-soft {
-  border-color: #b8860b;
+  border-color: var(--amber);
   border-style: dashed;
+  background: var(--amber-tint);
 }
 
-/* A grid of fixed-width (13rem) cards, single-column below the desktop
-   breakpoint regardless of how many courses the group has: the mobile
-   horizontal strip's group card (`.requirement-group`, 16rem) is only wide
-   enough for one 13rem card, and a `repeat(N, 13rem)` grid doesn't shrink
-   its explicit tracks to fit — extra columns spill out over the neighbouring
-   group instead of wrapping. `--group-columns` (Sidebar.tsx, `min(courseCount,
-   MAX_COLUMNS)`) only takes effect once the desktop media query below
-   opts back into it, where the sidebar is actually sized for it (see that
-   query's own comment). */
 .available-courses {
   list-style: none;
-  margin: 0.25rem 0;
+  margin: 0.6rem 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 13rem;
-  gap: 0.5rem;
+  grid-template-columns: 13.5rem;
+  gap: 0.6rem;
 }
 
 .course-search form {
@@ -276,100 +523,153 @@ dialog::backdrop {
 .course-search label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
   flex: 1;
+  font-size: 0.85rem;
+  color: var(--unigrey);
 }
 
 .course-search-status {
-  margin: 0.5rem 0 0;
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  color: var(--unigrey);
 }
 
-/* Reuses .available-courses' grid so a search result card is sized and laid
-   out identically to the requirement groups' own cards below it. */
 .course-search-results {
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
 }
 
-/* Solid, not dotted — a dotted border can look, especially once a screenshot
-   is scaled or compressed, like it "bleeds" past its own box near a rounded
-   corner, which was mistaken for a layout overflow bug (it wasn't: measured
-   getBoundingClientRect confirmed a clean margin every time). */
 .course-card-unplaced {
-  border-color: #bbb;
+  border-color: var(--line);
 }
 
-/* A course already placed elsewhere stays in its group's list (rather than
-   disappearing) so it can still be compared against the group's unplaced
-   courses, but reads as settled: dimmed, and its "Place in…" menu replaced
-   by a tick and a link back to where it landed. */
 .course-card-sidebar-placed {
   opacity: 0.55;
-  border-color: #bbb;
+  border-color: var(--line);
 }
 
 .course-card-tick {
-  color: #2e7d32;
+  color: var(--moss);
   font-weight: bold;
-  margin-inline-end: 0.25rem;
+  margin-inline-end: 0.3rem;
 }
 
 .badge-term-link {
   cursor: pointer;
   background: none;
+  border: none;
+  padding: 0;
   font: inherit;
   font-size: 0.8em;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
-/* A brief highlight when the sidebar's "locate on timeline" badge scrolls
-   a card into view, so the student can actually find it among the other
-   cards in that term instead of just landing on the right column. */
+.badge-term-link:hover {
+  border: none;
+  color: var(--gold-ink);
+}
+
 .course-card-highlighted {
-  outline: 3px solid #1565c0;
+  outline: 3px solid var(--gold);
   outline-offset: 2px;
 }
 
-/* `block`, not `inline-block`: a badge sits right after the code/title,
-   which is raw inline content with no block wrapper of its own, so an
-   inline-level badge flows onto the same line as the tail of a long title
-   instead of starting a new one. `width: fit-content` keeps it sized to its
-   own text rather than stretching the full card width. */
 .badge {
-  font-size: 0.8em;
+  font-size: 0.78em;
+  font-weight: 600;
   border: 1px solid currentColor;
-  border-radius: 0.25rem;
-  padding: 0.1rem 0.3rem;
+  border-radius: 0.35rem;
+  padding: 0.15rem 0.45rem;
   display: block;
   width: fit-content;
-  margin-block-start: 0.25rem;
+  margin-block-start: 0.4rem;
+}
+
+.badge-state-hard,
+.badge-conflict {
+  color: var(--rust);
+  background: var(--rust-tint);
+  border-color: transparent;
+}
+
+.badge-state-soft,
+.badge-unplaced-prereqs {
+  color: var(--amber);
+  background: var(--amber-tint);
+  border-color: transparent;
+}
+
+.badge-verify,
+.badge-unknown {
+  color: var(--unigrey);
+  background: var(--paper);
+  border-color: transparent;
+}
+
+.badge-projected {
+  color: var(--moss);
+  background: var(--moss-tint);
+  border-color: transparent;
+}
+
+.course-card-units,
+.course-card-allocation {
+  font-size: 0.85em;
+  color: var(--unigrey);
+  margin: 0.35rem 0 0;
 }
 
 .course-card-suggestions {
   list-style: none;
-  margin: 0.25rem 0;
+  margin: 0.4rem 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
+}
+
+.course-card-suggestions button {
+  font-size: 0.85rem;
+  width: 100%;
+  text-align: start;
 }
 
 .place-in-menu {
   position: relative;
+  display: inline-block;
 }
 
 .place-in-menu ul {
   list-style: none;
-  margin: 0;
-  padding: 0.25rem;
+  margin: 0.3rem 0 0;
+  padding: 0.3rem;
   position: absolute;
-  z-index: 1;
-  background: #fff;
-  border: 1px solid #999;
+  z-index: 3;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  box-shadow: 0 10px 30px -12px rgb(23 24 26 / 0.3);
+  min-width: 9rem;
+}
+
+.place-in-menu ul button {
+  width: 100%;
+  border: none;
+  text-align: start;
+  font-weight: 500;
+}
+
+.place-in-menu ul button:hover:not(:disabled) {
+  background: var(--paper);
 }
 
 .progress-bar-track {
   position: relative;
-  height: 0.6rem;
-  background: #e5e5e5;
+  height: 0.5rem;
+  background: var(--line);
   border-radius: 0.3rem;
   overflow: hidden;
 }
@@ -382,12 +682,19 @@ dialog::backdrop {
 }
 
 .progress-bar-completed {
-  background: #0b5fff;
+  background: var(--gold);
   inset-inline-start: 0;
 }
 
 .progress-bar-planned {
-  background: #9dc2ff;
+  background: var(--gold-tint);
+  border-inline-start: 1px solid var(--surface);
+}
+
+.progress-bar-text {
+  font-size: 0.82em;
+  color: var(--unigrey);
+  margin: 0.25rem 0 0;
 }
 
 @media (min-width: 1100px) {
@@ -396,15 +703,6 @@ dialog::backdrop {
     align-items: flex-start;
   }
 
-  /* Sized to fit MAX_COLUMNS (Sidebar.tsx) 13rem cards with roughly a
-     gap-width of margin either side (3 * 13rem cards + 2 inter-card gaps +
-     the group card's own padding + a bit of breathing room), rather than an
-     arbitrary viewport fraction that left excess space around a group with
-     fewer courses than that. */
-  /* Both panes get their own independent vertical scroll region (instead of
-     one shared page scroll), so hovering the timeline scrolls the timeline
-     and hovering the sidebar scrolls the sidebar — you don't have to scroll
-     past a long requirements list to reach the bottom of a term column. */
   .planner > aside {
     order: -1;
     flex: 0 0 42rem;
@@ -434,14 +732,7 @@ dialog::backdrop {
     min-width: 0;
   }
 
-  /* Only here is the sidebar wide enough (42rem, sized for exactly this —
-     see .planner > aside above) for more than one 13rem column. */
   .available-courses {
-    grid-template-columns: repeat(var(--group-columns, 1), 13rem);
+    grid-template-columns: repeat(var(--group-columns, 1), 13.5rem);
   }
-}
-
-.progress-bar-text {
-  font-size: 0.85em;
-  margin: 0.15rem 0 0;
 }
