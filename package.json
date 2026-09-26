@@ -21,6 +21,7 @@
     "astro": "^7.3.3",
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.2",
+    "node-html-parser": "^9.0.4",
     "preact": "^10.29.8"
   },
   "devDependencies": {

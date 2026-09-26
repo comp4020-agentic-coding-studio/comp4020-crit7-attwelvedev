@@ -271,4 +271,23 @@ describe("planner", () => {
     const pinRes = await putJson("/api/plans/example/pins", { code: "COMP1130", groupId: null });
     expect(pinRes.status).toBe(403);
   });
+
+  it("search COMP21 returns COMP2100 with status found", async () => {
+    const res = await fetch(new URL("/api/courses/search?q=COMP21", baseUrl));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { status: string; courses: { code: string }[] };
+    expect(body.status).toBe("found");
+    expect(body.courses.some((c) => c.code === "COMP2100")).toBe(true);
+  });
+
+  it('search "software" matches titles', async () => {
+    const res = await fetch(new URL("/api/courses/search?q=software", baseUrl));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { status: string; courses: { code: string; title: string }[] };
+    expect(body.status).toBe("found");
+    expect(body.courses.length).toBeGreaterThan(0);
+    for (const course of body.courses) {
+      expect(course.title.toLowerCase()).toContain("software");
+    }
+  });
 });

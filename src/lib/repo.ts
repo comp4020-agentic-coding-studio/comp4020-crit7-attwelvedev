@@ -255,3 +255,83 @@ export function setPin(db: Db, planId: string, code: string, groupId: string | n
     .where(and(eq(planCourses.planId, planId), eq(planCourses.courseCode, code)))
     .run();
 }
+
+// Caches a course fetched live from P&C (Task 16), the same upsert shape
+// `seedCourses` uses, but with `is_stub` forced to 1 — the boot-time reseed
+// never runs against it again, so it's the only source of truth for it.
+export function upsertFetchedCourse(db: Db, c: CatalogueCourse): void {
+  db.insert(courses)
+    .values({
+      code: c.code,
+      title: c.title,
+      units: c.units,
+      level: c.level,
+      description: c.description,
+      url: c.url,
+      isTdp: c.isTdp ? 1 : 0,
+      twoSemester: c.twoSemester ? 1 : 0,
+      isStub: 1,
+      scrapedAt: c.scrapedAt,
+      parseStatus: c.requisites.parseStatus,
+    })
+    .onConflictDoUpdate({
+      target: courses.code,
+      set: {
+        title: c.title,
+        units: c.units,
+        level: c.level,
+        description: c.description,
+        url: c.url,
+        isTdp: c.isTdp ? 1 : 0,
+        twoSemester: c.twoSemester ? 1 : 0,
+        isStub: 1,
+        scrapedAt: c.scrapedAt,
+        parseStatus: c.requisites.parseStatus,
+      },
+    })
+    .run();
+
+  db.delete(courseOfferings).where(eq(courseOfferings.courseCode, c.code)).run();
+  for (const offering of c.offerings) {
+    db.insert(courseOfferings).values({ courseCode: c.code, year: offering.year, session: offering.session }).run();
+  }
+
+  db.delete(courseRequisites).where(eq(courseRequisites.courseCode, c.code)).run();
+  db.insert(courseRequisites)
+    .values({
+      courseCode: c.code,
+      reqType: "prereq",
+      expression: JSON.stringify(c.requisites.prereq),
+      rawText: c.requisiteRaw,
+      notes: JSON.stringify({ unverifiable: c.requisites.unverifiable, otherPrograms: c.requisites.otherPrograms }),
+    })
+    .run();
+  db.insert(courseRequisites)
+    .values({
+      courseCode: c.code,
+      reqType: "incompatible",
+      expression: JSON.stringify(c.requisites.incompatible),
+      rawText: c.requisiteRaw,
+      notes: JSON.stringify({ unverifiable: [], otherPrograms: [] }),
+    })
+    .run();
+}
+
+// DB matches only (FR10): code prefix or title substring. The catalogue Map
+// is already cached by loadCatalogue, so this filters in memory rather than
+// adding a second, SQL-level search path to keep in sync.
+export function searchCourses(db: Db, q: string, limit = 20): CatalogueCourse[] {
+  const query = q.trim();
+  if (!query) return [];
+  const upperQuery = query.toUpperCase();
+  const lowerQuery = query.toLowerCase();
+
+  const matches: CatalogueCourse[] = [];
+  for (const course of loadCatalogue(db).courses.values()) {
+    if (course.code.startsWith(upperQuery) || course.title.toLowerCase().includes(lowerQuery)) {
+      matches.push(course);
+      if (matches.length >= limit) break;
+    }
+  }
+  return matches;
+}
