@@ -1,0 +1,80 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:04Z",
+  "code": "COMP2100",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP2100",
+  "title": "Software Construction",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course, you must have successfully completed: COMP1110 or COMP1140 AND 6 units of 1000-level MATH.  Students enrolled in a Bachelor of Science (BSC) or Bachelor of Advanced Science (ASCAD) must have successfully completed: COMP1110 or COMP1140 AND COMP1600 AND 6 units of 1000-level MATH.",
+  "prerequisite_codes": [
+    "COMP1110",
+    "COMP1140",
+    "COMP1110",
+    "COMP1140",
+    "COMP1600"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have completed COMP6442 .",
+  "requisite_raw": "To enrol in this course, you must have successfully completed: COMP1110 or COMP1140 AND 6 units of 1000-level MATH.  Students enrolled in a Bachelor of Science (BSC) or Bachelor of Advanced Science (ASCAD) must have successfully completed: COMP1110 or COMP1140 AND COMP1600 AND 6 units of 1000-level MATH.  You are not able to enrol in this course if you have completed COMP6442 .",
+  "cotaught": [
+    "COMP6442"
+  ],
+  "description": "This course extensively explores the fundamental principles and practices necessary for creating medium-scale software projects, with a specific focus on the object-oriented programming paradigm. By blending theoretical understanding with hands-on practice, students establish a robust foundation in software construction, drawing from their prior programming experience. Key topics, including programming techniques at large, life cycle models, data manipulation techniques, and GUI concepts, are highlighted to foster a comprehensive grasp of software development. Ultimately, the course empowers students with the skills to construct medium-scale software projects efficiently, ethically, and in alignment with industry standards.",
+  "learning_outcomes": [
+    "Apply object-oriented programming concepts for medium-scale software projects",
+    "Understand the fundamentals of life cycle models for developing medium-scale software projects",
+    "Apply and evaluate software construction principles across various life cycle stages in medium-scale software projects",
+    "Describe contractual specifications, analyse documentation and specifications against others’ code, develop, understand, test, and evolve substantial programs using a modern IDE, and understand fundamental concepts of GUIs and user interfaces",
+    "Understand basic concepts of intellectual property in software construction, considering ethical and social implications of technical decisions",
+    "Apply and evaluate techniques for data manipulation in medium-scale software projects"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Labs and Video Assignments",
+      "weight": "25"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "45"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5103",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10106",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6681",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11053",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

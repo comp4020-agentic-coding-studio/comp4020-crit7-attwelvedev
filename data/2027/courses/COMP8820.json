@@ -1,0 +1,59 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:40Z",
+  "code": "COMP8820",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8820",
+  "title": "Exchange Program for Graduate Students in Computer Science",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "Students enrol in this course when they have been approved to participate in a formal Computing exchange with one of the Australian National University's overseas exchange partners. For information regarding Computing exchanges, selection criteria, etc, please go to the following website:Student exchange | ANU College of Engineering, Computing & Cybernetics",
+  "learning_outcomes": [
+    "NA - Shell code"
+  ],
+  "assessment": [
+    {
+      "task": "(null) [LO null]",
+      "weight": ""
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "4948",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "9974",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6386",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10757",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

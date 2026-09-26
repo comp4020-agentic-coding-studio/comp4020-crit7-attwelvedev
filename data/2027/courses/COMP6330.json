@@ -1,0 +1,61 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:57Z",
+  "code": "COMP6330",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6330",
+  "title": "Operating Systems Implementation",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must be:  studying a Master of Computing (Advanced)    OR   be enrolled in or have completed COMP6300 or  have completed COMP2300 or ENGN2219 .",
+  "prerequisite_codes": [
+    "COMP6300",
+    "COMP2300",
+    "ENGN2219"
+  ],
+  "incompatibilities": "Incompatible with COMP3300 .",
+  "requisite_raw": "To enrol in this course you must be:  studying a Master of Computing (Advanced)    OR   be enrolled in or have completed COMP6300 or  have completed COMP2300 or ENGN2219 .  Incompatible with COMP3300 .",
+  "cotaught": [
+    "COMP3300"
+  ],
+  "description": "This course takes a detailed look at the services provided by, and the internals of, an existing operating system to see how each part is constructed and integrated into the whole. The lectures will also address recent literature describing advances in operating systems. The following topics are addressed: system programming and its facilities (including I/O, signals, job control, interprocess communication, sockets, transport layers, remote operations), system calls and their relation to the system libraries, process management and coordination, implementation of message passing, memory management, interrupt handling, real-time clocks, device-independent input/output, serial-line drivers, network communication, disk drivers, deadlock avoidance, scheduling paradigms, file systems, security.",
+  "learning_outcomes": [
+    "Identify and evaluate features of the system library of a particular operating system, and be able to apply this knowledge to program small applications",
+    "Describe and analyse the actual algorithms and data structures that are used in a particular operating system",
+    "Define and analyse the structure of operating systems in general, especially those that support communicating processes",
+    "Identify and describe the reasons for many architectural features of contemporary machines",
+    "Demonstrate advanced experience in the design and implementation of a large software system"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Tutorials and Laboratories",
+      "weight": "10"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "60"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10377",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11076",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:05Z",
+  "code": "COMP4600",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4600",
+  "title": "Advanced Algorithms",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must have completed COMP3600 and 18 units of 3000 level COMP courses.",
+  "prerequisite_codes": [
+    "COMP3600"
+  ],
+  "incompatibilities": "Incompatible with COMP8460 .",
+  "requisite_raw": "To enrol in this course you must have completed COMP3600 and 18 units of 3000 level COMP courses. Incompatible with COMP8460 .",
+  "cotaught": [
+    "COMP8460"
+  ],
+  "description": "This course covers a large spectrum of algorithmic topics such as approximation algorithms, randomized algorithms, parallel/distributed algorithms, and online algorithms. Students will learn how to analyze the most fundamental algorithms in these areas using various techniques from graph theory, probability theory, and algebra. After successful completion of the course, students will be able to design efficient and effective algorithms for similar problems leveraging these techniques. Furthermore, students will learn about the most recent research advancements in these areas by studying current research publications.",
+  "learning_outcomes": [
+    "Display a deep understanding of classical approximation and graph algorithms and their analysis.",
+    "Analyze the efficiency and correctness of randomized algorithms and data structures.",
+    "Demonstrate a good knowledge of parallel, distributed, and online algorithms.",
+    "Design and analyze efficient algorithms using various advanced algorithmic techniques such as linear programming, graph theory, probability theory, and algebra.",
+    "Understand, analyze, summarize, and present research publications in the area of algorithm design."
+  ],
+  "assessment": [
+    {
+      "task": "Mid-semester test",
+      "weight": "40"
+    },
+    {
+      "task": "Assignment",
+      "weight": "20"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "40"
+    }
+  ],
+  "offerings": []
+}

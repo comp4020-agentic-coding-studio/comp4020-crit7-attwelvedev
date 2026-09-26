@@ -1,0 +1,51 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:47Z",
+  "code": "COMP4620",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4620",
+  "title": "Advanced Topics in Artificial Intelligence",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "12 units of 3000 and/or 4000 level COMP courses.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website (Special Topics in Computing page) when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions for Enrolling in CSS courses .",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP8620 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "requisite_raw": "12 units of 3000 and/or 4000 level COMP courses.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website (Special Topics in Computing page) when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions for Enrolling in CSS courses .  Incompatible with COMP8620 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [
+    "COMP8620"
+  ],
+  "description": "This is an advanced undergraduate course that offers students the opportunity to study a special thematic area within the discipline of Artificial Intelligence. The topics will vary from year to year in response to emerging theoretical and practical issues in the discipline, as well as the research interests and expertise of academics and sessional staff. They will be drawn from the broad areas of Artificial Intelligence, and could include (but not limited to) the following topics: Planning, Scheduling, Games, Search, Reasoning (constraint-based, model-based, spatial, temporal), Knowledge representation, Decision-making under uncertainty, Integrated planning and learning, Reinforcement learning, and Robotics. Please see theclass websitefor the specific topics covered in a particular semester.",
+  "learning_outcomes": [
+    "Gain both a wide and a deep knowledge of the topic(s) taught in the current instance of the course.",
+    "Navigate through, and critically examine the scientific literature on the taught topic(s).",
+    "Plan and execute project work and/or a piece of research and scholarship in the advanced topic(s)"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "55"
+    },
+    {
+      "task": "Final Exam and/or Project",
+      "weight": "45"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10076",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10838",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

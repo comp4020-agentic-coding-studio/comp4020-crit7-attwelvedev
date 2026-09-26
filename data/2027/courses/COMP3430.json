@@ -1,0 +1,64 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:34Z",
+  "code": "COMP3430",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3430",
+  "title": "Data Wrangling",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "Students are required to have completed introductory courses on databases, programming and algorithms.  To enrol in this course you must have completed    6 units from COMP 1030 or COMP1100 or COMP1130 or COMP1730 ; AND    6 units from COMP 1040 or COMP1110 or COMP1140 ; AND COMP2400",
+  "prerequisite_codes": [
+    "COMP1100",
+    "COMP1130",
+    "COMP1730",
+    "COMP1110",
+    "COMP1140",
+    "COMP2400"
+  ],
+  "incompatibilities": "Incompatible with COMP8430 and COMP8930 .",
+  "requisite_raw": "Students are required to have completed introductory courses on databases, programming and algorithms.  To enrol in this course you must have completed    6 units from COMP 1030 or COMP1100 or COMP1130 or COMP1730 ; AND    6 units from COMP 1040 or COMP1110 or COMP1140 ; AND COMP2400 Incompatible with COMP8430 and COMP8930 .",
+  "cotaught": [
+    "COMP6434"
+  ],
+  "description": "Real-world data are commonly messy, distributed, and heterogeneous. This course introduces core concepts of data cleaning, standardisation, and data integration, that are aimed at converting and mapping raw data into other formats that allow more efficient and convenient use and analysis of data. The courses also discusses data quality, management, and storage issues as relevant to data analytics.",
+  "learning_outcomes": [
+    "Critically reflect upon different data sources, types, formats and structures,",
+    "Justify and apply data cleaning, preprocessing, and standardisation for data analytics,",
+    "Apply data integration concepts and techniques to heterogeneous and distributed data,",
+    "Interpret, assess and discuss data quality measurements,",
+    "Understand and be able to use advanced data wrangling, data integration, and database techniques as relevant to data analytics."
+  ],
+  "assessment": [
+    {
+      "task": "Written and practical assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Oral presentation and report",
+      "weight": "20"
+    },
+    {
+      "task": "Final examination",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10085",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10846",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

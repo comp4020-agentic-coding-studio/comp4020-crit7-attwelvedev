@@ -1,0 +1,50 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:28Z",
+  "code": "COMP8500",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8500",
+  "title": "Advanced Computing Team Project",
+  "units": "12",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must:  be enrolled in the Master of Computing AND have successfully completed: ( COMP6442 or COMP2100 )  AND ( COMP8260 or COMP8280 ) AND be concurrently enrolled in or have successfully completed: COMP6120 or COMP2120 OR  be enrolled in the Master of Machine Learning and Computer Vision AND have successfully completed: ( COMP6442 or COMP2100 )  AND ( COMP6250 or COMP8260 or COMP8280 )",
+  "prerequisite_codes": [
+    "COMP6442",
+    "COMP2100",
+    "COMP8260",
+    "COMP8280",
+    "COMP6120",
+    "COMP2120",
+    "COMP6442",
+    "COMP2100",
+    "COMP6250",
+    "COMP8260",
+    "COMP8280"
+  ],
+  "incompatibilities": "Incompatible with COMP8755 and COMP8830 and COMP8800 and COMP8715",
+  "requisite_raw": "To enrol in this course you must:  be enrolled in the Master of Computing AND have successfully completed: ( COMP6442 or COMP2100 )  AND ( COMP8260 or COMP8280 ) AND be concurrently enrolled in or have successfully completed: COMP6120 or COMP2120 OR  be enrolled in the Master of Machine Learning and Computer Vision AND have successfully completed: ( COMP6442 or COMP2100 )  AND ( COMP6250 or COMP8260 or COMP8280 )  Incompatible with COMP8755 and COMP8830 and COMP8800 and COMP8715",
+  "cotaught": [],
+  "description": "COMP8500is a 12-unit course in one semester. Students will conduct a project, under supervision, that will act as a capstone to their degree program and increase the depth of their knowledge in the computing area. The project will be undertaken in small teams. The activities in the course will normally include some combination of reading, writing, artefact construction and presentation, as appropriate to the project's topic. Application of research methodologies in literature review and evaluation will also be undertaken. Topic-specific learning objectives, project overview and assessment arrangements will be specified at the outset of the course. To enrol in this course you must meet the eligibility criteria, which includes membership of a student project group before the end of week 1, where the project has been approved by the convener.",
+  "learning_outcomes": [
+    "Apply the student's knowledge and implementation skills in computer science, and apply this to an advanced and specific project topic in that area.",
+    "Deepen their knowledge of computing principles and practice through undertaking the project.",
+    "Learn any specific technical skills required by their topic, and apply them to project work.",
+    "Apply and deepen skills in oral and written communication, and apply these in a project context.",
+    "Apply relevant project-related skills, including project management, teamwork, ethics in research, knowledge of relevant research, evaluation and production of project artifacts."
+  ],
+  "assessment": [
+    {
+      "task": "Four 2-Week Sprint Reviews",
+      "weight": "60"
+    },
+    {
+      "task": "Group Poster and Showcase",
+      "weight": "20"
+    },
+    {
+      "task": "Individual Reflection",
+      "weight": "20"
+    }
+  ],
+  "offerings": []
+}

@@ -1,0 +1,69 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:42Z",
+  "code": "STAT1008",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/STAT1008",
+  "title": "Quantitative Research Methods",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with STAT1003 .",
+  "requisite_raw": "Incompatible with STAT1003 .",
+  "cotaught": [],
+  "description": "Quantitative Research Methods provides training in the gathering, description and analysis of quantitative information in a broad range of different disciplines including, science, arts, sports, business, management and the financial sciences. Further, students use the skills acquired in this course to identify problems, interpret and analyse results, and provide solutions while engaging with external stakeholders. This is a course in research methods including discussions, analysis, interpretation and providing solutions of: data gathering issues and techniques; sources of data and potential biases; graphical and numerical data description techniques including simple linear regression, sampling behaviour of averages and the Central Limit Theorem; point and interval estimation procedures; concepts in hypothesis testing for comparing two populations, simple and multiple linear regression; p-values and significance levels. Students in this course are exposed to a variety of different problems/issues from different disciplines and seek to provide input to these problems through the application of quantitative data analysis skills. The data sets and/or problems/issues are introduced through a variety of guest speakers that are included in the class, as well as a series of recordings, blogs or newspaper articles to drive and contextualise the data stemming from the variety of different disciplines.",
+  "learning_outcomes": [
+    "Use the skills developed in this course to identify problems in a variety of different disciplines to interpret and analyse results and provide solutions while engaging with external stakeholders and students from a variety of disciplines.",
+    "Work collaboratively in groups from different areas of study to analyse results, provide solutions and orally present findings and discussions to a diverse range of stakeholders from different disciplines.",
+    "Compare and contrast different sampling methodologies and assess suitability for a range of situations and contexts.",
+    "Discuss different types of variables and produce appropriate graphical and numerical descriptive statistics.",
+    "Apply probability rules and concepts to discrete and continuous random variables, including estimation techniques and the Central Limit Theorem, to solve problems across a range of disciplines.",
+    "Perform and interpret hypothesis tests and linear regression analyses, including both simple and multiple regression.",
+    "Use technology to perform statistical analysis, and interpret statistical software output in a variety of different fields of study."
+  ],
+  "assessment": [
+    {
+      "task": "The research-based assessment will consist of assignments, providing students with a confined set of datasets along with a pertinent problem from the particular discipline that the dataset is relevant to. The objective of this assessment is to work collaboratively in groups to analyse and draw meaningful conclusions from data presented in graphical format. In this task, students will demonstrate in groups their ability to extract key information from data and communicate findings in a short, in-person oral group presentation.",
+      "weight": "10"
+    },
+    {
+      "task": "The other assessment may include but is not restricted to: exams, quizzes, presentations and other assessments as appropriate.",
+      "weight": "90"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "4368",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "9373",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5884",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10267",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

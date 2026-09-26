@@ -1,0 +1,66 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:39Z",
+  "code": "COMP3740",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3740",
+  "title": "Individual Project",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed 72 units towards a degree.  Students will receive a permission code by completing the steps listed on Enrolling in student projects including the Student Project Registration Form.  CoSM students must be studying a CSCI-MAJ to enrol in this course and count 6 units towards their 3000-level COMP course requirement. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have completed 72 units towards a degree.  Students will receive a permission code by completing the steps listed on Enrolling in student projects including the Student Project Registration Form.  CoSM students must be studying a CSCI-MAJ to enrol in this course and count 6 units towards their 3000-level COMP course requirement. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "Students will conduct a small, one semester long (6-unit) project, under supervision, that in area of computing of mutual interest to the student and their supervisor. The project will involve applying and increasing the depth of the student's knowledge in some aspect of computing. The activities in the course will normally include some combination of reading, writing, project work and presentation, as appropriate to the topic. The specific learning objectives, project overview and assessment arrangements will be specified at the outset using the Project Registration Form. Students enrolled are responsible  to find a supervisor and identify a suitable Computer Science Project before they submit the permission code request.",
+  "learning_outcomes": [
+    "Apply the student's knowledge and implementation skills in the in computer science for the project course, and apply this to a specific project topic in that area.",
+    "Deepen their knowledge of computing through undertaking the project.",
+    "Apply any specific technical skills required by their topic, and apply them to the project work.",
+    "Apply relevant project-related skills, including project management and oral and written communication, and apply these to the project work."
+  ],
+  "assessment": [
+    {
+      "task": "Project artifacts/reports",
+      "weight": "90"
+    },
+    {
+      "task": "Presentation",
+      "weight": "10"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5090",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10092",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6495",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10853",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

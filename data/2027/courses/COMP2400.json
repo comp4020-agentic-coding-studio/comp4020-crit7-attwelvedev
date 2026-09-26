@@ -1,0 +1,77 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:09Z",
+  "code": "COMP2400",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP2400",
+  "title": "Relational Databases",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course you must have successfully completed: COMP1100 or COMP1130 or INFS1001 or COMP1730",
+  "prerequisite_codes": [
+    "COMP1100",
+    "COMP1130",
+    "INFS1001",
+    "COMP1730"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have successfully completed COMP6240 .",
+  "requisite_raw": "To enrol in this course you must have successfully completed: COMP1100 or COMP1130 or INFS1001 or COMP1730 You are not able to enrol in this course if you have successfully completed COMP6240 .",
+  "cotaught": [
+    "COMP6240"
+  ],
+  "description": "This course is an introduction to relational databases and the general skills for designing and using them. Topics include the relational data model, SQL, data modelling tools such as the entity-relationship model, functional dependencies, and (de-)normalisation, query processing and optimisation, and potential social and economic impacts of database design, for instance through (in-)security. Current development of database systems based on models other than the relational (known asNoSQL databases) will be introduced at the end of the course.",
+  "learning_outcomes": [
+    "Describe the basic concepts of the relational model and its mathematical foundation.",
+    "Connect database design with social and economic impacts including security, ethics, and Australian Privacy Principles.",
+    "Use SQL to define, query and manipulate a relational database, and describe principles of SQL query processing and optimisation.",
+    "Use data modelling concepts and practices to create, evaluate and communicate relational database designs, collaboratively and individually."
+  ],
+  "assessment": [
+    {
+      "task": "In-class activities and quizzes",
+      "weight": "10"
+    },
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "60"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5101",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10104",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6683",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11054",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

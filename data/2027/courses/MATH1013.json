@@ -1,0 +1,78 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:27Z",
+  "code": "MATH1013",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MATH1013",
+  "title": "Mathematics and Applications 1",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed, or are attempting to concurrently enrol in, MATH1113 or MATH1115 .",
+  "requisite_raw": "You are not able to enrol in this course if you have previously completed, or are attempting to concurrently enrol in, MATH1113 or MATH1115 .",
+  "cotaught": [],
+  "description": "This course covers single-variable calculus and introductory linear algebra. The emphasis is on understanding the material such that it both can be applied across a range of fields including the physical and biological sciences, engineering and information technologies, economics and commerce, and can also serve as a base for future mathematics courses. Many applications and connections with other fields will be discussed although not developed in detail. Not all the material will be developed in a rigorous theorem-proof style, although students will see some examples of this and may work some examples themselves. Students interested in a deeper understanding of mathematics and more mathematical/theoretical aspects of topics (including those students who are interested in the more theoretical aspects from engineering, computing, science, and economics) should enrol inMATH1115. Topics to be covered include: Calculus - Limits, including infinite limits and limits at infinity. Continuity and global properties of continuous functions. Differentiation, including mean value theorem, chain rule, implicit differentiation, inverse functions, antiderivatives and basic ideas about differential equations. Transcendental functions: exponential and logarithmic functions and their connection with integration, growth and decay, hyperbolic functions. Local and absolute extrema, concavity and inflection points. L'Hopital's rule. Riemann integration and the Fundamental Theorem of Calculus. Techniques of integration including the method of substitution and integration by parts. Volumes. Linear Algebra - Solution of linear systems of equations. Matrix algebra including matrix inverses, linear transformations, matrix factorisation and subspaces. Determinants. Example applications including computer graphics, the Leontief Input-Output Model, and various linear models in science and engineering. Complex numbers.",
+  "learning_outcomes": [
+    "Explain the fundamental concepts of calculus and linear algebra and their role in modern mathematics and applied contexts.  These concepts include the solution of linear systems, matrix algebra, linear transformations and determinants in Linear Algebra; and limits, continuity, differentiation, local and absolute extrema, Riemann integration and the fundamental theorem of calculus in Calculus.",
+    "Demonstrate accurate and efficient use of calculus and linear algebra techniques as they relate to the concepts listed above.",
+    "Demonstrate capacity for mathematical reasoning through explaining concepts from calculus and linear algebra and reproducing familiar proofs.",
+    "Apply problem-solving using calculus and linear algebra techniques applied to diverse situations in physics, engineering and other mathematical contexts."
+  ],
+  "assessment": [
+    {
+      "task": "Workshop contributions",
+      "weight": "7"
+    },
+    {
+      "task": "Online quizzes",
+      "weight": "7"
+    },
+    {
+      "task": "Assignments (two)",
+      "weight": "18"
+    },
+    {
+      "task": "Mastery Hurdle Examinations",
+      "weight": "20"
+    },
+    {
+      "task": "Final examination",
+      "weight": "48"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5413",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10390",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6694",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11059",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

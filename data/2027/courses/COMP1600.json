@@ -1,0 +1,60 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:03Z",
+  "code": "COMP1600",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP1600",
+  "title": "Foundations of Computing",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "To enrol in this course you must have completed:  6 units of MATH courses and COMP1100 or COMP1130 .  It is incompatible with COMP6260 .",
+  "prerequisite_codes": [
+    "COMP1100",
+    "COMP1130",
+    "COMP6260"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have completed:  6 units of MATH courses and COMP1100 or COMP1130 .  It is incompatible with COMP6260 .",
+  "cotaught": [
+    "COMP6260"
+  ],
+  "description": "This course presents some formal notations that are commonly used for the description of computation and of computing systems, for the specification of software and for mathematically rigorous arguments about program properties. The following areas of study constitute the backbone of the course: predicate calculus and natural deduction, inductive definitions of data types as a basis for recursive functions and structural induction, specification languages and their use in program verification.",
+  "learning_outcomes": [
+    "Apply the concepts of mathematical logic to formulate, analyse and evaluate formal assertions about programs",
+    "Construct proofs or refutations in a variety of formalisms, particularly in a semi-automated, machine-assisted setting.",
+    "Prove simple properties of recursive functions on inductively defined data structures using structural induction.",
+    "Prove simple programs correct using Hoare Logic."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "40"
+    },
+    {
+      "task": "Quizzes",
+      "weight": "10"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10088",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10849",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

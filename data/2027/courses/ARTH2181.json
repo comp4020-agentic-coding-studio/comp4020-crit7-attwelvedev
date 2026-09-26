@@ -1,0 +1,54 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:04:57Z",
+  "code": "ARTH2181",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/ARTH2181",
+  "title": "Digital Approaches to Art History and Curatorship",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course you must have completed 12 units of 1,000 level courses.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have completed 12 units of 1,000 level courses.",
+  "cotaught": [],
+  "description": "This course introduces basic skills for applying digital methods to art history and curatorship. Students will get hands-on experience with hardware and software to learn how to identify and create a data set for research; how to tell stories with simple but effective software; how to create digital maps to locate objects of study geographically; how to create 3D models; and how to curate digital exhibitions as websites, catalogues, and exhibition walkthroughs.",
+  "learning_outcomes": [
+    "critically evaluate the key principles of digital humanities research for art history and curatorship;",
+    "demonstrate a basic competency in a range of skills for digital methods for art history and curatorship;",
+    "discover a range of hardware and software required for a basic application of digital methods for art history and curatorship; and",
+    "explain the application of digital approaches to art history and curatorship."
+  ],
+  "assessment": [
+    {
+      "task": "Project development 1 -- define project (1,000 words)",
+      "weight": "20"
+    },
+    {
+      "task": "Project development 2  --  draft digital project (equivalent to 1,500 words )",
+      "weight": "40"
+    },
+    {
+      "task": "Project showcase presentation -- final digital project (equivalent to 2,000 words)",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10186",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10912",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

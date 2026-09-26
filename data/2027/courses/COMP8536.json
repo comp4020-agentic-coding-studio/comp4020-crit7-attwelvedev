@@ -1,0 +1,42 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:30Z",
+  "code": "COMP8536",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8536",
+  "title": "Advanced Topics in Deep Learning for Computer Vision",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must be studying Master of Engineering or Master of Machine Learning and Computer Vision or Master of Computing (Advanced).  Students must have completed either COMP6710 or COMP6730 or equivalent.",
+  "prerequisite_codes": [
+    "COMP6710",
+    "COMP6730"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must be studying Master of Engineering or Master of Machine Learning and Computer Vision or Master of Computing (Advanced).  Students must have completed either COMP6710 or COMP6730 or equivalent.",
+  "cotaught": [],
+  "description": "The course covers the theory and practice of deep learning with a focus on applications in computer vision. Students will learn the foundational mathematics behind deep learning and explore topics such as multi-layer perceptrons (MLPs), back-propagation and automatic differentiation, convolutional neural networks (CNNs), recurrent neural networks (RNNs), and Transformers. These techniques play a crucial role in modern AI systems, including image and video understanding, natural language processing, generative AI, and robotics. The various practical assessments will enhance student's understanding and intuition of deep learning and its application in computer vision.",
+  "learning_outcomes": [
+    "Describe and apply the theory of convolutional neural networks and the universal approximation theorem.",
+    "Apply the theory of training a convolutional neural network.",
+    "Write programs to design, train and test neural networks to solve problems in computer vision.",
+    "Competently apply programming and software tools to write programs to solve realistic problems of computer vision using deep neural networks.",
+    "Understand the principals of testing and evaluating the performance of deep neural networks, and apply these principals in practice.",
+    "Research an area of computer vision and apply deep neural network methods to a problem in that area."
+  ],
+  "assessment": [
+    {
+      "task": "Lab Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Project Proposal and Presentation",
+      "weight": "30"
+    },
+    {
+      "task": "Major Project report",
+      "weight": "40"
+    }
+  ],
+  "offerings": []
+}

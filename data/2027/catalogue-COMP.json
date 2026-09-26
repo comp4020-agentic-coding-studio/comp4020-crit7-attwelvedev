@@ -1,0 +1,898 @@
+[
+  {
+    "code": "COMP1100",
+    "title": "Programming as Problem Solving",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP1110",
+    "title": "Structured Programming",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP1130",
+    "title": "Programming as Problem Solving (Advanced)",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP1140",
+    "title": "Structured Programming (Advanced)",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP1600",
+    "title": "Foundations of Computing",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP1720",
+    "title": "Art and Interaction Computing",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP1730",
+    "title": "Programming for Scientists",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP2100",
+    "title": "Software Construction",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP2120",
+    "title": "Software Engineering",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP2300",
+    "title": "Computer Architecture",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP2310",
+    "title": "Systems, Networks, and Concurrency",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP2400",
+    "title": "Relational Databases",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP2550",
+    "title": "Computing R&D Methods",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP2610",
+    "title": "Information Theory",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP2620",
+    "title": "Logic",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP2700",
+    "title": "Cyber Security Foundations",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP2710",
+    "title": "Special Topics in Computer Science",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP3242",
+    "title": "Deep Learning",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP3300",
+    "title": "Operating Systems Implementation",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3310",
+    "title": "Computer Networks",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP3320",
+    "title": "High Performance Scientific Computation",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3425",
+    "title": "Data Mining",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP3430",
+    "title": "Data Wrangling",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3500",
+    "title": "Software Engineering Project",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP3540",
+    "title": "Game Development",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP3600",
+    "title": "Algorithms",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3610",
+    "title": "Principles of Programming Languages",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3620",
+    "title": "Artificial Intelligence",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP3630",
+    "title": "Theory of Computation",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP3670",
+    "title": "Introduction to Machine Learning",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3703",
+    "title": "Software Security",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP3704",
+    "title": "Network Security",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP3710",
+    "title": "Topics in Computer Science",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP3740",
+    "title": "Individual Project",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP3770",
+    "title": "Computing Research Project (R&D)",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP3820",
+    "title": "Computing Internship",
+    "career": "Undergraduate",
+    "units": "12",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP3900",
+    "title": "Human-Computer Interaction",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP4011",
+    "title": "Advanced Topics in Formal Methods and Programming Languages",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP4020",
+    "title": "Advanced Topics in Human-Centred and Creative Computing",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP4045",
+    "title": "Advanced Topics in Computer Systems",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4130",
+    "title": "Managing Software Quality and Process",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4300",
+    "title": "Parallel Systems",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4350",
+    "title": "Sound and Music Computing",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4425",
+    "title": "Data Mining",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4450",
+    "title": "Computing Research Methods",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4500",
+    "title": "Software Engineering Team Project",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP4528",
+    "title": "Computer Vision",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4550",
+    "title": "Computing Research Project",
+    "career": "Undergraduate",
+    "units": "12",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP4600",
+    "title": "Advanced Algorithms",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP4610",
+    "title": "Computer Graphics",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4620",
+    "title": "Advanced Topics in Artificial Intelligence",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP4650",
+    "title": "Document Analysis",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP4670",
+    "title": "Statistical Machine Learning",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4680",
+    "title": "Advanced Topics in Machine Learning",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4691",
+    "title": "Optimisation",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP4703",
+    "title": "Vulnerability Research and Exploit Mitigation",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP4712",
+    "title": "Compiler Construction",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP4820",
+    "title": "Advanced Computing Internship",
+    "career": "Undergraduate",
+    "units": "12",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP4880",
+    "title": "Computational Methods for Network Science",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP5920",
+    "title": "Exchange Program in Computer Science",
+    "career": "Undergraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP6034",
+    "title": "Network Security",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6120",
+    "title": "Software Engineering",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6240",
+    "title": "Relational Databases",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP6242",
+    "title": "Deep Learning",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6250",
+    "title": "Professional Practice: Holistic Thinking and Communication",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP6260",
+    "title": "Foundations of Computing",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6261",
+    "title": "Information Theory",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6262",
+    "title": "Logic",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6300",
+    "title": "Computer Architecture",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6310",
+    "title": "Systems, Networks and Concurrency",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6320",
+    "title": "Artificial Intelligence",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6330",
+    "title": "Operating Systems Implementation",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6331",
+    "title": "Computer Networks",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6361",
+    "title": "Principles of Programming Languages",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6363",
+    "title": "Theory of Computation",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6390",
+    "title": "Human-Computer Interaction",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6434",
+    "title": "Data Wrangling",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6442",
+    "title": "Software Construction",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP6445",
+    "title": "Computing Research Methods",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6464",
+    "title": "High Performance Scientific Computing",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6466",
+    "title": "Algorithms",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6470",
+    "title": "Special Topics in Computing",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP6490",
+    "title": "Document Analysis",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP6528",
+    "title": "Computer Vision",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP6540",
+    "title": "Game Development",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP6670",
+    "title": "Introduction to Machine Learning",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP6710",
+    "title": "Structured Programming",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP6720",
+    "title": "Art and Interaction Computing",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP6730",
+    "title": "Programming for Scientists",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP6780",
+    "title": "Web Development and Design",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP6800",
+    "title": "Cyber Security Foundations",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP7710",
+    "title": "Programming Fundamentals",
+    "career": "Postgraduate",
+    "units": "12",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP8011",
+    "title": "Advanced Topics in Formal Methods and Programming Languages",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP8020",
+    "title": "Advanced Topics in Human-Centred and Creative Computing",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP8045",
+    "title": "Advanced Topics in Computer Systems & Architecture",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8131",
+    "title": "Managing Software Quality and Process",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8260",
+    "title": "Professional Practice: Responsible Innovation and Leadership",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8280",
+    "title": "Responsible Practice, Innovation and Leadership",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP8300",
+    "title": "Parallel Systems",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8350",
+    "title": "Sound and Music Computing",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8410",
+    "title": "Data Mining",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8430",
+    "title": "Data Wrangling",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8460",
+    "title": "Advanced Algorithms",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8490",
+    "title": "Document Analysis",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP8500",
+    "title": "Advanced Computing Team Project",
+    "career": "Postgraduate",
+    "units": "12",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8535",
+    "title": "Engineering Data Analytics",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8536",
+    "title": "Advanced Topics in Deep Learning for Computer Vision",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8539",
+    "title": "Advanced Topics in Computer Vision",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP8600",
+    "title": "Statistical Machine Learning",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8610",
+    "title": "Computer Graphics",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8620",
+    "title": "Advanced Topics in Artificial intelligence",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Second Semester"
+  },
+  {
+    "code": "COMP8650",
+    "title": "Advanced Topics in Machine Learning",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8691",
+    "title": "Optimisation",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8703",
+    "title": "Vulnerability Research and Exploit Mitigation",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester"
+  },
+  {
+    "code": "COMP8712",
+    "title": "Compiler Construction",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8715",
+    "title": "Advanced Computing Team Project",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP8800",
+    "title": "Advanced Computing Research Project",
+    "career": "Postgraduate",
+    "units": "12",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP8820",
+    "title": "Exchange Program for Graduate Students in Computer Science",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP8830",
+    "title": "Computing Internship",
+    "career": "Postgraduate",
+    "units": "12",
+    "sessions": "First Semester/Second Semester"
+  },
+  {
+    "code": "COMP8880",
+    "title": "Computational Methods for Network Science",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8900F",
+    "title": "Master of Philosophy (Computer Science)",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Quarter 1/First Semester/Quarter 2/Quarter 3/Second Semester/Quarter 4"
+  },
+  {
+    "code": "COMP8900P",
+    "title": "Master of Philosophy (Computer Science)",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Quarter 1/First Semester/Quarter 2/Quarter 3/Second Semester/Quarter 4"
+  },
+  {
+    "code": "COMP8901F",
+    "title": "MPhil Research (RSCS)",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Quarter 1/First Semester/Quarter 2/Quarter 3/Second Semester/Quarter 4"
+  },
+  {
+    "code": "COMP8980",
+    "title": "Computational Methods for Network Science",
+    "career": "Postgraduate",
+    "units": "6",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP8999",
+    "title": "School of Computing Higher Degree by Research Internship",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Not offered"
+  },
+  {
+    "code": "COMP9000F",
+    "title": "Doctor of Philosophy (Computer Science)",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Quarter 1/First Semester/Quarter 2/Quarter 3/Second Semester/Quarter 4"
+  },
+  {
+    "code": "COMP9000P",
+    "title": "Doctor of Philosophy (Computer Science)",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Quarter 1/First Semester/Quarter 2/Quarter 3/Second Semester/Quarter 4"
+  },
+  {
+    "code": "COMP9001F",
+    "title": "PhD Research (RSCS)",
+    "career": "Research",
+    "units": "3",
+    "sessions": "Quarter 1/First Semester/Quarter 2/Quarter 3/Second Semester/Quarter 4"
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:44Z",
+  "code": "COMP3620",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3620",
+  "title": "Artificial Intelligence",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed: COMP1110 /1140 AND   have completed or be currently enrolled in COMP2620 .",
+  "prerequisite_codes": [
+    "COMP1110",
+    "COMP2620"
+  ],
+  "incompatibilities": "Incompatible with COMP6320 .",
+  "requisite_raw": "To enrol in this course you must have completed: COMP1110 /1140 AND   have completed or be currently enrolled in COMP2620 .  Incompatible with COMP6320 .",
+  "cotaught": [
+    "COMP6320"
+  ],
+  "description": "Artificial intelligence is the science that studies and develops methods of making computers more /intelligent/. The focus of this course is on core AI techniques for search, knowledge representation and reasoning, planning, and designing intelligent agents. The course also aims to give an overview of the historical, philosophical, and logical foundations of AI.",
+  "learning_outcomes": [
+    "Identify problems that are amenable to solution by AI methods, and which AI methods may be suited to solving a given problem.",
+    "Formalise a given problem in the language/framework of different AI methods (e.g., as a search problem, as a constraint satisfaction problem, as a planning problem, etc).",
+    "Implement basic AI algorithms (e.g., standard search or constraint propagation algorithms).",
+    "Design and perform an empirical evaluation of different algorithms on a problem formalisation, and state the conclusions that the evaluation supports."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "50"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5052",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6461",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

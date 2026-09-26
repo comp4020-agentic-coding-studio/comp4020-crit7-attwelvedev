@@ -1,0 +1,68 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:50Z",
+  "code": "COMP6242",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6242",
+  "title": "Deep Learning",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must have successfully completed: ( COMP3670 or COMP6670 or COMP8410 ) AND ( COMP1110 or COMP6710 or COMP7710 or COMP1730 or COMP6730 ).",
+  "prerequisite_codes": [
+    "COMP3670",
+    "COMP6670",
+    "COMP8410",
+    "COMP1110",
+    "COMP6710",
+    "COMP7710",
+    "COMP1730",
+    "COMP6730"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have successfully completed: ( COMP3670 or COMP6670 or COMP8410 ) AND ( COMP1110 or COMP6710 or COMP7710 or COMP1730 or COMP6730 ).",
+  "cotaught": [
+    "COMP3242"
+  ],
+  "description": "The course covers the theory and practice of deep learning. Students will learn the foundational mathematics behind deep learning and explore topics such as multi-layer perceptrons (MLPs), back-propagation and automatic differentiation, convolutional neural networks (CNNs), recurrent neural networks (RNNs), transformers, generative models, and the role of data in training models. These techniques play a crucial role in modern AI systems, including image and video understanding, natural language processing, generative AI, robotics, medicine and scientific discovery. The various practical assessments will enhance student's understanding and intuition of deep learning and its application.",
+  "learning_outcomes": [
+    "Describe and apply the theory of artificial neural networks and the universal approximation theorem.",
+    "Apply the theory of training a convolutional neural network or transformer model.",
+    "Write programs to design, train and test neural networks to solve problems in a given application area.",
+    "Competently apply programming and software tools to write programs to solve realistic problems using deep neural networks.",
+    "Understand the principals of testing and evaluating the performance of deep neural networks, and apply these principles in practice.",
+    "Understand the role of data in training deep learning systems including ethical considerations and potential biases.",
+    "Research an application area and apply deep neural network methods to a problem in that area."
+  ],
+  "assessment": [
+    {
+      "task": "Lab Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Research Project Report and Presentation",
+      "weight": "40"
+    },
+    {
+      "task": "Final Written Exam",
+      "weight": "30"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5089",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6494",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

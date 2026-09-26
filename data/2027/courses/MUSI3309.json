@@ -1,0 +1,56 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:35Z",
+  "code": "MUSI3309",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MUSI3309",
+  "title": "Digital Music: Platforms, Content and AI",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed 72 units of tertiary courses, or with consent of the Convener.",
+  "prerequisite_codes": [],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed MUSI6009 .",
+  "requisite_raw": "To enrol in this course you must have completed 72 units of tertiary courses, or with consent of the Convener.  You are not able to enrol in this course if you have previously completed MUSI6009 .",
+  "cotaught": [
+    "MUSI6009"
+  ],
+  "description": "Digital Music: Platforms, Content and AI is an interdisciplinary course focusing on the business, cultural context, and scientific nature of the [inter]relationship between music and media. The course blends theoretical perspectives designed to problematise our relationships with digital music formats, production, consumption and dissemination, with practical workshops for producing content for online music and media platforms. Such is the evolutionary nature of music in the digital age that the issues and problems addressed in this course will vary from year to year. Course content may include: a short history of music and digitisation; intellectual property, copyright, and ethics; massively collaborative online music production and distribution; case study analyses of music for gaming, music 'apps' and crowd funding for music projects; digital audiovisual curation techniques; and, the role of music as content on platforms, and the recent technological ruptures such as Artificial Intelligence.",
+  "learning_outcomes": [
+    "understand the ethical implications of music, digitisation and media dissemination via a demonstrated critical understanding of intellectual property;",
+    "design and realise a presentation on an appropriate topic suitable for public dissemination;",
+    "produce a digital media project incorporating audio, visual, and interactive elements; and",
+    "research, critically analyse, and debate current issues/problems surrounding music and digital media from a variety of interdisciplinary perspectives."
+  ],
+  "assessment": [
+    {
+      "task": "Group presentation",
+      "weight": "50"
+    },
+    {
+      "task": "e-CV with integrated multimedia elements",
+      "weight": "30"
+    },
+    {
+      "task": "Individual written essay on negotiated topic (1500 words)",
+      "weight": "20"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "3894",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5463",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

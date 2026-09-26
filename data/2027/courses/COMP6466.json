@@ -1,0 +1,61 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:05Z",
+  "code": "COMP6466",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6466",
+  "title": "Algorithms",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must:  be studying Master of Computing or  Master of Computing Advanced or have successfully completed ( COMP6710 or COMP7710 or COMP1110 or COMP1140 ).",
+  "prerequisite_codes": [
+    "COMP6710",
+    "COMP7710",
+    "COMP1110",
+    "COMP1140"
+  ],
+  "incompatibilities": "Incompatible with COMP3600 .",
+  "requisite_raw": "To enrol in this course you must:  be studying Master of Computing or  Master of Computing Advanced or have successfully completed ( COMP6710 or COMP7710 or COMP1110 or COMP1140 ).  Incompatible with COMP3600 .",
+  "cotaught": [
+    "COMP3600"
+  ],
+  "description": "Algorithms are the foundation of Computer Science. They enable advances in Artificial Intelligence, Machine Learning, Cybersecurity, Distributed, Mobile, and Cloud Computing, Computer Graphics and Animation, and many more. These advances have made Computer Science an indispensable part of our everyday life. The main goal of this course is to familiarize students with basic concepts in the design and analysis of algorithms and data structures. It focuses on fundamental computing problems such as sorting and searching. The students will learn how to use different algorithm design methods and data structures to solve such problems efficiently, as well as basic performance measures and analysis techniques.",
+  "learning_outcomes": [
+    "Display a solid understanding of classical algorithms for fundamental computing problems such as sorting and searching and their analysis.",
+    "Demonstrate deep knowledge of various data structures, such as binary search trees and heaps, and their applications.",
+    "Design efficient algorithms using techniques such as greedy approaches and dynamic programming.",
+    "Analyse the time and space complexity of algorithms."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "5"
+    },
+    {
+      "task": "Midterm Test",
+      "weight": "40"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10081",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10842",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

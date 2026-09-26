@@ -1,0 +1,72 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:39Z",
+  "code": "COMP8800",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8800",
+  "title": "Advanced Computing Research Project",
+  "units": "12",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must:  be enrolled in the Master of Computing (Advanced) OR Master of Machine Learning and Computer Vision AND  have completed or be currently enrolled in COMP6445 AND  have completed ( COMP8280 or COMP8260 or COMP6250 ) AND  have completed 36 units of COMP courses AND  have a GPA of 6 out of 7 AND  receive a permission code by completing the steps listed on Enrolling in student projects and having submitted the Student Project Registration Form.",
+  "prerequisite_codes": [
+    "COMP6445",
+    "COMP8280",
+    "COMP8260",
+    "COMP6250"
+  ],
+  "incompatibilities": "Incompatible with COMP8715 and COMP8830 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "requisite_raw": "To enrol in this course you must:  be enrolled in the Master of Computing (Advanced) OR Master of Machine Learning and Computer Vision AND  have completed or be currently enrolled in COMP6445 AND  have completed ( COMP8280 or COMP8260 or COMP6250 ) AND  have completed 36 units of COMP courses AND  have a GPA of 6 out of 7 AND  receive a permission code by completing the steps listed on Enrolling in student projects and having submitted the Student Project Registration Form.    Incompatible with COMP8715 and COMP8830 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "COMP8800is an Annual course (12+12) that must be completed twice, in consecutive semesters. This course requires students to conduct a substantial individual research project under academic supervision, with a formal thesis being submitted and presentation of a seminar or poster. This course will allow you to apply your Computer Science knowledge and skills in the planning and execution of your research project. This course provides you with the opportunity to deeply engage with the course content, drive your leaning, build skills and confidence in undertaking a research project.",
+  "learning_outcomes": [
+    "Identify a question/problem in a particular field of computing and devise a plan for a research project to investigate the topic.",
+    "Implement effective literature search and critical evaluation skills to complete a literature survey in the project topic area.",
+    "Select and apply appropriate research methods, tools, techniques to develop research findings and insights.",
+    "Effectively communicate research questions, methods and outcomes in oral, written and graphical forms to a broad audience using appropriate tools.",
+    "Produce a structured written thesis demonstrating an advanced understanding of the chosen research area."
+  ],
+  "assessment": [
+    {
+      "task": "Presentation",
+      "weight": "10"
+    },
+    {
+      "task": "Thesis",
+      "weight": "90"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5048",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10075",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6457",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10837",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

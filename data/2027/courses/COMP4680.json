@@ -1,0 +1,48 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:50Z",
+  "code": "COMP4680",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4680",
+  "title": "Advanced Topics in Machine Learning",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "12 units of 3000 and/or 4000 level COMP courses.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website (Special Topics in Computing page ) when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions for Enrolling in CECC courses.",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP8650 .",
+  "requisite_raw": "12 units of 3000 and/or 4000 level COMP courses.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website (Special Topics in Computing page ) when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions for Enrolling in CECC courses.  Incompatible with COMP8650 .",
+  "cotaught": [
+    "COMP8650"
+  ],
+  "description": "This course builds on previous machine learning (ML) courses to explore selected areas relevant to machine learning in depth. It will be taught by an ML staff member of internationally recognised standing and research interest in that area. Based on current ML staffing, this will be one or more of: Students should contact the course convenor to find out what topic is planned for the coming semester.",
+  "learning_outcomes": [
+    "Review the fundamental concepts and techniques of the machine learning advanced topic.",
+    "Reflect critically on the suitability of studied concepts and techniques for solving machine learning problems.",
+    "Critically read research papers in the advanced topic area.",
+    "Plan and execute project work and/or a piece of research and scholarship in the advanced topic."
+  ],
+  "assessment": [
+    {
+      "task": "Assessments and their weighting will vary depending on the nature of the topic. Specific details will be presented in the Class Summary.",
+      "weight": "100"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5050",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6459",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

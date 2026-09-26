@@ -1,0 +1,61 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:48Z",
+  "code": "COMP6120",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6120",
+  "title": "Software Engineering",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must have successfully completed or be currently studying COMP6442 or COMP2100 .",
+  "prerequisite_codes": [
+    "COMP6442",
+    "COMP2100"
+  ],
+  "incompatibilities": "Incompatible with COMP2120 .",
+  "requisite_raw": "To enrol in this course you must have successfully completed or be currently studying COMP6442 or COMP2100 .  Incompatible with COMP2120 .",
+  "cotaught": [
+    "COMP2120"
+  ],
+  "description": "Real-world software development is a complex and dynamic activity involving people, technology and processes interacting within a complex environment of clients, users and other stakeholders while being observant of technological, physical, social, legal, and ethical constraints. This course will empower students with the ability and confidence necessary to exercise critical thinking and professional judgment to select and apply appropriate knowledge, practices and tools to the development of non-trivial software systems. This will be achieved by introducing students to important design methodologies. We will build on previous programming courses to deepen and broaden students' knowledge and understanding of the practices and tools used to build large software systems within complex environments. We will use real-world examples such as distributed, high-integrity, web-based systems where rigorous software engineering can demonstrably enhance business value. Students will learn how practices and tools can be adapted to suit specific project needs and contexts. Knowledge, practices and tools considered in this course will include process models, requirements engineering, design, modelling and user experience. Software engineering design methodologies evolve over time. In this course, students will study the details of one or more design methodologies and critically assess their applicability to modern software systems.",
+  "learning_outcomes": [
+    "Discuss the breadth and nature of the software engineering process, including project management activities, and distinguish various phases of the process.",
+    "Evaluate other people's code contributions using modern formal code inspection approaches.",
+    "Compare correct techniques for ensuring and assessing the quality of software.",
+    "Assess the issues in constructing large software systems from their components, including considerations of cyber security and user-centred design, and evaluate the nature and design of these components.",
+    "Employ group working skills in solving software development problems;",
+    "Analyse and evaluate IT-related scenarios with reference to the software engineering code of ethics and professional practice."
+  ],
+  "assessment": [
+    {
+      "task": "Assignment(s)  (Individual)",
+      "weight": "5"
+    },
+    {
+      "task": "Group Assignments & Presentation",
+      "weight": "50"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "45"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10109",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10864",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

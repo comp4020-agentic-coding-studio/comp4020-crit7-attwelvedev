@@ -1,0 +1,44 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:36Z",
+  "code": "COMP8691",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8691",
+  "title": "Optimisation",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must have completed COMP6320 or COMP3620 .",
+  "prerequisite_codes": [
+    "COMP6320",
+    "COMP3620"
+  ],
+  "incompatibilities": "Incompatible with COMP4690 .",
+  "requisite_raw": "To enrol in this course you must have completed COMP6320 or COMP3620 .  Incompatible with COMP4690 .",
+  "cotaught": [
+    "COMP4691"
+  ],
+  "description": "This course provides foundations and plenty of exercises in practical optimisation problems, while covering all basic elements of optimisation including forms of constraint programming as well as variations on linear programming and convex optimisation.",
+  "learning_outcomes": [
+    "Be able to apply Linear Programming and Mixed-Integer Programming model to solve real-world problems.",
+    "Be able to recognize and formulate convex optimization problems arising in practice.",
+    "Demonstrate an understanding of theoretical foundations of convex optimization and be able to use it to characterize optimal solutions to general problems.",
+    "Be able to define an appropriate local search neighbourhood for a given problem.",
+    "Be able to use and reflect on a variety of meta-heuristics to escape local minima in a neighbourhood.",
+    "Demonstrate an understanding and reflect on of the propagation of a global constraint in a Constraint programming system."
+  ],
+  "assessment": [
+    {
+      "task": "Student Seminar",
+      "weight": "10"
+    },
+    {
+      "task": "Assignments",
+      "weight": "40"
+    },
+    {
+      "task": "Exam (hurdle)",
+      "weight": "50"
+    }
+  ],
+  "offerings": []
+}

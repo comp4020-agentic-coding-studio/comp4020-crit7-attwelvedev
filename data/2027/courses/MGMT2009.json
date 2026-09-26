@@ -1,0 +1,29 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:34Z",
+  "code": "MGMT2009",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MGMT2009",
+  "title": "Design Thinking: Human-Centred Innovation",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "",
+  "cotaught": [],
+  "description": "Design Thinking is an approach to innovation that is prevalent in both the private and public sectors. It combines practices, methods and mindsets from the design discipline to understand and tackle wicked problems, developing potential solutions from a human-centred perspective. Whether it be large incumbent organisations, or small entrepreneurial projects, design thinking provides the tools to engage with stakeholders, identify their needs and develop prototype solutions that respond to their requirements and desires. This course draws on current literature and best practices in design thinking and is delivered through a series of workshop-based seminars that focus on addressing a live brief provided by a partner organisation. This course integrates the \"Double Diamond\" and evidence-based management frameworks to provide valuable tools and experience for students from a range of different backgrounds. It will equip and empower students to identify opportunities for the creation of value, lead innovation processes and participate in the broader entrepreneurship ecosystem in a diversity of roles.",
+  "learning_outcomes": [
+    "Describethe design thinking process and the implications it can have for organisations in the public and private sectors;",
+    "Determinethe appropriate tools to use at each stage of the design thinking process;",
+    "Usedesign thinking tools and methods to address specific aspects of a \"wicked\" problem; and,",
+    "Communicatethe results of a design thinking process in a way that is actionable for implementation."
+  ],
+  "assessment": [
+    {
+      "task": "Typical assessments may include, but is not restricted to: in-class exercises, written and oral assignments, quizzes, examinations, group project tasks, oral presentation, and other assessment deemed appropriate to show attainment of the learning outcomes set for the course. Further details will be made available via the Class Summary.",
+      "weight": "100"
+    }
+  ],
+  "offerings": []
+}

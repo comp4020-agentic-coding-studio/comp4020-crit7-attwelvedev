@@ -1,0 +1,28 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:32Z",
+  "code": "COMP2710",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP2710",
+  "title": "Special Topics in Computer Science",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "Pre-requisite courses for the Advanced Topic will be listed on the Special Topics in Computing webpage when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions on the College webpage. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "Pre-requisite courses for the Advanced Topic will be listed on the Special Topics in Computing webpage when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions on the College webpage. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "This course is available so that students can pursue, with a small class, topics that are not covered in the regular curriculum that will significantly increase their knowledge of some aspect of computer science. The The topic will vary from instance to instance in response to the research interests and expertise of Academics and sessional staff. The topic for each instance will be advertised on the School of Computing website in the first few weeks before the semester The activities in the course will be a combination of lectures, workshops, reading, writing and project work, as appropriate to the topic. These activities will be specified in the class summary.",
+  "learning_outcomes": [
+    "plan and execute project work and/or a piece of research and scholarship in the Special Topic",
+    "demonstrate an understanding of the body of knowledge and theoretical concepts within the topic in written and/or oral form to a variety of audiences",
+    "understand the Special topic and its role in modern Computing and applied contexts."
+  ],
+  "assessment": [
+    {
+      "task": "Assessments and their weighting will vary depending on the nature of the topic. Specific details will be presented in the Class Summary.",
+      "weight": "100"
+    }
+  ],
+  "offerings": []
+}

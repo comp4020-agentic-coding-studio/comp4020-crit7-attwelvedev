@@ -1,0 +1,55 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:48Z",
+  "code": "COMP4650",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4650",
+  "title": "Document Analysis",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must have completed : ( COMP1600 OR COMP2100 ) AND 12 units of 3000/4000 level (COMP OR INFS courses).",
+  "prerequisite_codes": [
+    "COMP1600",
+    "COMP2100"
+  ],
+  "incompatibilities": "Incompatible with COMP6490 .",
+  "requisite_raw": "To enrol in this course you must have completed : ( COMP1600 OR COMP2100 ) AND 12 units of 3000/4000 level (COMP OR INFS courses).  Incompatible with COMP6490 .",
+  "cotaught": [
+    "COMP8490"
+  ],
+  "description": "Processing of semi-structured documents such as internet pages, Really Simple Syndication (RSS) feeds and their accompanying news items, and Portable Document Format (PDF) brochures is considered from the perspective of interpreting the content. This course considers the document and its various genres as a fundamental object for business, government and community. For this, the course covers four broad areas: 1.\tInformation Retrieval (IR), 2.\tNatural Language Processing (NLP), 3.\tMachine/Deep Learning (M/DL) for documents, and 4.\trelevant tools for the Web. Basic tasks here are covered, including content collection and extraction, formal and informal NLP, Information Extraction (IE), IR, classification, and analysis. Fundamental probabilistic techniques for performing these tasks and some common software systems will be covered, though no area will be covered in any depth. (The older version: This course considers the “document” and its various genres as a fundamental object for business, government and community, such as web pages, social media feeds, news items, and PDF brochures. The goal is to introduce concepts and hands-on tools for automated understanding of large amounts of text. For this, the course covers four broad areas: (A) information retrieval, (B) natural language processing, (C) machine learning for documents, and (D) relevant tools for the web. Tasks include content collection and extraction, formal and informal natural language processing, information extraction, information retrieval, classification and analysis. Fundamental probabilistic techniques for performing these tasks, and some common software systems will be covered, though no area will be covered in great depth.)",
+  "learning_outcomes": [
+    "differentiate between the basic probabilistic theories of language, document structure, and their applications to text generation and analysis.",
+    "apply,  analyse, and evaluate methods for natural language processing, word representation, document feature engineering, information retrieval, text classification, text clustering, and language modelling.",
+    "create automated workflows for document analysis, information retrieval, and text classification tasks by developing and deploying typical algorithms, code libraries, and software (e.g., for natural language processing and machine/deep learning).",
+    "demonstrate intermediate proficiency at designing, justifying, conducting, and reporting on such analysis and evaluation experiments at document and corpus levels."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "45"
+    },
+    {
+      "task": "Written final exam",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10086",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10847",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

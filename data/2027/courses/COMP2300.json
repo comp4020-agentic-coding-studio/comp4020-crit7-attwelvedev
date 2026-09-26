@@ -1,0 +1,64 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:06Z",
+  "code": "COMP2300",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP2300",
+  "title": "Computer Architecture",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course you must have completed:  ( COMP1100 OR COMP1130 OR COMP1730 )  AND   6 units of 1000-level MATH courses.",
+  "prerequisite_codes": [
+    "COMP1100",
+    "COMP1130",
+    "COMP1730"
+  ],
+  "incompatibilities": "Incompatible with COMP6300 , ENGN2219 and COMP6719 .",
+  "requisite_raw": "To enrol in this course you must have completed:  ( COMP1100 OR COMP1130 OR COMP1730 )  AND   6 units of 1000-level MATH courses.    Incompatible with COMP6300 , ENGN2219 and COMP6719 .",
+  "cotaught": [
+    "COMP6300",
+    "ENGN2219"
+  ],
+  "description": "This course is a rigorous introduction to the design of digital circuits and computer architecture. It provides technical foundations for how a computer system is built from the bottom up and how the high-level programming languages you learn in other courses are translated into simple instructions the computer executes. The course introduces the different abstraction layers necessary to make a computer system work, and a key focus is the connection between hardware and software. The course introduces the predominant stored-program computer paradigm and principles of digital design and computer architecture. Students build a fully functional general-purpose computer from simple logic circuits in a digital simulator. The course also demystifies assembly code, the machine language the processor speaks, and the mapping of assembly programs to higher levels of programming abstraction. The focus is on fundamental techniques employed in the design of modern microprocessors and their hardware/software interface. This course will challenge your understanding of how computers work and what happens in them when we run a program. At the end of this course, you will be able to navigate between layers of abstraction in a computer system, from individual digital circuits to high-level software, and understand how low-level structures enable and enhance the abilities of a computer system. This course covers topics such as combinational and sequential logic design, digital building blocks such as arithmetic/logic unit and random access memory, instruction set architectures and assembly programming, input/output systems, interrupt handling, single-cycle and pipelined processor design, out-of-order execution, and hardware speculation.",
+  "learning_outcomes": [
+    "Understand the basics of digital circuits and principles of digital design.",
+    "Learn how a modern computer works underneath from the bottom up.",
+    "Design and implement a simple processor in a digital simulator following a principled approach.",
+    "Evaluate tradeoffs of different designs and ideas.",
+    "Debug complex systems systematically at different abstraction layers.",
+    "Evaluate computer systems at abstraction levels from software to individual digital circuits and account for the implications of machine-level choices.",
+    "Write programs in assembly language and explain the relationship between high-level and assembly languages, including function calls and basic control structures."
+  ],
+  "assessment": [
+    {
+      "task": "Labs and Quizzes",
+      "weight": "10"
+    },
+    {
+      "task": "Practical Assignments",
+      "weight": "40"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5055",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6682",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

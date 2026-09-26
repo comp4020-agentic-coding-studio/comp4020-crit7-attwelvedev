@@ -1,0 +1,26 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:06Z",
+  "code": "COMP6470",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6470",
+  "title": "Special Topics in Computing",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "This course is available so that senior students can pursue, under supervision, topics that are not covered in the regular curriculum of some aspect of computer science. The activities in the course will be some combination of lectures, reading, writing and project work, as appropriate to the topic.",
+  "learning_outcomes": [
+    "Learning Outcomes will be determined for each individual student and recorded in an 'Independent Study Contract' at the beginning of the course."
+  ],
+  "assessment": [
+    {
+      "task": "An appropriate combination of written report, exercises, examination and seminar presentation",
+      "weight": "100"
+    }
+  ],
+  "offerings": []
+}

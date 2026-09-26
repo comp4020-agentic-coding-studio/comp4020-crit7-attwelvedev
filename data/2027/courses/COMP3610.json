@@ -1,0 +1,59 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:00Z",
+  "code": "COMP3610",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3610",
+  "title": "Principles of Programming Languages",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed: COMP2100 and  ( COMP1600 or 6 units of MATHS excluding MATH1003 )",
+  "prerequisite_codes": [
+    "COMP2100",
+    "COMP1600",
+    "MATH1003"
+  ],
+  "incompatibilities": "Incompatible with COMP6361 .",
+  "requisite_raw": "To enrol in this course you must have completed: COMP2100 and  ( COMP1600 or 6 units of MATHS excluding MATH1003 ) Incompatible with COMP6361 .",
+  "cotaught": [
+    "COMP6361"
+  ],
+  "description": "“Programming languages are the medium through which we describe computations. More specifically, we use the model provided by a programming language to discuss concepts, formulate algorithms, and reason about problem solutions. Programming languages define models tailored to thinking about and solving problems in intended application areas. For example, the C language provides a model close to a computer’s underlying hardware […]. The languages used in practice change continuously as advances in our field and the broadening uses of technology change how we model and express computation. At its core, the study of programming languages examines the principles and limitations of computing (or programming) models, the effective design and use of systems or languages based on these models, and methods to compare their relative strengths and weaknesses in particular contexts.” [Why Undergraduates Should Learn the Principles of Programming Languages, ACM SIGPLAN Education Board, February 6, 2011, Page 1] This course is an introduction to the theory and design of programming languages. To develop high-assurance software - software for which we can give strong evidence that the software will do what it is supposed to do and nothing more - a formal description of the 'meaning' and behaviour of programs is required. Hence two fundamental aspects of the study of programming languages are their syntax, and their formal semantics. High-assurance software is not only needed for safety-critical software, but also for program transformations, such as carried out by optimising compilers. Topics covered in this course include formal semantics of programming languages (such as operational, denotational and axiomatic), type systems, higher-order functions and lambda calculus, concurrency, and communication.",
+  "learning_outcomes": [
+    "Understand the role of theoretical formalisms, such as operational and denotational semantics",
+    "Apply these semantics in the context of programming languages",
+    "Evaluate differences (advantages/disadvantages) of these theoretical formalisms",
+    "Create operational or denotational semantics of simple imperative programs",
+    "Analyse the role of types in programming languages",
+    "Formalise properties and reason about programs",
+    "Apply basic principles for formalising concurrent programming languages"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "35"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "65"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10097",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11056",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

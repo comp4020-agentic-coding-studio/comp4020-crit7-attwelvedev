@@ -1,0 +1,55 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:25Z",
+  "code": "INFS3024",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/INFS3024",
+  "title": "Information Systems Management",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course, you must have completed at least one of the following courses: INFS2024 - Info Systems Analysis COMP2400 - Relational Databases .",
+  "prerequisite_codes": [
+    "INFS2024",
+    "COMP2400"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course, you must have completed at least one of the following courses: INFS2024 - Info Systems Analysis COMP2400 - Relational Databases .",
+  "cotaught": [],
+  "description": "This course gives students a thorough grounding in the management of technology in an organisational context, placing particular emphasis on the Chief Information Officer perspective. The unit material complements applied student knowledge with a theoretical technology management foundation. Topics are presented from a textbook and, where appropriate, relevant readings from the contemporary literature are used to present competing points of view. Topics include the information system in the organisation, information system planning, enterprise systems in context, systems to support operations and management, policy development and directive management, and technology economics. Students are introduced to the practical aspects of this area through a series of organisational case studies.",
+  "learning_outcomes": [
+    "Demonstrate an understanding of business information systems strategic planning and management principles, concepts, and theories;",
+    "Apply evidence in formulating business information systems strategic plans;",
+    "Demonstrate an understanding of internal and external dimensions of business information systems strategic planning with appropriate theories, models and examples;",
+    "Demonstrate ethical judgement in business information systems strategic planning, consistent with the ACS Code of Ethics;",
+    "Communicate effectively in oral and written forms about business information systems strategic planning principles, concepts and theories;",
+    "Undertake an applied team research project to formulate business information systems strategy that is underpinned by tactical plans and technical solutions."
+  ],
+  "assessment": [
+    {
+      "task": "Typical assessment may include, but is not restricted to: exams, assignments, quizzes, presentations and other assessment as appropriate. Further details will be made available via the Class Summary.",
+      "weight": "50"
+    },
+    {
+      "task": "A team research-based project. Further details will be made available via the Class Summary.",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5003",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6420",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

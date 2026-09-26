@@ -1,0 +1,67 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:01Z",
+  "code": "COMP6390",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6390",
+  "title": "Human-Computer Interaction",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must:  be studying Master of Computing  OR Master of Computing Advanced   OR  have completed 6 units of ( COMP6442 OR COMP6710 OR COMP6720 OR COMP6730 OR COMP7710 ).",
+  "prerequisite_codes": [
+    "COMP6442",
+    "COMP6710",
+    "COMP6720",
+    "COMP6730",
+    "COMP7710"
+  ],
+  "incompatibilities": "Incompatible with COMP3900 .",
+  "requisite_raw": "To enrol in this course you must:  be studying Master of Computing  OR Master of Computing Advanced   OR  have completed 6 units of ( COMP6442 OR COMP6710 OR COMP6720 OR COMP6730 OR COMP7710 ).   Incompatible with COMP3900 .",
+  "cotaught": [
+    "COMP3900"
+  ],
+  "description": "This course will provide an overview of the field of Human-Computer Interaction (HCI) and will introduce students to key interaction and experience design paradigms, approaches and methods. The course will equip students with theory, methods, and techniques to investigate different design situations, develop and prototype novel design ideas, and engage with the ethical dimensions of technology design.",
+  "learning_outcomes": [
+    "Explain and illustrate key aspects of human-computer interaction, including relevant theories, ethical considerations, and perspectives.",
+    "Apply a design and prototyping process to develop interactive systems that address user needs.",
+    "Investigate activities, practices, and contexts of technology use through research methods.",
+    "Critically evaluate novel technology designs using human-computer interaction approaches.",
+    "Critically reflect on a designer's own presence and influence within a technology design and research process."
+  ],
+  "assessment": [
+    {
+      "task": "Class Tasks",
+      "weight": "10"
+    },
+    {
+      "task": "Prototyping Assignment",
+      "weight": "20"
+    },
+    {
+      "task": "User Research Study",
+      "weight": "30"
+    },
+    {
+      "task": "Prototype Design and Research Project",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10091",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10852",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

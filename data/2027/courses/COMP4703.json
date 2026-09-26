@@ -1,0 +1,56 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:44Z",
+  "code": "COMP4703",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4703",
+  "title": "Vulnerability Research and Exploit Mitigation",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must have completed COMP2310 and COMP2700 .",
+  "prerequisite_codes": [
+    "COMP2310",
+    "COMP2700"
+  ],
+  "incompatibilities": "Incompatible with COMP2710 , COMP3703 and COMP8703 .",
+  "requisite_raw": "To enrol in this course you must have completed COMP2310 and COMP2700 . Incompatible with COMP2710 , COMP3703 and COMP8703 .",
+  "cotaught": [
+    "COMP8703"
+  ],
+  "description": "Historically, major defensive security techniques for software systems were developed as a response to the emergence of classes of exploitation techniques. The aims of such defensive techniques are usually not about preventing software developers from writing insecure code, but rather, they are aimed at preventing bugs in software to be exploited by attackers to compromise their targets. Vulnerability Research and Exploit Mitigation examines important exploit mitigation techniques deployed in modern software systems through an adversarial lens: software vulnerabilities are explored in depth, through how they can be discovered and exploited, in order to understand the mechanisms behind the exploit mitigation techniques. The course covers topics ranging from common patterns in software vulnerabilities, such as stack-based buffer overflow, format string vulnerabilities, and heap-based vulnerabilities; exploitation techniques such as code injection, code obfuscation, return-oriented-programming; techniques for vulnerability discovery, such as program binaries reverse engineering, fuzzing and symbolic execution; and mitigation techniques such as memory protection mechanisms, input sanitization, and control flow integrity protection. The course features hands-on lectures and labs to analyse software vulnerabilities, both in the source code and in program binaries, to develop proof-of-concept exploits, and to design and implement appropriate mitigation techniques against exploitation. Students will learn state-of-the-art vulnerability research and exploitation tools and techniques, and apply their knowledge on case studies involving real-world software systems.",
+  "learning_outcomes": [
+    "Demonstrate a thorough understanding of common sources of vulnerabilities in software.",
+    "Demonstrate a thorough understanding in exploitation techniques against software vulnerabilities and defensive techniques against these exploitations.",
+    "Demonstrate proficiency in software reverse engineering.",
+    "Demonstrate proficiency in vulnerability discovery processes, from both source code and binary.",
+    "Apply vulnerability discovery techniques to real-world software."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "60"
+    },
+    {
+      "task": "Final computer-based exam.",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5112",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6510",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

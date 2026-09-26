@@ -1,0 +1,48 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:19Z",
+  "code": "COMP8045",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8045",
+  "title": "Advanced Topics in Computer Systems & Architecture",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must have successfully completed 12 units of 6000-level COMP coded courses.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions on Enrolling in CSS courses. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have successfully completed 12 units of 6000-level COMP coded courses.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions on Enrolling in CSS courses. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [
+    "COMP4045"
+  ],
+  "description": "This course offers students a unique opportunity for the advanced study of a special thematic area within the discipline of computer systems and architecture. The topics will vary from year to year in response to emerging theoretical and practical issues in the discipline, as well as the research interests and expertise of academics and sessional staff. They could include (but not limited to) the following topics: micro architecture, garbage collection, memory design, and micro kernels.",
+  "learning_outcomes": [
+    "Demonstrate a broad knowledge in the advanced topic and its role and applications in modern computing systems",
+    "Critically evaluate the scientific literature related to the advanced topic and/or applications of the advanced topic in modern computing systems",
+    "Plan and execute project work and/or a piece of research and scholarship in the advanced topic",
+    "Reflect on current approaches of the advanced topic and evaluate their limitations"
+  ],
+  "assessment": [
+    {
+      "task": "Assessments and their weighting will vary depending on the nature of the topic. Specific details will be presented in the Class Summary",
+      "weight": "100"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5497",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11049",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

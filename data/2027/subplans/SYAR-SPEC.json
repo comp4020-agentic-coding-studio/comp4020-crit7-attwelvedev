@@ -1,0 +1,86 @@
+{
+  "kind": "subplan",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:04:55Z",
+  "code": "SYAR-SPEC",
+  "url": "https://programsandcourses.anu.edu.au/2027/specialisation/SYAR-SPEC",
+  "title": "Systems and Architecture",
+  "min_units": 24,
+  "introduction": "Computer systems and computer system architectures provide critical resources for modern computing environments. This ranges from resources for general purpose user application programming, to highly specialised real time embedded development environments. By gaining a deep understanding of these systems a developer can produce robust and high performing implementations. This also facilitates the exploration of better ways of providing these fundamental resources.\n\nThe Systems and Architecture specialisation focuses on computer systems including their use, architecture,  hardware, design, implementation, and limitations.\n\nDepending on the chosen courses, students will learn about:",
+  "learning_outcomes": [
+    "Demonstrate a deep understanding of a variety of computer system approaches",
+    "Choose an appropriate computer system approach and architecture to solve a given problem",
+    "Design, implement, test and evaluate different computer system approaches."
+  ],
+  "requirements": [
+    {
+      "type": "text",
+      "content": "This specialisation requires the completion of 24 units, which must consist of a minimum of 12 units of 4000 level courses."
+    },
+    {
+      "type": "group",
+      "heading": "A minimum of 12 units from completion of courses from the following list:",
+      "courses": [
+        {
+          "code": "COMP4045",
+          "title": "Advanced Topics in Computer Systems",
+          "units": null
+        },
+        {
+          "code": "COMP4300",
+          "title": "Parallel Systems",
+          "units": null
+        },
+        {
+          "code": "COMP4712",
+          "title": "Compiler Construction",
+          "units": null
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "heading": "A maximum of 12 units from completion of courses from the following list:",
+      "courses": [
+        {
+          "code": "COMP3300",
+          "title": "Operating Systems Implementation",
+          "units": null
+        },
+        {
+          "code": "COMP3310",
+          "title": "Computer Networks",
+          "units": null
+        },
+        {
+          "code": "COMP3320",
+          "title": "High Performance Scientific Computation",
+          "units": null
+        },
+        {
+          "code": "COMP3610",
+          "title": "Principles of Programming Languages",
+          "units": null
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "content": "This specialisation is incompatible with the Computer Systems (COMS) Major."
+    },
+    {
+      "type": "text",
+      "content": "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+    }
+  ],
+  "specialisations": [],
+  "all_course_codes": [
+    "COMP3300",
+    "COMP3310",
+    "COMP3320",
+    "COMP3610",
+    "COMP4045",
+    "COMP4300",
+    "COMP4712"
+  ]
+}

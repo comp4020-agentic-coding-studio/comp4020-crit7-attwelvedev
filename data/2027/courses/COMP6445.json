@@ -1,0 +1,57 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:04Z",
+  "code": "COMP6445",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6445",
+  "title": "Computing Research Methods",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must be enrolled in Master of Computing (Advanced) (VCOMP) or Master of Machine Learning and Computer Vision (MMLCV).",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP2550 and COMP4450",
+  "requisite_raw": "To enrol in this course you must be enrolled in Master of Computing (Advanced) (VCOMP) or Master of Machine Learning and Computer Vision (MMLCV).  Incompatible with COMP2550 and COMP4450",
+  "cotaught": [
+    "COMP4450"
+  ],
+  "description": "The course introduces students to some fundamentals of research methodology. The course comprises a series of lectures which cover the following topics: Philosophy of Science, Quantitative Research Methods, Qualitative Research Methods, Basic Machine Learning Methods, Theoretical Research Methods, How to find a Research Topic, Literature Analysis, Reading and Reviewing Papers, Research Ethics and Commercialising Research. The lectures will be complemented by a series of workshops, labs and assignments that require students to do some small research-focused tasks that help them get a hands-on experience of research, both individually and in teams of students. This includes different tasks such as topic modelling, statistical analysis, applying different machine learning techniques to solve a problem in a team, proving theorems, complexity analysis, designing a research project, reviewing papers and presenting papers. Workshops cover topics such as research integrity, time management and project management, teamwork, reading strategies, report writing, and presenting research. At the end of the course, students will be confident to start working on their own research projects.",
+  "learning_outcomes": [
+    "Effectively communicate research questions, methods and outcomes in oral, written and graphical forms to a broad audience using appropriate tools.",
+    "Justify and apply appropriate ethical technological choices based on an advanced consideration of the research question and methods.",
+    "Explain the process of identifying, composing and formulating ethical research questions.",
+    "Apply effective literature search and critical evaluation skills.",
+    "Explain the role of academic integrity and the importance of building upon and correctly attributing the work of others."
+  ],
+  "assessment": [
+    {
+      "task": "Research Proposal",
+      "weight": "20"
+    },
+    {
+      "task": "Literature Review",
+      "weight": "60"
+    },
+    {
+      "task": "Individual Presentation and Presentation Reviews",
+      "weight": "20"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5082",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6487",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

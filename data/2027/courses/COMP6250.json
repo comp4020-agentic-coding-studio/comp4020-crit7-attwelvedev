@@ -1,0 +1,36 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:51Z",
+  "code": "COMP6250",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6250",
+  "title": "Professional Practice: Holistic Thinking and Communication",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must be enrolled in Graduate Diploma of Computing or Master of Computing or Master of Computing (Advanced) or Master of Machine Learning and Computer Vision.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must be enrolled in Graduate Diploma of Computing or Master of Computing or Master of Computing (Advanced) or Master of Machine Learning and Computer Vision.",
+  "cotaught": [
+    "ENGN6250"
+  ],
+  "description": "This is one of two professional practice courses (the other isCOMP8260: Professional Practice: Responsible Innovation and Leadership) for engineering and computing graduate students that focus on developing professional and communication skills for the 21st century workplace. Industry bodies and employers of engineering and computing graduates consistently rank communication skills as one of the most important selection criteria when hiring. This course aims to heighten students’ awareness of ethical professional practice, and to develop new interpersonal and communication skills, leading to students becoming more competent professionals in their field. Based on Engineers Australia and Australian Computer Society professional competencies, students will develop and practice fundamental skills required by industry to better equip them for the workforce.",
+  "learning_outcomes": [
+    "Communicate effectively in a professional setting in written and spoken formats to transfer complex knowledge and ideas to technical and non-technical audiences.",
+    "Identify, critique and use appropriate sources of information when developing professional documents.",
+    "Maintain and develop appropriate, effective and professional forms of documentation.",
+    "Demonstrate effective team membership skills and contribute collaboratively within diverse team environments.",
+    "Articulate and reflect on the industry expectations of competence and ethical conduct in engineering and computing professions."
+  ],
+  "assessment": [
+    {
+      "task": "Group assignments                                                                           Marks for group tasks will include components for group performance and individual contribution of each student.",
+      "weight": "60"
+    },
+    {
+      "task": "Individual Assignments and Tutorial contributions    Weighting of assessment items will be confirmed by the course convener at the start of semester and published in the class summary.",
+      "weight": "40"
+    }
+  ],
+  "offerings": []
+}

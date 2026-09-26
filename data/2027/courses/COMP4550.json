@@ -1,0 +1,70 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:15Z",
+  "code": "COMP4550",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4550",
+  "title": "Computing Research Project",
+  "units": "12",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must:  have completed COMP2550 OR   have completed or be currently enrolled in COMP4450 AND  find a project/supervisor AND  have a weighted average mark equivalent to an ANU 70 per cent calculated from the 36 units of courses with the highest marks in cognate disciplines (excluding 1000-level courses) AND   have received a permission code by having completed all the steps required for Enrolling in student projects including completing the Student Project Registration Form.",
+  "prerequisite_codes": [
+    "COMP2550",
+    "COMP4450"
+  ],
+  "incompatibilities": "Incompatible with COMP4500 and COMP4560 and COMP4810 and COMP4820 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "requisite_raw": "To enrol in this course you must:  have completed COMP2550 OR   have completed or be currently enrolled in COMP4450 AND  find a project/supervisor AND  have a weighted average mark equivalent to an ANU 70 per cent calculated from the 36 units of courses with the highest marks in cognate disciplines (excluding 1000-level courses) AND   have received a permission code by having completed all the steps required for Enrolling in student projects including completing the Student Project Registration Form.    Incompatible with COMP4500 and COMP4560 and COMP4810 and COMP4820 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "COMP4550(12+12) is an Annual course that must be completed twice, in consecutive semesters. Students will conduct an individual research project under the close supervision of one or more academic staff. Projects will, at least in part, require the application of theoretical or experimental research techniques. In particular, students will be expected to conduct and present a survey of the literature relevant to the research topic. Students will prepare a thesis reporting on the research project and its outcomes. They will also be expected to present a poster or a short seminar describing their work.",
+  "learning_outcomes": [
+    "Identify a question/problem in a particular field of computing and devise a plan for a research project to investigate the topic.",
+    "Apply effective literature search and critical evaluation skills to complete a literature survey in the project topic area.",
+    "Select and apply appropriate research methods, tools, techniques to develop research findings and insights.",
+    "Effectively communicate research questions, methods and outcomes in oral, written and graphical forms to a broad audience using appropriate tools.",
+    "Produce a structured written thesis demonstrating an understanding of the chosen research area."
+  ],
+  "assessment": [
+    {
+      "task": "Thesis",
+      "weight": "90"
+    },
+    {
+      "task": "Presentation",
+      "weight": "10"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5083",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10083",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6488",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10844",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:40Z",
+  "code": "COMP3770",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3770",
+  "title": "Computing Research Project (R&D)",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol you must:  be studying Bachelor of Advanced Computing (Research and Development) AND have successfully completed COMP2550 AND find a project/supervisor AND have received a permission code by having completed all the steps required for Enrolling in student projects including completing the Student Project Registration Form. Finding a project/supervisor is best done before the start of the semester you are intending to do this course. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [
+    "COMP2550"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol you must:  be studying Bachelor of Advanced Computing (Research and Development) AND have successfully completed COMP2550 AND find a project/supervisor AND have received a permission code by having completed all the steps required for Enrolling in student projects including completing the Student Project Registration Form. Finding a project/supervisor is best done before the start of the semester you are intending to do this course. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "COMP3770is an Annual course (6+6) that must be completed twice, in consecutive semesters. This is an Individual Research Project (IRP) within the Bachelor of Advanced Computing (Research and Development) (Honours) degree, specifically designed to provide a strong research focus customised to each student. These give students valuable research experience along with the opportunity to explore different research areas prior to their final Honour's project.",
+  "learning_outcomes": [
+    "plan and engage in an independent and sustained critical investigation and evaluation of a chosen computer science research topic,",
+    "engage in systematic discovery and critical review of appropriate and relevant information sources,",
+    "propose, develop and evaluate different approaches for solving a research problem, and",
+    "communicate research concepts and contexts clearly and effectively, in writing and orally and in the production of a research-related artifact."
+  ],
+  "assessment": [
+    {
+      "task": "Thesis",
+      "weight": "90"
+    },
+    {
+      "task": "Presentation",
+      "weight": "10"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5084",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10084",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6489",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10845",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

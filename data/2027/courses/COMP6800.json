@@ -1,0 +1,55 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:15Z",
+  "code": "COMP6800",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6800",
+  "title": "Cyber Security Foundations",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must be enrolled in Masters of Computing (Advanced).",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP2700 .",
+  "requisite_raw": "To enrol in this course you must be enrolled in Masters of Computing (Advanced). Incompatible with COMP2700 .",
+  "cotaught": [
+    "COMP2700"
+  ],
+  "description": "Cyber Security Foundations introduces all essential cyber security principles. This includes principles of secure design, secrets minimization, least privilege, isolation, separation and encapsulation. The interplay between failed security principles and vulnerabilities is investigated in detail, and ethical considerations in vulnerability disclosure are discussed. The course provides the essential foundations which allow students to continue in a more in-depth cyber security career, yet can also be used a standalone unit to provide a self-contained set of knowledge.",
+  "learning_outcomes": [
+    "Demonstrate a thorough understanding of the fundamental principles underlying Cyber Security.",
+    "Define and identify cyber security principles and their violation.",
+    "Apply cyber security principles in a practical context.",
+    "Migrate insights from cyber security analysis into new designs.",
+    "Communicate cyber security threats to a heterogeneous team of professionals.",
+    "Demonstrate awareness of ethical issues in cyber security",
+    "Demonstrate understanding of cyber security issues in governance, risk and compliance in an organisational context."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "50"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5086",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6491",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

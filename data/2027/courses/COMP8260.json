@@ -1,0 +1,39 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:20Z",
+  "code": "COMP8260",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8260",
+  "title": "Professional Practice: Responsible Innovation and Leadership",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must be enrolled in the Graduate Diploma of Computing or Master of Computing or Master of Computing (Advanced) or Master of Machine Learning and Computer Vision.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must be enrolled in the Graduate Diploma of Computing or Master of Computing or Master of Computing (Advanced) or Master of Machine Learning and Computer Vision.",
+  "cotaught": [
+    "ENGN8260"
+  ],
+  "description": "This is one of two professional practice courses (the other isCOMP6250: Holistic Thinking and Communication) for engineering and computing graduate students that focus on developing professional and communication skills for the 21st century workplace. The course builds upon individual capacity, and further develops students’ professional skills, values, and attributes in ways that directly complement their technical expertise. These skills will enable students to perform effectively in the complex context in which engineering and computer professionals operate. In particular, the course will provide students with skills to interpret, critically evaluate, and justify their own and others’ decisions with reference to ethical and professional standards and expectations. The practical focus on these skills and their integration into the engineering and computing curriculum reflects the contemporary expectations of professional organisations (e.g. Engineers Australia and the Australian Computer Society) and enhances the employment opportunities of graduates.",
+  "learning_outcomes": [
+    "Demonstrate understanding of the responsibilities of membership in a professional community through engagement in ethical reflective practice, critical self-review and peer evaluation.",
+    "Justify, interpret and communicate professional propositions and decisions to technical and non-technical audiences.",
+    "Identify, analyse and synthesise information from multiple sources when developing solutions to complex problems.",
+    "Apply creativity, sensitivity, and initiative to decision-making and leadership of diverse team activities, especially where these involve negotiation of disparate stakeholder requirements."
+  ],
+  "assessment": [
+    {
+      "task": "Lecture and Workshop Contribution & Quizzes",
+      "weight": "20"
+    },
+    {
+      "task": "Responsible Innovation report, presentation and reflection",
+      "weight": "60"
+    },
+    {
+      "task": "AssignmentsWeighting of assessment items will be confirmed by the course convener at the start of semester and published in the course outline.",
+      "weight": "20"
+    }
+  ],
+  "offerings": []
+}

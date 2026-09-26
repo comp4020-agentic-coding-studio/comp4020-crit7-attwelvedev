@@ -1,0 +1,107 @@
+{
+  "kind": "subplan",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:04:53Z",
+  "code": "ARIN-SPEC",
+  "url": "https://programsandcourses.anu.edu.au/2027/specialisation/ARIN-SPEC",
+  "title": "Artificial Intelligence",
+  "min_units": 24,
+  "introduction": "The Artificial Intelligence specialisation covers modern artificial intelligence across both its symbolic and learning-based traditions. Students study logic-based reasoning, search, planning and optimisation alongside statistical machine learning, deep learning, computer vision and document analysis, and develop the theoretical understanding, technical skills and critical judgement to formulate, build and evaluate AI systems for real-world problems. The specialisation is designed for students aiming for advanced applied or research roles in AI.",
+  "learning_outcomes": [
+    "Apply methods of artificial intelligence across symbolic and/or learning-based traditions.",
+    "Formalise real-world problems mathematically and select appropriate AI methods.",
+    "Design, implement and empirically evaluate AI algorithms.",
+    "Critically analyse state-of-the-art AI methods and the ethical, social and data-related implications of their use."
+  ],
+  "requirements": [
+    {
+      "type": "text",
+      "content": "This Specialisation requires the completion of 24 units, which must include a minimum of 12 units of 4000-level courses."
+    },
+    {
+      "type": "group",
+      "heading": "A maximum of 12 units from the following list:",
+      "courses": [
+        {
+          "code": "COMP2620",
+          "title": "Logic",
+          "units": null
+        },
+        {
+          "code": "COMP3242",
+          "title": "Deep Learning",
+          "units": null
+        },
+        {
+          "code": "COMP3620",
+          "title": "Artificial Intelligence",
+          "units": null
+        },
+        {
+          "code": "COMP3670",
+          "title": "Introduction to Machine Learning",
+          "units": null
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "heading": "A minimum of 12 units from the following list:",
+      "courses": [
+        {
+          "code": "COMP4528",
+          "title": "Computer Vision",
+          "units": null
+        },
+        {
+          "code": "COMP4620",
+          "title": "Advanced Topics in Artificial Intelligence",
+          "units": null
+        },
+        {
+          "code": "COMP4650",
+          "title": "Document Analysis",
+          "units": null
+        },
+        {
+          "code": "COMP4670",
+          "title": "Statistical Machine Learning",
+          "units": null
+        },
+        {
+          "code": "COMP4680",
+          "title": "Advanced Topics in Machine Learning",
+          "units": null
+        },
+        {
+          "code": "COMP4691",
+          "title": "Optimisation",
+          "units": null
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "content": "This specialisation is not compatible with the INSY-MAJ."
+    },
+    {
+      "type": "text",
+      "content": "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+    }
+  ],
+  "specialisations": [],
+  "all_course_codes": [
+    "COMP2620",
+    "COMP3242",
+    "COMP3620",
+    "COMP3670",
+    "COMP4528",
+    "COMP4620",
+    "COMP4650",
+    "COMP4670",
+    "COMP4680",
+    "COMP4691",
+    "MATH1013",
+    "MATH1115"
+  ]
+}

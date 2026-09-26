@@ -1,0 +1,62 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:22Z",
+  "code": "COMP8300",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8300",
+  "title": "Parallel Systems",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must have completed: COMP6310 /2310 OR COMP6330 /3300 OR COMP6331 /3310 OR COMP6464 OR ENGN6539",
+  "prerequisite_codes": [
+    "COMP6310",
+    "COMP6330",
+    "COMP6331",
+    "COMP6464",
+    "ENGN6539"
+  ],
+  "incompatibilities": "Incompatible with COMP4300 .",
+  "requisite_raw": "To enrol in this course you must have completed: COMP6310 /2310 OR COMP6330 /3300 OR COMP6331 /3310 OR COMP6464 OR ENGN6539 Incompatible with COMP4300 .",
+  "cotaught": [
+    "COMP4300"
+  ],
+  "description": "A practically oriented introduction to programming paradigms for parallel computers. Considers definitions of program efficiency on parallel computers, addresses the modelling, analysis and measurement of program performance. Description, implementation and use of parallel programming languages, parallel features of operating systems, library routines and applications.",
+  "learning_outcomes": [
+    "Be proficient at programming multiple parallel machines in more than one special programming language or programming system",
+    "Be able to descriptively compare the performance of different programs and methods on one machine",
+    "Demonstrate advanced knowledge of the elements of parallel programming language and system implementation",
+    "Critique the history of parallel systems and review the developments in the field"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Laboratories",
+      "weight": "20"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5096",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6500",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

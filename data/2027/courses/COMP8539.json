@@ -1,0 +1,61 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:31Z",
+  "code": "COMP8539",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8539",
+  "title": "Advanced Topics in Computer Vision",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must have completed: COMP6528 or COMP4528 or ENGN4528 .",
+  "prerequisite_codes": [
+    "COMP6528",
+    "COMP4528",
+    "ENGN4528"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed ENGN8501 .",
+  "requisite_raw": "To enrol in this course you must have completed: COMP6528 or COMP4528 or ENGN4528 .  You are not able to enrol in this course if you have previously completed ENGN8501 .",
+  "cotaught": [
+    "ENGN8501"
+  ],
+  "description": "The goal of Computer Vision is to enable the computer or AI agent to ‘see’ and ‘understand’ the world like if not better than human beings. To that end, the computer needs to use sensors such as RGB or depth sensors to interact with the world. It mainly includes the understanding of the environment (scene understanding), humans, and further interaction with humans. Mapping to specific computer vision problems, this course will cover advanced topics in computer vision, such as 1) Scene Understanding, 2)Graphical Models, 3)3D visual perception , 4) Human Analysis and modeling. This course will review current research literature in the above fields and update students with state-of-the-art techniques. Students will work on group projects related to concrete research problems and present their research results in the form of seminars.",
+  "learning_outcomes": [
+    "Describe and analyze the main research challenges in the field of computer vision.",
+    "Summarize research literature and state-of-the-art techniques for solving the challenging research problems in those areas.",
+    "Model and formulate problems, propose effective solutions to the problem and implement algorithms using suitable programming languages.",
+    "Design network structure and loss functions in cases where problems need to be solved using deep learning techniques.",
+    "Analyze the results and effectively evaluate the results on benchmark datasets."
+  ],
+  "assessment": [
+    {
+      "task": "Literature Reading Reports",
+      "weight": "50"
+    },
+    {
+      "task": "Research/Design Project",
+      "weight": "30"
+    },
+    {
+      "task": "Seminar Presentation",
+      "weight": "20"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10149",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11050",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:16Z",
+  "code": "COMP7710",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP7710",
+  "title": "Programming Fundamentals",
+  "units": "12",
+  "level": "7000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed or are currently enrolled in COMP1110 OR COMP1140 OR COMP6710",
+  "requisite_raw": "You are not able to enrol in this course if you have previously completed or are currently enrolled in COMP1110 OR COMP1140 OR COMP6710",
+  "cotaught": [],
+  "description": "This course provides Students with the opportunity to develop a solid understanding of programming that is essential before progressing to more advanced concepts. It is structured to demonstrate and provide the students with practice in the fundamentals of structured programming.  It is designed for Postgraduate students who do not have a programming background. Students will learn to use an industrial-strength object-oriented programming language and form basic mental models of how computer programs execute and interact with their environment. The course focuses on key aspects of solving programming problems: reasoning about a problem description to design appropriate data representations and function/method descriptions, to find examples, to write, test, debug, and otherwise evaluate the relevant code, and to present and defend their approach. Students will learn to effectively use a large standard library and key standard data structures, including lists, trees, hash tables, and graphs. The course also introduces the basics of reasoning about the time and space complexity of algorithms, in particular as related to the above data structures.",
+  "learning_outcomes": [
+    "Internalize computation thinking",
+    "Apply fundamental programming concepts, using an object-oriented programming language, to solve practical programming problems",
+    "Implement, debug, and evaluate algorithms for solving substantial problems; implement an abstract data type",
+    "Apply basic algorithmic analysis to simple algorithms; use appropriate algorithmic approaches to solve problems",
+    "Design, implement, and test data structures and code",
+    "Understand their ethical responsibilities as a programmer with respect to Academic integrity, the use of Artificial Intelligence and authorship of code",
+    "Present, explain, evaluate, and defend choices in design and implementations of programs and algorithms"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "35"
+    },
+    {
+      "task": "In-Class Activities",
+      "weight": "5"
+    },
+    {
+      "task": "Final Exam and Mid-term test",
+      "weight": "60"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5114",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10119",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6512",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10873",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

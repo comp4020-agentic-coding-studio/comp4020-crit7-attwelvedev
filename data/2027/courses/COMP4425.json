@@ -1,0 +1,59 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:43Z",
+  "code": "COMP4425",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4425",
+  "title": "Data Mining",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must have completed 6 units of ( COMP1100 or COMP1130 or COMP1730 ) AND COMP2400",
+  "prerequisite_codes": [
+    "COMP1100",
+    "COMP1130",
+    "COMP1730",
+    "COMP2400"
+  ],
+  "incompatibilities": "Incompatible with COMP3425 , COMP8400 , COMP8410 and COMP8910 .",
+  "requisite_raw": "To enrol in this course you must have completed 6 units of ( COMP1100 or COMP1130 or COMP1730 ) AND COMP2400 Incompatible with COMP3425 , COMP8400 , COMP8410 and COMP8910 .",
+  "cotaught": [
+    "COMP8410"
+  ],
+  "description": "Massive amounts of data are being collected by public and private organisations, and research projects, while the Internet provides a very large source of information about almost every aspect of human life and society. Analysing such data can provide significant benefits to an organisation. This course provides a practical focus on the technology and research in the area of data mining. It focuses on the algorithms and techniques and less on the mathematical and statistical foundations.",
+  "learning_outcomes": [
+    "Critically analyse and justify the steps involved in the data mining process.",
+    "Anticipate and identify data issues related to data mining.",
+    "Test and apply the principal algorithms and techniques used in data mining.",
+    "Justify suitable techniques to use for a given data mining problem.",
+    "Appraise and reflect upon the results of a data mining project using suitable measurements.",
+    "Reflect upon ethical and social impacts of data mining."
+  ],
+  "assessment": [
+    {
+      "task": "Written and practical assignments and quizzes",
+      "weight": "50"
+    },
+    {
+      "task": "Final examination",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5087",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6492",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

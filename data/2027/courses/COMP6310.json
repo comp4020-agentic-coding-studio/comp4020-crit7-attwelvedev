@@ -1,0 +1,65 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:55Z",
+  "code": "COMP6310",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6310",
+  "title": "Systems, Networks and Concurrency",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must have completed: COMP6300 AND ( COMP6710 or COMP7710 or COMP1110 )",
+  "prerequisite_codes": [
+    "COMP6300",
+    "COMP6710",
+    "COMP7710",
+    "COMP1110"
+  ],
+  "incompatibilities": "Incompatible with COMP2310 .",
+  "requisite_raw": "To enrol in this course you must have completed: COMP6300 AND ( COMP6710 or COMP7710 or COMP1110 )  Incompatible with COMP2310 .",
+  "cotaught": [
+    "COMP2310"
+  ],
+  "description": "This course is based on the foundations set by the previous course on computer organisation. It expands particularly into all forms of concurrent programming including aspects of massively parallel programming. This course introduces all basic mechanisms to analyse, design, and manage concurrent, single computer-node (multicore) as well as distributed applications (e.g. as performance or dependability enhancements). Following on from the previous course, the fields of operating systems and networking will also be expanded on. On the operating system side aspects of security, scheduling algorithms and memory management are discussed. More specific networking aspects follow on from message passing as a core concurrency construct. These include the basics of routing and dependable protocols.",
+  "learning_outcomes": [
+    "Model, design and program concurrent systems.",
+    "Select appropriate modeling techniques, tools and mechanisms to solve a range of problems in concurrent and distributed systems. This includes the appropriate programming language and runtime environment for the task at hand.",
+    "Analyse and debug concurrent programs.",
+    "Understand the aspects of an operating system concerning scheduling, protection and memory management.",
+    "Employ message passing locally and over networks to construct distributed systems",
+    "Distinguish as well as connect conceptual concurrency with physical parallelism at all levels of a distributed system.",
+    "Identify core aspects of operating systems and networks irrespective of the specific system at hand.",
+    "Reflect critically on current concurrent and distributed systems tools and their limitations."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "40"
+    },
+    {
+      "task": "Mid-semester test",
+      "weight": "10"
+    },
+    {
+      "task": "Final exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10117",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10871",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

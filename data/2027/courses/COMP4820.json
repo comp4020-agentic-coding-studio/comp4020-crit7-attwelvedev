@@ -1,0 +1,72 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:17Z",
+  "code": "COMP4820",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4820",
+  "title": "Advanced Computing Internship",
+  "units": "12",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must be studying a Bachelor of Advanced Computing AND have successfully completed: COMP2100 AND 12 units of 3000 level COMP courses.",
+  "prerequisite_codes": [
+    "COMP2100"
+  ],
+  "incompatibilities": "Incompatible with COMP4500 , COMP4550 , COMP4560 and COMP4810 .  Competitive entry based on application and interviews with Hosts. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "requisite_raw": "To enrol in this course you must be studying a Bachelor of Advanced Computing AND have successfully completed: COMP2100 AND 12 units of 3000 level COMP courses.  Incompatible with COMP4500 , COMP4550 , COMP4560 and COMP4810 .  Competitive entry based on application and interviews with Hosts. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "This course will enable advanced computing students to develop competencies expected of professionals working in business, government or the broader community. The internship opportunities are published on the School of Computing Projects webpage. A holistic selection process, including interviews with the Host, will be used to select the best applicant for each opportunity. Students can also propose internships, but these will always be established following negotiations between the ANU and potential host organisations, and then offered to students along with other opportunities.",
+  "learning_outcomes": [
+    "Demonstrate a personal commitment to ethical behaviour, competent practice, meeting legal and regulatory requirements, taking responsibility for their own work and acknowledging the work of others.",
+    "Demonstrate a commitment to safety and sustainability, appropriate engagement with relevant stakeholders, and identify, assess and manage risk.",
+    "Communicate effectively and work productively in a trans-disciplinary team, using initiative and sound judgement, to achieve defined workplace objectives.",
+    "Apply their knowledge and skills in computer science to explore and critically analyse a real-world problem; using creativity and innovation, identify and critically evaluate potential solutions to the problem; choose and implement a particular solution; and critically evaluate and analyse the outcomes and impact of this solution."
+  ],
+  "assessment": [
+    {
+      "task": "Statement of Work",
+      "weight": "25"
+    },
+    {
+      "task": "Poster and Pitch",
+      "weight": "25"
+    },
+    {
+      "task": "Feedback and Reflection",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5047",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10074",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6456",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10836",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

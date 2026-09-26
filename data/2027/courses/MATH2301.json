@@ -1,0 +1,66 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:32Z",
+  "code": "MATH2301",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MATH2301",
+  "title": "Games, Graphs and Machines",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course you must have completed MATH1005 , MATH1013 , MATH1113 , or MATH1115 .",
+  "prerequisite_codes": [
+    "MATH1005",
+    "MATH1013",
+    "MATH1113",
+    "MATH1115"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have completed MATH1005 , MATH1013 , MATH1113 , or MATH1115 .",
+  "cotaught": [],
+  "description": "This course is designed to introduce students to abstraction and its role in modeling problems mathematically. It focuses on discrete mathematics with elements of computer science, and is designed for students with a broad range of backgrounds. Topics to be covered include:",
+  "learning_outcomes": [
+    "Engage with abstraction and its role in modeling phenomena.",
+    "Assimilate new ideas and apply them to solve problems.",
+    "Use graph theoretic methods to solve problems.",
+    "Understand the relationship between regular languages and finite state automata.",
+    "Analyse certain kinds of games in full or partial detail.",
+    "Solve problems with a good degree of accuracy.",
+    "Work together to solve problems."
+  ],
+  "assessment": [
+    {
+      "task": "Regular assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Mid-semester examination",
+      "weight": "25"
+    },
+    {
+      "task": "Final examination",
+      "weight": "40"
+    },
+    {
+      "task": "Workshop participation",
+      "weight": "5"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "9775",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10595",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

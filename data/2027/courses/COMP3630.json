@@ -1,0 +1,54 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:12Z",
+  "code": "COMP3630",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3630",
+  "title": "Theory of Computation",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed: 24 units of COMP coded courses AND (6 units of MATH OR COMP1600 )",
+  "prerequisite_codes": [
+    "COMP1600"
+  ],
+  "incompatibilities": "Incompatible with COMP6363 .",
+  "requisite_raw": "To enrol in this course you must have completed: 24 units of COMP coded courses AND (6 units of MATH OR COMP1600 ) Incompatible with COMP6363 .",
+  "cotaught": [
+    "COMP6363"
+  ],
+  "description": "This course covers the theoretical computer science areas of formal languages and automata, computability and complexity. Topics covered include the following: regular and context-free languages; finite automata and pushdown automata; Turing machines; computability - halting problem, solvable, and unsolvable problems; space and time complexity; classes P, NP and PSPACE; NP-Completeness.",
+  "learning_outcomes": [
+    "Demonstrate advanced knowledge of formal computation and its relationship to languages",
+    "Distinguish different computing languages and classify their respective types",
+    "Recognise and comprehend formal reasoning about languages",
+    "Demonstrate a competent understanding of the basic concepts of complexity theory"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments, quizzes, in-class activities",
+      "weight": "50"
+    },
+    {
+      "task": "Final Exam and/or during semester assessments",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5111",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6509",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

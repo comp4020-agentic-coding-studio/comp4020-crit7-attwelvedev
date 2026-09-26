@@ -1,0 +1,69 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:31Z",
+  "code": "MATH2222",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MATH2222",
+  "title": "Introduction to Mathematical Thinking: Problem-Solving and Proofs",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "Students with excellent results in either the ACT Specialist Mathematics double major, NSW HSC Mathematics Extension 2 or equivalent may take this course together with MATH1115 in the first year. For many students taking MATH1115 in their first year, MATH1005 would be a more appropriate companion choice. If you are not sure which courses to take in your first year, please consult the MSI First-year Coordinator.    All other students may enrol in this course if they have completed MATH1116 with a mark of at least 50, or MATH1113 with a mark of at least 60, or MATH1005 with a mark of at least 70, or MATH1013 or MATH1014 with a mark of at least 80.    Incompatible: MATH2322 , MATH3104 , MATH2320 , MATH3116 or MATH6222 .",
+  "prerequisite_codes": [
+    "MATH1115",
+    "MATH1115",
+    "MATH1005",
+    "MATH1116",
+    "MATH1113",
+    "MATH1005",
+    "MATH1013",
+    "MATH1014",
+    "MATH2322",
+    "MATH3104",
+    "MATH2320",
+    "MATH3116",
+    "MATH6222"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "Students with excellent results in either the ACT Specialist Mathematics double major, NSW HSC Mathematics Extension 2 or equivalent may take this course together with MATH1115 in the first year. For many students taking MATH1115 in their first year, MATH1005 would be a more appropriate companion choice. If you are not sure which courses to take in your first year, please consult the MSI First-year Coordinator.    All other students may enrol in this course if they have completed MATH1116 with a mark of at least 50, or MATH1113 with a mark of at least 60, or MATH1005 with a mark of at least 70, or MATH1013 or MATH1014 with a mark of at least 80.    Incompatible: MATH2322 , MATH3104 , MATH2320 , MATH3116 or MATH6222 .",
+  "cotaught": [
+    "MATH6222"
+  ],
+  "description": "This course focuses on the language of mathematical arguments. Rather than attacking advanced topics, we will use simple mathematics to develop an understanding of how results are established. We begin with clearly stated and plausible assumptions or axioms and then develop a more and more complex theory from them. The course, and the lecturer, will have succeeded if you finish the course able to construct valid arguments of your own and to criticise those that are presented to you.",
+  "learning_outcomes": [
+    "Understand the role of rigorous proof in mathematics.",
+    "Demonstrate facility with a range of mathematical and logical arguments.",
+    "Develop problem-solving skills in elementary number theory, graph theory, and probability theory."
+  ],
+  "assessment": [
+    {
+      "task": "Regular written problem sets",
+      "weight": "30"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    },
+    {
+      "task": "Workshop quizzes",
+      "weight": "20"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "4018",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5568",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:04:59Z",
+  "code": "COMP1100",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP1100",
+  "title": "Programming as Problem Solving",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP1130 .",
+  "requisite_raw": "Incompatible with COMP1130 .",
+  "cotaught": [],
+  "description": "This course is the first of three core computer science courses on programming. It introduces students to the field of computer science as a discipline for solving problems through computation and provides the foundation for more advanced courses on programming and software development. Data structures and algorithms, the key concepts at the core of computer science, receive their first treatment in this course. The course covers functional programming in depth, developing the core idea of functions operating on data structures. Students learn the organization of programming languages using types, how programs are evaluated (reduction), functional composition, recursive functions, algebraic data types, pattern matching, parametric polymorphism, higher-order functions. Students also gain exposure to asymptotic analysis of basic data structures, abstract data types, modules, laziness, and streams. The functional paradigm demonstrates elegant solutions to many programming problems. The course also introduces students to standard productivity tools for software development that will be used throughout the course and remainder of the computer science degree. These include distributed software revision control systems. The Advanced version of this course covers these topics in more depth, allowing students to deepen their understanding and experience.",
+  "learning_outcomes": [
+    "Apply fundamental programming concepts, using a functional programming language, to solve problems.",
+    "Understand basic types and the benefits of static typing.",
+    "Describe, understand and evolve programs, via documentation, testing, and debugging.",
+    "Discuss, use, and apply the fundamentals of data structures, algorithms, and design; create, implement, and debug algorithms for solving problems, including recursively, using divide-and-conquer, and via decomposition.",
+    "Discuss basic algorithmic analysis for simple algorithms; determine appropriate algorithmic approaches to a problem (for example bruteforce, greedy, divide-and-conquer, recursive backtracking, heuristic, dynamic programming).",
+    "Understand and apply the concepts of parametric and ad-hoc polymorphism"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Lab Assessment",
+      "weight": "5"
+    },
+    {
+      "task": "Mid-term quiz (hurdle)",
+      "weight": "10"
+    },
+    {
+      "task": "Final Exam (hurdle)",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5099",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10101",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6679",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11051",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

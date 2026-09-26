@@ -1,0 +1,39 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:36Z",
+  "code": "COMP3703",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3703",
+  "title": "Software Security",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed: COMP2300 OR ENGN2219 AND COMP2700 .  It is incompatible with COMP2710 Software Security.",
+  "prerequisite_codes": [
+    "COMP2300",
+    "ENGN2219",
+    "COMP2700",
+    "COMP2710"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have completed: COMP2300 OR ENGN2219 AND COMP2700 .  It is incompatible with COMP2710 Software Security.",
+  "cotaught": [],
+  "description": "Software Security covers advanced techniques in software vulnerability assessment, discovery and mitigation. These include: common patterns in software vulnerabilities, such as stack-based buffer overflow, format string vulnerabilities, and heap-based vulnerabilities; exploitation techniques such as code injection, return-oriented-programming; techniques for vulnerability discovery, such as program binaries reverse engineering, fuzzing and symbolic execution; and mitigation techniques such as memory protection mechanisms, input sanitation, and control flow integrity protection. The course features hands-on lectures and labs to analyse software vulnerabilities, both in the source code and in program binaries, and design and implement appropriate mitigation techniques.",
+  "learning_outcomes": [
+    "Demonstrate a thorough understanding of common sources of vulnerabilities in software.",
+    "Demonstrate a thorough understanding in exploitation techniques against software vulnerabilities and defensive techniques against these exploitations.",
+    "Demonstrate proficiency in software reverse engineering.",
+    "Demonstrate proficiency in vulnerability discovery processes, from both source code and binary.",
+    "Apply the vulnerability discovery techniques to real-world software, analyse their vulnerabilities and design and implement appropriate mitigation techniques."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments with practical hands-on components, and report writing with in-depth analysis of vulnerabilities and designs and implementations of mitigation techniques.",
+      "weight": "60"
+    },
+    {
+      "task": "Final computer-based exam in vulnerability discovery and exploit writing.",
+      "weight": "40"
+    }
+  ],
+  "offerings": []
+}

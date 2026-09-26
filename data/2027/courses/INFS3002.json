@@ -1,0 +1,49 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:24Z",
+  "code": "INFS3002",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/INFS3002",
+  "title": "Enterprise Systems in Business",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course, you must have completed at least one of the following courses: INFS2005 - Accounting Information Systems INFS2024 - Info Systems Analysis COMP2400 - Relational Databases .",
+  "prerequisite_codes": [
+    "INFS2005",
+    "INFS2024",
+    "COMP2400"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course, you must have completed at least one of the following courses: INFS2005 - Accounting Information Systems INFS2024 - Info Systems Analysis COMP2400 - Relational Databases .",
+  "cotaught": [],
+  "description": "This course prepares students for future managerial level appointments by introducing the important management and socio-technical concepts related to the strategic development, investment and use of Business IT systems in organizations and business enterprises. The course actively builds on prior Business Information Systems fundamental and management studies, by focusing on integrated business systems thinking, particularly in the areas of organizational enterprise architecture and business process management. The course also covers enterprise systems design principles; the human dimension of enterprise systems; trust, security and ethics in the enterprise; enterprise resource, supply chain and customer relationship management systems; and, the importance of handling heterogeneous information systems in business environments. The course also introduces the latest trends in enterprise solutions, like AI-enabled enterprise systems. The assessment requires a practically oriented research and consulting report targeted at a contemporary real-world business problem.",
+  "learning_outcomes": [
+    "analyse, design and architect IT systems within small, medium and large enterprises",
+    "analyse, redesign and manage business processes within small, medium and large enterprises",
+    "manage the resourcing and control of enterprise IT systems."
+  ],
+  "assessment": [
+    {
+      "task": "Typical assessments may include, but is not restricted to: in-class exercises, written and oral assignments, quizzes, examinations, group project tasks, oral presentation, and other assessment deemed appropriate to show attainment of the learning outcomes set for the course. Further details will be made available via the Class Summary.",
+      "weight": "100"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "9554",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10427",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

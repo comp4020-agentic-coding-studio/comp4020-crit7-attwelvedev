@@ -1,0 +1,74 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:25Z",
+  "code": "COMP8410",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8410",
+  "title": "Data Mining",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must have completed COMP7240 or COMP6240 or COMP2400 ; and COMP6730 or COMP7230 or COMP6710 .",
+  "prerequisite_codes": [
+    "COMP7240",
+    "COMP6240",
+    "COMP2400",
+    "COMP6730",
+    "COMP7230",
+    "COMP6710"
+  ],
+  "incompatibilities": "Incompatible with COMP3420 and COMP3425 and COMP8400 and COMP8910 .",
+  "requisite_raw": "To enrol in this course you must have completed COMP7240 or COMP6240 or COMP2400 ; and COMP6730 or COMP7230 or COMP6710 .  Incompatible with COMP3420 and COMP3425 and COMP8400 and COMP8910 .",
+  "cotaught": [
+    "COMP4425"
+  ],
+  "description": "Massive amounts of data are collected by public and private organisations, while the Web offers rich information about almost every aspect of human life and society. Analysing such data can provide significant benefits to an organisation or research project. This course provides a practical focus on the technology and research in the area of data mining. It focuses on the algorithms and techniques and less on the mathematical and statistical foundations.",
+  "learning_outcomes": [
+    "Critically analyse and justify the steps involved in the\ndata mining process,",
+    "Anticipate and identify data issues related to data mining,",
+    "Research, test and apply the principal algorithms and\ntechniques used in data mining,",
+    "Justify suitable techniques to use for a given data mining\nproblem,",
+    "Appraise and reflect upon the results of a data mining\nproject using suitable measurements,",
+    "Investigate application areas and current research\ndirections of data mining,",
+    "Reflect upon ethical and social impacts of data mining."
+  ],
+  "assessment": [
+    {
+      "task": "Regular formative quizzes",
+      "weight": "5"
+    },
+    {
+      "task": "Written assignment: essay",
+      "weight": "15"
+    },
+    {
+      "task": "Mid-course lab exam",
+      "weight": "20"
+    },
+    {
+      "task": "Practical assignment: report",
+      "weight": "20"
+    },
+    {
+      "task": "Final examination",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5401",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6677",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

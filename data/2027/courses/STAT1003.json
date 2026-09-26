@@ -1,0 +1,47 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:41Z",
+  "code": "STAT1003",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/STAT1003",
+  "title": "Statistical Techniques",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with STAT1008 .",
+  "requisite_raw": "Incompatible with STAT1008 .",
+  "cotaught": [],
+  "description": "This course introduces students to the philosophy and methods of modern statistical data analysis and inference, with a particular focus on applications to the life sciences. The course has a strong emphasis on computing and graphical methods, and uses a variety of real-world problems to motivate the theory and methods required for carrying out statistical data analysis. This course makes extensive use of R statistical analysis package interfaced through R Studio.",
+  "learning_outcomes": [
+    "Summarise and graph data appropriately;",
+    "Work with random variables and probability distributions and describe the rationale behind them;",
+    "Describe and use the normal distribution appropriately;",
+    "Identify when and how to carry out basic statistical inference including confidence intervals, hypothesis testing, regression and analysis of variance; and,",
+    "Identify contexts in which particular statistical methods may be inappropriate."
+  ],
+  "assessment": [
+    {
+      "task": "Typical assessment may include, but is not restricted to: exams, assignments, quizzes, presentations and other assessment as appropriate",
+      "weight": "100"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "4720",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6187",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

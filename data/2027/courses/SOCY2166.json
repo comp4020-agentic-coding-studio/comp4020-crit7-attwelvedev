@@ -1,0 +1,52 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:40Z",
+  "code": "SOCY2166",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/SOCY2166",
+  "title": "Social Science of the Internet",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course you must have completed:     -12 units of Computer (COMP) or Statistics (STAT) courses , OR     -12 units of Criminology (CRIM), Political Science (POLS), Social Research (SOCR) or Sociology (SOCY) courses. In addition, if SOCY2038 Introduction to Quantitative Research Methods has not been completed, then it must studied concurrently with SOCY2166 .  Students not satisfying the above may request permission to enrol from the convener.",
+  "prerequisite_codes": [
+    "SOCY2038",
+    "SOCY2166"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed SOCY6066 .",
+  "requisite_raw": "To enrol in this course you must have completed:     -12 units of Computer (COMP) or Statistics (STAT) courses , OR     -12 units of Criminology (CRIM), Political Science (POLS), Social Research (SOCR) or Sociology (SOCY) courses. In addition, if SOCY2038 Introduction to Quantitative Research Methods has not been completed, then it must studied concurrently with SOCY2166 .  Students not satisfying the above may request permission to enrol from the convener.  You are not able to enrol in this course if you have previously completed SOCY6066 .",
+  "cotaught": [
+    "SOCY6066"
+  ],
+  "description": "The internet, and in particular the web and social media, has transformed the way we socialise, participate in politics, work, collaborate, and engage in commerce. This course focuses on the contribution of social science at large – emphasising classical sociology and social network analysis – to understanding life in the Digital Age. While attention is paid to relevant insights and approaches from other disciplines, for example applied physics and computer science, the primary focus is on theoretical and empirical contributions from social science. This course equips students with the theory and methods for understanding the social, political and economic impact of the internet. Students will also learn how network analysis and big data are being used to answer long-standing questions in social science.",
+  "learning_outcomes": [
+    "critically assess the social, political and economic impact of the Internet;",
+    "understand how big data are being used to answer long-standing social science research questions;",
+    "conduct basic social network analysis;",
+    "research available data, tools and methods for studying online social behaviour; and",
+    "compare social scientific approaches to studying the Internet with those from other disciplines."
+  ],
+  "assessment": [
+    {
+      "task": "Online quizzes",
+      "weight": "20"
+    },
+    {
+      "task": "Social network analysis problem set and research note",
+      "weight": "30"
+    },
+    {
+      "task": "Final examination",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6282",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:33Z",
+  "code": "COMP8610",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8610",
+  "title": "Computer Graphics",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must:  be studying VCOMP  OR   be studying MMLCV and have completed COMP6710 or COMP1110 or COMP1140 OR  have completed ( COMP6710 or COMP1110 or COMP1140 ) and have completed ( COMP6390 or COMP6442 or COMP6540 or COMP6780 or COMP6720 ).",
+  "prerequisite_codes": [
+    "COMP6710",
+    "COMP1110",
+    "COMP1140",
+    "COMP6710",
+    "COMP1110",
+    "COMP1140",
+    "COMP6390",
+    "COMP6442",
+    "COMP6540",
+    "COMP6780",
+    "COMP6720"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have successfully completed COMP4610 or COMP6461 .",
+  "requisite_raw": "To enrol in this course you must:  be studying VCOMP  OR   be studying MMLCV and have completed COMP6710 or COMP1110 or COMP1140 OR  have completed ( COMP6710 or COMP1110 or COMP1140 ) and have completed ( COMP6390 or COMP6442 or COMP6540 or COMP6780 or COMP6720 ).  You are not able to enrol in this course if you have successfully completed COMP4610 or COMP6461 .",
+  "cotaught": [
+    "COMP4610"
+  ],
+  "description": "Computer graphics are an essential part of modern software. In this course, students will learn about fundamental algorithms, data structures and programming models used in 3D graphics applications. These key concepts in computer graphics programming will be covered from their mathematical foundations through to their application in domains such as data visualisation, virtual reality, computer games and film animation/VFX. In this course students will explore these concepts through practical implementation in a modern computer graphics software context.",
+  "learning_outcomes": [
+    "Explain the stages of a modern, hardware-accelerated 3D rendering pipeline",
+    "Construct and manipulate complex models, geometries and scene graphs in both 2D and 3D",
+    "Implement computer graphics algorithms in a shader language",
+    "Compare and evaluate different computer graphics techniques based on performance, aesthetic and implementation difficulty"
+  ],
+  "assessment": [
+    {
+      "task": "Weekly lab portfolio",
+      "weight": "10"
+    },
+    {
+      "task": "Group project",
+      "weight": "20"
+    },
+    {
+      "task": "Individual project",
+      "weight": "40"
+    },
+    {
+      "task": "Final exam",
+      "weight": "30"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5058",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6465",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

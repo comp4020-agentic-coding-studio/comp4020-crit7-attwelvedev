@@ -1,0 +1,76 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:35Z",
+  "code": "COMP3500",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3500",
+  "title": "Software Engineering Project",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must meet the eligibility criteria, which includes membership of a student project group before the end of week 1, where the project has been approved by the convener.   You must also be studying: Bachelor of Engineering (Honours) in Software Engineering (AENSE)  OR  Bachelor of Computing (BCOMP) AND have completed: COMP2100 AND COMP2120",
+  "prerequisite_codes": [
+    "COMP2100",
+    "COMP2120"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed COMP3100 or if you have previously or are currently enrolled in COMP3820 or COMP4500 or COMP4820 .",
+  "requisite_raw": "To enrol in this course you must meet the eligibility criteria, which includes membership of a student project group before the end of week 1, where the project has been approved by the convener.   You must also be studying: Bachelor of Engineering (Honours) in Software Engineering (AENSE)  OR  Bachelor of Computing (BCOMP) AND have completed: COMP2100 AND COMP2120 You are not able to enrol in this course if you have previously completed COMP3100 or if you have previously or are currently enrolled in COMP3820 or COMP4500 or COMP4820 .",
+  "cotaught": [],
+  "description": "COMP3500is an annual course (6+6) that must be completed twice, in consecutive semesters. Students work in small groups and participate in all the development phases (requirements analysis, design, construction, testing and documentation) of a nontrivial software system. As well, each group has to address the control of the development process by constructing and following a detailed software development management plan. Students will also study relevant aspects of the software engineering milieux. Most students will work on projects for an industry, government or university client. Highly motivated students will be given an opportunity to engage with the ACT Innovation community and students across the university to create their own software-based start-up businesses. To enrol in this course you must meet the eligibility criteria, which includes membership of a student project group before the end of week 1, where the project has been approved by the convener.",
+  "learning_outcomes": [
+    "Work as an effective member of a team that creatively identifies, implements, and delivers a software solution to a complex problem.",
+    "Develop lifelong learning through reflection, as demonstrated through continual reflection on the software development lifecycle (SDLC) and teamwork processes experienced throughout the year.",
+    "Exhibit an awareness of team formation strategies and stages leading to the development of a high-performing self-managing team.",
+    "Present, communicate, and effectively defend sound engineering decisions at project reviews, both orally and in writing, with peers, supervisors, and project stakeholders.",
+    "Demonstrate experience in project, configuration, and risk management processes when undertaking a software development project.",
+    "Demonstrate experience in the different stages of the SDLC.",
+    "Demonstrate experience in and appropriate use of standards in software development."
+  ],
+  "assessment": [
+    {
+      "task": "Three group project reviews",
+      "weight": "70"
+    },
+    {
+      "task": "Group Poster and Showcase",
+      "weight": "10"
+    },
+    {
+      "task": "Individual Reflection and Portfolio",
+      "weight": "20"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5105",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10110",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6504",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10865",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

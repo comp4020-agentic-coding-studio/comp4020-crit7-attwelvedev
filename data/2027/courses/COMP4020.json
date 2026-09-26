@@ -1,0 +1,49 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:54Z",
+  "code": "COMP4020",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4020",
+  "title": "Advanced Topics in Human-Centred and Creative Computing",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "To enrol in this course, you must have completed COMP3900 . Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website when the course topic is announced. Students who meet the prerequisites can request a permission code from the College. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [
+    "COMP3900"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course, you must have completed COMP3900 . Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website when the course topic is announced. Students who meet the prerequisites can request a permission code from the College. You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [
+    "COMP8020"
+  ],
+  "description": "This course offers students a unique opportunity for the advanced study of a special thematic area within the disciplines of human-centred and creative computing. The topics will vary from year to year in response to emerging challenges in these disciplines, as well as the research interests and expertise of academics and sessional staff. Topics will be drawn from the broad areas of human-computer interaction and creative computing, and could include (but not limited to) the following topics:human-centred AI, design research methodologies, interface design with e-textiles, interface design with recycled materials, augmented reality and spatial computing.",
+  "learning_outcomes": [
+    "Demonstrate a broad knowledge in the advanced topic and its role and applications in computing",
+    "Critically evaluate the scholarly literature related to the advanced topic and/or applications of the advanced topic in computing",
+    "Plan and execute project work and/or a piece of research and scholarship in the advanced topic"
+  ],
+  "assessment": [
+    {
+      "task": "Assessments and their weighting will vary depending on the nature of the topic. Specific details will be presented in the Class Summary.",
+      "weight": "100"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10061",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10825",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

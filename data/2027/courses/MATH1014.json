@@ -1,0 +1,94 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:28Z",
+  "code": "MATH1014",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MATH1014",
+  "title": "Mathematics and Applications 2",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "To enrol in this course you must have completed MATH1013 or MATH1115 or MATH1113 .",
+  "prerequisite_codes": [
+    "MATH1013",
+    "MATH1115",
+    "MATH1113"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed MATH1116 .",
+  "requisite_raw": "To enrol in this course you must have completed MATH1013 or MATH1115 or MATH1113 .  You are not able to enrol in this course if you have previously completed MATH1116 .",
+  "cotaught": [],
+  "description": "This course continues on fromMATH1013. It emphasises an understanding of the fundamental results from calculus and linear algebra which both can be applied across a range of fields including the physical and biological sciences, engineering and information technologies, economics and commerce, and can also serve as a base for future mathematics courses. Many applications and connections with other fields will be discussed although not developed in detail. Topics to be covered include: Calculus - Integration and techniques of integration, including multiple and iterated integrals. Sequences and series. Functions of several variables - visualisation, continuity, partial derivatives, and directional derivatives. Lagrange multipliers. Linear Algebra - theory and application of Euclidean vector spaces. Vector spaces: linear independence, bases and dimension; eigenvalues and eigenvectors; orthogonality and least squares.",
+  "learning_outcomes": [
+    "Explain the fundamental concepts of calculus and linear algebra and their role in modern mathematics and applied contexts. These concepts include vector spaces, eigenvalues and eigenvectors, orthogonality and least squares in linear algebra; and integration, sequences and series, functions of several variables, and partial differential equations in calculus.",
+    "Demonstrate accurate and efficient use of calculus and linear algebra techniques as they relate to the concepts listed above.",
+    "Demonstrate capacity for mathematical reasoning through explaining concepts from calculus and linear algebra and reproducing familiar proofs.",
+    "Apply problem-solving using calculus and linear algebra techniques applied to diverse situations in physics, engineering and other mathematical contexts."
+  ],
+  "assessment": [
+    {
+      "task": "Workshop assessment (completed during workshops)",
+      "weight": "8"
+    },
+    {
+      "task": "Online quizzes",
+      "weight": "12"
+    },
+    {
+      "task": "Assignments (three)",
+      "weight": "30"
+    },
+    {
+      "task": "Final examination",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5414",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10391",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Spring Session",
+      "mode": "In Person",
+      "class_number": "9623",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6695",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11060",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Spring Session",
+      "mode": "In Person",
+      "class_number": "10429",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

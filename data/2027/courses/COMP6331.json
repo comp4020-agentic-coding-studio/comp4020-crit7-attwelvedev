@@ -1,0 +1,68 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:58Z",
+  "code": "COMP6331",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6331",
+  "title": "Computer Networks",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must have completed:  ( COMP6710 OR COMP7710 OR COMP1110 OR COMP1140 ) OR ( COMP6310 OR COMP2310 ) OR ( COMP6442 OR COMP2100 ).",
+  "prerequisite_codes": [
+    "COMP6710",
+    "COMP7710",
+    "COMP1110",
+    "COMP1140",
+    "COMP6310",
+    "COMP2310",
+    "COMP6442",
+    "COMP2100"
+  ],
+  "incompatibilities": "Incompatible with COMP3310 , ENGN3539 , ENGN6539 .",
+  "requisite_raw": "To enrol in this course you must have completed:  ( COMP6710 OR COMP7710 OR COMP1110 OR COMP1140 ) OR ( COMP6310 OR COMP2310 ) OR ( COMP6442 OR COMP2100 ).  Incompatible with COMP3310 , ENGN3539 , ENGN6539 .",
+  "cotaught": [
+    "COMP3310",
+    "ENGN3539",
+    "ENGN6539"
+  ],
+  "description": "This course studies the standard models for the layered approach to communication between autonomous machines in a network, and the main characteristics of data transmission across various physical link types. It considers how to design networks and protocols for diverse situations, analyses several application and support protocols from a distributed systems viewpoint, and identifies significant problem areas in networked communications. Topics include: communication network architectures, signalling and modulation across physical media, real-world local and wide-area networks, internet protocol fundamentals, performance and monitoring of networks, routing, network security, and application protocols for distributed systems including web, email, video, internet-of-everything and other contemporary network topics.",
+  "learning_outcomes": [
+    "Interpret, articulate and critically review the layered protocol model.",
+    "Articulate, analyse and appraise a number of datalink, network, and transport layer protocols.",
+    "Program network communication services for client/server and other application layouts.",
+    "Articulate, analyse and appraise various related technical, administrative and social aspects of specific computer network protocols from standards documents and other primary materials found through research.",
+    "Design, analyse, and recommend networks and services for homes, data centres, IoT/IoE, LANs and WANs."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "45"
+    },
+    {
+      "task": "Mid-Semenster Quiz",
+      "weight": "15"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5061",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6467",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

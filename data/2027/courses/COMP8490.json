@@ -1,0 +1,64 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:27Z",
+  "code": "COMP8490",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8490",
+  "title": "Document Analysis",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must be enrolled in  Master of Computing (Advanced) OR   have completed 6 units of: ( COMP6240 /2400 OR COMP6260 /1600 OR COMP6442 /2100) AND have completed 6 units of: ( COMP6730 /1730 OR COMP6710 /1110).",
+  "prerequisite_codes": [
+    "COMP6240",
+    "COMP6260",
+    "COMP6442",
+    "COMP6730",
+    "COMP6710"
+  ],
+  "incompatibilities": "Incompatible with COMP4650 and COMP6490 and COMP6990 .",
+  "requisite_raw": "To enrol in this course you must be enrolled in  Master of Computing (Advanced) OR   have completed 6 units of: ( COMP6240 /2400 OR COMP6260 /1600 OR COMP6442 /2100) AND have completed 6 units of: ( COMP6730 /1730 OR COMP6710 /1110).  Incompatible with COMP4650 and COMP6490 and COMP6990 .",
+  "cotaught": [
+    "COMP4650"
+  ],
+  "description": "The ability to process and analyse large volumes of text is essential in today's information-driven world. This course introduces technologies for the analysis of textual documents, covering both foundational and modern approaches. It begins with the basics of information retrieval and text classification, then advances to deep learning methods in natural language processing, including the use of pre-trained large language models (LLMs). Emphasis will be placed on the theoretical foundations of the methods and algorithms, while practical exercises will provide students with valuable hands-on experience.",
+  "learning_outcomes": [
+    "Explain, implement, and evaluate fundamental information retrieval methods, and analyse their effectiveness on real-world document collections.",
+    "Design and assess machine learning pipelines for text classification, including using cross validation to perform model selection.",
+    "Explain, implement, and experiment with embedding-based text representations and their application in downstream NLP tasks.",
+    "Explain, implement, train, and evaluate commonly used neural network architectures for text processing, including recurrent neural networks and transformer models.",
+    "Explain the principles underlying large language models, including training objectives, architectures, fine-tuning strategies, and critically assess their capabilities and limitations in applied settings.",
+    "Evaluate and interpret the performance of document analysis methods using appropriate metrics, and effectively communicate the findings."
+  ],
+  "assessment": [
+    {
+      "task": "Quizzes",
+      "weight": "15"
+    },
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Final Examination",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10087",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10848",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

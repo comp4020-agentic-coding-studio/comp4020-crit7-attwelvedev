@@ -1,0 +1,58 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:11Z",
+  "code": "COMP3600",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3600",
+  "title": "Algorithms",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed the following: 24 units of COMP coded courses AND (6 units of MATH OR COMP1600 )",
+  "prerequisite_codes": [
+    "COMP1600"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have successfully completed COMP6466 .",
+  "requisite_raw": "To enrol in this course you must have completed the following: 24 units of COMP coded courses AND (6 units of MATH OR COMP1600 )  You are not able to enrol in this course if you have successfully completed COMP6466 .",
+  "cotaught": [
+    "COMP6466"
+  ],
+  "description": "Algorithms are the foundation of Computer Science. They enable advances in Artificial Intelligence, Machine Learning, Cybersecurity, Distributed, Mobile, and Cloud Computing, Computer Graphics and Animation, and many more. These advances have made Computer Science an indispensable part of our everyday life. The main goal of this course is to familiarize students with basic concepts in the design and analysis of algorithms and data structures. It focuses on fundamental computing problems such as sorting and searching. The students will learn how to use different algorithm design methods and data structures to solve such problems efficiently, as well as basic performance measures and analysis techniques.",
+  "learning_outcomes": [
+    "Display a solid understanding of classical algorithms for fundamental computing problems such as sorting and searching and their analysis.",
+    "Demonstrate knowledge of various data structures, such as binary search trees and heaps, and their applications.",
+    "Design efficient algorithms using techniques such as greedy approaches and dynamic programming.",
+    "Analyse the time and space complexity of algorithms."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "5"
+    },
+    {
+      "task": "Midterm assessments",
+      "weight": "40"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10080",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11055",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

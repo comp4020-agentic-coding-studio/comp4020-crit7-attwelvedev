@@ -1,0 +1,44 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:41Z",
+  "code": "COMP3820",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3820",
+  "title": "Computing Internship",
+  "units": "12",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have successfully completed COMP2100 and COMP2120 .  You will need to undergo competitive entry to enrol in this course, please see CECC webpage for more information.",
+  "prerequisite_codes": [
+    "COMP2100",
+    "COMP2120"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed or are currently enrolled in COMP3500 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "requisite_raw": "To enrol in this course you must have successfully completed COMP2100 and COMP2120 .  You will need to undergo competitive entry to enrol in this course, please see CECC webpage for more information.  You are not able to enrol in this course if you have previously completed or are currently enrolled in COMP3500 . You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "This course will enable computer science students to develop competencies expected of professionals working in business, government or the broader community. The course coordinator will maintain a list of available internship opportunities for which students can apply. A holistic selection process will be used to select the best applicant for each opportunity. Students can also propose internships, but these will always be established following negotiations between the ANU and potential host organisations, and then offered to students along with other opportunities.",
+  "learning_outcomes": [
+    "Demonstrate a personal commitment to ethical behaviour, competent practice, meeting legal and regulatory requirements, taking responsibility for their own work and acknowledging the work of others.",
+    "Demonstrate a commitment to safety and sustainability, appropriate engagement with relevant stakeholders, and identify, assess and manage risk.",
+    "Communicate effectively and work productively in a multi-disciplinary team, using initiative and sound judgement, to achieve defined workplace objectives.",
+    "Apply their knowledge and skills in computer science to explore and critically analyse a real-world problem; using creativity and innovation, identify and critically evaluate potential solutions to the problem; choose and implement a particular solution; and critically evaluate and analyse the outcomes and impact of this solution."
+  ],
+  "assessment": [
+    {
+      "task": "Statement of Work",
+      "weight": "20"
+    },
+    {
+      "task": "Poster and Showcase",
+      "weight": "20"
+    },
+    {
+      "task": "Feedback and Reflection",
+      "weight": "40"
+    },
+    {
+      "task": "Work Portfolio Package",
+      "weight": "20"
+    }
+  ],
+  "offerings": []
+}

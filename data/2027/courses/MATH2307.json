@@ -1,0 +1,60 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:33Z",
+  "code": "MATH2307",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MATH2307",
+  "title": "Bioinformatics and Biological Modelling",
+  "units": "6",
+  "level": "2000",
+  "prerequisites": "To enrol in this course you must have successfully completed 12 units of 1000 levels Mathematics (MATH) courses including either MATH1014 or MATH1116 .",
+  "prerequisite_codes": [
+    "MATH1014",
+    "MATH1116"
+  ],
+  "incompatibilities": "You are not able to enrol in this course if you have completed MATH6100 .",
+  "requisite_raw": "To enrol in this course you must have successfully completed 12 units of 1000 levels Mathematics (MATH) courses including either MATH1014 or MATH1116 . You are not able to enrol in this course if you have completed MATH6100 .",
+  "cotaught": [],
+  "description": "The course begins with a detailed discussion of genome assembly and sequence alignment algorithms that are critical for assessing the relatedness of DNA, RNA and amino acid sequences. We then proceed to studying Markov chains, hidden Markov models, and phylogenetics as important examples of biological models for such sequences. The main algorithms and several applications will be explained. Finally, mathematical models in epidemiology and biochemistry will be given as examples of a more general application of mathematics in biology. The course is accompanied by computer lab sessions to gain practice in R, a language and environment for statistical and mathematical computing and graphics.",
+  "learning_outcomes": [
+    "Understand basic models for the evolution and comparison of biological sequences.",
+    "Understand and apply basic probabilistic concepts such as conditional probability, Markov chains, and hidden Markov models.",
+    "Understand the main principles of mathematical modelling in biology."
+  ],
+  "assessment": [
+    {
+      "task": "Three assignments (10% each)",
+      "weight": "30"
+    },
+    {
+      "task": "Two quizzes (10% each)",
+      "weight": "20"
+    },
+    {
+      "task": "Final exam",
+      "weight": "40"
+    },
+    {
+      "task": "Oral presentation and short essay (optional, if not taken final exam has 50% allocation)",
+      "weight": "10"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "9033",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "9958",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

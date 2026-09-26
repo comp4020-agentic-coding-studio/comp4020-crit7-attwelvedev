@@ -1,0 +1,59 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:35Z",
+  "code": "COMP8650",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8650",
+  "title": "Advanced Topics in Machine Learning",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must have completed COMP6670 Introduction to Machine Learning or COMP8600 Statistical Machine Learning.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website (Special Topics in Computing page ) when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions for Enrolling in CECC courses.",
+  "prerequisite_codes": [
+    "COMP6670",
+    "COMP8600"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must have completed COMP6670 Introduction to Machine Learning or COMP8600 Statistical Machine Learning.  Additional Prerequisite courses for the Advanced Topic will be listed on the SoCo website (Special Topics in Computing page ) when the course topic is announced. Students who meet the pre-requisites can request a permission code following the instructions for Enrolling in CECC courses.",
+  "cotaught": [
+    "COMP4680"
+  ],
+  "description": "This course explores a selected area relevant to statistical machine learning in depth, and will be taught by an SML staff member of internationally recognised standing and research interest in that area. Based on current SML staffing, this will be one of: kernel methods structured probabilistic models reinforcement learning convex analysis and optimisation topics in information theory decision theory deep learning differentiable optimisation in deep learning Over the past several years the content has alternated between “convex analysis and optimisation” and “differentiable optimisation in deep learning\". Students should contact the course convenor to find out what topic is planned for the coming semester.",
+  "learning_outcomes": [
+    "Distinguish definitions of key concepts \nin convex analysis, including convexity of sets and functions, \nsubgradients, and the convex dual",
+    "Produce a formal optimization problem from a high-level description and determine whether the problem is convex",
+    "Recognize standard convex optimization problems such as linear programs and quadratic programs",
+    "Derive results about convex functions such as Jensen’s inequality",
+    "Derive\n the standard (dual) quadratic program for support vector machines and \nunderstand the extension to max-margin methods for structured prediction",
+    "Implement and analyse gradient descent algorithms such as stochastic gradient descent and mirror descent",
+    "Understanding advanced  concepts in deep learning and relate them to principles from convex optimisation",
+    "Implement a simple algorithms and differentiable models using a common deep learning framework (such as PyTorch)"
+  ],
+  "assessment": [
+    {
+      "task": "Regular homework assignments",
+      "weight": "40"
+    },
+    {
+      "task": "Open-book final exam",
+      "weight": "60"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5051",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6460",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

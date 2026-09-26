@@ -1,0 +1,66 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:49Z",
+  "code": "COMP4670",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP4670",
+  "title": "Statistical Machine Learning",
+  "units": "6",
+  "level": "4000",
+  "prerequisites": "To enrol in this course you must have completed: COMP3670 OR  ( COMP1110 / COMP1140 AND MATH1014 OR MATH1115 OR MATH1116 )",
+  "prerequisite_codes": [
+    "COMP3670",
+    "COMP1110",
+    "COMP1140",
+    "MATH1014",
+    "MATH1115",
+    "MATH1116"
+  ],
+  "incompatibilities": "Incompatible with COMP8600 and COMP8960 .",
+  "requisite_raw": "To enrol in this course you must have completed: COMP3670 OR  ( COMP1110 / COMP1140 AND MATH1014 OR MATH1115 OR MATH1116 )    Incompatible with COMP8600 and COMP8960 .",
+  "cotaught": [
+    "COMP8600"
+  ],
+  "description": "This course provides a broad but thorough introduction to the methods and practice of statistical machine learning. Topics covered will include Bayesian inference and maximum likelihood; regression, classification, density estimation, clustering, principal and independent component analysis; parametric, semi-parametric, and non-parametric models; basis functions, neural networks, kernel methods, and graphical models; deterministic and stochastic optimisation; overfitting, regularisation, and validation.",
+  "learning_outcomes": [
+    "Describe a number of models for supervised, unsupervised, and reinforcement machine learning",
+    "Assess the strengths and weaknesses of each of these models",
+    "Interpret the mathematical equations from Linear Algebra, Statistics, and Probability Theory used in these machine learning models",
+    "Implement efficient machine learning algorithms on a computer",
+    "Design test procedures in order to evaluate a model",
+    "Combine several models in order to gain better results",
+    "Make choices for a model for new machine learning tasks based on reasoned argument"
+  ],
+  "assessment": [
+    {
+      "task": "Exam 1",
+      "weight": "25"
+    },
+    {
+      "task": "Exam 2",
+      "weight": "25"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5109",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6508",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

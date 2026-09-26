@@ -1,0 +1,55 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:53Z",
+  "code": "COMP6261",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6261",
+  "title": "Information Theory",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "You cannot enrol in this course if you have completed COMP2610 or ENGN8534 .",
+  "requisite_raw": "You cannot enrol in this course if you have completed COMP2610 or ENGN8534 .",
+  "cotaught": [
+    "COMP2610"
+  ],
+  "description": "Information theory studies the fundamental limits of the representation and transmission of information. This course provides an introduction to information theory, studying fundamental concepts such as probability, information, and entropy and examining their applications in the areas of data compression, coding, communications, pattern recognition and probabilistic inference.",
+  "learning_outcomes": [
+    "Understand and \napply fundamental concepts in information theory such as probability, \nentropy, information content and their inter-relationships.",
+    "Understand the principles of data compression.",
+    "Compute entropy and mutual information of random variables.",
+    "Implement and analyse basic coding and compression algorithms.",
+    "Understand\n the relationship of information theoretical principles and Bayesian \ninference in data modelling and pattern recognition.",
+    "Understand some key theorems and inequalities that quantify essential limitations on compression, communication and inference.",
+    "Know the basic concepts regarding communications over noisy channels."
+  ],
+  "assessment": [
+    {
+      "task": "Assignment 1",
+      "weight": "10"
+    },
+    {
+      "task": "Assignment 2",
+      "weight": "20"
+    },
+    {
+      "task": "Assignment 3",
+      "weight": "20"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10382",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

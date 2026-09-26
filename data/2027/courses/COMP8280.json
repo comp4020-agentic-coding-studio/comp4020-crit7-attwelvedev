@@ -1,0 +1,74 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:21Z",
+  "code": "COMP8280",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8280",
+  "title": "Responsible Practice, Innovation and Leadership",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must be enrolled in the Graduate Diploma of Computing or Master of Computing or Master of Computing (Advanced) or Master of Machine Learning and Computer Vision.",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP8260 , ENGN8260 and ENGN8280 .",
+  "requisite_raw": "To enrol in this course you must be enrolled in the Graduate Diploma of Computing or Master of Computing or Master of Computing (Advanced) or Master of Machine Learning and Computer Vision.  Incompatible with COMP8260 , ENGN8260 and ENGN8280 .",
+  "cotaught": [
+    "ENGN8280"
+  ],
+  "description": "This professional practice course for computing and engineering graduate students focuses on developing professional and communication skills essential for the 21st-century workplace. The course builds upon individual capacity, and further develops students’ professional skills, values, and attributes in ways that directly complement their technical expertise. These skills will enable students to perform effectively in the complex transdisciplinary environments in which computing and engineering professionals operate. In particular, the course will provide students with skills to interpret, critically evaluate, and justify their own and others’ decisions with reference to ethical and professional standards and expectations. The practical focus on these skills and their integration into the computing and engineering curriculum reflects the contemporary expectations of professional organisations (e.g. ACS (Australian Computer Society) and Engineers Australia) and enhances the employment and leadership opportunities of graduates.",
+  "learning_outcomes": [
+    "Demonstrate understanding of membership in a professional community through engagement in ethical reflective practice, critical self-review and peer evaluation.",
+    "Demonstrate effective team membership skills within diverse team environments.",
+    "Apply key aspects of responsible innovation, inclusive and ethical practice to projects.",
+    "Reflect on the value of systems approaches within a transdisciplinary context in professional practice.",
+    "Identify, analyse and synthesise information from multiple sources and perspectives when developing solutions to complex problems.",
+    "Communicate effectively in written and spoken formats to transfer complex knowledge and ideas to technical and non-technical audiences."
+  ],
+  "assessment": [
+    {
+      "task": "Lecture and tutorial participation and quizzes",
+      "weight": "20"
+    },
+    {
+      "task": "Exam",
+      "weight": "20"
+    },
+    {
+      "task": "Assignments - number and weighting of assessment items will be confirmed by the course convener at the start of semester and published in the course outline.",
+      "weight": "60"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5097",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10099",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6501",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10859",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

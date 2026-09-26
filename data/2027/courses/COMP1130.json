@@ -1,0 +1,65 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:01Z",
+  "code": "COMP1130",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP1130",
+  "title": "Programming as Problem Solving (Advanced)",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP1100 .",
+  "requisite_raw": "Incompatible with COMP1100 .",
+  "cotaught": [
+    "COMP1100"
+  ],
+  "description": "This course is a variation on Programming for Problem Solving (COMP1100). It covers the same topics in more depth, requiring additional contact hours to allow students to deepen their understanding and experience. They will understand the foundations of program semantics, program proof, and implementation of the programming language features that they have learned in the course. As the advanced version of the course the first six Learning Outcomes are the same as forCOMP1100. Students can start inCOMP1130and then drop back toCOMP1100during the semester.  You cannot change intoCOMP1130after week 2. This course is an Advanced Studies Extension Course (ASE), with the additional work required for an ASE built into theCOMP1130assessment.",
+  "learning_outcomes": [
+    "Apply fundamental programming concepts, using a functional programming language, to solve problems.",
+    "Understand basic types and the benefits of static typing.",
+    "Describe, understand and evolve programs, via documentation, testing, and debugging.",
+    "Discuss, use, and apply the fundamentals of data structures, algorithms, and design; create, implement, and debug algorithms for solving problems, including recursively, using divide-and-conquer, and via decomposition.",
+    "Discuss basic algorithmic analysis for simple algorithms; determine appropriate algorithmic approaches to a problem (for example bruteforce, greedy, divide-and-conquer, recursive backtracking, heuristic, dynamic programming).",
+    "Understand and apply the concepts of parametric and ad-hoc polymorphism.",
+    "Reflect on the fundamental mathematical concepts underlying functional programming.",
+    "Use formal proof and structural induction to reason about the correctness of functional programs.",
+    "Assessing the significance of different evaluation strategies, including laziness, for the computational behaviour of functional programs."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "30"
+    },
+    {
+      "task": "Lab Assessment",
+      "weight": "5"
+    },
+    {
+      "task": "Mid-Term Exam",
+      "weight": "10"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5100",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6503",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

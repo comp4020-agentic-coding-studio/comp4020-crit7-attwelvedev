@@ -1,0 +1,65 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:08Z",
+  "code": "COMP6528",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6528",
+  "title": "Computer Vision",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must be studying one of:  Graduate Diploma of Computing Master of Computing Master of Computing (Advanced). Master of Machine Learning and Computer Vision",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with ENGN6528 and COMP4528 and ENGN4528 .",
+  "requisite_raw": "To enrol in this course you must be studying one of:  Graduate Diploma of Computing Master of Computing Master of Computing (Advanced). Master of Machine Learning and Computer Vision   Incompatible with ENGN6528 and COMP4528 and ENGN4528 .",
+  "cotaught": [
+    "COMP4528",
+    "ENGN4528",
+    "ENGN6528"
+  ],
+  "description": "Computer Vision is an important field of Artificial Intelligence concerned with automatically extracting useful information from images or videos. The explosive growth in digital imaging technologies, vision datasets and deep learning makes the problems of automated image interpretation even more exciting and more relevant than ever. This course introduces students to fundamental problems in computer vision and foundational techniques for solving them. Topics covered in detail include: image formation, image filtering, camera geometry, thresholding and image segmentation, edge, point and feature detection, geometric frameworks for vision, single view and two views geometry, 3D visual reconstruction, camera calibration, stereo vision, image classification, object recognition, deep learning and neural networks. The course features extensive practical components including computer labs that provide students with the opportunity to practice and refine their skills in computer vision.",
+  "learning_outcomes": [
+    "Understand and proficiently apply specialised knowledge, methods and skills in image processing and computer vision applications, research and development.",
+    "Identify, formulate and innovatively solve problems in image processing and computer vision.",
+    "Critically analyse, evaluate and examine existing practical computer vision systems.",
+    "Design and develop practical and innovative image processing and computer vision applications or systems using advanced knowledge and research techniques.",
+    "Communicate effectively to both specialist and non-specialist audiences, explaining and synthesising complex concepts related to visual information processing systems.",
+    "Conduct themselves professionally and responsibly in the areas of computer vision, image processing and deep learning.",
+    "Critically read, review and assess scientific literature in the field and apply theoretical knowledge to identify the novelty and practicality of proposed methods."
+  ],
+  "assessment": [
+    {
+      "task": "Assignment 1",
+      "weight": "15"
+    },
+    {
+      "task": "Assignment 2",
+      "weight": "15"
+    },
+    {
+      "task": "Assignment 3",
+      "weight": "15"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "55"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5066",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6471",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

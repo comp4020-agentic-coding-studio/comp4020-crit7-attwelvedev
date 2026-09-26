@@ -1,0 +1,63 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:58Z",
+  "code": "COMP3310",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3310",
+  "title": "Computer Networks",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed COMP2100 or COMP2300 . AND 6 units of COMP2000 -level courses.",
+  "prerequisite_codes": [
+    "COMP2100",
+    "COMP2300",
+    "COMP2000"
+  ],
+  "incompatibilities": "Incompatible with COMP6331 , ENGN3539 and ENGN6539 .",
+  "requisite_raw": "To enrol in this course you must have completed COMP2100 or COMP2300 . AND 6 units of COMP2000 -level courses.  Incompatible with COMP6331 , ENGN3539 and ENGN6539 .",
+  "cotaught": [
+    "COMP6331",
+    "ENGN3539",
+    "ENGN6539"
+  ],
+  "description": "This course studies the standard models for the layered approach to communication between autonomous devices in a network, the main characteristics of data transmission across various physical link types and the implications for protocol designs. It considers how to design networks and protocols for diverse situations, analyses several application and support protocols from a distributed systems viewpoint, and identifies significant problem areas in networked communications. Topics include: communication network architectures, signalling and modulation across physical media, real-world local and wide-area networks, internet protocol fundamentals, performance and monitoring of networks, routing, network security, and application protocols for distributed systems including web, email, video, internet-of-everything, peer-to-peer and other contemporary network topics.",
+  "learning_outcomes": [
+    "Interpret and articulate the layered protocol model.",
+    "Articulate, analyse and evaluate a number of datalink, network, and transport layer protocols.",
+    "Program network communication services for client/server and other application layouts.",
+    "Articulate, analyse and evaluate various related technical, administrative and social aspects of specific computer network protocols from standards documents and other primary materials found through research.",
+    "Design, analyse, and evaluate networks and services for homes, data centres, IoT/IoE, LANs and WANs."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "45"
+    },
+    {
+      "task": "Mid-Semester Quiz",
+      "weight": "15"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5059",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6684",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:09Z",
+  "code": "COMP6540",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6540",
+  "title": "Game Development",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must:  be enrolled in Master of Computing Advanced OR  have completed ( COMP6710 or COMP7710 or COMP1110 or COMP1140 ).",
+  "prerequisite_codes": [
+    "COMP6710",
+    "COMP7710",
+    "COMP1110",
+    "COMP1140"
+  ],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must:  be enrolled in Master of Computing Advanced OR  have completed ( COMP6710 or COMP7710 or COMP1110 or COMP1140 ).",
+  "cotaught": [
+    "COMP3540"
+  ],
+  "description": "This course will provide a holistic grounding for game development, including elements of design, development, and production. Students will learn about key theories of game design and development and develop practical game development skills using leading professional development tools. Students will additionally learn from experienced industry professionals via guest lectures and engagement opportunities.",
+  "learning_outcomes": [
+    "Explain game development theory and architecture",
+    "Apply appropriate techniques and tools in the production of video games",
+    "Analyse how game elements influence player experience",
+    "Work effectively in a team environment to create video games",
+    "Successfully communicate game development ideas, concepts, designs, models, and processes",
+    "Evaluate game development outcomes in terms of current industry practice and recent developments"
+  ],
+  "assessment": [
+    {
+      "task": "Game Proposal",
+      "weight": "20"
+    },
+    {
+      "task": "Game Labs",
+      "weight": "20"
+    },
+    {
+      "task": "Development Process",
+      "weight": "20"
+    },
+    {
+      "task": "Game Project",
+      "weight": "40"
+    }
+  ],
+  "offerings": []
+}

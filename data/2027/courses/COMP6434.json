@@ -1,0 +1,60 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:02Z",
+  "code": "COMP6434",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6434",
+  "title": "Data Wrangling",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must have completed: 6 units of ( COMP1110 or COMP1140 or COMP6730 or COMP6710 ) AND 6 units of ( COMP2400 or COMP6240 ).",
+  "prerequisite_codes": [
+    "COMP1110",
+    "COMP1140",
+    "COMP6730",
+    "COMP6710",
+    "COMP2400",
+    "COMP6240"
+  ],
+  "incompatibilities": "Incompatible with COMP3430 and COMP8930 .",
+  "requisite_raw": "To enrol in this course you must have completed: 6 units of ( COMP1110 or COMP1140 or COMP6730 or COMP6710 ) AND 6 units of ( COMP2400 or COMP6240 ).  Incompatible with COMP3430 and COMP8930 .",
+  "cotaught": [
+    "COMP3430"
+  ],
+  "description": "Real-world data are commonly messy, distributed, and heterogeneous. This course introduces core concepts of data cleaning and standardisation, and data integration, that are aimed at converting and mapping raw data into other formats that allow more efficient and convenient use and analysis of data. The courses also discusses data quality, management, and storage issues as relevant to data analytics.",
+  "learning_outcomes": [
+    "Critically reflect upon different data sources, types,\nformats, and structures,",
+    "Research, justify and apply data cleaning, preprocessing,\nand standardisation for data analytics,",
+    "Apply data integration concepts and techniques to\nheterogeneous and distributed data,",
+    "Interpret, assess and discuss data quality measurements,",
+    "Research\nand justify advanced data wrangling, data integration, and database techniques\nas relevant to data analytics"
+  ],
+  "assessment": [
+    {
+      "task": "Written and practical assignments",
+      "weight": "60"
+    },
+    {
+      "task": "Final examination",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10380",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11046",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

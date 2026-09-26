@@ -1,0 +1,58 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:29Z",
+  "code": "COMP8535",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP8535",
+  "title": "Engineering Data Analytics",
+  "units": "6",
+  "level": "8000",
+  "prerequisites": "To enrol in this course you must be studying:  Master of Computing (Advanced) OR Master of Machine Learning and Computer Vision  AND  have completed 12 units of 6000-level COMP coded courses.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "To enrol in this course you must be studying:  Master of Computing (Advanced) OR Master of Machine Learning and Computer Vision  AND  have completed 12 units of 6000-level COMP coded courses.",
+  "cotaught": [
+    "ENGN8535"
+  ],
+  "description": "Data-driven decision-making is an essential component of emerging systems that generate and consume very large amounts of sensing data from autonomous vehicles to digital pathology. This course covers technologies and methodologies necessary for inferring useful information and identifying underlying patterns from often raw, incomplete, noisy and corrupted data that is present in real-life applications. It will also give students the opportunity to explore advanced solutions of data analytics such as dimensionality reduction, sparse encoding, compressive sensing, nonlinear filtering, manifold learning, and generative data modelling.",
+  "learning_outcomes": [
+    "Describe a number of models for inference from data",
+    "Assess the strength and weakness of each of these models",
+    "Interpret the mathematical equations from Linear Algebra, Statistics, and Probability Theory used in the learning models",
+    "Implement efficient data analysis algorithms on a computer",
+    "Design test procedures in order to evaluate a model",
+    "Combine several models in order to gain better results"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "40"
+    },
+    {
+      "task": "Group research project",
+      "weight": "30"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "30"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5146",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6539",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

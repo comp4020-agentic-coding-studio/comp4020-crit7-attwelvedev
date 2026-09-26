@@ -1,0 +1,52 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:38Z",
+  "code": "SCOM3029",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/SCOM3029",
+  "title": "Science Communication and Planetary Crises",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed 72 units of tertiary study.",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with SCOM6029 .",
+  "requisite_raw": "To enrol in this course you must have completed 72 units of tertiary study.  Incompatible with SCOM6029 .",
+  "cotaught": [
+    "SCOM6029"
+  ],
+  "description": "The world's challenges appear to be increasingly complex. Environmental, social and economic challenges are now recognised to be highly interdependent, with some commentators describing a state of polycrisis: where many crises - such as climate change, economic inequality, biodiversity loss and food security - all occur at once, and also have highly interconnected and compounding effects. Scientific and other forms of knowledge are critical for effectively addressing these challenges, but doing so is likely to require more than the documentation of disasters, the development of technical solutions, and the setting of deadlines. Science communication in the context of planetary crisis demands meaningful dialogue between science and society to develop more just and sustainable futures. This course explores challenges and opportunities for science communication in the context of planetary crisis. In doing so, it will provide students with knowledge and skills to think critically about the sustainability challenges confronting societies around the world (especially in relation to the UN Sustainable Development Goals) and helps students to develop a more robust transdisciplinary understanding of science communication in this context. The course will cover a range of topics, such as understanding the historical context of science communication, planetary crises and environmental expertise, the need to grapple with challenges of complexity and diversity when thinking at global scales, the foundations for recognising and engaging with different knowledge-systems, and the importance and options for dialogical, participatory and inclusive science communication. The course will allow students to develop skills that they can carry forward into further studies and employment, where they may seek to apply science communication concepts and approaches to engage publics, journalists, governments, industry professionals and other scientists in discussions and practices that enable the emergence of desirable futures for both people and the planet. This course is co-taught with postgraduate students but assessed separately.",
+  "learning_outcomes": [
+    "Describe key challenges for science communication in the context of planetary crisis",
+    "Critically evaluate past and present examples of science communication in the context of planetary crisis",
+    "Recognise and apply key academic concepts to inform the analysis of science communication in the context of planetary crisis",
+    "Describe and demonstrate practical and/or creative strategies to enhance science communication for planetary crises"
+  ],
+  "assessment": [
+    {
+      "task": "Written critical reflections",
+      "weight": "20"
+    },
+    {
+      "task": "Engagement activity report",
+      "weight": "30"
+    },
+    {
+      "task": "Report and oral presentation on science communication challenge",
+      "weight": "40"
+    },
+    {
+      "task": "Class participation",
+      "weight": "10"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10370",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

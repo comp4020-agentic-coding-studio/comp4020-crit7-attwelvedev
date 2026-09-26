@@ -1,0 +1,26 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:38Z",
+  "code": "COMP3710",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3710",
+  "title": "Topics in Computer Science",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "prerequisite_codes": [],
+  "incompatibilities": "None",
+  "requisite_raw": "You will need to contact the School of Computing to request a permission code to enrol in this course.",
+  "cotaught": [],
+  "description": "This course is available so that senior students can pursue, with a small class, topics that are not covered in the regular curriculum that will significantly increase their knowledge of some aspect of computer science. The activities in the course will be a combination of lectures, workshops, reading, writing and project work, as appropriate to the topic. These activities will be specified in separate websites for each class.",
+  "learning_outcomes": [
+    "Learning Outcomes will be determined for each individual student and recorded in an 'Independent Study Contract' at the beginning of the course."
+  ],
+  "assessment": [
+    {
+      "task": "An appropriate combination of written report, exercises, examination and seminar presentations. This will be set out in the 'Independent Study Contract' for each student at the start of each course. (null) [LO null]",
+      "weight": ""
+    }
+  ],
+  "offerings": []
+}

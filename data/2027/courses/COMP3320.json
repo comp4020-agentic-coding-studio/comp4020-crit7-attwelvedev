@@ -1,0 +1,65 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:59Z",
+  "code": "COMP3320",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP3320",
+  "title": "High Performance Scientific Computation",
+  "units": "6",
+  "level": "3000",
+  "prerequisites": "To enrol in this course you must have completed: ( COMP2100 or COMP2300 or ENGN2219 ) AND ( COMP1600 or 6 units of MATH courses (excluding MATH1003 ))",
+  "prerequisite_codes": [
+    "COMP2100",
+    "COMP2300",
+    "ENGN2219",
+    "COMP1600",
+    "MATH1003"
+  ],
+  "incompatibilities": "Incompatible with COMP6464 .",
+  "requisite_raw": "To enrol in this course you must have completed: ( COMP2100 or COMP2300 or ENGN2219 ) AND ( COMP1600 or 6 units of MATH courses (excluding MATH1003 )) Incompatible with COMP6464 .",
+  "cotaught": [
+    "COMP6464"
+  ],
+  "description": "This course provides an introduction to High Performance Computing with an orientation towards applications in science and engineering. Aspects of numerical computing and the design and construction of sophisticated scientific software will be considered. The focus will be on the C and C++ programming languages, although reflecting the reality of modern scientific computation, this course will also touch on other languages such as Python, Java and FORTRAN95. The course will study high performance computer architectures, including modern parallel processors, and will describe how an algorithm interacts with these architectures. It will also look at practical methods of estimating and measuring algorithm/architecture performance. The following topics will be addressed: the C++ programming language; basic numerical computing from aspects of floating point error analysis to algorithms for solving differential equations; the engineering of scientific software; general high performance computing concepts and architectural principles; modern scalar architectures and their memory structure; performance and programmability issues, and program analysis techniques for high performance computing; parallel computing paradigms and programming using the OpenMP standard; trends in HPC systems.",
+  "learning_outcomes": [
+    "Appreciate the building blocks of scientific and engineering software.",
+    "Demonstrate a basic knowledge of numerical computing using an appropriate programming language.",
+    "Be competent in experimental computing in a numerical context and of the optimisation of algorithms on high performance architectures.",
+    "Be able to reason about the accuracy of mathematical and numerical models of real physical phenomena.",
+    "Have an awareness of the modern field of computational science and engineering and of the impact of high-performance computing on science and industry.",
+    "Have an understanding of the various paradigms of high performance computing and their potential for performance and programmability.",
+    "Be capable of writing algorithms that yield good performance on high-performance architectures, and to be able to estimate and evaluate their performance."
+  ],
+  "assessment": [
+    {
+      "task": "Assignment(s)",
+      "weight": "40"
+    },
+    {
+      "task": "Mid-semester test",
+      "weight": "20"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10378",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11077",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

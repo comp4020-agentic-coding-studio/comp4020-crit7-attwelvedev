@@ -1,0 +1,52 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:07:00Z",
+  "code": "COMP6363",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6363",
+  "title": "Theory of Computation",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must be studying Master of Computing OR Master of Computing (Advanced).",
+  "prerequisite_codes": [],
+  "incompatibilities": "Incompatible with COMP3630 .",
+  "requisite_raw": "To enrol in this course you must be studying Master of Computing OR Master of Computing (Advanced).  Incompatible with COMP3630 .",
+  "cotaught": [
+    "COMP3630"
+  ],
+  "description": "This course covers the theoretical computer science areas of formal languages and automata, computability and complexity. Topics covered include the following: regular and context-free languages; finite automata and pushdown automata; Turing machines; computability - halting problem, solvable, and unsolvable problems; space and time complexity; classes P, NP and PSPACE; NP-Completeness.",
+  "learning_outcomes": [
+    "Demonstrate advanced knowledge of formal computation and its relationship to languages",
+    "Distinguish different computing languages and classify their respective types",
+    "Recognise and comprehend formal reasoning about languages",
+    "Demonstrate a competent understanding of the concepts of complexity theory"
+  ],
+  "assessment": [
+    {
+      "task": "Assignments, Quizzes, in-class activities",
+      "weight": "50"
+    },
+    {
+      "task": "Final Exam and/or during semester assessments",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5421",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6693",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

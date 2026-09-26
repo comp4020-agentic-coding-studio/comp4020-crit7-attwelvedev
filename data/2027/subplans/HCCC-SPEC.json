@@ -1,0 +1,101 @@
+{
+  "kind": "subplan",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:04:54Z",
+  "code": "HCCC-SPEC",
+  "url": "https://programsandcourses.anu.edu.au/2027/specialisation/HCCC-SPEC",
+  "title": "Human-Centred and Creative Computing",
+  "min_units": 24,
+  "introduction": "The Human-Centred and Creative Computing specialisation offers an interdisciplinary grounding in human-computer interaction, humanities-centred computing, and creative computing, including games, music, or graphics. This specialisation is where computing meets a complex world with unique and varied social contexts to create impacts that change and enrich our lives. Students will gain insight and skills in designing, developing, and evaluating human-centred and creative applications.",
+  "learning_outcomes": [
+    "Identify and describe challenges in human-centred and creative computing",
+    "Synthesise knowledge of human-centred and creative computing systems and their social context to address problems",
+    "Design and develop human-centred and creative technologies",
+    "Apply theoretical frameworks to evaluate and critique human-centred and creative computing systems"
+  ],
+  "requirements": [
+    {
+      "type": "text",
+      "content": "Advice to Students"
+    },
+    {
+      "type": "text",
+      "content": "This Undergraduate Specialisation requires the completion of 24 units, which must include a minimum of 12 units of 4000-level courses:"
+    },
+    {
+      "type": "text",
+      "content": "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+    },
+    {
+      "type": "group",
+      "heading": "The 24 units must consist of:",
+      "courses": [
+        {
+          "code": "COMP3900",
+          "title": "Human-Computer Interaction",
+          "units": null
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "content": "AND"
+    },
+    {
+      "type": "group",
+      "heading": "A minimum of 12 units from completion of courses from the following list:",
+      "courses": [
+        {
+          "code": "COMP4020",
+          "title": "Advanced Topics in Human-Centred and Creative Computing",
+          "units": null
+        },
+        {
+          "code": "COMP4350",
+          "title": "Sound and Music Computing",
+          "units": null
+        },
+        {
+          "code": "COMP4528",
+          "title": "Computer Vision",
+          "units": null
+        },
+        {
+          "code": "COMP4610",
+          "title": "Computer Graphics",
+          "units": null
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "content": "AND"
+    },
+    {
+      "type": "group",
+      "heading": "A maximum of 6 units from completion of courses from the following list:",
+      "courses": [
+        {
+          "code": "COMP3540",
+          "title": "Game Development",
+          "units": null
+        },
+        {
+          "code": "COMP3670",
+          "title": "Introduction to Machine Learning",
+          "units": null
+        }
+      ]
+    }
+  ],
+  "specialisations": [],
+  "all_course_codes": [
+    "COMP3540",
+    "COMP3670",
+    "COMP3900",
+    "COMP4020",
+    "COMP4350",
+    "COMP4528",
+    "COMP4610"
+  ]
+}

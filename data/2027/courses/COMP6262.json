@@ -1,0 +1,53 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:54Z",
+  "code": "COMP6262",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6262",
+  "title": "Logic",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "None",
+  "prerequisite_codes": [],
+  "incompatibilities": "You are not able to enrol in this course if you have previously completed PHIL2080 or COMP2620 .",
+  "requisite_raw": "You are not able to enrol in this course if you have previously completed PHIL2080 or COMP2620 .",
+  "cotaught": [
+    "COMP2620"
+  ],
+  "description": "Formal logic is the fundamental mathematics of computer science. Its impact ranges from the design of programming languages and hardware, to the specification and verification of critical software, to artificial intelligence systems that can reason. This course introduces propositional and predicate logic. We discuss how to reason within these logics, how to reason about their properties and limitations, and how to use them to model situations of interest in both natural language and computer science applications. We explore how computational thinking can help us solve logic problems.",
+  "learning_outcomes": [
+    "Model natural language and computer science applications using logical notation.",
+    "Construct formal proofs in logical calculi.",
+    "Apply computational methods to solve logical problems.",
+    "Analyse the properties of logics, including the relationship between logical calculi and mathematical semantics.",
+    "Understand the relationships between different logics with applications to computer science."
+  ],
+  "assessment": [
+    {
+      "task": "Weekly exercises conducted during tutorials",
+      "weight": "50"
+    },
+    {
+      "task": "Final exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5092",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6497",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

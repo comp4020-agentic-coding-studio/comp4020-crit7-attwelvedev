@@ -1,0 +1,61 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:05:30Z",
+  "code": "MATH1116",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/MATH1116",
+  "title": "Advanced Mathematics and Applications  2",
+  "units": "6",
+  "level": "1000",
+  "prerequisites": "To enrol in this course you must have completed MATH1115 with a mark of 60 or above or MATH1113 with a mark of 80 or above.",
+  "prerequisite_codes": [
+    "MATH1115",
+    "MATH1113"
+  ],
+  "incompatibilities": "You may not enrol in MATH1116 if you have previously completed, or are attempting to concurrently enrol in, MATH1014 .  You may not enrol in MATH1116 if you have previously completed MATH1014 .",
+  "requisite_raw": "To enrol in this course you must have completed MATH1115 with a mark of 60 or above or MATH1113 with a mark of 80 or above. You may not enrol in MATH1116 if you have previously completed, or are attempting to concurrently enrol in, MATH1014 .  You may not enrol in MATH1116 if you have previously completed MATH1014 .",
+  "cotaught": [],
+  "description": "This course continues on fromMATH1115, providing an in-depth development of fundamental concepts of calculus and linear algebra, with a particular emphasis on the underlying foundations of mathematics. The use and understanding of proof and abstract ideas will allow students to develop analytical skills which will form a base for further study in fundamental mathematics, as well as providing a foundation for a wide range of quantitative areas such as actuarial studies, computer science, economics, engineering, physics and statistics. Topics to be covered include: Calculus/Analysis – sequences and series, convergence tests, power series, Taylor series, a short introduction to metric spaces in the context of the calculus of functions of several variables, generalisation of the real analysis theory studied inMATH1115to multivariable functions including limits and continuity, double integrals, Fubini's theorem, integrability of continuous functions, partial derivatives, gradients and directional derivatives, differentiation of multivariable functions, extreme values, vector-valued functions. Linear Algebra – subspaces, span, linear independence, bases and dimension, linear maps, duality, eigenvalues and eigenvectors, inner product spaces, Gram-Schmidt orthogonalisation, operators on inner product spaces, the spectral theorem in finite dimensions, singular value decomposition. Note: This is an Honours Pathway Course. It involves extra material and emphasises the use and understanding of proof and abstract ideas to a deeper conceptual level thanMATH1014.",
+  "learning_outcomes": [
+    "Explain the fundamental concepts of analysis and linear algebra and their role in modern mathematics and applied contexts.",
+    "Demonstrate accurate and efficient use of analysis and linear algebra techniques.",
+    "Demonstrate capacity for mathematical reasoning through analysing, proving and explaining concepts and theorems from analysis and linear algebra.",
+    "Apply problem-solving using analysis and linear algebra techniques applied to diverse situations in physics, engineering and other mathematical contexts."
+  ],
+  "assessment": [
+    {
+      "task": "In-workshop assessment (0-5%)",
+      "weight": "0"
+    },
+    {
+      "task": "Assignments and online quizzes (25-30%)",
+      "weight": "30"
+    },
+    {
+      "task": "Tests during the semester (25-35%)",
+      "weight": "30"
+    },
+    {
+      "task": "Final examination (35-45%)",
+      "weight": "40"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "10392",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "Second Semester",
+      "mode": "In Person",
+      "class_number": "11061",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}

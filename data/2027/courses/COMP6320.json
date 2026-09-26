@@ -1,0 +1,62 @@
+{
+  "kind": "course",
+  "year": "2027",
+  "scraped_at": "2026-09-26T07:06:56Z",
+  "code": "COMP6320",
+  "url": "https://programsandcourses.anu.edu.au/2027/course/COMP6320",
+  "title": "Artificial Intelligence",
+  "units": "6",
+  "level": "6000",
+  "prerequisites": "To enrol in this course you must have completed  ( COMP6710 OR COMP7710 OR COMP1110 OR be enrolled in Master of Computing (Advanced)) AND have completed or be currently enrolled in COMP6262 OR COMP2620",
+  "prerequisite_codes": [
+    "COMP6710",
+    "COMP7710",
+    "COMP1110",
+    "COMP6262",
+    "COMP2620"
+  ],
+  "incompatibilities": "Incompatible with COMP3620 .",
+  "requisite_raw": "To enrol in this course you must have completed  ( COMP6710 OR COMP7710 OR COMP1110 OR be enrolled in Master of Computing (Advanced)) AND have completed or be currently enrolled in COMP6262 OR COMP2620 Incompatible with COMP3620 .",
+  "cotaught": [
+    "COMP3620"
+  ],
+  "description": "Artificial intelligence is the science that studies and develops methods of making computers more intelligent. The focus of this course is on core AI techniques for search, knowledge representation and reasoning, planning, and designing intelligent agents. The course also aims to give an overview of the historical, philosophical, and logical foundations of AI.",
+  "learning_outcomes": [
+    "Identify problems that are amenable to solution by AI methods, and which AI methods may be suited to solving a given problem.",
+    "Formalise a given problem in the language/framework of different AI methods (e.g., as a search problem, as a constraint satisfaction problem, as a planning problem, etc).",
+    "Implement basic AI algorithms (e.g., standard search or constraint propagation algorithms).",
+    "Design and perform an empirical evaluation of different algorithms on a problem formalisation, and relate the conclusions that the evaluation supports."
+  ],
+  "assessment": [
+    {
+      "task": "Assignments",
+      "weight": "38"
+    },
+    {
+      "task": "Quizzes",
+      "weight": "12"
+    },
+    {
+      "task": "Final Exam",
+      "weight": "50"
+    }
+  ],
+  "offerings": [
+    {
+      "year": "2027",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "5053",
+      "summary_url": null,
+      "topic": ""
+    },
+    {
+      "year": "2028",
+      "semester": "First Semester",
+      "mode": "In Person",
+      "class_number": "6462",
+      "summary_url": null,
+      "topic": ""
+    }
+  ]
+}
