@@ -99,3 +99,31 @@ acceptance criteria and human-review script were rewritten to describe
 the checkbox, so a future reader of the plan sees the real interaction
 contract instead of a stale hover description that no longer matches
 what ships.
+
+## 2026-09-26 — A TypeScript HTML parser port checked against real scraped output, not just read-through
+
+Resolved by b1421ab.
+
+Task 16 needed `fetch-pandc.ts` to reproduce `anu_pandc/parse/courses.py`'s
+requisite-section extraction exactly, so a live-fetched stub agrees with the
+already-committed, already-trusted `data/2027/courses/*.json`. A straight
+read-through port — walk the section's DOM, concatenate `.textContent`,
+collapse whitespace — looked right and would have passed a superficial
+glance. It silently disagreed with the real data in two ways only a
+byte-for-byte diff against `COMP2100.json`/`MATH1116.json` surfaced: BeautifulSoup's
+`get_text(" ", strip=True)` inserts a separator at *every* text-node boundary,
+not just direct-child ones, so a mid-sentence `<a>COMP1110</a>` picks up a
+leading and trailing space the naive port dropped; and `get_text()` with no
+separator (used for the description) inserts none, so `fromMATH1115` in the
+source stays un-spaced. Guessing at "close enough" whitespace handling and
+moving on would have shipped a parser that diverges from the offline scraper
+on real pages — exactly the kind of drift Task 16 exists to prevent.
+
+The fix: a single `textOf(nodes, separator)` helper that collects every leaf
+text node individually (trimmed) and joins with the given separator, used
+with `" "` for the requisite section and `""` for the description, matching
+BS4's own per-call separator semantics rather than one hardcoded joining
+rule. Checked by running the port against two real, live-fetched fixture
+pages and asserting exact string equality against the already-scraped JSON,
+not just "looks plausible" — the same discipline the offline scraper's own
+output already carries.
