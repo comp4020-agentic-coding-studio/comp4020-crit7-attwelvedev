@@ -95,6 +95,39 @@ describe("evaluatePlan (real 2027 catalogue)", () => {
     expect(p.state).toBe("available");
   });
 
+  it("a satisfied OR branch isn't re-suggested once its sibling is placed", () => {
+    // COMP1140 is placed, satisfying the (COMP1110 OR COMP1140) branch; only
+    // the still-unmet MATH units leaf should drive suggestions/reasons.
+    const result = evaluatePlan(
+      cat,
+      feas,
+      plan([
+        { code: "COMP1140", term: 1 },
+        { code: "COMP2100", term: 2 },
+      ]),
+    );
+    const p = result.placements.find((p) => p.code === "COMP2100")!;
+    expect(p.state).toBe("soft");
+    expect(p.suggestions.some((s) => s.code === "COMP1110")).toBe(false);
+    expect(p.reasons.some((r) => r.includes("MATH"))).toBe(true);
+  });
+
+  it("doesn't suggest a course incompatible with one already placed", () => {
+    // COMP1130 is placed, satisfying the (COMP1100 OR COMP1130 OR COMP1730)
+    // branch, but even the unsatisfied MATH leaf shouldn't surface COMP1100
+    // as a fix since it's incompatible with the already-placed COMP1130.
+    const result = evaluatePlan(
+      cat,
+      feas,
+      plan([
+        { code: "COMP1130", term: 0 },
+        { code: "COMP2300", term: 3 },
+      ]),
+    );
+    const p = result.placements.find((p) => p.code === "COMP2300")!;
+    expect(p.suggestions.some((s) => s.code === "COMP1100")).toBe(false);
+  });
+
   it("a prereq placed in the same term only satisfies concurrent leaves", () => {
     const concurrent = evaluatePlan(
       cat,

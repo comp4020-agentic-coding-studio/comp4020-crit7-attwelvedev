@@ -49,6 +49,7 @@ function collectCourseCodes(expr: ReqExpr | null, out: Set<string>): void {
 
 function collectFailingCourseLeaves(node: RequisiteStatus, out: { code: string; concurrent: boolean }[]): void {
   if (node.kind === "and" || node.kind === "or") {
+    if (node.ok) return; // satisfied node: its unmet branches (e.g. the other side of an OR) aren't actually required
     for (const item of node.items) collectFailingCourseLeaves(item, out);
   } else if (node.kind === "course" && !node.ok) {
     out.push({ code: node.code, concurrent: node.concurrent });
@@ -154,9 +155,20 @@ export function evaluatePlan(
   // FR16: the earliest term at or before the dependent (same term allowed
   // for a concurrent leaf) with room under the 24-unit load cap; failing
   // that, just the earliest term the leaf isn't hard-blocked in.
+  function conflictsWithPlaced(code: string): boolean {
+    const course = cat.courses.get(code);
+    if (course?.requisites.incompatible.some((other) => placedByCode.has(other) && other !== code)) return true;
+    for (const p of plan.placements) {
+      if (p.code === code) continue;
+      if (cat.courses.get(p.code)?.requisites.incompatible.includes(code)) return true;
+    }
+    return false;
+  }
+
   function suggestionFor(code: string, concurrent: boolean, depTerm: number): Suggestion | null {
     const course = cat.courses.get(code);
     if (!course) return null;
+    if (conflictsWithPlaced(code)) return null;
     const maxT = concurrent ? depTerm : depTerm - 1;
     let target = -1;
     for (let t = 0; t <= maxT; t++) {
