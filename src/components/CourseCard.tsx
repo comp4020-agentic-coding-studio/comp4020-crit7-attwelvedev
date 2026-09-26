@@ -44,17 +44,32 @@ export default function CourseCard({
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // Guards this card's own buttons for the duration of its own in-flight
+  // request — not a global lock, so moving one card doesn't freeze others,
+  // but does stop a slow connection from inviting a double-click that
+  // fires the same move/remove twice.
+  const [pending, setPending] = useState(false);
 
   async function move(term: number) {
-    const result = await placeCourse(planId, placement.code, term);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    setPending(true);
+    try {
+      const result = await placeCourse(planId, placement.code, term);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setPending(false);
+    }
   }
 
   async function applySuggestion(code: string, term: number) {
-    const result = await placeCourse(planId, code, term);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    setPending(true);
+    try {
+      const result = await placeCourse(planId, code, term);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setPending(false);
+    }
   }
 
   async function remove() {
@@ -64,11 +79,16 @@ export default function CourseCard({
       pinnedGroupId: placement.pinned ? (placement.countsToward ?? null) : null,
       label: course ? `${placement.code} — ${course.title}` : placement.code,
     };
-    const result = await removeCourse(planId, placement.code);
-    if (isError(result)) onAnnounce(result.error);
-    else {
-      onChanged(result);
-      onRemoved(removed);
+    setPending(true);
+    try {
+      const result = await removeCourse(planId, placement.code);
+      if (isError(result)) onAnnounce(result.error);
+      else {
+        onChanged(result);
+        onRemoved(removed);
+      }
+    } finally {
+      setPending(false);
     }
   }
 
@@ -79,6 +99,7 @@ export default function CourseCard({
     <li
       class={`course-card course-card-${placement.state}`}
       data-placed={placement.code}
+      aria-busy={pending}
       // Not in the tab order (no ordinary reason to tab onto a card), but
       // focusable programmatically so the sidebar's "locate on timeline"
       // badge can move focus here, not just scroll it into view.
@@ -133,7 +154,7 @@ export default function CourseCard({
             <li key={`${suggestion.action}-${suggestion.code}-${suggestion.term}`}>
               <button
                 type="button"
-                disabled={readOnly}
+                disabled={readOnly || pending}
                 onClick={() => applySuggestion(suggestion.code, suggestion.term)}
               >
                 {suggestion.text}
@@ -146,17 +167,17 @@ export default function CourseCard({
         view={view}
         code={placement.code}
         onPlace={move}
-        disabled={readOnly}
+        disabled={readOnly || pending}
         placed
         currentTerm={placement.term}
         open={openMenuCode === placement.code}
         onOpenChange={(open) => onMenuOpenChange(placement.code, open)}
       />
-      <button type="button" onClick={() => setDetailsOpen(true)}>
+      <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
         Details
       </button>
-      <button type="button" disabled={readOnly} onClick={remove}>
-        Remove
+      <button type="button" disabled={readOnly || pending} onClick={remove}>
+        {pending ? "Removing…" : "Remove"}
       </button>
       <CourseDetail
         view={view}

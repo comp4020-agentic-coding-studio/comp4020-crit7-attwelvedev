@@ -1,3 +1,4 @@
+import { useState } from "preact/hooks";
 import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, removeCourse, setChoice } from "./api";
@@ -53,10 +54,17 @@ function Group({
   onMenuOpenChange,
   onLocateCourse,
 }: GroupProps) {
+  const [choicePending, setChoicePending] = useState(false);
+
   async function choose(childId: string | null) {
-    const result = await setChoice(planId, group.id, childId);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    setChoicePending(true);
+    try {
+      const result = await setChoice(planId, group.id, childId);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setChoicePending(false);
+    }
   }
 
   // Placed courses stay in the list (dimmed, ticked, non-draggable) rather
@@ -82,7 +90,7 @@ function Group({
         required={group.unitsRequired}
       />
       {group.selectable && (
-        <fieldset>
+        <fieldset aria-busy={choicePending}>
           <legend>Choose {group.label}</legend>
           {group.options.map((option) => (
             <label key={option.id}>
@@ -90,7 +98,7 @@ function Group({
                 type="radio"
                 name={`choice-${group.id}`}
                 checked={group.chosenId === option.id}
-                disabled={readOnly}
+                disabled={readOnly || choicePending}
                 onChange={() => choose(option.id)}
               />
               {option.label}

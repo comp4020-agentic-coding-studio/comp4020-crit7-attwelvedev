@@ -38,20 +38,27 @@ export default function AvailableCourseCard({
   const course = view.courses[code];
   const readOnly = view.plan.readOnly;
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [pending, setPending] = useState(false);
   if (!course) return null;
 
   const draggable = !readOnly && !placement;
 
   async function place(term: number) {
-    const result = await placeCourse(planId, code, term);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    setPending(true);
+    try {
+      const result = await placeCourse(planId, code, term);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
     <li
       class={`course-card ${placement ? "course-card-sidebar-placed" : "course-card-unplaced"}`}
       draggable={draggable}
+      aria-busy={pending}
       onDragStart={(event) => {
         if (!draggable) {
           event.preventDefault();
@@ -86,12 +93,12 @@ export default function AvailableCourseCard({
           view={view}
           code={code}
           onPlace={place}
-          disabled={readOnly}
+          disabled={readOnly || pending}
           open={openMenuCode === code}
           onOpenChange={(open) => onMenuOpenChange(code, open)}
         />
       )}
-      <button type="button" onClick={() => setDetailsOpen(true)}>
+      <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
         Details
       </button>
       <CourseDetail

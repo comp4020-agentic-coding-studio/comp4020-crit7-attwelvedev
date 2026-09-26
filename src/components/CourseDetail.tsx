@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { CourseCard, PlanView } from "../lib/domain/view";
 import { isError, setPin } from "./api";
 import { groupLabel } from "./planner-logic";
@@ -29,6 +29,7 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
   const course = courseOverride ?? view.courses[code];
   const placement = view.placements.find((p) => p.code === code);
   const readOnly = view.plan.readOnly;
+  const [pinPending, setPinPending] = useState(false);
 
   useEffect(() => {
     if (open) dialogRef.current?.showModal();
@@ -38,9 +39,14 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
   if (!course) return null;
 
   async function pin(groupId: string) {
-    const result = await setPin(planId, code, groupId || null);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    setPinPending(true);
+    try {
+      const result = await setPin(planId, code, groupId || null);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setPinPending(false);
+    }
   }
 
   const pinnedValue = placement?.pinned ? (placement.countsToward ?? "") : "";
@@ -80,7 +86,7 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
           <label>
             Pin to
             <select
-              disabled={readOnly}
+              disabled={readOnly || pinPending}
               value={pinnedValue}
               onChange={(event) => pin((event.target as HTMLSelectElement).value)}
             >

@@ -544,6 +544,16 @@ dialog::backdrop {
   padding: 0.7rem 0.8rem;
 }
 
+/* A request is in flight for this exact card/control — not a spinner (most
+   of these resolve in well under a second, and a spinner that flashes for
+   100ms reads as more broken than helpful), just a quiet dimming so a
+   pending state is visible without announcing itself. */
+.course-card[aria-busy="true"],
+.cutoff-controls[aria-busy="true"],
+fieldset[aria-busy="true"] {
+  opacity: 0.6;
+}
+
 .term-cards .course-card,
 .available-courses .course-card {
   width: 13rem;

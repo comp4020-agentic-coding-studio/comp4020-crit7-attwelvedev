@@ -63,17 +63,24 @@ function SearchResultCard({
   onMenuOpenChange,
 }: SearchResultCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [pending, setPending] = useState(false);
   const draggable = !readOnly;
 
   async function place(term: number) {
-    const result = await placeCourse(planId, course.code, term);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    setPending(true);
+    try {
+      const result = await placeCourse(planId, course.code, term);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
     <li
       class="course-card course-card-unplaced"
+      aria-busy={pending}
       draggable={draggable}
       onDragStart={(event) => {
         if (!draggable) {
@@ -94,12 +101,12 @@ function SearchResultCard({
         view={view}
         code={course.code}
         onPlace={place}
-        disabled={readOnly}
+        disabled={readOnly || pending}
         hardBlockedOverride={course.hardBlocked}
         open={openMenuCode === course.code}
         onOpenChange={(open) => onMenuOpenChange(course.code, open)}
       />
-      <button type="button" onClick={() => setDetailsOpen(true)}>
+      <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
         Details
       </button>
       <CourseDetail
