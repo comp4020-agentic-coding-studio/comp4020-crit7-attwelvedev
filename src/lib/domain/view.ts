@@ -265,6 +265,11 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
   }
 
   const leafTotals = new Map<string, { completed: number; planned: number }>();
+  // Which course codes actually landed in each leaf group, so rule-based
+  // groups (electives, "3000/4000-level COMP" — no predefined `courses`
+  // list) can display the placed courses the allocator counted toward
+  // them, the same way predefined-list groups display theirs.
+  const leafCourses = new Map<string, Set<string>>();
   for (const placement of nonLoserEvals) {
     const leaf = allocation.byCourse[placement.code];
     if (!leaf) continue;
@@ -275,6 +280,9 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
     if (placement.completed) bucket.completed += units;
     else bucket.planned += units;
     leafTotals.set(leaf, bucket);
+    const codes = leafCourses.get(leaf) ?? new Set<string>();
+    codes.add(placement.code);
+    leafCourses.set(leaf, codes);
   }
 
   function buildGroupView(group: GroupDef): GroupView {
@@ -310,6 +318,11 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
 
     const missing = (group.courses ?? []).filter((code) => allocation.byCourse[code] !== group.id);
 
+    const predefined = group.courses ?? [];
+    const placedExtras = isLeaf
+      ? [...(leafCourses.get(group.id) ?? [])].filter((code) => !predefined.includes(code)).sort()
+      : [];
+
     return {
       id: group.id,
       label: group.label,
@@ -323,7 +336,7 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
       completed,
       planned,
       satisfied: completed + planned >= group.unitsRequired,
-      courses: group.courses ?? [],
+      courses: [...predefined, ...placedExtras],
       filterLabel: group.filter ? filterLabel(group.filter) : null,
       missing,
       children: childViews,

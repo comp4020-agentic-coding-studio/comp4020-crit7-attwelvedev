@@ -85,6 +85,14 @@ describe("buildPlanView (example plan)", () => {
     expect(comp1130.pinned).toBe(false);
   });
 
+  it("a rule-based group (no predefined courses list) lists the placed courses allocated to it", () => {
+    const compUpper = findGroup(view.groups, "comp-upper")!;
+    expect(compUpper.filterLabel).not.toBeNull();
+    const placedHere = view.placements.filter((p) => p.countsToward === "comp-upper").map((p) => p.code);
+    expect(placedHere.length).toBeGreaterThan(0);
+    for (const code of placedHere) expect(compUpper.courses).toContain(code);
+  });
+
   it("performance: building the example plan's view takes under 50ms (median of 5 runs)", () => {
     const durations: number[] = [];
     for (let i = 0; i < 5; i++) {
