@@ -134,6 +134,10 @@ code, token: Date.now() })` → Timeline scrolls to, focuses and highlights
 - `.course-card-title` and `.course-card-offered` classes (Task 1).
 - `CourseDetail` prop `focusChecks?: boolean` (Task 3). It isn't used
   here, but it's part of the props.
+- As built in Phase 01 (2026-09-28): `button.course-card-title` gets its
+  name from `aria-label="{title}, details"`, with no hidden span;
+  `.course-card` is `position: relative`; `MoreOptions` also takes
+  `fixed?: boolean`, which the timeline card passes to float its panel.
 
 ## 4. Approach
 
@@ -246,9 +250,12 @@ under `@container (min-width: 24rem)`. The title button is
     - Renders `<li class="placed-row">`, containing:
       - `<strong class="placed-row-code">{code}</strong>`
       - `<button type="button" class="placed-row-title"
-        title={course.title} onClick={() =>
-        setDetailsOpen(true)}>{course.title}<span
-        class="visually-hidden">, details</span></button>`
+        title={course.title} aria-label={\`${course.title}, details\`}
+        onClick={() => setDetailsOpen(true)}>{course.title}</button>`
+        (aria-label, not a visually-hidden span: Phase 01 found the span,
+        being absolutely positioned, makes Chromium name the button
+        "… , details" with a stray space, and it can escape a scrolling
+        strip and widen the page)
       - `<p class="placed-row-status">{word} <button type="button"
         class="course-card-term-link" onClick={() =>
         onLocateCourse(code)} aria-label={\`${code} is ${word ===
