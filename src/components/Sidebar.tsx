@@ -107,7 +107,7 @@ function Group({
     }
   }
 
-  // Placed courses stay in the list (dimmed, ticked, non-draggable) rather
+  // Placed courses stay in the list (marked "Placed in <term>", non-draggable) rather
   // than disappearing, so a student can still compare them against the
   // group's unplaced courses instead of losing track of which ones they'd
   // already decided on.

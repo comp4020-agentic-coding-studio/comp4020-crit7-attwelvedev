@@ -101,12 +101,10 @@ export default function AvailableCourseCard({
       {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
       {placement && (
         <p class="course-card-placed-status">
-          <span class="course-card-tick" aria-hidden="true">
-            ✓
-          </span>
+          Placed in
           <button
             type="button"
-            class="badge badge-term-link"
+            class="course-card-term-link"
             onClick={() => onLocateCourse(code)}
             aria-label={`${code} is placed in ${view.terms[placement.term].label} — locate it on the timeline`}
           >

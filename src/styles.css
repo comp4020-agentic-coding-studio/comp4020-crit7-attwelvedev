@@ -1199,28 +1199,25 @@ fieldset[aria-busy="true"] {
   border-color: var(--line);
 }
 
-.course-card-tick {
-  color: var(--moss);
-  font-weight: bold;
-  margin-inline-end: 0.3rem;
+/* Words, not a tick: "Placed in" says what the card's state is, and the
+   term beside it is the way to the course on the timeline. */
+.course-card-placed-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85em;
+  margin: 0.35rem 0 0;
 }
 
-.badge-term-link {
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  font-size: 0.8em;
-  font-weight: 600;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.badge-term-link:hover {
-  border: none;
-  color: var(--gold-ink);
+/* A small button, not a .badge: sharing .badge's equal-specificity border
+   and padding (declared later, so they won) left a border at rest that a
+   hover rule then removed. Styled only against the base button rule, so
+   its border stays put and just darkens on hover like every other button. */
+.course-card-term-link {
+  padding: 0.1rem 0.45rem;
+  font-size: inherit;
+  border-radius: 0.35rem;
 }
 
 .course-card-highlighted {

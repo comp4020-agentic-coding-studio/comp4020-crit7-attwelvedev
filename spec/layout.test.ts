@@ -743,7 +743,7 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     }
   });
 
-  it("shows an already-placed search result as the requirement lists do: dimmed, ticked, term badge, not draggable", async () => {
+  it("shows an already-placed search result as the requirement lists do: placed-in term button, not draggable", async () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
     try {
@@ -754,9 +754,9 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
       expect(await card.getAttribute("class")).toBe("course-card course-card-sidebar-placed");
       expect(await card.getAttribute("draggable")).toBe("false");
       expect(await card.getAttribute("data-drag-code")).toBeNull();
-      expect(await card.locator(".course-card-tick").count()).toBe(1);
+      expect(await card.locator(".course-card-placed-status").textContent()).toMatch(/^\s*Placed in\s*S1 2027$/);
       expect(await card.getByRole("button", { name: "Place in…" }).count()).toBe(0);
-      const badge = card.locator(".badge-term-link");
+      const badge = card.locator(".course-card-term-link");
       expect(await badge.textContent()).toBe("S1 2027");
       await badge.click();
       await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-placed"))).toBe("COMP1130");
@@ -1994,5 +1994,18 @@ describe("course cards", { timeout: 30_000 }, () => {
     );
     expect(measured).toBeGreaterThan(0);
     expect(tight).toEqual([]);
+  });
+
+  it("a placed course's term button keeps its border on hover", async () => {
+    // Guards a cascade slip: a later same-specificity rule gave this button
+    // a border its own :hover rule then took away.
+    await withPlan({ width: 1920, height: 1080 }, async (page) => {
+      const button = page.locator(".course-card-sidebar-placed .course-card-term-link").first();
+      const border = () => button.evaluate((el) => getComputedStyle(el).borderTopWidth);
+      const atRest = await border();
+      await button.hover();
+      expect(atRest).not.toBe("0px");
+      expect(await border()).toBe(atRest);
+    });
   });
 });
