@@ -548,3 +548,32 @@ because opacity set on the card, not the button, was the actual bug, and
 it went red on the old CSS before going green. The hover-border check
 pins the computed border width at rest and on hover, since the defect
 was a cascade-order slip that no markup inspection would show.
+
+## 2026-09-28 — Bounding SSR assertions to the card, not a character count
+
+Resolved by 469404b.
+
+Adding the new card header (grip SVG, a wrapper div, a title button)
+broke three `spec/planner.test.ts` checks that the plan never listed:
+`sidebar-placed" draggable="false"[\s\S]{0,60}COMP1100` and two
+`data-placed="…"[\s\S]{0,400}<badge text>`. Nothing they tested had
+changed. The markup between a card's opening tag and its text had just
+grown past a guessed window.
+
+The obvious fix was to widen the windows (60→200, 400→900). I rejected
+it. It loosens each assertion, since a larger window can reach into the
+next card's markup and match there, and Phase 03's strips and dots would
+push the text past the new numbers anyway. Instead each regex now
+searches `(?:(?!<dialog)[\s\S])*?`, which runs from the card's opening
+tag to its Details dialog (the card's last child). The text has to be in
+that same card's body, however long the header gets. That's stricter
+than before, not looser.
+
+How I knew it was right: the full `pnpm check` went from 6 failures to
+535/535. The same run also caught a real regression the source didn't
+show. The new visually-hidden unit text, being absolutely positioned,
+escaped the sidebar's scrolling strip and widened the page to 3351px at
+390px, found by listing absolutely positioned elements past the viewport
+edge. Making `.course-card` `position: relative` fixed it, and the 390×844
+screenshot confirmed it. The corrections live in the tests themselves, so
+later phases that grow the card can't reintroduce either failure.
