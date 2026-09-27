@@ -802,16 +802,25 @@ nav[aria-label="site"] .nav-hide:hover {
 }
 
 /* Sticky inside the timeline pane (its vertical scroller), so the key
-   stays in view while you follow a line down a long column. */
+   stays in view while you follow a line down a long column. Pinned 1px
+   above the pane's edge, with the pixel given back as padding: the pane
+   starts at a fractional y on a phone, and the sticky layer and the
+   content scrolling under it can round to different device pixels,
+   leaving a hairline of cards showing above the key. The pane clips the
+   overhang, so the background just always covers the seam.
+   z-index 2 is just enough to sit over the overlay's lines (1, later in
+   the DOM) and no more: on a phone the pane makes no stacking context
+   (see the min-height: 30rem block), so this competes with the page's own
+   layers, and the More options and card menus (3) must still open over it. */
 .prereq-legend {
   position: sticky;
-  top: 0;
-  z-index: 3;
+  top: -1px;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 1rem;
-  padding-block: 0.35rem;
+  padding-block: calc(0.35rem + 1px) 0.35rem;
   margin-block-end: 0.35rem;
   background: var(--paper);
   color: var(--unigrey);

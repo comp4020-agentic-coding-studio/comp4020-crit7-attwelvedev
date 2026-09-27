@@ -1418,6 +1418,28 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
     });
   });
 
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the More options menu opens over the legend, not under it", async (width, height) => {
+    await withPlan({ width, height }, async (page) => {
+      await showLinks(page);
+      await page.getByRole("button", { name: "More options" }).click();
+      const hit = await page.evaluate(() => {
+        const panel = document.querySelector(".more-options-panel:not([hidden])")!.getBoundingClientRect();
+        const legend = document.querySelector(".prereq-legend")!.getBoundingClientRect();
+        const top = Math.max(panel.top, legend.top);
+        const bottom = Math.min(panel.bottom, legend.bottom);
+        const left = Math.max(panel.left, legend.left);
+        const right = Math.min(panel.right, legend.right);
+        if (bottom <= top || right <= left) return "no overlap";
+        const el = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
+        return el?.closest(".more-options-panel") ? "panel" : "legend";
+      });
+      expect(["panel", "no overlap"]).toContain(hit);
+    });
+  });
+
   it("the hover hint shows with a mouse, not on a touch-only phone", async () => {
     for (const touch of [false, true]) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: touch, isMobile: touch });
