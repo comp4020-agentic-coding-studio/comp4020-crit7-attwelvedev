@@ -451,3 +451,37 @@ line. A real-catalogue test checks the AACOM route alone reaches "Check
 requirements" and drops to "Needs prerequisites" without COMP2120. In
 the built app's Details panel, the two routes show as separate "All of"
 groups.
+
+## 2026-09-27 — A cosmetic report that turned out to be a crash
+
+Resolved by 3db2ac1.
+
+Claude reported that COMP4500's "Pin to" list showed raw group ids. I
+pushed back, since in my plans it showed labels, and I was right for any
+plan with a capstone chosen. The ids only appeared in a new plan with no
+capstone picked. There, the list included every capstone option's
+groups, and those groups weren't in the active tree that labels come
+from.
+
+The obvious fix was to filter the dropdown, which is one line in the UI.
+Instead I had the same list traced to the server, because the pin check
+used the same function. That turned up the real problem. Pin a course
+under one capstone option, then switch capstone, and the allocator threw
+on the now-ineligible pin. The switch and every later load of that plan
+returned 500, so the plan was broken for good. A UI-only filter would
+have hidden the ids and left the crash in place.
+
+The fix works at three levels. There's one "active eligible leaves" rule
+for the dropdown, the server's pin check (now a 409) and the allocator.
+Changing a choice clears any pin it invalidates, in the same
+transaction. And building the view treats a leftover stale pin as
+Automatic instead of throwing, so plans already saved in that state
+render again.
+
+How I knew it was right: we reproduced the 500 against the built server
+with a throwaway database before touching code. Five tests were written
+first and all failed: two unit, one view (a stale pin must not throw),
+and two API specs (409 for an unchosen option; switch capstone → 200,
+page 200, and switching back doesn't revive the pin). After the fix the
+same curl sequence gave 409 / 200 / 200, and Pin to lists only the
+chosen option's labelled groups at both viewports.
