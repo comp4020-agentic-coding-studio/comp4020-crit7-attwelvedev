@@ -115,7 +115,11 @@ planning rulings (§2.4). Phase files cite them as `CWn` and `Nn`.
 - **CW24** (added after Task 1). The title row has two groups: [title,
   badge] and [completed control, ⋯].
   - When the row doesn't fit, the second group wraps as a whole onto its
-    own line, starting at the line's start.
+    own line, aligned to the line's end (amended during Task 3's review).
+    The readout's width changes with the label ("Nothing completed yet" is
+    254px, "Completed through S2 2027" is 293px), so only end alignment
+    keeps ‹, › and ⋯ fixed while you step through semesters.
+  - Stepping the completed semesters never moves ‹, › or ⋯.
   - The badge wraps below the title only when it doesn't fit beside it.
   - On a 390px phone, an editable plan's row is two lines (title, then
     control + ⋯), and the example plan's is three (title, badge, then

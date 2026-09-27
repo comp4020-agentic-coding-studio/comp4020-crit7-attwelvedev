@@ -877,18 +877,6 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
     }
   });
 
-  it("gives the first term more room on a phone", async () => {
-    await withPlan({ width: 390, height: 844 }, async (page) => {
-      const offset = await page.evaluate(() => {
-        const area = document.querySelector(".planner-timeline-area")!.getBoundingClientRect();
-        const term = document.querySelector(".term")!.getBoundingClientRect();
-        return term.top - area.top;
-      });
-      expect(offset).toBeLessThanOrEqual(100);
-      expect(await horizontalOverflow(page)).toBe(0);
-    });
-  });
-
   it("no user-facing text says cutoff", async () => {
     const id = await planWithPlacement("COMP1130");
     for (const path of ["/plan/example", `/plan/${id}`, "/help/", "/readme/"]) {
@@ -1014,6 +1002,183 @@ describe("more options", { timeout: 30_000 }, () => {
     await withFreshPlan(desktop, async (page) => {
       await moreOptions(page).click();
       expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+});
+
+describe("plan title row", { timeout: 60_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const phone = { width: 390, height: 844 };
+
+  interface Box {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }
+  const centre = (box: Box) => (box.top + box.bottom) / 2;
+  const intersects = (a: Box, b: Box) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+  // Rects of the title row's parts, plus the h1's text (not its padded box).
+  function rowRects(page: Page) {
+    return page.evaluate(() => {
+      const box = (el: Element | null) => {
+        if (!el) return null;
+        const { top, bottom, left, right } = el.getBoundingClientRect();
+        return { top, bottom, left, right };
+      };
+      const h1 = document.querySelector("h1")!;
+      const range = document.createRange();
+      range.selectNodeContents(h1);
+      const text = range.getBoundingClientRect();
+      return {
+        h1: box(h1)!,
+        h1Text: { top: text.top, bottom: text.bottom, left: text.left, right: text.right },
+        note: box(document.querySelector('[role="note"]')),
+        readout: box(document.querySelector(".completed-readout")),
+        more: box(document.querySelector(".more-options-toggle")),
+        row: box(document.querySelector(".plan-title")),
+        actions: box(document.querySelector(".plan-actions")),
+        area: box(document.querySelector(".planner-timeline-area"))!,
+        term: box(document.querySelector(".term"))!,
+        tab: box(document.querySelector("button.nav-show")),
+      };
+    });
+  }
+
+  async function onPlan<T>(path: string, viewport: Viewport, check: (page: Page) => Promise<T>, options = {}) {
+    const page = await openPage(browser, new URL(path, baseUrl).href, viewport, options);
+    try {
+      return await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  it("puts a 1.4rem title, the badge and the controls on one row at 1920", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector("h1")!).fontSize)).toBe("22.4px");
+      expect(await page.locator('[role="note"]').textContent()).toBe("This is an example — Start your own plan");
+      const r = await rowRects(page);
+      expect(Math.abs(centre(r.note!) - centre(r.h1))).toBeLessThanOrEqual(4);
+      expect(r.h1.right).toBeLessThan(r.note!.left);
+      expect(Math.abs(centre(r.readout!) - centre(r.h1))).toBeLessThanOrEqual(4);
+      expect(Math.abs(centre(r.more!) - centre(r.h1))).toBeLessThanOrEqual(4);
+      expect(Math.abs(r.more!.right - r.row!.right)).toBeLessThanOrEqual(1);
+    });
+  });
+
+  it.each(["/help/", "/readme/", "/"])("leaves %s's h1 at its document size", async (path) => {
+    await onPlan(path, desktop, async (page) => {
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector("h1")!).fontSize)).toBe("33.6px");
+    });
+  });
+
+  it("leaves nothing above the timeline", async () => {
+    const id = await planWithPlacement("COMP1130");
+    for (const viewport of [desktop, phone]) {
+      for (const path of ["/plan/example", `/plan/${id}`]) {
+        await onPlan(path, viewport, async (page) => {
+          const r = await rowRects(page);
+          expect(r.term.top - r.area.top, `${path} at ${viewport.width}`).toBeLessThanOrEqual(4);
+          expect(await page.locator(".cutoff-controls").count()).toBe(0);
+        });
+      }
+    }
+  });
+
+  it("gives the height back to the timeline", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const limits = [
+      [desktop, "/plan/example", 64],
+      [desktop, `/plan/${id}`, 64],
+      [phone, "/plan/example", 125],
+      [phone, `/plan/${id}`, 100],
+    ] as const;
+    for (const [viewport, path, limit] of limits) {
+      await onPlan(path, viewport, async (page) => {
+        const r = await rowRects(page);
+        expect(r.term.top - r.h1.top, `${path} at ${viewport.width}`).toBeLessThanOrEqual(limit);
+        expect(await horizontalOverflow(page)).toBe(0);
+        expect(await verticalOverflow(page)).toBe(0);
+      });
+    }
+  });
+
+  it("wraps the controls onto their own line on a phone", async () => {
+    const id = await planWithPlacement("COMP1130");
+    await onPlan(`/plan/${id}`, phone, async (page) => {
+      const r = await rowRects(page);
+      expect(r.actions!.top).toBeGreaterThanOrEqual(r.h1.bottom);
+      expect(Math.abs(r.actions!.right - r.row!.right)).toBeLessThanOrEqual(1);
+      expect(Math.abs(centre(r.more!) - centre(r.readout!))).toBeLessThanOrEqual(4);
+    });
+    await withPlan(phone, async (page) => {
+      const r = await rowRects(page);
+      expect(r.note!.top).toBeGreaterThanOrEqual(r.h1.bottom);
+      expect(r.actions!.top).toBeGreaterThanOrEqual(r.note!.bottom);
+    });
+  });
+
+  it("keeps the nav tab clear of the title and badge on a phone", async () => {
+    await onPlan(
+      "/plan/example",
+      phone,
+      async (page) => {
+        const r = await rowRects(page);
+        expect(intersects(r.tab!, r.note!)).toBe(false);
+        expect(intersects(r.tab!, r.h1Text)).toBe(false);
+        expect(await horizontalOverflow(page)).toBe(0);
+        expect(await verticalOverflow(page)).toBe(0);
+      },
+      { storage: { "panel-nav": "hidden" } },
+    );
+  });
+
+  it("is clean under axe", async () => {
+    const id = await planWithPlacement("COMP1130");
+    for (const path of ["/plan/example", `/plan/${id}`]) {
+      await onPlan(path, desktop, async (page) => {
+        expect(await axeViolations(page)).toEqual([]);
+      });
+    }
+  });
+
+  it.each([
+    [390, 844],
+    [1920, 1080],
+  ])("at %i×%i stepping the completed semesters doesn't move the buttons", async (width, height) => {
+    const id = await planWithPlacement("COMP1130");
+    await onPlan(`/plan/${id}`, { width, height }, async (page) => {
+      const buttons = () =>
+        page.evaluate(() =>
+          [
+            'button[aria-label="One fewer semester completed"]',
+            'button[aria-label="One more semester completed"]',
+            ".more-options-toggle",
+          ].map((selector) => {
+            const { left, top } = document.querySelector(selector)!.getBoundingClientRect();
+            return { left, top };
+          }),
+        );
+      const readout = page.locator(".completed-readout");
+      const before = await buttons();
+      const beforeText = await readout.textContent();
+      await page.getByRole("button", { name: "One more semester completed" }).click();
+      await expect.poll(() => readout.textContent()).not.toBe(beforeText);
+      const after = await buttons();
+      after.forEach((box, i) => {
+        expect(Math.abs(box.left - before[i].left)).toBeLessThanOrEqual(1);
+        expect(Math.abs(box.top - before[i].top)).toBeLessThanOrEqual(1);
+      });
+    });
+  });
+
+  it("Help says the control sits beside the title", async () => {
+    await onPlan("/help/", desktop, async (page) => {
+      const text = await page.evaluate(() => document.body.innerText);
+      expect(text).toMatch(/beside the plan's title/i);
+      expect(text).not.toContain("Above the timeline");
     });
   });
 });

@@ -22,9 +22,10 @@ const MORE_OPTIONS = "more-options";
 
 interface Props {
   view: PlanView;
+  title: string;
 }
 
-export default function Planner({ view: initialView }: Props) {
+export default function Planner({ view: initialView, title }: Props) {
   const [view, setView] = useState(initialView);
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
@@ -163,58 +164,69 @@ export default function Planner({ view: initialView }: Props) {
       <p aria-live="polite" class="visually-hidden">
         {announcement}
       </p>
+      {/* The plan page is a workspace, so its title row also carries the plan's own controls, leaving the timeline nothing above it. */}
+      <div class="plan-title">
+        <div class="plan-title-main">
+          <h1>{title}</h1>
+          {readOnly && (
+            <p role="note" class="plan-badge">
+              This is an example — Start your own plan
+            </p>
+          )}
+        </div>
+        <div class="plan-actions">
+          <div class="completed-control" aria-busy={cutoffPending}>
+            <span class="completed-readout" aria-hidden="true">
+              {readout.short}
+            </span>
+            <span class="visually-hidden">{readout.full}</span>
+            <button
+              type="button"
+              class="completed-step"
+              aria-label="One fewer semester completed"
+              disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
+              onClick={() => moveCutoff(-1)}
+            >
+              <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m15 6-6 6 6 6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="completed-step"
+              aria-label="One more semester completed"
+              disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
+              onClick={() => moveCutoff(1)}
+            >
+              <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+          <MoreOptions
+            open={openMenuCode === MORE_OPTIONS}
+            onOpenChange={(next) => setOpenMenuCode(next ? MORE_OPTIONS : null)}
+          >
+            <label class="show-links-toggle">
+              <input
+                type="checkbox"
+                checked={showPrereqLinks}
+                onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
+              />
+              Show prerequisite links
+            </label>
+            {!readOnly && (
+              <button type="button" onClick={copyPlanLink}>
+                {linkCopied ? "Copied!" : "Copy plan link"}
+              </button>
+            )}
+          </MoreOptions>
+        </div>
+      </div>
       {/* Size container for the panes; the fixed undo toast stays outside it, since containment would pin it to the container. */}
       <div class="planner-layout">
         <div class="planner-panes">
           <div class="planner-timeline-area">
-            <div class="cutoff-controls">
-              <div class="completed-control" aria-busy={cutoffPending}>
-                <span class="completed-readout" aria-hidden="true">
-                  {readout.short}
-                </span>
-                <span class="visually-hidden">{readout.full}</span>
-                <button
-                  type="button"
-                  class="completed-step"
-                  aria-label="One fewer semester completed"
-                  disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
-                  onClick={() => moveCutoff(-1)}
-                >
-                  <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="m15 6-6 6 6 6" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  class="completed-step"
-                  aria-label="One more semester completed"
-                  disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
-                  onClick={() => moveCutoff(1)}
-                >
-                  <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="m9 6 6 6-6 6" />
-                  </svg>
-                </button>
-              </div>
-              <MoreOptions
-                open={openMenuCode === MORE_OPTIONS}
-                onOpenChange={(next) => setOpenMenuCode(next ? MORE_OPTIONS : null)}
-              >
-                <label class="show-links-toggle">
-                  <input
-                    type="checkbox"
-                    checked={showPrereqLinks}
-                    onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
-                  />
-                  Show prerequisite links
-                </label>
-                {!readOnly && (
-                  <button type="button" onClick={copyPlanLink}>
-                    {linkCopied ? "Copied!" : "Copy plan link"}
-                  </button>
-                )}
-              </MoreOptions>
-            </div>
             <Timeline
               view={view}
               planId={view.plan.id}

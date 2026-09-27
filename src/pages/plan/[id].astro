@@ -16,11 +16,7 @@ const title = !view ? "Plan not found" : view.plan.readOnly ? "Example plan" : "
 <Base title={title}>
   {
     view ? (
-      <>
-        <h1>{title}</h1>
-        {view.plan.readOnly && <p role="note">This is an example — Start your own plan</p>}
-        <Planner client:load view={view} />
-      </>
+      <Planner client:load view={view} title={title} />
     ) : (
       <h1>Plan not found</h1>
     )

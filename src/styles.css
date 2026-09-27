@@ -70,6 +70,50 @@ h1 {
   font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem);
 }
 
+/* The plan page is a workspace, so its title row gives height back to the
+   planner. The actions group sits at the end of whichever line it's on, so
+   the chevrons don't move as the readout's text changes width. The badge
+   wraps below the title only when it has to, and the nav-hidden h1's
+   min-height keeps a wrapped badge clear of the tab. */
+.plan-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-block-end: 0.75rem;
+}
+
+.plan-title-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  min-width: 0;
+}
+
+.plan-title h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.plan-badge {
+  margin: 0;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--gold-ink);
+  background: var(--gold-tint);
+  border-radius: 999px;
+}
+
+.plan-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
 h2 {
   font-size: 1.15rem;
 }
@@ -481,14 +525,6 @@ nav[aria-label="site"] .nav-hide:hover {
 
 .reqs-rail-planned {
   background: var(--gold-tint);
-}
-
-.cutoff-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-block-end: 0.75rem;
-  flex-wrap: wrap;
 }
 
 .completed-control {

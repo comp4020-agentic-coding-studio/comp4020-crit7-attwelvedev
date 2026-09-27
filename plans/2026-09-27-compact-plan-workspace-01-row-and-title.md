@@ -267,8 +267,9 @@ room, so it can't push the page sideways.
 state, and a portal can't server-render, so the `h1` moves into Planner.
 `[id].astro` passes `title`, and the server HTML still has exactly one
 `h1`. The row is two flex groups with `justify-content: space-between` and
-`flex-wrap`. When the actions group wraps, it's the only item on its line,
-so space-between puts it at the line's start (CW24). The title group wraps
+`flex-wrap`. The actions group has `margin-inline-start: auto`, so it sits
+at the end of whichever line it's on, and ‹ › ⋯ don't move when the
+readout's text changes width (CW24, amended during Task 3's review). The title group wraps
 internally, so the badge drops below the `h1` only when it doesn't fit. The
 nav-hidden `h1` rule keeps indenting the `h1` beside the tab. Its
 `min-height: 2.75rem` keeps a wrapped badge below the tab. With the row
@@ -594,7 +595,7 @@ row existed.
 
 ### Task 3: Move the plan's controls into a compact title row with the example badge
 
-- [ ] **Description:** Planner renders the title row: a 1.4rem `h1`, the
+- [x] **Description:** Planner renders the title row: a 1.4rem `h1`, the
   example badge, then `.completed-control` and `MoreOptions`. The row above
   the timeline goes, and Help's position wording follows.
 - **Files touched:**
@@ -631,9 +632,11 @@ row existed.
          `/plan/example`
        - `horizontalOverflow` and `verticalOverflow` are 0 in each case
     5. **Phone wrap (CW24)** at 390×844:
-       - fresh plan: `.plan-actions`' top ≥ the `h1`'s bottom. Its `left` is
-         within 1px of `.plan-title`'s `left`. The ⋯ button's vertical
-         centre is within 4px of `.completed-readout`'s.
+       - fresh plan: `.plan-actions`' top ≥ the `h1`'s bottom. Its `right`
+         is within 1px of `.plan-title`'s `right` (end-aligned; this
+         supersedes the original left-edge check, because CW24 changed).
+         The ⋯ button's vertical centre is within 4px of
+         `.completed-readout`'s.
        - `/plan/example`: the badge's top ≥ the `h1`'s bottom, and
          `.plan-actions`' top ≥ the badge's bottom
     6. **Nav hidden** at 390×844 on `/plan/example`, with `{ storage: {
@@ -644,8 +647,15 @@ row existed.
        - `horizontalOverflow` and `verticalOverflow` are 0
     7. **Axe:** at 1920×1080, `/plan/example` and a fresh editable plan
        have `axeViolations` equal to `[]` (N3).
-    8. **Help:** `/help/`'s `body.innerText` contains "beside the plan's
-       title" and doesn't contain "Above the timeline".
+    8. **Help:** `/help/`'s `body.innerText` matches `/beside the plan's
+       title/i` (the copy starts a sentence with it) and doesn't contain
+       "Above the timeline".
+    9. **The buttons stay put** (CW24), at 390×844 and 1920×1080 on a fresh
+       `planWithPlacement("COMP1130")` plan:
+       - record the ‹, › and ⋯ rects
+       - click ›, then `expect.poll` until `.completed-readout`'s text
+         changes
+       - each rect's `left` and `top` are within 1px of what was recorded
 - **Implementation (green):**
   - **`[id].astro`:** the `view` branch becomes `<Planner client:load
     view={view} title={title} />` alone. The `h1` and the note move into
@@ -689,11 +699,12 @@ row existed.
       - `.plan-badge { margin: 0; padding: 0.15rem 0.6rem; font-size:
         0.8rem; font-weight: 500; color: var(--gold-ink); background:
         var(--gold-tint); border-radius: 999px; }`
-      - `.plan-actions { display: flex; align-items: center; gap: 0.5rem; }`
+      - `.plan-actions { display: flex; align-items: center; gap: 0.5rem;
+        margin-inline-start: auto; }`
       - A comment: the plan page is a workspace, so its title row gives
-        height back to the planner. When the row doesn't fit, the actions
-        group wraps as a whole and space-between starts it at the line's
-        start. The badge wraps below the title only when it has to, and
+        height back to the planner. The actions group sits at the end of
+        whichever line it's on, so the chevrons don't move as the readout's
+        text changes width. The badge wraps below the title only when it has to, and
         the nav-hidden `h1`'s `min-height` keeps a wrapped badge clear of
         the tab.
   - **`help.astro`:** in "Completed semesters", change `Above the timeline,
@@ -702,7 +713,7 @@ row existed.
     next to "Completed through …".
 - **Refactor:** grep `src/` for `cutoff-controls`. None should remain.
 - **Acceptance criteria:**
-  - The superseded deletion and new tests 1–8 pass.
+  - The superseded deletion and new tests 1–9 pass.
   - `spec/planner.test.ts:107` ("This is an example") still passes.
   - `spec/invariants.test.ts` still passes (one `h1`).
   - "on %s at %i×%i the tab shares the title's row and covers nothing"
@@ -749,7 +760,7 @@ row existed.
 | CW8 | Task 3: tests 1 and 5 |
 | CW9 | Task 3: test 6, and the existing "covers nothing" test |
 | CW23 | Task 2: tests 1–5 and the superseded tests 1–2 |
-| CW24 | Task 3: test 5 |
+| CW24 | Task 3: tests 5 and 9 |
 | FR5 (amended) | Tasks 1–3: human reviews |
 | N1 | Task 1: test 1; Task 2: test 5; Task 3: tests 4 and 6 |
 | N2 | Task 1: test 1; Task 2: superseded test 1 |
