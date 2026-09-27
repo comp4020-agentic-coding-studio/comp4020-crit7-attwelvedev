@@ -1425,6 +1425,25 @@ describe("more options", { timeout: 30_000 }, () => {
     });
   });
 
+  // A press on the card itself counts as outside: that's where a drag
+  // starts, and an open menu shouldn't ride along under the pointer.
+  it("a press outside a course's Move to… menu closes it, even on its own card", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const card = page.locator(".course-card").filter({ hasText: "COMP1130" });
+      const moveTo = card.getByRole("button", { name: "Move to…" });
+      await moveTo.click();
+      expect(await moveTo.getAttribute("aria-expanded")).toBe("true");
+      await card.locator(".course-card-allocation").click();
+      expect(await moveTo.getAttribute("aria-expanded")).toBe("false");
+
+      await moveTo.click();
+      await card.getByRole("menu").click({ position: { x: 2, y: 2 } });
+      expect(await moveTo.getAttribute("aria-expanded")).toBe("true");
+      await page.locator("h1").click();
+      expect(await moveTo.getAttribute("aria-expanded")).toBe("false");
+    });
+  });
+
   it("offers only the prerequisite toggle on a read-only plan", async () => {
     await withPlan(desktop, async (page) => {
       await moreOptions(page).click();

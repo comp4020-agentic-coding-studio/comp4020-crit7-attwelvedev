@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
 import { dropTargets } from "./planner-logic";
 
@@ -46,9 +47,22 @@ export default function PlaceInMenu({
   const blockedReasons = Array.from(
     new Set(allTargets.filter((target) => !target.allowed && target.reason).map((target) => target.reason as string)),
   );
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Same as MoreOptions: any press outside closes it — including one on
+  // the menu's own card, since that's where a drag starts and the open
+  // list would otherwise be dragged along with the card.
+  useEffect(() => {
+    if (!open) return;
+    function closeOnOutsidePress(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) onOpenChange(false);
+    }
+    document.addEventListener("pointerdown", closeOnOutsidePress);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePress);
+  }, [open]);
 
   return (
-    <div class="place-in-menu">
+    <div class="place-in-menu" ref={rootRef}>
       <button
         type="button"
         aria-haspopup="true"
