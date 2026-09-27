@@ -110,7 +110,7 @@ export function overlayEdges(view: PlanView, code: string): OverlayEdge[] {
 }
 
 export function unplacedCount(view: PlanView, code: string): number {
-  return view.placements.find((p) => p.code === code)?.unplacedPrereqs.length ?? 0;
+  return view.placements.find((p) => p.code === code)?.prereqsToPlace ?? 0;
 }
 
 export interface OutstandingItem {

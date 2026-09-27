@@ -38,7 +38,12 @@ export interface PlacementEval {
   loser: boolean;
   completed: boolean;
   placedPrereqs: string[];
-  unplacedPrereqs: string[];
+  // The fewest more courses that would have to be placed to meet the
+  // requisite (0 unless "soft"): an OR costs its cheapest branch, an AND the
+  // sum of its unmet items. A course already placed (just too late) costs
+  // 0 — that's a "Move" suggestion — and so do units pools, which get their
+  // own reason, and unknown leaves.
+  prereqsToPlace: number;
   requisiteStatus: RequisiteStatus | null;
 }
 
@@ -57,6 +62,20 @@ function collectFailingCourseLeaves(node: RequisiteStatus, out: { code: string; 
     for (const item of node.items) collectFailingCourseLeaves(item, out);
   } else if (node.kind === "course" && !node.ok) {
     out.push({ code: node.code, concurrent: node.concurrent });
+  }
+}
+
+function coursesToPlace(node: RequisiteStatus, placed: ReadonlyMap<string, unknown>): number {
+  if (node.ok !== false) return 0;
+  switch (node.kind) {
+    case "and":
+      return node.items.reduce((sum, item) => sum + coursesToPlace(item, placed), 0);
+    case "or":
+      return Math.min(...node.items.map((item) => coursesToPlace(item, placed)));
+    case "course":
+      return placed.has(node.code) ? 0 : 1;
+    default:
+      return 0;
   }
 }
 
@@ -207,7 +226,6 @@ export function evaluatePlan(
     const allPrereqCodes = new Set<string>();
     collectCourseCodes(course?.requisites.prereq ?? null, allPrereqCodes);
     const placedPrereqs = [...allPrereqCodes].filter((code) => placedByCode.has(code));
-    const unplacedPrereqs = [...allPrereqCodes].filter((code) => !placedByCode.has(code));
 
     const conflicts = [...(conflictWith.get(p.code) ?? [])];
     const loser = loserSet.has(p.code);
@@ -227,7 +245,7 @@ export function evaluatePlan(
         loser,
         completed,
         placedPrereqs,
-        unplacedPrereqs,
+        prereqsToPlace: 0,
         requisiteStatus: null,
       };
     }
@@ -250,7 +268,7 @@ export function evaluatePlan(
         loser,
         completed,
         placedPrereqs,
-        unplacedPrereqs,
+        prereqsToPlace: 0,
         requisiteStatus,
       };
     }
@@ -282,7 +300,7 @@ export function evaluatePlan(
       loser,
       completed,
       placedPrereqs,
-      unplacedPrereqs,
+      prereqsToPlace: coursesToPlace(requisiteStatus!, placedByCode),
       requisiteStatus,
     };
   });

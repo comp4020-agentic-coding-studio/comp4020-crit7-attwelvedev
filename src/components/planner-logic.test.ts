@@ -163,15 +163,26 @@ describe("overlayEdges", () => {
   });
 });
 
+// "N prerequisites not placed" is the fewest more courses that would have
+// to be placed — not every code the requisite mentions, which counted both
+// sides of an OR ("2 not placed" for COMP1110 or COMP1140) and even the
+// unneeded side of one already satisfied.
 describe("unplacedCount", () => {
-  it("counts COMP2100's unplaced prereqs when it's placed alone", () => {
-    const plan: PlanState = {
-      ...emptyPlan(),
-      placements: [{ code: "COMP2100", term: 2, pinnedGroupId: null }],
-    };
-    const view = buildPlanView(cat, AACOM_2027, plan);
-    expect(unplacedCount(view, "COMP2100")).toBe(view.placements[0].unplacedPrereqs.length);
-    expect(unplacedCount(view, "COMP2100")).toBeGreaterThan(0);
+  it.each([
+    // (COMP1110 or COMP1140) and 6 units of MATH: one course; the units
+    // pool has its own "Needs 6 more units" reason.
+    ["COMP2100", [["COMP2100", 2]], 1],
+    // (COMP1110 or COMP1140) and (COMP2300 or ENGN2219).
+    ["COMP2310", [["COMP2310", 3]], 2],
+    // COMP3670, or both (COMP1110 or COMP1140) and (MATH1014 or MATH1115).
+    ["COMP4880", [["COMP4880", 6]], 1],
+    // COMP1140 satisfies its OR; COMP1110 isn't still "not placed".
+    ["COMP2310", [["COMP1140", 1], ["COMP2310", 3]], 1],
+    // Placed, just too late: a "Move" suggestion, not an unplaced course.
+    ["COMP3300", [["COMP2310", 5], ["COMP3300", 3]], 0],
+  ] as [string, [string, number][], number][])("%s with %j → %i", (code, placements, expected) => {
+    const view = buildPlanView(cat, AACOM_2027, placed(...placements));
+    expect(unplacedCount(view, code)).toBe(expected);
   });
 
   it("is 0 for a course that isn't placed", () => {
