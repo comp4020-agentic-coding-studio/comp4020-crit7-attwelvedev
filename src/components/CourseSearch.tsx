@@ -179,12 +179,18 @@ export default function CourseSearch({
       <form onSubmit={onSubmit}>
         <label>
           Course code or title
-          <input
-            type="text"
-            placeholder="e.g. COMP1100 or Software Engineering"
-            value={query}
-            onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
-          />
+          <span class="course-search-field">
+            <svg class="course-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+            <input
+              type="text"
+              placeholder="e.g. COMP1100 or Software Engineering"
+              value={query}
+              onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
+            />
+          </span>
         </label>
         <button type="submit" disabled={pending}>
           Search
