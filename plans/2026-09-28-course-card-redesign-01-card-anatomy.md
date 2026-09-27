@@ -690,15 +690,15 @@ selector list.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 1–4 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Screenshots at 1920×1080 and 390×844 of `/plan/example` and a fresh
+- [x] Tasks 1–4 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Screenshots at 1920×1080 and 390×844 of `/plan/example` and a fresh
       plan with an open card menu, checked for:
-  - [ ] no em-dash titles;
-  - [ ] no disabled buttons on the read-only example;
-  - [ ] a panel inside its column
-- [ ] Tick Phase 01 in overview §5 and commit
+  - [x] no em-dash titles;
+  - [x] no disabled buttons on the read-only example;
+  - [x] a panel inside its column
+- [x] Tick Phase 01 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

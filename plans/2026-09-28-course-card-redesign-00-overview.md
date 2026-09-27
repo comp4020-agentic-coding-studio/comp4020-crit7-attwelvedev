@@ -332,7 +332,7 @@ export interface ShowRequest { kind: "group" | "check"; id: string; token: numbe
 
 | Phase | File | Tasks | Needs | Ends with | Done |
 | --- | --- | --- | --- | --- | --- |
-| 01 | `…-01-card-anatomy.md` | 1–4 | — | New card header, grip and title → Details; timeline three-dot menu; verify badge; blocked cards recede; read-only shows no edit controls | [ ] |
+| 01 | `…-01-card-anatomy.md` | 1–4 | — | New card header, grip and title → Details; timeline three-dot menu; verify badge; blocked cards recede; read-only shows no edit controls | [x] |
 | 02 | `…-02-placed-rows.md` | 5–6 | 01 | Placed courses are compact Completed/Planned rows in groups and search | [ ] |
 | 03 | `…-03-family-colours.md` | 7–10 | 01, 02 | Palette + checks test; strips, dots, family progress bars, per-term bar | [ ] |
 | 04 | `…-04-jumps.md` | 11–13 | 01, 02, 03 | "Counts toward" and "What's left" jump to requirements; heading hover recedes other cards | [ ] |
