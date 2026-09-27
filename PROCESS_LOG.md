@@ -611,3 +611,29 @@ overflow. With the guard it failed on the clipped build and passed on
 the floating one. A new close-on-scroll test failed with its listener
 disabled. The real build's screenshots matched the approved simulation
 in all five cases.
+
+## 2026-09-28 — Keeping a row's status test strict and changing the CSS instead
+
+Resolved by 9f2b8c5.
+
+Phase 02's plan specified a compact row for placed courses, with two
+lines that contradicted each other. The CSS made the status line
+`display: flex; gap: 0.35rem`, and the test required its `innerText` to
+be "Completed S1 2027". Built as written, the render read
+"Completed\nS1 2027": flex blockifies its children, so Chromium's
+innerText breaks the line between the word and the term button, even
+though the markup has a plain space.
+
+The obvious fix was the test. Switching to whitespace-normalised
+`textContent` would have passed at once and kept the planned CSS. I
+kept the test instead, because `innerText` is the closest proxy the
+spec has for how the status reads as a phrase. Normalising it away
+would have hidden exactly the kind of drift the test exists to catch.
+I dropped the flex and let the source's space and the inline button do
+the spacing, then amended the plan's CSS line, so the plan still
+describes what was built.
+
+How I knew it was right: the same test, unchanged, failed on the flex
+build and passed on the inline one. Screenshots at 390×844 and
+1920×1080 showed the word and the term button still aligned, with the
+same gap, in both the two-line and the one-line layouts.
