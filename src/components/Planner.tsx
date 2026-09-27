@@ -223,7 +223,7 @@ export default function Planner({ view: initialView }: Props) {
             onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}
             onHide={() => updateReqs({ ...reqs, collapsed: true }, true)}
             onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
-            dropReady={false}
+            dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
           />
         </div>
       </div>

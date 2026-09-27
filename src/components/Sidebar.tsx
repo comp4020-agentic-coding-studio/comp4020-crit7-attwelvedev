@@ -226,6 +226,7 @@ export default function Sidebar({
   onLocateCourse,
   onHide,
   onShow,
+  dropReady,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -263,6 +264,7 @@ export default function Sidebar({
     <aside
       id="requirements"
       aria-label="requirements"
+      class={dropReady ? "reqs-drop-ready" : undefined}
       onDragOver={(event) => event.preventDefault()}
       onDrop={async (event) => {
         event.preventDefault();

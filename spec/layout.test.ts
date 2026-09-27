@@ -303,3 +303,58 @@ describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("requirements rail as a drop target", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+
+  async function planWithPlacement(code: string): Promise<string> {
+    const created = await fetch(new URL("/api/plans", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      redirect: "manual",
+    });
+    const id = created.headers.get("location")!.split("/").pop()!;
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code, term: 0 }),
+    });
+    expect(placed.status).toBe(200);
+    return id;
+  }
+
+  it("dragging a placed course onto the collapsed rail removes it", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop, {
+      storage: { "panel-reqs": "collapsed" },
+    });
+    try {
+      const card = page.locator('[data-placed="COMP1130"]');
+      const box = (await page.locator(".reqs-rail").boundingBox())!;
+      await card.hover();
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+      expect(await page.locator("aside.reqs-drop-ready").count()).toBe(1);
+      await page.mouse.up();
+      await expect.poll(() => card.count()).toBe(0);
+      expect(await page.locator("aside.reqs-drop-ready").count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("doesn't signal a drop target while dragging a course that isn't placed", async () => {
+    const page = await openPage(browser, planUrl(), desktop);
+    try {
+      const card = page.locator(".course-card-unplaced").first();
+      const box = (await page.locator(".planner-timeline-area").boundingBox())!;
+      await card.hover();
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+      expect(await page.locator(".reqs-drop-ready").count()).toBe(0);
+      await page.mouse.up();
+    } finally {
+      await page.close();
+    }
+  });
+});

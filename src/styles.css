@@ -1222,4 +1222,12 @@ fieldset[aria-busy="true"] {
   :root[data-reqs="collapsed"] .reqs-rail {
     display: flex;
   }
+
+  /* A 3rem rail is otherwise easy to miss as the place to drop a course to
+     remove it. Touch hover is still covered by aside.drag-hover-target. */
+  :root[data-reqs="collapsed"] .reqs-drop-ready .reqs-rail {
+    outline: 2px dashed var(--gold);
+    outline-offset: -4px;
+    background: var(--gold-tint);
+  }
 }

@@ -356,7 +356,7 @@ cascade order).
 
 ### Task 6: Signal the rail as a drop target while a placed course is dragged
 
-- [ ] **Description:** wire `dropReady` and style it, then prove that native
+- [x] **Description:** wire `dropReady` and style it, then prove that native
   drag-to-remove works on the collapsed rail.
 - **Files touched:**
   - `src/components/Planner.tsx`
@@ -407,12 +407,12 @@ cascade order).
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 5–6 complete, with their tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Two commits (Task 5, Task 6)
-- [ ] Task 5's human review accepted by the user
-- [ ] Tick Phase 03 in overview §5 and commit
+- [x] Tasks 5–6 complete, with their tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Two commits (Task 5, Task 6)
+- [x] Task 5's human review accepted by the user
+- [x] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

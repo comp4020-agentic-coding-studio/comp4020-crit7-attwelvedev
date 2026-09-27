@@ -341,7 +341,7 @@ export function axeViolations(page: Page): Promise<string[]>;    // "id: target"
 | --- | --- | --- | --- | --- | --- |
 | 01 | `…-01-fit-layout.md` | 1–2 | — | Two commits. No sideways overflow at any width; tiers 3/2/1/stacked. Human review of 1280/1100/900 renders. PROCESS_LOG entry | [x] |
 | 02 | `…-02-nav-collapse.md` | 3–4 | 01 | One commit. Nav hides and shows, persists, no flash. Human review of the tab | [x] |
-| 03 | `…-03-sidebar-collapse.md` | 5–6 | 01, 02 | Two commits. Rail collapse with drop target and highlight. Human review of the rail | [ ] |
+| 03 | `…-03-sidebar-collapse.md` | 5–6 | 01, 02 | Two commits. Rail collapse with drop target and highlight. Human review of the rail | [x] |
 | 04 | `…-04-snapping-resize.md` | 7–8 | 01, 02, 03 | One commit. Snapping resize by pointer and keyboard. Human review of the handle | [ ] |
 
 Phase 03 needs Phase 02 for `panel-state.ts` (Task 3) and the head script
