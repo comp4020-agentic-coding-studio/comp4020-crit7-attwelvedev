@@ -128,4 +128,9 @@ describe("the inline head script in Base.astro", () => {
     const base = readFileSync("src/layouts/Base.astro", "utf-8");
     expect(base).toContain(`"${REQS_KEY}"`);
   });
+
+  it("uses the same column-count key", () => {
+    const base = readFileSync("src/layouts/Base.astro", "utf-8");
+    expect(base).toContain(`"${REQS_COLS_KEY}"`);
+  });
 });

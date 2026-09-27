@@ -1147,8 +1147,8 @@ fieldset[aria-busy="true"] {
 
 /* The planner lays itself out from its own width, not the viewport's, so
    the site nav (or anything else beside it) can never push it wider than the
-   page. Each tier's threshold is that tier's sidebar width + the 1rem pane
-   gap + --timeline-min, written as literals because `@container` conditions
+   page. Each tier's threshold is that tier's sidebar width + the 1rem
+   resize handle between the panes + --timeline-min, written as literals because `@container` conditions
    can't read `var()`. The widths budget for course grids nested two groups
    deep, the deepest the example plan goes. */
 @container planner (min-width: 49.5rem) {
@@ -1292,6 +1292,95 @@ fieldset[aria-busy="true"] {
       flex: 1 1 auto;
       min-height: 0;
     }
+  }
+}
+
+/* The resize handle between the sidebar and the timeline. In side-by-side
+   it takes the place of the 1rem pane gap, so every tier's threshold and
+   width above still adds up. */
+.reqs-resize {
+  display: none;
+}
+
+@container planner (min-width: 49.5rem) {
+  .planner-panes {
+    gap: 0;
+  }
+
+  .reqs-resize {
+    display: block;
+    order: -1;
+    flex: 0 0 1rem;
+    align-self: flex-start;
+    position: sticky;
+    top: 1rem;
+    height: calc(100vh - 2rem);
+    cursor: col-resize;
+    touch-action: none;
+  }
+
+  /* The handle is drawn 1rem wide, but its hit area is 2.75rem so it's a
+     comfortable pointer and touch target. */
+  .reqs-resize::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline: -0.875rem;
+  }
+
+  .reqs-resize::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(50% - 1px);
+    width: 2px;
+    border-radius: 1px;
+    background: var(--line);
+  }
+
+  .reqs-resize:hover::after,
+  .reqs-resize:focus-visible::after {
+    background: var(--gold);
+  }
+}
+
+/* In the fitted page, the handle spans the panes like the aside and the
+   timeline do. position: relative keeps it the containing block for its
+   ::before and ::after. */
+@media (min-height: 30rem) {
+  @container planner (min-width: 49.5rem) {
+    .reqs-resize {
+      align-self: stretch;
+      position: relative;
+      top: auto;
+      height: auto;
+    }
+  }
+}
+
+/* The preferred column count only ever narrows the width a tier allows:
+   these caps sit inside the tier that would otherwise show more columns.
+   They must come after the fit group and before the collapsed block, which
+   has the same specificity and must win over them. */
+@container planner (min-width: 63.1rem) {
+  :root[data-reqs-cols="1"] .planner-panes > aside {
+    flex-basis: var(--reqs-w-1);
+    width: var(--reqs-w-1);
+  }
+
+  :root[data-reqs-cols="1"] .available-courses {
+    grid-template-columns: 13rem;
+  }
+}
+
+@container planner (min-width: 76.7rem) {
+  :root[data-reqs-cols="2"] .planner-panes > aside {
+    flex-basis: var(--reqs-w-2);
+    width: var(--reqs-w-2);
+  }
+
+  :root[data-reqs-cols="2"] .available-courses[data-columns="3"] {
+    grid-template-columns: repeat(2, 13rem);
   }
 }
 

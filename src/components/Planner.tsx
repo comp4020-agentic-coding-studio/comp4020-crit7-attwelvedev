@@ -4,6 +4,7 @@ import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
 import { applyReqsState, DEFAULT_REQS, type ReqsState, reqsStateFromDataset, saveReqsState } from "./panel-state";
 import { dropTargets } from "./planner-logic";
+import ReqsResizeHandle from "./ReqsResizeHandle";
 import Sidebar from "./Sidebar";
 import Timeline from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
@@ -226,6 +227,7 @@ export default function Planner({ view: initialView }: Props) {
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void performRemove(code)}
           />
+          <ReqsResizeHandle reqs={reqs} onChange={updateReqs} />
         </div>
       </div>
       {removed && (

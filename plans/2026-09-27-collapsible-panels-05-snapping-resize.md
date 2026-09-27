@@ -208,7 +208,7 @@ threshold and width is unchanged.
 
 ### Task 7: Pure snapping and stepping logic for the sidebar width
 
-- [ ] **Description:** create `reqs-resize.ts` exactly as in this file's §4,
+- [x] **Description:** create `reqs-resize.ts` exactly as in this file's §4,
   with unit tests. Also add a drift test tying `REQS_WIDTH_REM` to the CSS
   tokens.
 - **Files touched:**
@@ -253,7 +253,7 @@ threshold and width is unchanged.
 
 ### Task 8: The resize handle: live snapping by pointer, stepping by keyboard
 
-- [ ] **Description:** add the separator component, wire it into Planner,
+- [x] **Description:** add the separator component, wire it into Planner,
   add the preference-cap CSS and the head-script columns line.
 - **Files touched:**
   - `src/components/ReqsResizeHandle.tsx` (new)

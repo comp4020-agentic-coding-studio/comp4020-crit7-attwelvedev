@@ -21,6 +21,8 @@ const { title } = Astro.props;
         var s = localStorage, h = document.documentElement;
         if (s.getItem("panel-nav") === "hidden") h.dataset.nav = "hidden";
         if (s.getItem("panel-reqs") === "collapsed") h.dataset.reqs = "collapsed";
+        var c = s.getItem("panel-reqs-cols");
+        if (c === "1" || c === "2") h.dataset.reqsCols = c;
       } catch (e) {}
     </script>
     <title>{title}</title>

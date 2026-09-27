@@ -640,3 +640,178 @@ describe("requirements rail as a drop target", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("requirements resize handle", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const separator = (page: Page) => page.getByRole("separator", { name: "Resize requirements" });
+  const asideWidth = (page: Page) =>
+    page.evaluate(() => document.querySelector<HTMLElement>("#requirements")!.offsetWidth);
+  const asideLeft = (page: Page) =>
+    page.evaluate(() => document.querySelector("#requirements")!.getBoundingClientRect().left);
+  const tracks = (page: Page) =>
+    page.evaluate(() => {
+      const list = document.querySelector('.available-courses[data-columns="3"]');
+      return list ? getComputedStyle(list).gridTemplateColumns.split(" ").length : null;
+    });
+  const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
+
+  // Presses on the handle's centre and releases at `x`, leaving the move's
+  // intermediate state for the caller when `release` is false.
+  async function dragHandleTo(page: Page, x: number, release = true) {
+    const box = (await separator(page).boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width / 2, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y, { steps: 5 });
+    if (release) await page.mouse.up();
+  }
+
+  it("starts at 3 columns, controls the sidebar, and spans its height", async () => {
+    const page = await openPage(browser, planUrl(), desktop);
+    try {
+      const sep = separator(page);
+      expect(await sep.getAttribute("aria-valuenow")).toBe("3");
+      expect(await sep.getAttribute("aria-valuemax")).toBe("3");
+      expect(await sep.getAttribute("aria-valuetext")).toBe("3 columns");
+      expect(await sep.getAttribute("aria-controls")).toBe("requirements");
+      const handle = (await sep.boundingBox())!;
+      const aside = (await page.locator("#requirements").boundingBox())!;
+      expect(Math.abs(handle.y - aside.y)).toBeLessThanOrEqual(1);
+      expect(Math.abs(handle.height - aside.height)).toBeLessThanOrEqual(1);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("steps through the sizes from the keyboard and saves each one", async () => {
+    const page = await openPage(browser, planUrl(), desktop);
+    try {
+      const sep = separator(page);
+      await sep.focus();
+      const steps: [string, string, number | null][] = [
+        ["ArrowLeft", "2 columns", 498],
+        ["ArrowLeft", "1 column", 280],
+        ["ArrowLeft", "Collapsed", 48],
+        ["ArrowRight", "1 column", null],
+        ["End", "3 columns", 715],
+        ["Home", "Collapsed", null],
+      ];
+      for (const [key, text, width] of steps) {
+        await page.keyboard.press(key);
+        await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe(text);
+        if (width !== null) expect(await asideWidth(page)).toBe(width);
+        if (text === "2 columns") {
+          expect(await tracks(page)).toBe(2);
+          expect(await stored(page, "panel-reqs-cols")).toBe("2");
+        }
+        if (text === "1 column" && width !== null) expect(await tracks(page)).toBe(1);
+        if (text === "Collapsed" && width !== null) expect(await page.locator(".reqs-rail").isVisible()).toBe(true);
+        expect(await horizontalOverflow(page)).toBe(0);
+        expect(await verticalOverflow(page)).toBe(0);
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("applies the saved column count before any bundled script runs", async () => {
+    const page = await openPage(browser, planUrl(), desktop, {
+      storage: { "panel-reqs-cols": "2" },
+      blockScripts: true,
+    });
+    try {
+      expect(await asideWidth(page)).toBe(498);
+      expect(await tracks(page)).toBe(2);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("can't reach more columns than fit", async () => {
+    const page = await openPage(browser, planUrl(), { width: 1280, height: 800 });
+    try {
+      const sep = separator(page);
+      await expect.poll(() => sep.getAttribute("aria-valuemax")).toBe("2");
+      await sep.focus();
+      await page.keyboard.press("End");
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("2 columns");
+    } finally {
+      await page.close();
+    }
+
+    const seeded = await openPage(browser, planUrl(), { width: 1280, height: 800 }, {
+      storage: { "panel-reqs-cols": "3" },
+    });
+    try {
+      expect(await asideWidth(seeded)).toBe(498);
+    } finally {
+      await seeded.close();
+    }
+
+    const narrow = await openPage(browser, planUrl(), { width: 1100, height: 800 });
+    try {
+      await expect.poll(() => separator(narrow).getAttribute("aria-valuemax")).toBe("1");
+    } finally {
+      await narrow.close();
+    }
+  });
+
+  it("previews while dragging and saves only on release", async () => {
+    const page = await openPage(browser, planUrl(), desktop);
+    try {
+      const sep = separator(page);
+      const left = await asideLeft(page);
+
+      await dragHandleTo(page, left + 20 * 16, false);
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("1 column");
+      expect(await asideWidth(page)).toBe(280);
+      expect(await stored(page, "panel-reqs-cols")).toBeNull();
+      await page.mouse.up();
+      await expect.poll(() => stored(page, "panel-reqs-cols")).toBe("1");
+
+      await dragHandleTo(page, left + 5 * 16);
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("Collapsed");
+      await expect.poll(() => stored(page, "panel-reqs")).toBe("collapsed");
+
+      // The handle stays beside the rail, so dragging out from there expands.
+      await dragHandleTo(page, left + 40 * 16);
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("3 columns");
+      await expect.poll(() => stored(page, "panel-reqs")).toBeNull();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("expands from the rail to the saved column count", async () => {
+    const page = await openPage(browser, planUrl(), desktop, {
+      storage: { "panel-reqs": "collapsed", "panel-reqs-cols": "2" },
+    });
+    try {
+      await page.locator(".reqs-rail").click();
+      await expect.poll(() => asideWidth(page)).toBe(498);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("isn't shown in the stacked layout", async () => {
+    const page = await openPage(browser, planUrl(), { width: 390, height: 844 });
+    try {
+      expect(await separator(page).isVisible()).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    ["at 1 column", { "panel-reqs-cols": "1" }],
+    ["collapsed", { "panel-reqs": "collapsed" }],
+  ])("passes axe %s", async (_state, storage) => {
+    const page = await openPage(browser, planUrl(), desktop, { storage });
+    try {
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+});
