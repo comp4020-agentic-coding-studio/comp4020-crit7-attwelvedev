@@ -327,3 +327,34 @@ How I knew it was right: both specs pass, and removing the `:not()` guard
 makes both fail, so the check actually pins the behaviour. Mid-drag
 screenshots at both viewports confirmed the outline on the allowed column
 and none on the blocked one.
+
+## 2026-09-27 — Drawing every qualifying prereq, dashed, instead of picking one
+
+Resolved by e6f492d..5c1b394.
+
+I noticed COMP3242's "6 units of (COMP3670 or MATH1013 ...)" and
+COMP2300's "6 units of 1000-level MATH" never linked the MATH course I'd
+placed. Rather than patch those two, I had the whole catalogue's parsed
+requisites run through a scan that bucketed every leaf kind. It showed
+the overlay only followed plain course leaves: 6 code-list pools and 29
+subject/level pools drew nothing. It also turned up a second gap, a start-
+vs-last-term mismatch with evaluate.ts for two-semester courses, and a
+separate parser problem (COMP4880's "all of the following: COMP1110" is
+lost as unverifiable text) that I've kept out of this fix.
+
+The obvious way to show "one of several" is to pick the single course
+that satisfies it. I rejected that: the choice is arbitrary and would
+jump as cards move. Instead every qualifying placed course gets a line,
+and the edge carries a kind. Required (named on an all-AND path) draws
+solid; option (an OR branch or pool member) draws dashed, so two MATH
+lines into COMP2300 don't read as "needs both". I also reversed hover:
+with links on, it now dims the rest of the graph instead of hiding it,
+and with links off it draws nothing.
+
+How I knew it was right: I printed the edges for a test plan and checked
+each one against the P&C wording (COMP2310's "COMP2300 or ENGN2219"
+correctly comes out as an option). Unit tests pin each edge kind and the
+two-semester timing. A new spec/layout.test.ts check runs the real
+render at both marking viewports. It first failed on my own assumption
+of 4 hovered lines: it was 7, because hover also highlights COMP3242's
+outgoing links, which is correct.
