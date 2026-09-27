@@ -495,11 +495,15 @@ export function parseRequisites(input: { prerequisites: string; incompatibilitie
 
   const incompatible: string[] = [];
   const seenIncompat = new Set<string>();
-  const unverifiable: string[] = [];
+  // A code-less sentence in the incompatibility field is a requirement
+  // filed in the wrong place (COMP4820's "Competitive entry based on
+  // application ..." and permission-code sentences), so it joins the tree
+  // as an unverifiable leaf rather than a note nothing can ever resolve.
+  const incompatProse: ReqExpr[] = [];
   for (const sentence of incompatBucket) {
     const codes = matchAllCodes(sentence);
     if (codes.length === 0) {
-      unverifiable.push(sentence);
+      incompatProse.push({ kind: "unverifiable", text: sentence });
       continue;
     }
     for (const code of codes) {
@@ -533,8 +537,9 @@ export function parseRequisites(input: { prerequisites: string; incompatibilitie
     const node = parseExpr(stripped);
     if (node) prereqParts.push(node);
   }
-  const prereq = combineAnd(prereqParts);
+  const prereq = combineAnd([...prereqParts, ...incompatProse]);
 
+  const unverifiable: string[] = [];
   collectUnverifiable(prereq, unverifiable);
 
   return {

@@ -121,7 +121,7 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
 
 ### Task 1: Make incompatibility-field prose required unverifiable leaves
 
-- [ ] Done
+- [x] Done
 - **Description:** In `parseRequisites`, code-less incompatibility-bucket
   sentences become `{ kind: "unverifiable", text }` leaves AND'ed after the
   parsed prereq parts; `unverifiable` is then collected from the tree only,

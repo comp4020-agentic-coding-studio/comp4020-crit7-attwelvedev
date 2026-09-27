@@ -167,10 +167,18 @@ describe("parseRequisites: prereq fixtures", () => {
     );
   });
 
-  it("COMP4820: program leaf, course leaf and a units clause", () => {
+  it("COMP4820: incompatibility-field prose becomes a required leaf", () => {
+    // Its competitive-entry and permission-code sentences sit in P&C's
+    // incompatibility field, but they're requirements all the same.
     expectPrereq(
       "COMP4820",
-      AND(P(null, true), C("COMP2100"), U(12, { prefixes: ["COMP"], minLevel: 3000, maxLevel: 3000 })),
+      AND(
+        P(null, true),
+        C("COMP2100"),
+        U(12, { prefixes: ["COMP"], minLevel: 3000, maxLevel: 3000 }),
+        { kind: "unverifiable" },
+        { kind: "unverifiable" },
+      ),
     );
   });
 
@@ -407,6 +415,25 @@ describe("parseRequisites: invariants over the whole catalogue", () => {
       for (const text of result.unverifiable) if (codeRe.test(text)) offenders.push(`${raw.code}: "${text}"`);
     }
     expect(offenders).toEqual([]);
+  });
+
+  function collectUnverifiableTexts(node: ReqExpr | null, out: string[]): void {
+    if (node === null) return;
+    if (node.kind === "and" || node.kind === "or") for (const item of node.items) collectUnverifiableTexts(item, out);
+    else if (node.kind === "unverifiable") out.push(node.text);
+  }
+
+  // A student answers verify items in the tree's terms (a leaf is met, not
+  // met or unknown) — an item outside the tree could be answered but would
+  // never change anything, as COMP4820's permission-code sentence couldn't.
+  it("every verify item is exactly one unverifiable leaf of the prereq tree", () => {
+    for (const file of globSync("data/2027/courses/*.json")) {
+      const raw: RawCourse = JSON.parse(readFileSync(file, "utf-8"));
+      const result = parseRequisites({ prerequisites: raw.prerequisites, incompatibilities: raw.incompatibilities });
+      const leaves: string[] = [];
+      collectUnverifiableTexts(result.prereq, leaves);
+      expect([...result.unverifiable].sort(), raw.code).toEqual(leaves.sort());
+    }
   });
 
   // The same gap one level up: COMP4500's two degree routes lost both

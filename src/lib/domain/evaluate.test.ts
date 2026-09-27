@@ -327,6 +327,20 @@ describe("evaluatePlan: 'check' on the real catalogue", () => {
     expect(missing.placements.find((p) => p.code === "COMP4500")!.state).toBe("soft");
   });
 
+  it("COMP4820 with its courses met is 'check' until its permission items are answered", () => {
+    const result = evaluatePlan(
+      cat,
+      feas,
+      plan([
+        { code: "COMP2100", term: 2 },
+        { code: "COMP3600", term: 3 },
+        { code: "COMP3620", term: 4 },
+        { code: "COMP4820", term: 6 },
+      ]),
+    );
+    expect(result.placements.find((p) => p.code === "COMP4820")!.state).toBe("check");
+  });
+
   it("the example plan — a complete, working plan — has nothing still flagged 'soft'", () => {
     const result = evaluatePlan(cat, feas, EXAMPLE_PLAN);
     expect(result.placements.filter((p) => p.state === "soft").map((p) => p.code)).toEqual([]);
