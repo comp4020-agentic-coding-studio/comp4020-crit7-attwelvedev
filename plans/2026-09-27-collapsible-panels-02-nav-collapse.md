@@ -11,6 +11,10 @@
   - §4.3 (`panel-state.ts` API)
   - §4.5 (browser helpers)
 - **Depends on phases:** 01 (for `spec/browser.ts` and the fit layout).
+- **Later amendment:** FR9's "nothing changes below 1100px", as built and
+  tested here, was replaced on 2026-09-27 by the amended FR9 and FR26, which
+  Phase 04 (`…-04-header-nav-fit-height.md`, Task 9) builds. Phase 04 deletes
+  this phase's "ignores the saved state on a phone" test.
 
 ## 1. Summary
 

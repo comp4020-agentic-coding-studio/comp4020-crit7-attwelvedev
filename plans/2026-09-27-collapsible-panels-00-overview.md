@@ -14,11 +14,17 @@ Files in this set:
 - `plans/2026-09-27-collapsible-panels-01-fit-layout.md`: Tasks 1–2
 - `plans/2026-09-27-collapsible-panels-02-nav-collapse.md`: Tasks 3–4
 - `plans/2026-09-27-collapsible-panels-03-sidebar-collapse.md`: Tasks 5–6
-- `plans/2026-09-27-collapsible-panels-04-snapping-resize.md`: Tasks 7–8
+- `plans/2026-09-27-collapsible-panels-04-header-nav-fit-height.md`: Tasks 9–10
+- `plans/2026-09-27-collapsible-panels-05-snapping-resize.md`: Tasks 7–8
 
 Each implementation session reads **this overview plus exactly one phase
 file**. Task numbers are global across the files. Tick a phase in §5 only
 once that phase file's Definition of Done is met.
+
+Phase 04 was added on 2026-09-27, after Phase 02 shipped, when the user
+asked for the nav toggle at every width and a fitted plan page. It runs
+before the resize phase, which was renumbered from 04 to 05 but kept its
+task numbers (7–8). That's why Tasks 9–10 run before Tasks 7–8.
 
 ## 1. Summary
 
@@ -36,6 +42,9 @@ feature does four things:
   program progress and still accepts drops.
 - **Lets the sidebar snap-resize** between collapsed, 1, 2 and 3 card
   columns.
+- **Brings the nav toggle to the narrow top bar** and **fits the plan page to
+  the screen,** so the title stays put and each pane scrolls on its own.
+  Both were added after Phase 02; see §0.
 
 Every choice is remembered per browser and applied before first paint.
 
@@ -66,8 +75,10 @@ decisions applied. Phase files cite them as `FRn`.
    - 1 column fits at 49.5rem.
 
    The default preference is 3.
-5. 1920×1080 renders as today apart from the removed overflow. 390×844 is
-   unchanged.
+5. 1920×1080 renders as today apart from the removed overflow and the
+   fitted height (FR27–28). 390×844 changes only as FR9, FR26 and FR29
+   describe. *(Amended 2026-09-27; it originally said 390×844 was
+   unchanged.)*
 
 **Site nav (Phase 02)**
 
@@ -76,7 +87,29 @@ decisions applied. Phase files cite them as `FRn`.
    the accessibility tree. A "Show navigation" tab is pinned top-left.
 8. While the nav is hidden, `main`'s inline-start padding grows so the tab
    never overlaps content.
-9. Below 1100px there's no toggle, and the stored hidden state is ignored.
+9. Below 1100px, the top bar has a "Hide navigation" button at the end of
+   its brand row, with the chevron pointing up. The stored hidden state
+   applies at every width, under one `panel-nav` key. *(Amended 2026-09-27;
+   it originally said there was no toggle below 1100px and the state was
+   ignored there.)*
+
+**Site nav in the top bar, and the fitted plan page (Phase 04)**
+
+26. Below 1100px, hiding the nav sets it to `display: none` and shows a
+    "Show navigation" tab, chevron pointing down, at the start of the page
+    title's row. The page's `<h1>` is indented beside it. On pages that
+    scroll, the tab scrolls away with the title. It never covers content.
+27. On `/plan/*`, whenever the viewport is at least 30rem tall, the document
+    never scrolls vertically (`scrollHeight === clientHeight`) at any width
+    and in any panel state. The nav (if shown), the title and the note sit
+    at the top, and the planner fills the rest.
+28. In side-by-side, the sidebar (or the collapsed rail) and the timeline
+    each fill the planner's height and scroll independently.
+29. In stacked, the timeline, including its cutoff controls, takes at most
+    half the planner's height. The requirements fill the rest, and each
+    scrolls on its own.
+30. Below 30rem of viewport height, the plan page scrolls as before, with
+    sticky panes.
 
 **Sidebar collapse (Phase 03)**
 
@@ -92,7 +125,7 @@ decisions applied. Phase files cite them as `FRn`.
 15. The stacked layout has no collapse control, and the collapsed state is
     ignored there.
 
-**Resize (Phase 04)**
+**Resize (Phase 05)**
 
 16. In side-by-side, a resize handle sits between the sidebar and the
     timeline. It's also present beside the collapsed rail.
@@ -133,17 +166,18 @@ decisions applied. Phase files cite them as `FRn`.
 - **Verification**
   - A Playwright-driven `spec/layout.test.ts` runs inside `pnpm check`.
   - `agent-browser` is used for the CLAUDE.md render check at 1920×1080 and
-    390×844 before each commit.
+    390×844 before each commit. From Phase 04 on, add 900×800, the top-bar
+    side-by-side layout.
 - **CI:** the `check` job in `.github/workflows/checks.yml` installs
   Chromium before `pnpm check`.
 
 ### 2.3 Out of scope
 
-- Mobile/stacked layout changes beyond FR2's threshold.
+- Mobile/stacked layout changes beyond FR2's threshold and FR29's split.
+- Fitting any page other than `/plan/*` to the viewport.
 - Per-group compaction (already shipped in `5f5f052`).
 - Per-plan memory.
 - Free, non-snapping widths.
-- A nav toggle below 1100px.
 - Enabling axe's colour-contrast rule.
 
 ### 2.4 Assumptions
@@ -158,6 +192,9 @@ and §5a.
   15px scrollbar gutter.
 - Panels default to expanded. State is global, not per plan.
 - Dragging out from the rail expands it, and ← from 1 column collapses it.
+- *(Added with Phase 04.)* One `panel-nav` key covers every width. The
+  30rem height floor for fitting the plan page was a default the user
+  confirmed.
 
 ## 3. Shared context & conventions
 
@@ -229,7 +266,8 @@ container itself.
 | `panel-reqs-cols` | `"1"`, `"2"`, `"3"` | `data-reqs-cols="1"`/`"2"` (absent for 3) | Preferred column count |
 
 **The final inline head script** is built up in Base.astro across Tasks 4, 5
-and 8. Each phase adds its own line.
+and 8. Each phase adds its own line. The nav line applies at every width;
+since Task 9, CSS decides what "hidden" looks like on each side of 1100px.
 
 ```html
 <script is:inline>
@@ -311,12 +349,17 @@ Reference points, with the nav expanded:
 | 800 | 47.5rem | stacked |
 | 390 | — | stacked |
 
-**Cascade order at the end of the planner section** (Tasks 5 and 8 depend
-on it):
+**Cascade order at the end of the planner section** (Tasks 5, 8 and 10
+depend on it):
 
 1. tier blocks (Task 2)
-2. preference-cap rules (Task 8)
-3. collapsed rules (Task 5), in their own
+2. the fit group (Task 10): `@media (min-height: 30rem)` wrapping the shell
+   and planner flex rules. Its stacked part is `@container planner (width <
+   49.5rem)`, and its side-by-side part `@container planner (min-width:
+   49.5rem)`. It overrides the tiers' `position`/`max-height`/`align-items`
+3. preference-cap rules and the resize handle (Task 8), including the
+   handle's own fit override
+4. collapsed rules (Task 5), in their own
    `@container planner (min-width: 49.5rem)` block placed last, because they
    have the same specificity as the preference caps and must win
 
@@ -332,6 +375,7 @@ export interface OpenOptions {
 export function launch(): Promise<Browser>;
 export function openPage(browser: Browser, url: string, viewport: Viewport, options?: OpenOptions): Promise<Page>;
 export function horizontalOverflow(page: Page): Promise<number>; // scrollWidth − clientWidth of <html>
+export function verticalOverflow(page: Page): Promise<number>;   // scrollHeight − clientHeight of <html> (added by Task 10)
 export function axeViolations(page: Page): Promise<string[]>;    // "id: target" strings; [] when clean
 ```
 
@@ -342,11 +386,14 @@ export function axeViolations(page: Page): Promise<string[]>;    // "id: target"
 | 01 | `…-01-fit-layout.md` | 1–2 | — | Two commits. No sideways overflow at any width; tiers 3/2/1/stacked. Human review of 1280/1100/900 renders. PROCESS_LOG entry | [x] |
 | 02 | `…-02-nav-collapse.md` | 3–4 | 01 | One commit. Nav hides and shows, persists, no flash. Human review of the tab | [x] |
 | 03 | `…-03-sidebar-collapse.md` | 5–6 | 01, 02 | Two commits. Rail collapse with drop target and highlight. Human review of the rail | [x] |
-| 04 | `…-04-snapping-resize.md` | 7–8 | 01, 02, 03 | One commit. Snapping resize by pointer and keyboard. Human review of the handle | [ ] |
+| 04 | `…-04-header-nav-fit-height.md` | 9–10 | 01, 02, 03 | Two commits. Nav toggle at every width; plan page fits the screen. Human review of both | [ ] |
+| 05 | `…-05-snapping-resize.md` | 7–8 | 01, 02, 03, 04 | One commit. Snapping resize by pointer and keyboard. Human review of the handle | [ ] |
 
 Phase 03 needs Phase 02 for `panel-state.ts` (Task 3) and the head script
-(Task 4). Phase 04 needs Phase 03 for the rail and the Planner-owned
-`ReqsState` (Task 5).
+(Task 4). Phase 04 needs Phase 03 for the rail and the collapsed block it
+must precede. Phase 05 needs Phase 03 for the rail and the Planner-owned
+`ReqsState` (Task 5), and Phase 04 for the fit group its handle stretches
+with.
 
 ## 6. Feature-level Definition of Done
 
@@ -356,25 +403,27 @@ Phase 03 needs Phase 02 for `panel-state.ts` (Task 3) and the head script
 - [ ] `pnpm check` passes
 - [ ] Manually verified with `agent-browser`: on `/plan/example` at 1920×1080,
       hide the nav, collapse the sidebar, drag the handle out to 2 columns,
-      and reload. The layout is identical with no flash, the page never
-      scrolls sideways, and 390×844 looks as before.
+      and reload. The layout is identical with no flash, and the page never
+      scrolls sideways or vertically. At 390×844, hide the nav: the tab
+      sits beside the title, and the timeline and requirements split the
+      height.
 - [ ] Every requirement in §2 is covered (see §7)
-- [ ] Every `Human review:` task (2, 4, 5, 8) explicitly accepted by the user
+- [ ] Every `Human review:` task (2, 4, 5, 8, 9, 10) explicitly accepted by the user
 - [ ] No item remains in §8
 
 ## 7. Requirements coverage check
 
 | Requirement | Covered by |
 | --- | --- |
-| FR1 | Task 2 (tests at 6 widths); Tasks 4, 5, 8 (re-assert in their states) |
+| FR1 | Task 2 (tests at 6 widths); Tasks 4, 5, 8, 9, 10 (re-assert in their states) |
 | FR2 | Task 2 |
 | FR3 | Task 2 |
 | FR4 | Task 2 (fit); Task 8 (preference cap) |
-| FR5 | Task 2 |
+| FR5 | Task 2; Tasks 9–10 (amended wording, human reviews) |
 | FR6 | Task 4 |
 | FR7 | Task 4 |
 | FR8 | Task 4 |
-| FR9 | Task 4 |
+| FR9 | Task 4 (original); Task 9 (amended) |
 | FR10 | Task 5 |
 | FR11 | Task 5 |
 | FR12 | Task 5 |
@@ -390,8 +439,13 @@ Phase 03 needs Phase 02 for `panel-state.ts` (Task 3) and the head script
 | FR22 | Task 3 |
 | FR23 | Task 3; Tasks 4, 5, 8 (keys in the head script) |
 | FR24 | Task 3 (global keys) |
-| FR25 | Tasks 4, 5, 8 (blocked-scripts tests) |
-| NFR a11y | Tasks 4, 5, 8 (focus, axe); Task 2 (invariants stay green) |
+| FR25 | Tasks 4, 5, 8 (blocked-scripts tests); Task 9 (at 390×844) |
+| FR26 | Task 9 |
+| FR27 | Task 10; Task 8 (re-asserts it) |
+| FR28 | Task 10; Task 8 (handle height) |
+| FR29 | Task 10 |
+| FR30 | Task 10 |
+| NFR a11y | Tasks 4, 5, 8, 9 (focus, axe); Task 2 (invariants stay green) |
 | NFR verification/CI | Task 1 |
 
 ## 8. Risks / open questions

@@ -1,4 +1,4 @@
-# Collapsible panels — Phase 04: Snapping resize
+# Collapsible panels — Phase 05: Snapping resize
 
 - **Date:** 2026-09-27
 - **Status:** Approved
@@ -8,7 +8,9 @@
   - §2 (FR4 preference cap, FR16–21, FR25)
   - §3
   - §4.1–4.5, especially the §4.4 widths and cascade order
-- **Depends on phases:** 01, 02 and 03.
+  - §0 explains the renumbering: this was Phase 04. Its tasks keep the
+    numbers 7–8 but run after Phase 04's Tasks 9–10
+- **Depends on phases:** 01, 02, 03 and 04.
 
 ## 1. Summary
 
@@ -26,6 +28,8 @@ painted before first render. When it ends, the whole feature is complete.
 - FR25: the `panel-reqs-cols` line.
 - FR12: re-asserted, so expanding restores the preferred columns.
 - FR1: re-asserted at every size.
+- FR27 and FR28: re-asserted. The page still doesn't scroll vertically,
+  and the handle spans the panes' full height.
 
 ### 2.2 Non-functional
 
@@ -128,6 +132,22 @@ function updateReqs(next: ReqsState, commit: boolean) { … }  // setReqs + appl
 **From Tasks 4 and 5:** the `Base.astro` inline head script's `try` holds
 the `panel-nav` and `panel-reqs` lines.
 
+**From Task 10 (Phase 04)**
+
+- `spec/browser.ts` also exports `verticalOverflow(page: Page):
+  Promise<number>`, which is `scrollHeight − clientHeight` of `<html>`.
+- `styles.css` has a fit group right after the 76.7rem tier block and before
+  the collapsed block. It's `@media (min-height: 30rem) { … }`, and inside it
+  `@container planner (min-width: 49.5rem)` sets:
+  - `.planner-panes { align-items: stretch; }`
+  - `.planner-timeline-area, .planner-panes > aside { position: static;
+    max-height: none; }`
+  - `:root[data-reqs="collapsed"] .reqs-rail { flex: 1 1 auto; min-height:
+    0; }`
+- So at viewports at least 30rem tall, the panes have a definite height,
+  the aside and timeline fill it, and nothing is sticky. Below 30rem tall,
+  the old sticky `top: 1rem; max-height: calc(100vh − 2rem)` panes apply.
+
 ## 4. Approach
 
 **Pure logic in `src/components/reqs-resize.ts`,** unit-tested:
@@ -176,6 +196,14 @@ timeline.
 **The CSS** replaces the side-by-side `gap` with the 1rem handle, so every
 threshold and width is unchanged.
 
+- **Height:** the handle's own rules are for the unfitted fallback (sticky,
+  `calc(100vh − 2rem)`), matching the panes there.
+- **The fit override:** a `@media (min-height: 30rem)` override right after
+  them stretches it to the panes' height instead, matching Task 10's fitted
+  panes.
+- **Why the override comes after:** the handle rules come after the fit
+  group in the cascade (overview §4.4), so the override has to follow them.
+
 ## 5. Task breakdown
 
 ### Task 7: Pure snapping and stepping logic for the sidebar width
@@ -221,7 +249,7 @@ threshold and width is unchanged.
 - **Acceptance criteria:**
   - `pnpm test:unit` is green, and `astro check` is clean.
   - No commit on its own: this commits with Task 8.
-- **Depends on:** none (Phases 01–03 done).
+- **Depends on:** none (Phases 01–04 done).
 
 ### Task 8: The resize handle: live snapping by pointer, stepping by keyboard
 
@@ -241,7 +269,8 @@ threshold and width is unchanged.
     `page.getByRole("separator", { name: "Resize requirements" })`):
     1. **Initial state.** At 1920×1080: `sep` has `aria-valuenow="3"`,
        `aria-valuemax="3"`, `aria-valuetext="3 columns"` and
-       `aria-controls="requirements"`.
+       `aria-controls="requirements"`. Its `boundingBox()` top and height
+       are within 1px of the aside's (FR28, fitted).
     2. **Keyboard.** At 1920, focus `sep`, then check after each key:
 
        | Key | `aria-valuetext` | Aside `offsetWidth` | Also |
@@ -253,7 +282,8 @@ threshold and width is unchanged.
        | End | "3 columns" | 715 | |
        | Home | "Collapsed" | — | |
 
-       `horizontalOverflow` is 0 after each step.
+       `horizontalOverflow` and `verticalOverflow` are both 0 after each
+       step.
     3. **No flash.** `{ storage: { "panel-reqs-cols": "2" }, blockScripts:
        true }` at 1920: the aside is 498 and the list has 2 tracks.
     4. **Fit cap.**
@@ -311,6 +341,12 @@ threshold and width is unchanged.
         border-radius: 1px; background: var(--line); }`
       - `.reqs-resize:hover::after, .reqs-resize:focus-visible::after {
         background: var(--gold); }`
+    - Immediately after that block, `@media (min-height: 30rem) {
+      @container planner (min-width: 49.5rem) { .reqs-resize { align-self:
+      stretch; position: relative; top: auto; height: auto; } } }`. Add a
+      comment: in the fitted page (Task 10), the handle spans the panes like
+      the aside and timeline do. `position: relative` keeps it the
+      containing block for its `::before`/`::after`.
     - `@container planner (min-width: 63.1rem)`:
       - `:root[data-reqs-cols="1"] .planner-panes > aside { flex-basis:
         var(--reqs-w-1); width: var(--reqs-w-1); }`
@@ -322,15 +358,16 @@ threshold and width is unchanged.
       - `:root[data-reqs-cols="2"] .available-courses[data-columns="3"] {
         grid-template-columns: repeat(2, 13rem); }`
     - Precede these with a comment: the preference only ever narrows the
-      width the tier allows, and these blocks must come before the collapsed
-      block (overview §4.4).
+      width the tier allows, and these blocks must come after the fit group
+      and before the collapsed block (overview §4.4).
 - **Refactor:** now that the handle fills the side-by-side gap, check that
   no rule still assumes a 1rem `gap` between the aside and the timeline.
   Grep for `gap` under `.planner-panes`.
 - **Acceptance criteria:**
   - Tests 1–8 and the unit tests pass.
   - `pnpm check` passes.
-  - Render check at 1920×1080 (at 3, 2, 1 and collapsed) and 390×844.
+  - Render check at 1920×1080 (at 3, 2, 1 and collapsed), 900×800 and
+    390×844.
   - Commit (Tasks 7 and 8 together): "Let the requirements sidebar
     snap-resize between collapsed, 1, 2 and 3 columns".
 - **Human review:** a screen recording or screenshots at 1920×1080: hovering
@@ -350,7 +387,7 @@ threshold and width is unchanged.
 - [ ] One commit covering Tasks 7 and 8
 - [ ] Task 8's human review accepted by the user
 - [ ] Feature DoD (overview §6) walked through with `agent-browser`
-- [ ] Tick Phase 04 in overview §5 and commit
+- [ ] Tick Phase 05 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
@@ -366,6 +403,8 @@ threshold and width is unchanged.
 | FR21 | Task 8, test 5 (preview vs commit) |
 | FR25 (cols) | Task 8, test 3 + drift guard |
 | FR1 (every size) | Task 8, test 2 |
+| FR27 (re-assert) | Task 8, test 2 (`verticalOverflow`) |
+| FR28 (handle height) | Task 8, test 1 |
 | NFR a11y | Task 8, tests 1, 2 and 8 |
 
 ## 8. Risks / open questions

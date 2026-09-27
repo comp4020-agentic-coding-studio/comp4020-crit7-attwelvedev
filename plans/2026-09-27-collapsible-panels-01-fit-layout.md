@@ -39,7 +39,7 @@ does today, and 390×844 is unchanged.
 
 ### 2.3 Out of scope for this phase
 
-- Every control: nav toggle (Phase 02), rail (Phase 03), handle (Phase 04).
+- Every control: nav toggle (Phase 02), rail (Phase 03), handle (Phase 05).
 - No `data-nav`, `data-reqs` or `data-reqs-cols` rules yet.
 
 ### 2.4 Assumptions

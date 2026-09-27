@@ -258,6 +258,17 @@ each:
      containers.
    - This still meets the spec's intent: columns follow the sidebar's width
      and never the viewport's.
+5. **The nav toggle at every width, and a fitted plan page** (added after
+   Phase 02 shipped). The user found the missing top-bar toggle
+   inconsistent, so req 9's "no toggle below 1100px" was reversed.
+   - The top bar gets its own hide button (chevron up). Hidden, a
+     down-chevron tab sits at the start of the title's row.
+   - One `panel-nav` key covers every width.
+   - `/plan/*` fits the viewport at every width (at least 30rem tall): the
+     title stays put, and the sidebar and timeline scroll independently.
+     Stacked, the timeline takes at most half the height.
+   - This is planned as Phase 04 of the plan set. The resize phase moved
+     to 05.
 
 ## 6. Handoff notes for planning
 

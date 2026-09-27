@@ -49,7 +49,7 @@ to remove it, and nothing changes in the stacked layout.
 ### 2.3 Out of scope for this phase
 
 - The resize handle, the `panel-reqs-cols` head line and the
-  preference-cap CSS (all Phase 04).
+  preference-cap CSS (all Phase 05, formerly 04).
 - `ReqsState.columns` is carried and saved here but has no visual effect
   until Task 8.
 
@@ -188,7 +188,7 @@ contains `` `"${NAV_KEY}"` ``.
 
 ## 4. Approach
 
-**The state lives in `Planner`,** not `Sidebar`, because the Phase 04 handle
+**The state lives in `Planner`,** not `Sidebar`, because the Phase 05 handle
 (a sibling of the aside) drives it too:
 
 ```ts
