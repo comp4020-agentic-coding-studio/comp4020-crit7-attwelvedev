@@ -368,7 +368,10 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     [900, 800, { "panel-reqs": "collapsed" }],
     [390, 844, { "panel-reqs": "collapsed" }],
     [390, 844, { "panel-reqs": "collapsed", "panel-nav": "hidden" }],
-  ])("at %i×%i with %o the page doesn't scroll either way", async (width, height, storage) => {
+    [390, 844, { "panel-split": "30" }],
+    [390, 844, { "panel-split": "70" }],
+    [390, 844, { "panel-split": "70", "panel-nav": "hidden" }],
+  ])("at %i×%i with %o the page doesn't scroll either way",async (width, height, storage) => {
     const page = await openPage(browser, planUrl(), { width, height }, { storage });
     try {
       expect(await verticalOverflow(page)).toBe(0);
@@ -811,6 +814,7 @@ describe("undo toast placement", { timeout: 30_000 }, () => {
 
 describe("requirements resize handle", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
+  const phone = { width: 390, height: 844 };
   const separator = (page: Page) => page.getByRole("separator", { name: "Resize requirements" });
   const asideWidth = (page: Page) =>
     page.evaluate(() => document.querySelector<HTMLElement>("#requirements")!.offsetWidth);
@@ -962,14 +966,174 @@ describe("requirements resize handle", { timeout: 30_000 }, () => {
     }
   });
 
-  it("isn't shown in the stacked layout", async () => {
-    const page = await openPage(browser, planUrl(), { width: 390, height: 844 });
+  // The timeline's share of the planner's height, in %.
+  const share = (page: Page) =>
+    page.evaluate(() => {
+      const height = (s: string) => document.querySelector(s)!.getBoundingClientRect().height;
+      return (height(".planner-timeline-area") / height(".planner-panes")) * 100;
+    });
+
+  it("turns horizontal between the timeline and the requirements on a phone", async () => {
+    const page = await openPage(browser, planUrl(), phone);
+    try {
+      const sep = separator(page);
+      await expect.poll(() => sep.getAttribute("aria-orientation")).toBe("horizontal");
+      expect(await sep.getAttribute("aria-valuemin")).toBe("30");
+      expect(await sep.getAttribute("aria-valuemax")).toBe("100");
+      expect(await sep.getAttribute("aria-valuenow")).toBe("50");
+      expect(await sep.getAttribute("aria-valuetext")).toBe("Timeline 50%");
+      expect(await sep.getAttribute("aria-controls")).toBe("requirements");
+      const box = (await sep.boundingBox())!;
+      const timeline = (await page.locator(".planner-timeline-area").boundingBox())!;
+      const aside = (await page.locator("#requirements").boundingBox())!;
+      expect(Math.abs(box.y - (timeline.y + timeline.height))).toBeLessThanOrEqual(1);
+      expect(Math.abs(box.y + box.height - aside.y)).toBeLessThanOrEqual(1);
+      expect(box.height).toBe(16);
+      // Probed near the left edge: the right-aligned sticky "Hide
+      // requirements" button (z-index 1) deliberately wins where it overlaps
+      // the lower hit area.
+      const hits = await page.evaluate(
+        ([x, above, below]) => {
+          const handle = document.querySelector(".reqs-resize");
+          return [document.elementFromPoint(x, above) === handle, document.elementFromPoint(x, below) === handle];
+        },
+        [box.x + 20, box.y - 12, box.y + box.height + 12],
+      );
+      expect(hits).toEqual([true, true]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("is hidden in the stacked layout below 30rem tall", async () => {
+    const page = await openPage(browser, planUrl(), { width: 700, height: 400 });
     try {
       expect(await separator(page).isVisible()).toBe(false);
     } finally {
       await page.close();
     }
   });
+
+  it("steps the stacked split from the keyboard and saves each one", async () => {
+    const page = await openPage(browser, planUrl(), phone);
+    try {
+      const sep = separator(page);
+      await expect.poll(() => sep.getAttribute("aria-orientation")).toBe("horizontal");
+      await sep.focus();
+      const none = async () => {};
+      const steps: [string, string, number | null, () => Promise<void>][] = [
+        ["ArrowDown", "Timeline 70%", 70, async () => expect(await stored(page, "panel-split")).toBe("70")],
+        [
+          "ArrowDown",
+          "Requirements hidden",
+          null,
+          async () => {
+            expect(await page.locator(".reqs-rail").isVisible()).toBe(true);
+            expect(await stored(page, "panel-reqs")).toBe("collapsed");
+          },
+        ],
+        ["ArrowDown", "Requirements hidden", null, none],
+        ["ArrowUp", "Timeline 70%", 70, async () => expect(await stored(page, "panel-reqs")).toBeNull()],
+        ["Home", "Timeline 30%", 30, async () => expect(await stored(page, "panel-split")).toBe("30")],
+        ["End", "Requirements hidden", null, none],
+        ["ArrowUp", "Timeline 70%", 70, none],
+        ["ArrowUp", "Timeline 50%", 50, async () => expect(await stored(page, "panel-split")).toBeNull()],
+      ];
+      for (const [key, text, pct, also] of steps) {
+        await page.keyboard.press(key);
+        await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe(text);
+        if (pct !== null) expect(Math.abs((await share(page)) - pct)).toBeLessThanOrEqual(1.5);
+        await also();
+        expect(await horizontalOverflow(page)).toBe(0);
+        expect(await verticalOverflow(page)).toBe(0);
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("previews the stacked split while dragging and saves only on release", async () => {
+    const page = await openPage(browser, planUrl(), phone);
+    try {
+      const sep = separator(page);
+      await expect.poll(() => sep.getAttribute("aria-orientation")).toBe("horizontal");
+      const p = (await page.locator(".planner-panes").boundingBox())!;
+      // Presses on the handle's centre and moves to `fraction` of the panes'
+      // height, leaving the release to the caller when `release` is false.
+      async function dragTo(fraction: number, release = true) {
+        const box = (await sep.boundingBox())!;
+        const x = box.x + box.width / 2;
+        await page.mouse.move(x, box.y + box.height / 2);
+        await page.mouse.down();
+        await page.mouse.move(x, p.y + fraction * p.height, { steps: 5 });
+        if (release) await page.mouse.up();
+      }
+
+      await dragTo(0.3, false);
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("Timeline 30%");
+      expect(Math.abs((await share(page)) - 30)).toBeLessThanOrEqual(1.5);
+      expect(await stored(page, "panel-split")).toBeNull();
+      await page.mouse.up();
+      await expect.poll(() => stored(page, "panel-split")).toBe("30");
+
+      await dragTo(0.92);
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("Requirements hidden");
+      await expect.poll(() => stored(page, "panel-reqs")).toBe("collapsed");
+
+      // The handle stays just above the bar, so dragging up from there expands.
+      await dragTo(0.5);
+      await expect.poll(() => sep.getAttribute("aria-valuetext")).toBe("Timeline 50%");
+      await expect.poll(() => stored(page, "panel-reqs")).toBeNull();
+      expect(await stored(page, "panel-split")).toBeNull();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("applies the saved split before any bundled script runs", async () => {
+    const page = await openPage(browser, planUrl(), phone, { storage: { "panel-split": "70" }, blockScripts: true });
+    try {
+      expect(Math.abs((await share(page)) - 70)).toBeLessThanOrEqual(1.5);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("expands from the bar to the saved split", async () => {
+    const page = await openPage(browser, planUrl(), phone, {
+      storage: { "panel-reqs": "collapsed", "panel-split": "30" },
+    });
+    try {
+      await page.locator(".reqs-rail").click();
+      await expect.poll(async () => Math.abs((await share(page)) - 30)).toBeLessThanOrEqual(1.5);
+      expect(await page.evaluate(() => document.activeElement === document.querySelector(".reqs-hide"))).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("leaves the side-by-side sidebar alone with a saved split", async () => {
+    const page = await openPage(browser, planUrl(), desktop, { storage: { "panel-split": "30" } });
+    try {
+      expect(await asideWidth(page)).toBe(715);
+      expect(await separator(page).getAttribute("aria-orientation")).toBe("vertical");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each<Record<string, string>>([{ "panel-split": "30" }, {}, { "panel-split": "70" }, { "panel-reqs": "collapsed" }])(
+    "passes axe on a phone with %o",
+    async (storage) => {
+      const page = await openPage(browser, planUrl(), phone, { storage });
+      try {
+        await expect.poll(() => separator(page).getAttribute("aria-orientation")).toBe("horizontal");
+        expect(await axeViolations(page)).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    },
+  );
 
   it.each([
     ["at 1 column", { "panel-reqs-cols": "1" }],

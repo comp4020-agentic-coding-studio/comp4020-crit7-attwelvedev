@@ -300,7 +300,7 @@ specificity, so Collapsed still wins over any split.
 
 ### Task 6: Pure snapping logic and stored state for the stacked split
 
-- [ ] **Description:** add `nearestIndex` (with `snapSize` refactored onto
+- [x] **Description:** add `nearestIndex` (with `snapSize` refactored onto
   it), `split-resize.ts`, the split storage in `panel-state.ts` and the
   head-script line.
 - **Files touched:**
@@ -411,7 +411,7 @@ specificity, so Collapsed still wins over any split.
 
 ### Task 7: Turn the resize handle horizontal in the stacked layout to snap the timeline/requirements split
 
-- [ ] **Description:** teach `ReqsResizeHandle` the stacked axis, give
+- [x] **Description:** teach `ReqsResizeHandle` the stacked axis, give
   `Planner` the split state, add the stacked CSS, and replace the
   superseded Phase 05 test.
 - **Files touched:**
@@ -545,6 +545,13 @@ specificity, so Collapsed still wins over any split.
       `flex: 0 1 auto; max-height: 50%;` to `flex: 0 0 50%; max-height:
       none;`. Add a comment: the saved split (below) moves this 50%
       default.
+    - **Amended during execution:** the same rule also sets `z-index:
+      auto`. The base rule's `z-index: 2` (for the unfitted sticky
+      timeline) still makes a stacking context on a static *flex item*,
+      which painted the timeline over the handle's upper hit area and
+      failed test 1's probe above the line. Raising the handle's z-index
+      instead would also have put it over the sticky "Hide requirements"
+      button (`z-index: 1`), which must keep winning its overlap.
     - Immediately after the Phase 05 handle fit override, and before the
       preference caps, add:
 

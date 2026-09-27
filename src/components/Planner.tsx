@@ -3,11 +3,23 @@ import type { PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
 import MoreOptions from "./MoreOptions";
-import { applyReqsState, DEFAULT_REQS, type ReqsState, reqsStateFromDataset, saveReqsState } from "./panel-state";
+import {
+  applyReqsState,
+  applySplit,
+  DEFAULT_REQS,
+  DEFAULT_SPLIT,
+  parseSplit,
+  type ReqsState,
+  reqsStateFromDataset,
+  saveReqsState,
+  saveSplit,
+  type SplitStop,
+} from "./panel-state";
 import { completedReadout, dropTargets } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
 import Sidebar from "./Sidebar";
+import type { Panels } from "./split-resize";
 import Timeline from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
 
@@ -44,14 +56,25 @@ export default function Planner({ view: initialView, title }: Props) {
   const readOnly = view.plan.readOnly;
 
   const [reqs, setReqs] = useState<ReqsState>(DEFAULT_REQS);
+  const [split, setSplit] = useState<SplitStop>(DEFAULT_SPLIT);
   // The <head> script already painted the stored state; this just brings
   // Preact's copy in line after hydration (server render + first client
   // render stay equal, as with Sidebar's compaction state).
-  useEffect(() => setReqs(reqsStateFromDataset(document.documentElement.dataset)), []);
+  useEffect(() => {
+    setReqs(reqsStateFromDataset(document.documentElement.dataset));
+    setSplit(parseSplit(document.documentElement.dataset.split));
+  }, []);
   function updateReqs(next: ReqsState, commit: boolean) {
     setReqs(next);
     applyReqsState(document.documentElement, next);
     if (commit) saveReqsState(next);
+  }
+
+  function updatePanels(next: Panels, commit: boolean) {
+    updateReqs(next.reqs, commit);
+    setSplit(next.split);
+    applySplit(document.documentElement, next.split);
+    if (commit) saveSplit(next.split);
   }
 
   async function moveCutoff(delta: 1 | -1) {
@@ -260,7 +283,7 @@ export default function Planner({ view: initialView, title }: Props) {
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void performRemove(code)}
           />
-          <ReqsResizeHandle reqs={reqs} fit={fit} onChange={updateReqs} />
+          <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>
       </div>
       {removed && (

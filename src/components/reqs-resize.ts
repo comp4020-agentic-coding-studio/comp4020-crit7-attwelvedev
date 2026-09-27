@@ -27,16 +27,21 @@ export function stateFor(size: ReqsSize, prev: ReqsState): ReqsState {
   return size === 0 ? { ...prev, collapsed: true } : { collapsed: false, columns: size };
 }
 
-export function snapSize(widthRem: number, fit: ReqsColumns): ReqsSize {
-  let best: ReqsSize = 0;
-  for (let size = 1 as ReqsSize; size <= fit; size++) {
-    const gap = Math.abs(widthRem - REQS_WIDTH_REM[size]) - Math.abs(widthRem - REQS_WIDTH_REM[best]);
-    // The widths are tenths of a rem, so their midpoints aren't exact in
-    // floating point; a pointer on a midpoint (within 1e-9) goes to the
-    // larger size.
-    if (gap <= 1e-9) best = size;
+const SIZES: readonly ReqsSize[] = [0, 1, 2, 3];
+
+// Index of the position nearest `value`; positions ascend. A tie (within
+// 1e-9, since the widths' float midpoints aren't exact) goes to the later,
+// larger one.
+export function nearestIndex(value: number, positions: readonly number[]): number {
+  let best = 0;
+  for (let i = 1; i < positions.length; i++) {
+    if (Math.abs(value - positions[i]) - Math.abs(value - positions[best]) <= 1e-9) best = i;
   }
   return best;
+}
+
+export function snapSize(widthRem: number, fit: ReqsColumns): ReqsSize {
+  return nearestIndex(widthRem, SIZES.slice(0, fit + 1).map((s) => REQS_WIDTH_REM[s])) as ReqsSize;
 }
 
 export function stepSize(size: ReqsSize, key: string, fit: ReqsColumns): ReqsSize | null {

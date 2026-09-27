@@ -1,6 +1,28 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { parseFit, REQS_WIDTH_REM, type ReqsSize, sizeLabel, sizeOf, snapSize, stateFor, stepSize } from "./reqs-resize";
+import {
+  nearestIndex,
+  parseFit,
+  REQS_WIDTH_REM,
+  type ReqsSize,
+  sizeLabel,
+  sizeOf,
+  snapSize,
+  stateFor,
+  stepSize,
+} from "./reqs-resize";
+
+describe("nearestIndex", () => {
+  it.each([
+    [10.2, [3, 17.5], 0],
+    [10.25, [3, 17.5], 1],
+    [37.9, [3, 17.5, 31.1, 44.7], 3],
+    [-5, [1, 2], 0],
+    [99, [1, 2], 1],
+  ])("puts %d nearest %j at index %i", (value, positions, index) => {
+    expect(nearestIndex(value, positions)).toBe(index);
+  });
+});
 
 describe("snapSize", () => {
   it.each([

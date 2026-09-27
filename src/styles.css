@@ -1377,10 +1377,15 @@ fieldset[aria-busy="true"] {
   }
 
   @container planner (width < 49.5rem) {
+    /* The saved split (after the resize handle, below) moves this 50%
+       default. The sticky layer's z-index goes too: on a flex item it makes
+       a stacking context even when static, which would paint the timeline
+       over the handle's hit area above the line. */
     .planner-timeline-area {
       position: static;
-      flex: 0 1 auto;
-      max-height: 50%;
+      z-index: auto;
+      flex: 0 0 50%;
+      max-height: none;
     }
 
     .planner-panes > aside {
@@ -1467,6 +1472,62 @@ fieldset[aria-busy="true"] {
       position: relative;
       top: auto;
       height: auto;
+    }
+  }
+}
+
+/* In the fitted stacked page the same handle lies between the timeline
+   and the requirements and snaps their split instead. Below 30rem tall
+   the page isn't fitted, so there is no split and the handle stays
+   hidden. The collapsed blocks at the end still win over data-split. */
+@media (min-height: 30rem) {
+  @container planner (width < 49.5rem) {
+    .planner-panes {
+      gap: 0;
+    }
+
+    .reqs-resize {
+      display: block;
+      order: 1;
+      flex: 0 0 1rem;
+      position: relative;
+      cursor: row-resize;
+      touch-action: none;
+    }
+
+    .planner-panes > aside {
+      order: 2;
+    }
+
+    /* Drawn 1rem tall; the hit area is 2.75rem. */
+    .reqs-resize::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      inset-block: -0.875rem;
+    }
+
+    .reqs-resize::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      inset-block-start: calc(50% - 1px);
+      height: 2px;
+      border-radius: 1px;
+      background: var(--line);
+    }
+
+    .reqs-resize:hover::after,
+    .reqs-resize:focus-visible::after {
+      background: var(--gold);
+    }
+
+    :root[data-split="30"] .planner-timeline-area {
+      flex-basis: 30%;
+    }
+
+    :root[data-split="70"] .planner-timeline-area {
+      flex-basis: 70%;
     }
   }
 }

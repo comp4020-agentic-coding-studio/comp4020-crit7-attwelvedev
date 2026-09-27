@@ -58,6 +58,28 @@ export function saveReqsState(state: ReqsState, storage: StorageLike | null = sa
   }
 }
 
+export const SPLIT_KEY = "panel-split";
+export type SplitStop = 30 | 50 | 70; // the timeline's share of the stacked planner, in %
+export const DEFAULT_SPLIT: SplitStop = 50;
+
+export function parseSplit(raw: string | null | undefined): SplitStop {
+  return raw === "30" ? 30 : raw === "70" ? 70 : 50;
+}
+
+export function applySplit(root: DatasetHost, split: SplitStop): void {
+  if (split === DEFAULT_SPLIT) delete root.dataset.split;
+  else root.dataset.split = String(split);
+}
+
+export function saveSplit(split: SplitStop, storage: StorageLike | null = safeStorage()): void {
+  try {
+    if (split === DEFAULT_SPLIT) storage?.removeItem(SPLIT_KEY);
+    else storage?.setItem(SPLIT_KEY, String(split));
+  } catch {
+    // Not persisting is fine — the split still applies for this page view.
+  }
+}
+
 export function setNavHidden(root: DatasetHost, hidden: boolean, storage: StorageLike | null = safeStorage()): void {
   if (hidden) root.dataset.nav = "hidden";
   else delete root.dataset.nav;
