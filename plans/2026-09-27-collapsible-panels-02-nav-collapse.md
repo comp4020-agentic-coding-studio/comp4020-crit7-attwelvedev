@@ -168,7 +168,7 @@ above the sticky timeline's `z-index: 2`).
 
 ### Task 3: `panel-state.ts`, the single owner of panel keys and attributes
 
-- [ ] **Description:** a DOM-free module (it works on any object with a
+- [x] **Description:** a DOM-free module (it works on any object with a
   `dataset`, and on an injected storage) that reads, applies and saves panel
   state. Types and signatures are exactly overview §4.3.
 - **Files touched:**
@@ -226,7 +226,7 @@ above the sticky timeline's `z-index: 2`).
 
 ### Task 4: Hide and show the site nav, applied before first paint
 
-- [ ] **Description:** add the head script's nav line, the two controls, the
+- [x] **Description:** add the head script's nav line, the two controls, the
   click script and the ≥1100px CSS.
 - **Files touched:**
   - `src/layouts/Base.astro`
@@ -319,12 +319,12 @@ above the sticky timeline's `z-index: 2`).
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 3–4 complete, with their tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] One commit covering Tasks 3 and 4
-- [ ] Task 4's human review accepted by the user
-- [ ] Tick Phase 02 in overview §5 and commit
+- [x] Tasks 3–4 complete, with their tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] One commit covering Tasks 3 and 4
+- [x] Task 4's human review accepted by the user
+- [x] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

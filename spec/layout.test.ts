@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import type { Browser, Page } from "playwright";
-import { horizontalOverflow, launch, openPage, type Viewport } from "./browser";
+import { axeViolations, horizontalOverflow, launch, openPage, type Viewport } from "./browser";
 
 const baseUrl = inject("baseUrl");
 let browser: Browser;
@@ -123,5 +123,90 @@ describe("layout", { timeout: 30_000 }, () => {
       ),
     );
     expect(escaped).toEqual([]);
+  });
+});
+
+describe("site nav", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const navHidden = { storage: { "panel-nav": "hidden" } };
+  const helpUrl = () => new URL("/help/", baseUrl).href;
+
+  it("hides behind a tab, moves focus between the controls, and remembers the choice", async () => {
+    const page = await openPage(browser, planUrl(), desktop);
+    try {
+      const nav = page.locator('nav[aria-label="site"]');
+      const show = page.locator("button.nav-show");
+      const hide = page.locator("button.nav-hide");
+      const focused = (selector: string) =>
+        page.evaluate((s) => document.activeElement === document.querySelector(s), selector);
+
+      expect(await nav.isVisible()).toBe(true);
+      expect(await show.isVisible()).toBe(false);
+
+      await hide.click();
+      expect(await nav.isVisible()).toBe(false);
+      expect(await show.isVisible()).toBe(true);
+      expect(await focused("button.nav-show")).toBe(true);
+      expect(await horizontalOverflow(page)).toBe(0);
+      const clear = await page.evaluate(() => {
+        const h1 = document.querySelector("h1")!.getBoundingClientRect();
+        const tab = document.querySelector("button.nav-show")!.getBoundingClientRect();
+        return h1.left >= tab.right;
+      });
+      expect(clear).toBe(true);
+      expect(await page.evaluate(() => localStorage.getItem("panel-nav"))).toBe("hidden");
+
+      await page.reload({ waitUntil: "networkidle" });
+      expect(await nav.isVisible()).toBe(false);
+
+      await show.click();
+      expect(await nav.isVisible()).toBe(true);
+      expect(await focused("button.nav-hide")).toBe(true);
+      expect(await page.evaluate(() => localStorage.getItem("panel-nav"))).toBeNull();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("applies the saved state before any bundled script runs", async () => {
+    const page = await openPage(browser, helpUrl(), desktop, { ...navHidden, blockScripts: true });
+    try {
+      expect(await page.locator('nav[aria-label="site"]').isVisible()).toBe(false);
+      expect(await page.locator("button.nav-show").isVisible()).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("ignores the saved state on a phone, where there's no toggle", async () => {
+    const page = await openPage(browser, planUrl(), { width: 390, height: 844 }, navHidden);
+    try {
+      expect(await page.locator('nav[aria-label="site"]').isVisible()).toBe(true);
+      expect(await page.locator("button.nav-hide").isVisible()).toBe(false);
+      expect(await page.locator("button.nav-show").isVisible()).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("passes axe with the nav hidden", async () => {
+    const page = await openPage(browser, planUrl(), desktop, navHidden);
+    try {
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("gives the planner room for a wider sidebar tier when hidden", async () => {
+    const page = await openPage(browser, planUrl(), { width: 1440, height: 900 }, navHidden);
+    try {
+      const width = await page.evaluate(
+        () => document.querySelector<HTMLElement>('aside[aria-label="requirements"]')!.offsetWidth,
+      );
+      expect(width).toBe(715);
+    } finally {
+      await page.close();
+    }
   });
 });
