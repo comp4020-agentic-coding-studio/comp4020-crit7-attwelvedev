@@ -784,7 +784,10 @@ nav[aria-label="site"] .nav-hide:hover {
   padding-block-end: 0.5rem;
 }
 
-.prereq-overlay line {
+/* Shared with .prereq-legend's samples, so the key is drawn by the very
+   rules it explains. */
+.prereq-overlay line,
+.prereq-legend line {
   stroke: var(--gold);
   stroke-width: 2;
   opacity: 0.75;
@@ -793,8 +796,49 @@ nav[aria-label="site"] .nav-hide:hover {
 /* One of several ways through (an OR branch, or a course counting toward
    an "N units of ..." pool) — dashed so a student doesn't read two MATH
    lines into the same course as "needs both". */
-.prereq-overlay line.prereq-option {
+.prereq-overlay line.prereq-option,
+.prereq-legend line.prereq-option {
   stroke-dasharray: 6 4;
+}
+
+/* Sticky inside the timeline pane (its vertical scroller), so the key
+   stays in view while you follow a line down a long column. */
+.prereq-legend {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  padding-block: 0.35rem;
+  margin-block-end: 0.35rem;
+  background: var(--paper);
+  color: var(--unigrey);
+  font-size: 0.8rem;
+}
+
+.prereq-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.prereq-legend-sample {
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* Hovering is how you pick out one course's links; a touch-only screen
+   can't, so it isn't told to. */
+.prereq-legend-hint {
+  font-style: italic;
+}
+
+@media (hover: none) {
+  .prereq-legend-hint {
+    display: none;
+  }
 }
 
 /* Hovering one placed course with the links on picks out its own chain:

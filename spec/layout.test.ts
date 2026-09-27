@@ -1374,6 +1374,64 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
       })),
     );
 
+  const showLinks = async (page: Page) => {
+    await page.getByRole("button", { name: "More options" }).click();
+    await page.getByLabel("Show prerequisite links").check();
+    await page.keyboard.press("Escape");
+  };
+
+  it("the legend appears only with the links on", async () => {
+    await withPlan({ width: 1920, height: 1080 }, async (page) => {
+      expect(await page.locator(".prereq-legend").count()).toBe(0);
+      await showLinks(page);
+      expect(await page.locator(".prereq-legend").isVisible()).toBe(true);
+    });
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the legend's samples are drawn exactly like the lines, and stay in view as the pane scrolls", async (width, height) => {
+    await withPlan({ width, height }, async (page) => {
+      await showLinks(page);
+      const stroke = (selector: string) =>
+        page.$eval(selector, (el) => {
+          const s = getComputedStyle(el);
+          return { color: s.stroke, width: s.strokeWidth, dash: s.strokeDasharray, opacity: s.opacity };
+        });
+      for (const kind of ["required", "option"]) {
+        expect(await stroke(`.prereq-legend line.prereq-${kind}`)).toEqual(
+          await stroke(`.prereq-overlay line.prereq-${kind}:not(.prereq-hovered)`),
+        );
+      }
+      expect(await horizontalOverflow(page)).toBe(0);
+
+      const inView = () =>
+        page.evaluate(() => {
+          const area = document.querySelector(".planner-timeline-area")!;
+          area.scrollTop = area.scrollHeight;
+          const legend = document.querySelector(".prereq-legend")!.getBoundingClientRect();
+          const box = area.getBoundingClientRect();
+          return legend.top >= box.top - 1 && legend.bottom <= box.bottom + 1;
+        });
+      expect(await inView()).toBe(true);
+    });
+  });
+
+  it("the hover hint shows with a mouse, not on a touch-only phone", async () => {
+    for (const touch of [false, true]) {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: touch, isMobile: touch });
+      const page = await context.newPage();
+      try {
+        await page.goto(planUrl(), { waitUntil: "networkidle" });
+        await showLinks(page);
+        expect(await page.locator(".prereq-legend-hint").isVisible(), `touch: ${touch}`).toBe(!touch);
+      } finally {
+        await context.close();
+      }
+    }
+  });
+
   it("hover draws nothing while the links are off", async () => {
     await withPlan({ width: 1920, height: 1080 }, async (page) => {
       await page.locator('[data-placed="COMP3242"]').hover();

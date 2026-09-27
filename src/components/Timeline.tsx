@@ -3,6 +3,7 @@ import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/dom
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
 import { dropTargets } from "./planner-logic";
+import PrereqLegend from "./PrereqLegend";
 import PrereqOverlay from "./PrereqOverlay";
 
 interface Props {
@@ -97,6 +98,7 @@ export default function Timeline({
       {view.placements.length === 0 && (
         <p class="timeline-hint">Drag a course onto a semester, or use Place in…</p>
       )}
+      {showPrereqLinks && view.placements.length > 0 && <PrereqLegend />}
       <div
         class="timeline-scroll"
         onMouseOver={(event) => {
