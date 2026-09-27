@@ -299,3 +299,31 @@ It asserts the strip's `overflow-y` is `hidden`, that it has no inner
 vertical overflow, and that the SVG ends at the bottom of the tallest
 column. It failed before the change and passes after, with `pnpm check`
 green on all 438 tests.
+
+## 2026-09-27 — Mouse drop-target outline: document dragover over per-term dragleave
+
+Resolved by a7936e0.
+
+Touch drags outlined the term under the finger in gold; mouse drags didn't,
+and the outline also lit up hard-blocked (greyed) terms, promising a drop the
+planner would refuse. The obvious mouse implementation is per-term state set
+on `dragover` and cleared on `dragleave` when `relatedTarget` falls outside
+the column — the standard guard against dragleave firing on every move
+between a column's own children. It typechecked, built, and every existing
+spec passed.
+
+I didn't trust that, because no existing spec exercised a mouse drag over a
+term at all. So I wrote one first-class browser check per marking viewport
+in `spec/layout.test.ts`: a real Playwright mouse drag at 1920×1080 and a CDP
+touch drag at 390×844, each over a blocked term (no outline) and an allowed
+one (outline). The mouse case failed: Chromium leaves `dragleave`'s
+`relatedTarget` null, so the guard cleared the highlight on every child
+crossing. The fix mirrors what touch-drag.ts already does — while a drag is
+live, a single document-level `dragover` resolves `closest("[data-term]")` —
+and the blocked-term rule became one selector,
+`.term.drag-hover-target:not(.term-disallowed)`, shared by both paths.
+
+How I knew it was right: both specs pass, and removing the `:not()` guard
+makes both fail, so the check actually pins the behaviour. Mid-drag
+screenshots at both viewports confirmed the outline on the allowed column
+and none on the blocked one.
