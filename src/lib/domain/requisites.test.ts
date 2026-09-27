@@ -256,6 +256,36 @@ describe("parseRequisites: prereq fixtures", () => {
     expectPrereq(code, OR(...options.map(C)));
   });
 
+  it("COMP4500: two degree routes, each with its own conditions, after a shared eligibility sentence", () => {
+    // "... You also must be studying: <AACOM> AND have completed: COMP2120
+    // AND 12 units of 3000 and/or 4000 level courses. OR <AENSE> AND have
+    // completed: COMP3500" — the sentence-opening OR joins the two routes,
+    // not the whole requisite; neither route's conditions bleed into the other.
+    expectPrereq(
+      "COMP4500",
+      AND(
+        { kind: "unverifiable" },
+        OR(
+          AND(P("AACOM", true), C("COMP2120"), U(12, { minLevel: 3000, maxLevel: 4000 })),
+          AND(P("AENSE", false), C("COMP3500")),
+        ),
+      ),
+    );
+  });
+
+  it('COMP3500: "You must also be studying:" opens a later sentence', () => {
+    expectPrereq(
+      "COMP3500",
+      AND({ kind: "unverifiable" }, OR(P("AENSE", false), P("BCOMP", false)), C("COMP2100"), C("COMP2120")),
+    );
+  });
+
+  it("COMP4500: an all-prose sentence stays one verify line, not comma fragments", () => {
+    expect(parse("COMP4500").unverifiable).toEqual([
+      "meet the eligibility criteria, which includes membership of a student project group before the end of week 1, where the project has been approved by the convener",
+    ]);
+  });
+
   it('MATH2307: "units of 1000 levels Mathematics (MATH) courses including either A or B"', () => {
     expectPrereq(
       "MATH2307",

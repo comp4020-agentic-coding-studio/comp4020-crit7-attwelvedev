@@ -309,6 +309,24 @@ describe("evaluatePlan: 'check' on the real catalogue", () => {
     expect(without.placements[0]!.state).toBe("soft");
   });
 
+  it("COMP4500's AACOM route needs only its own conditions, then the eligibility check", () => {
+    // AACOM route: COMP2120 and 12 units of 3000/4000-level courses — not
+    // AENSE's COMP3500. With both met only the eligibility prose is left.
+    const met = evaluatePlan(
+      cat,
+      feas,
+      plan([
+        { code: "COMP2120", term: 3 },
+        { code: "COMP3600", term: 3 },
+        { code: "COMP3620", term: 4 },
+        { code: "COMP4500", term: 6 },
+      ]),
+    );
+    expect(met.placements.find((p) => p.code === "COMP4500")!.state).toBe("check");
+    const missing = evaluatePlan(cat, feas, plan([{ code: "COMP3600", term: 3 }, { code: "COMP3620", term: 4 }, { code: "COMP4500", term: 6 }]));
+    expect(missing.placements.find((p) => p.code === "COMP4500")!.state).toBe("soft");
+  });
+
   it("the example plan — a complete, working plan — has nothing still flagged 'soft'", () => {
     const result = evaluatePlan(cat, feas, EXAMPLE_PLAN);
     expect(result.placements.filter((p) => p.state === "soft").map((p) => p.code)).toEqual([]);

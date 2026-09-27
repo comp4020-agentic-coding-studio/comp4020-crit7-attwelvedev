@@ -58,8 +58,10 @@ const CODE_SLASH_RE = /^\s*\/\s*(?:([A-Z]{4})\s?)?(\d{4})\b/;
 // (COMP4450's HCOMP/HADAN/COMP-HSPC/AACOM), or the bare, code-less
 // "Bachelor of Advanced Computing" (COMP4820) — both satisfied per FR11's
 // rule (AACOM, or named "Bachelor of Advanced Computing" with no qualifier).
+// The qualifier can sit mid-name (COMP4500 "Bachelor of Engineering
+// (Honours) in Software Engineering (AENSE)").
 const PROGRAM_CODED_RE =
-  /^((?:Bachelor|Honours|Computer Science Honours Specialisation)[A-Za-z ]*?)(?:\s*\([A-Za-z][A-Za-z ]*\))?\s*\(([A-Z][A-Z0-9-]{1,10})\)/;
+  /^((?:Bachelor|Honours|Computer Science Honours Specialisation)[A-Za-z ]*?(?:\s*\([A-Za-z][A-Za-z ]*\)[A-Za-z ]*?)?)\s*\(([A-Z][A-Z0-9-]{1,10})\)/;
 const PROGRAM_BARE_RE = /^Bachelor of Advanced Computing\b/i;
 
 // N units of <noun phrase>. Each tail pattern below is tried in order after
@@ -72,8 +74,10 @@ const UNITS_CODE_LIST_RE = /^(?:of|from)\s*:?\s*\(\s*([A-Z]{4}\s?\d{4}(?:\s*(?:o
 const UNITS_FROM_CODES_RE = /^from\s*:?\s*([A-Z]{4}\s?\d{4}(?:\s*(?:or|OR|,)\s*[A-Z]{4}\s?\d{4})*)(?!\s*-?\s*level)/;
 // The subject may be spelled out ahead of its code (MATH2307 "1000 levels
 // Mathematics (MATH) courses") or comma-listed (COMP4350 "MUSI, DESN or ARTV").
+// No subject at all means any course at that level (COMP4500 "12 units of
+// 3000 and/or 4000 level courses").
 const UNITS_LEVEL_RE =
-  /^of\s*(\d{4})\s*(?:and\/or|\/|-)?\s*(\d{4})?\s*-?\s*level(?:s)?\s+(?:[A-Z][a-z]+\s+)?\(?\s*([A-Z]+(?:\s*(?:OR|or|,)\s*[A-Z]+)*)\s*\)?(?:\s*(?:coded\s+)?courses?\b)?/;
+  /^of\s*(\d{4})\s*(?:and\/or|\/|-)?\s*(\d{4})?\s*-?\s*level(?:s)?\s+(?:(?:[A-Z][a-z]+\s+)?\(?\s*([A-Z]+(?:\s*(?:OR|or|,)\s*[A-Z]+)*)\s*\)?)?(?:\s*(?:coded\s+)?courses?\b)?/;
 const UNITS_FUSED_LEVEL_RE = /^of\s*([A-Z]+)(\d{4})\s*-\s*level\s+courses\b/;
 // "of" is sometimes missing (COMP2700 "6 units MATH code course").
 const UNITS_PREFIX_RE = /^(?:of\s*)?([A-Z]+?)(S)?\b(?:\s+(?:coded?\s+)?courses?\b)?/;
@@ -184,7 +188,11 @@ function unitsCore(rest: string): { filter: CourseFilter; length: number } | nul
     const min = Number(level[1]);
     const max = level[2] ? Number(level[2]) : min;
     return {
-      filter: { prefixes: splitPrefixList(level[3]!), minLevel: Math.min(min, max), maxLevel: Math.max(min, max) },
+      filter: {
+        ...(level[3] ? { prefixes: splitPrefixList(level[3]) } : {}),
+        minLevel: Math.min(min, max),
+        maxLevel: Math.max(min, max),
+      },
       length: level[0].length,
     };
   }
@@ -393,6 +401,11 @@ function parseAndOuter(text: string, pos: number): AtomResult | null {
   return { node: items.length > 1 ? { kind: "and", items } : items[0]!, end };
 }
 
+function hasStructuredLeaf(node: ReqExpr): boolean {
+  if (node.kind === "and" || node.kind === "or") return node.items.some(hasStructuredLeaf);
+  return node.kind !== "unverifiable";
+}
+
 function parseExpr(sentence: string): ReqExpr | null {
   // "; AND" / "; OR" (COMP3425, COMP3430) is just the connective.
   const trimmed = sentence.replace(/\s*;\s*(?=(?:and|or)\b)/gi, " ").trim();
@@ -402,7 +415,11 @@ function parseExpr(sentence: string): ReqExpr | null {
     .map((route) => parseAndOuter(route.trim(), 0)?.node)
     .filter((node): node is ReqExpr => node !== undefined);
   if (routes.length === 0) return null;
-  return routes.length > 1 ? { kind: "or", items: routes } : routes[0]!;
+  const node: ReqExpr = routes.length > 1 ? { kind: "or", items: routes } : routes[0]!;
+  // A sentence with nothing checkable in it is one requirement to verify,
+  // not an and/or of its comma-separated fragments (COMP4500's eligibility
+  // sentence read as three "Verify" lines) — the answer is unknown either way.
+  return hasStructuredLeaf(node) ? node : { kind: "unverifiable", text: trimmed };
 }
 
 function splitSentences(text: string): string[] {
@@ -413,8 +430,12 @@ function splitSentences(text: string): string[] {
     .filter(Boolean);
 }
 
+// A later sentence can open with its own program lead-in (COMP4500 "You
+// also must be studying: Bachelor of Advanced Computing (AACOM) AND ...").
+const STUDYING_LEAD_IN_RE = /^you\s+(?:also\s+)?must\s+(?:also\s+)?be\s+studying\s*:?\s*/i;
+
 function stripLeadIn(sentence: string): string {
-  return sentence.replace(LEAD_IN_RE, "").trim();
+  return sentence.replace(LEAD_IN_RE, "").replace(STUDYING_LEAD_IN_RE, "").trim();
 }
 
 function collectUnverifiable(node: ReqExpr | null, out: string[]): void {
@@ -491,6 +512,19 @@ export function parseRequisites(input: { prerequisites: string; incompatibilitie
 
   const prereqParts: ReqExpr[] = [];
   for (const [i, sentence] of prereqSentences.entries()) {
+    // A sentence opening with a bare OR is the other route of the sentence
+    // just before it, not another AND (COMP4500: "... AACOM AND COMP2120 AND
+    // 12 units ... . OR ... AENSE AND COMP3500") — the shared sentences
+    // ahead of both (its eligibility clause) still apply to either route.
+    const orRoute = /^(?:OR|or)\b\s*/.exec(sentence);
+    if (i > 0 && orRoute && prereqParts.length > 0) {
+      const node = parseExpr(stripLeadIn(sentence.slice(orRoute[0].length)));
+      if (node) {
+        const prev = prereqParts.pop()!;
+        prereqParts.push({ kind: "or", items: [...(prev.kind === "or" ? prev.items : [prev]), node] });
+      }
+      continue;
+    }
     // A sentence split on ". " that begins with a bare connective (e.g.
     // COMP3310's "... COMP2300 . AND 6 units of ...") continues the same
     // top-level AND chain as the sentence before it. The lead-in can open
