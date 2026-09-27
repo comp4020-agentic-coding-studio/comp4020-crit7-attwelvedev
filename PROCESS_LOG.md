@@ -174,3 +174,32 @@ code. That also caught a knock-on issue for Phase 04's snap logic:
 larger" tie-break now carries a tolerance. Checked by the full layout spec
 passing unweakened, and by each reference viewport landing in the same tier
 as before.
+
+## 2026-09-27 — Right-aligning the wrapped controls so › stays under the finger
+
+Resolved by 63bfa46.
+
+Task 3 moved "Completed through … ‹ › ⋯" into the plan's title row. The
+plan wrapped the group onto its own line on a phone with
+`justify-content: space-between`, which puts a lone wrapped item at the
+line's start. Every test passed, including the plan's check that the
+wrapped group starts at the row's left edge. Reviewing the 390px render, I
+asked for the group to stay right-aligned when it wraps, because the
+readout's width changes with each semester.
+
+That beat the obvious alternatives. Leaving it left-aligned looked fine in
+a still screenshot, but the label runs from "Nothing completed yet"
+(254px) to "Completed through S2 2027" (293px). So the › button jumps with
+each press, and tapping it repeatedly misses. Fixing the readout's width
+would also hold the buttons still, but it wastes space on short labels and
+depends on the term labels. `margin-inline-start: auto` on the group keeps
+‹ › ⋯ at the line's end at every width, matching the one-line desktop row.
+
+The correction went into the harness, not just the CSS. CW24 was amended
+in the plan, and a new layout test at 390 and 1920 records ‹, › and ⋯,
+presses ›, waits for the readout to change, and requires every button
+within 1px of where it was. It failed first on the phone, with the buttons
+moving about 36px, and passes after the fix. The old left-edge check was
+superseded by a right-edge one, not loosened. So any future change that
+lets the controls drift as the label changes now fails `pnpm check`
+instead of relying on someone noticing in a screenshot.
