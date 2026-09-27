@@ -358,3 +358,35 @@ two-semester timing. A new spec/layout.test.ts check runs the real
 render at both marking viewports. It first failed on my own assumption
 of 4 hovered lines: it was 7, because hover also highlights COMP3242's
 outgoing links, which is correct.
+
+## 2026-09-27 — Closing the loophole in the "no silent drops" invariant
+
+Resolved by b8a9cf0.
+
+While completing the prereq overlay, a catalogue scan showed eleven
+undergrad courses with real codes stuck inside unverifiable text.
+COMP4880's COMP1110, COMP3425's whole "6 units from COMP1100 or ..." list,
+and the INFS "at least one of the following" lists were never checked or
+linked. And because an unverifiable leaf under an AND never counts as
+met, those courses stayed flagged no matter what was placed. The parser
+already had a whole-catalogue "no silent drops" invariant, and it passed.
+It counted a code as found if it showed up anywhere, *including inside
+unverifiable prose*, so the check was blind to exactly this failure.
+
+The obvious fix was to patch each phrasing and add a fixture for it.
+That would have fixed these eleven and left the next new phrasing just
+as invisible. So the correction went into the harness first: a stricter
+invariant fails on any code left in an unverifiable leaf for the
+courses the planner loads. Its three exceptions are each named with a
+reason (MATH1115's permission condition, MATH2222's mark thresholds,
+SOCY2166's conditional concurrency). Then came one fixture per phrasing,
+all red before the parser changes.
+
+How I knew the fixes were right and nothing else moved: I dumped every
+course's parsed tree before and after and diffed them. That diff caught
+a regression the tests didn't: making "including" a connective (needed
+for MATH2307) also chopped COMP4550's prose verify text in two. I
+narrowed it to "including" only when a code or "either" follows, and
+pinned that with a test. The final diff changed only the intended
+courses plus five postgrad ones, all improvements. COMP4880 also had a
+real semantic bug, now fixed: COMP3670 alone suffices again.
