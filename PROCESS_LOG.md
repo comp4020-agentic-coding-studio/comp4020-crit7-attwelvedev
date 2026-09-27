@@ -203,3 +203,31 @@ moving about 36px, and passes after the fix. The old left-edge check was
 superseded by a right-edge one, not loosened. So any future change that
 lets the controls drift as the label changes now fails `pnpm check`
 instead of relying on someone noticing in a screenshot.
+
+## 2026-09-27 — Letting JS tell the undo toast the layout, because CSS can't
+
+Resolved by cbfb2d3.
+
+Collapsing the stacked requirements to a bar along the bottom created a new
+problem: dropping a course on the bar shows the undo toast, and the toast
+sat directly on top of the bar it had just been dropped on. The obvious fix
+is one more rule in the stacked `@container planner` block. It can't work:
+a container query only styles descendants of the container, and the toast
+has to stay outside `.planner-layout`, because a size container becomes the
+containing block for a `position: fixed` child and would pin the toast to
+the panes. Moving the toast inside, or repeating the tier thresholds in a
+JS media query, would trade one bug for a second source of truth.
+
+The call was to read the layout CSS already publishes. The panes' tiers set
+`--reqs-fit` (0 means stacked), and the resize handle was already observing
+it. That observer moved into a `useReqsFit` hook owned by `Planner`, which
+passes `fit` to the handle and marks the toast `undo-toast-above-bar` only
+when the layout is stacked and collapsed. CSS still decides the layout, and
+JS only relays it.
+
+The check lives in `spec/`. A new "undo toast placement" test drops a
+course on the 390×844 bar and requires the toast to end above the bar. It
+failed first with the toast's bottom at 820px over the bar's 780px. Two
+more rows pin the toast at 24px at 1920×1080 collapsed and at 390×844
+expanded, and the existing resize-handle tests confirm the fit cap still
+works after the move.
