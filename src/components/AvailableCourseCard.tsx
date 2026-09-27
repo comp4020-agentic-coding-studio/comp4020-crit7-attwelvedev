@@ -99,7 +99,7 @@ export default function AvailableCourseCard({
       </p>
       {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
       {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
-      {placement ? (
+      {placement && (
         <p class="course-card-placed-status">
           <span class="course-card-tick" aria-hidden="true">
             ✓
@@ -113,20 +113,23 @@ export default function AvailableCourseCard({
             {view.terms[placement.term].label}
           </button>
         </p>
-      ) : (
-        <PlaceInMenu
-          view={view}
-          code={code}
-          onPlace={place}
-          disabled={readOnly || pending}
-          hardBlockedOverride={courseOverride?.hardBlocked}
-          open={openMenuCode === code}
-          onOpenChange={(open) => onMenuOpenChange(code, open)}
-        />
       )}
-      <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
-        Details
-      </button>
+      <div class="course-card-actions">
+        {!placement && (
+          <PlaceInMenu
+            view={view}
+            code={code}
+            onPlace={place}
+            disabled={readOnly || pending}
+            hardBlockedOverride={courseOverride?.hardBlocked}
+            open={openMenuCode === code}
+            onOpenChange={(open) => onMenuOpenChange(code, open)}
+          />
+        )}
+        <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
+          Details
+        </button>
+      </div>
       <CourseDetail
         view={view}
         code={code}

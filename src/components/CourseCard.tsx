@@ -173,22 +173,24 @@ export default function CourseCard({
           ))}
         </ul>
       )}
-      <PlaceInMenu
-        view={view}
-        code={placement.code}
-        onPlace={move}
-        disabled={readOnly || pending}
-        placed
-        currentTerm={placement.term}
-        open={openMenuCode === placement.code}
-        onOpenChange={(open) => onMenuOpenChange(placement.code, open)}
-      />
-      <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
-        Details
-      </button>
-      <button type="button" disabled={readOnly || pending} onClick={remove}>
-        {pending ? "Removing…" : "Remove"}
-      </button>
+      <div class="course-card-actions">
+        <PlaceInMenu
+          view={view}
+          code={placement.code}
+          onPlace={move}
+          disabled={readOnly || pending}
+          placed
+          currentTerm={placement.term}
+          open={openMenuCode === placement.code}
+          onOpenChange={(open) => onMenuOpenChange(placement.code, open)}
+        />
+        <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
+          Details
+        </button>
+        <button type="button" disabled={readOnly || pending} onClick={remove}>
+          {pending ? "Removing…" : "Remove"}
+        </button>
+      </div>
       <CourseDetail
         view={view}
         code={placement.code}

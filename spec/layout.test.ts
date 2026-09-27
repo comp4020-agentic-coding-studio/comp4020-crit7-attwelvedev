@@ -1963,3 +1963,36 @@ describe("manual checks", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("course cards", { timeout: 30_000 }, () => {
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i no two of a card's buttons touch", async (width, height) => {
+    // Measured from the render, not the markup: loose inline buttons pass
+    // any markup check yet sit flush against each other on screen.
+    const { measured, tight } = await withPlan({ width, height }, (page) =>
+      page.$$eval(".course-card", (cards) => {
+        let measured = 0;
+        const tight: string[] = [];
+        for (const card of cards) {
+          const rects = Array.from(card.querySelectorAll("button"))
+            .filter((b) => !b.closest("dialog") && b.getClientRects().length > 0)
+            .map((b) => ({ label: b.textContent?.trim(), rect: b.getBoundingClientRect() }));
+          for (let i = 0; i < rects.length; i++) {
+            for (let j = i + 1; j < rects.length; j++) {
+              const a = rects[i].rect;
+              const b = rects[j].rect;
+              const space = Math.max(b.left - a.right, a.left - b.right, b.top - a.bottom, a.top - b.bottom);
+              measured++;
+              if (space < 4) tight.push(`${card.querySelector("strong")?.textContent} ${rects[i].label}/${rects[j].label}: ${space.toFixed(1)}px`);
+            }
+          }
+        }
+        return { measured, tight };
+      }),
+    );
+    expect(measured).toBeGreaterThan(0);
+    expect(tight).toEqual([]);
+  });
+});

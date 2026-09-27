@@ -1286,6 +1286,16 @@ fieldset[aria-busy="true"] {
   margin: 0.35rem 0 0;
 }
 
+/* The card's own controls, in one wrapping row so neighbours never touch —
+   as loose inline siblings they sat flush side by side and only got space
+   between them from line-height when they wrapped. */
+.course-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
 .course-card-suggestions {
   list-style: none;
   margin: 0.4rem 0 0;
