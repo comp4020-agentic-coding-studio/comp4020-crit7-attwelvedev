@@ -1774,3 +1774,120 @@ describe("plan title row", { timeout: 60_000 }, () => {
     });
   });
 });
+
+describe("manual checks", { timeout: 30_000 }, () => {
+  // An editable plan with MATH1115 in S1 2027 and MATH1116 after it — the
+  // MATH1116 mark items are then all that's left to verify.
+  async function planWithMath1116(): Promise<string> {
+    const id = await planWithPlacement("MATH1115");
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "MATH1116", term: 1 }),
+    });
+    expect(placed.status).toBe(200);
+    return id;
+  }
+
+  async function openDetails(page: Page, code: string) {
+    await page.locator(`[data-placed="${code}"]`).getByRole("button", { name: "Details", exact: true }).click();
+    const dialog = page.locator("dialog[open]");
+    await dialog.waitFor(); // showModal() runs in an effect, after the click
+    return dialog;
+  }
+
+  const desktop = { width: 1920, height: 1080 };
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i Details offers Met / Not met / Not sure per item, labelled with its course", async (width, height) => {
+    const id = await planWithMath1116();
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width, height });
+    try {
+      const dialog = await openDetails(page, "MATH1116");
+      const fieldsets = dialog.locator("fieldset");
+      expect(await fieldsets.count()).toBe(2);
+      expect(await fieldsets.locator("legend").allTextContents()).toEqual([
+        "MATH1115 with a mark of 60 or above",
+        "MATH1113 with a mark of 80 or above",
+      ]);
+      for (const fieldset of await fieldsets.all()) {
+        for (const name of ["Met", "Not met", "Not sure"]) {
+          expect(await fieldset.getByRole("radio", { name, exact: true }).count()).toBe(1);
+        }
+        expect(await fieldset.getByRole("radio", { name: "Not sure", exact: true }).isChecked()).toBe(true);
+      }
+      // The course's sidebar entry renders a second (closed) copy of this
+      // dialog; a radio name shared with it would merge the two groups.
+      const groupSizes = await dialog.locator('input[type="radio"]').evaluateAll((radios) =>
+        [...new Set(radios.map((r) => (r as HTMLInputElement).name))].map(
+          (name) => document.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`).length,
+        ),
+      );
+      expect(groupSizes).toEqual([3, 3]);
+      expect(await horizontalOverflow(page)).toBe(0);
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("answering Met on the MATH1115 mark makes the card Available and drops its verify line", async () => {
+    const id = await planWithMath1116();
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const dialog = await openDetails(page, "MATH1116");
+      await dialog.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
+      const card = page.locator('[data-placed="MATH1116"]');
+      await expect.poll(() => card.locator('[class*="badge-state-"]').textContent()).toBe("Available");
+      expect(await card.locator(".badge-verify").count()).toBe(0);
+
+      await page.reload({ waitUntil: "networkidle" });
+      const reopened = await openDetails(page, "MATH1116");
+      expect(await reopened.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).isChecked()).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("Not met turns the card amber with its reason", async () => {
+    const id = await planWithMath1116();
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const dialog = await openDetails(page, "MATH1116");
+      await dialog.locator("fieldset").first().getByRole("radio", { name: "Not met", exact: true }).check();
+      const card = page.locator('[data-placed="MATH1116"]');
+      await expect.poll(() => card.locator(".badge-state-soft").count()).toBe(1);
+      expect(await card.locator(".badge-reason").textContent()).toContain(
+        'You marked "MATH1115 with a mark of 60 or above" as not met',
+      );
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("the read-only example's check controls are disabled", async () => {
+    await withPlan(desktop, async (page) => {
+      const dialog = await openDetails(page, "COMP4550");
+      // Playwright's isDisabled() only knows form controls, not <fieldset>,
+      // so read the fieldset's own property — and check what it disables.
+      const disabled = await dialog.locator("fieldset").evaluateAll((fs) => fs.map((f) => (f as HTMLFieldSetElement).disabled));
+      expect(disabled.length).toBeGreaterThan(0);
+      expect(disabled.every(Boolean)).toBe(true);
+      for (const radio of await dialog.locator('input[type="radio"]').all()) expect(await radio.isDisabled()).toBe(true);
+    });
+  });
+
+  it("the requisite tree says an answer was marked by you", async () => {
+    const id = await planWithMath1116();
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const dialog = await openDetails(page, "MATH1116");
+      await dialog.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
+      await expect.poll(() => dialog.textContent()).toContain("✓ met (marked by you)");
+    } finally {
+      await page.close();
+    }
+  });
+});

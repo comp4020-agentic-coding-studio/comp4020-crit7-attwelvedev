@@ -45,7 +45,8 @@ export default function RequisiteTree({ node }: Props) {
   }
   return (
     <li>
-      {node.text} — not checked
+      {node.text} —{" "}
+      {node.answer === "met" ? "✓ met (marked by you)" : node.answer === "not-met" ? "✗ not met (marked by you)" : "not checked"}
     </li>
   );
 }

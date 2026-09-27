@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useId, useRef, useState } from "preact/hooks";
+import type { CheckAnswer } from "../lib/domain/types";
 import type { CourseCard, PlanView } from "../lib/domain/view";
-import { isError, setPin } from "./api";
+import { isError, setCheck, setPin } from "./api";
 import { groupLabel } from "./planner-logic";
 import RequisiteTree from "./RequisiteTree";
 
@@ -30,6 +31,12 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
   const placement = view.placements.find((p) => p.code === code);
   const readOnly = view.plan.readOnly;
   const [pinPending, setPinPending] = useState(false);
+  // The answer being saved, shown checked until the new view arrives —
+  // otherwise the re-render for `disabled` snaps the radio back first.
+  const [pendingCheck, setPendingCheck] = useState<{ item: string; value: CheckAnswer | null } | null>(null);
+  // A placed course's dialog renders twice (its timeline card and its
+  // sidebar entry): radios sharing a name across both would be one group.
+  const radioPrefix = useId();
 
   useEffect(() => {
     if (open) dialogRef.current?.showModal();
@@ -48,6 +55,23 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
       setPinPending(false);
     }
   }
+
+  async function answer(item: string, value: CheckAnswer | null) {
+    setPendingCheck({ item, value });
+    try {
+      const result = await setCheck(planId, code, item, value);
+      if (isError(result)) onAnnounce(result.error);
+      else onChanged(result);
+    } finally {
+      setPendingCheck(null);
+    }
+  }
+
+  const answerOptions: [CheckAnswer | null, string][] = [
+    ["met", "Met"],
+    ["not-met", "Not met"],
+    [null, "Not sure"],
+  ];
 
   const pinnedValue = placement?.pinned ? (placement.countsToward ?? "") : "";
 
@@ -72,6 +96,31 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
         </ul>
       ) : (
         <p>No prerequisites, or not currently placed.</p>
+      )}
+      {placement && placement.checks.length > 0 && (
+        <>
+          <h3>Your checks</h3>
+          <small>
+            The planner can't check these itself. Mark each one for yourself — your answers decide whether this course
+            shows as Available — or leave it on Not sure to confirm with P&amp;C later.
+          </small>
+          {placement.checks.map((check, i) => (
+            <fieldset key={check.item} class="verify-check" disabled={readOnly || pendingCheck !== null}>
+              <legend>{check.label}</legend>
+              {answerOptions.map(([value, text]) => (
+                <label key={text}>
+                  <input
+                    type="radio"
+                    name={`${radioPrefix}-check-${code}-${i}`}
+                    checked={(pendingCheck?.item === check.item ? pendingCheck.value : check.answer) === value}
+                    onChange={() => answer(check.item, value)}
+                  />{" "}
+                  {text}
+                </label>
+              ))}
+            </fieldset>
+          ))}
+        </>
       )}
       {course.incompatible.length > 0 && <p>Incompatible with: {course.incompatible.join(", ")}</p>}
       {course.otherPrograms.length > 0 && (

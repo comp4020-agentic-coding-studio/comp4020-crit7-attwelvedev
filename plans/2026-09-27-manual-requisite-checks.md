@@ -219,7 +219,7 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
 
 ### Task 4: Details "Your checks" controls, tree answers, help text
 
-- [ ] Done
+- [x] Done
 - **Description:** Let the student answer items in Details; show answers in
   the requisite tree; explain it on the help page.
 - **Files touched:** `src/components/CourseDetail.tsx`,
@@ -236,6 +236,7 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
   - `RequisiteTree.tsx`: unverifiable → `{node.text} — {node.answer === "met" ? "✓ met (marked by you)" : node.answer === "not-met" ? "✗ not met (marked by you)" : "not checked"}`.
   - `styles.css`: `.verify-check` (no default fieldset chrome beyond a light border, options in a wrapping flex row with gap, legend wraps within the dialog width).
   - `help.astro` Check requirements `<dd>`: add that each item can be marked Met / Not met / Not sure under "Your checks" in the course's Details, that Met on everything that matters makes it Available and Not met flags it as needing prerequisites.
+- **Execution notes (2026-09-27):** the dialog renders twice per placed course (timeline card + sidebar entry), so radio names get a per-instance `useId()` prefix (the first spec asserts every item's group has exactly 3 radios page-wide); a `pendingCheck` state keeps the clicked radio checked while saving, replacing the boolean `checkPending`; the legend is floated inside the box so long items don't straddle the border; the read-only spec reads `HTMLFieldSetElement.disabled` (Playwright's `isDisabled()` ignores fieldsets) and checks every radio is disabled. Human review accepted by the user 2026-09-27.
 - **Refactor:** None expected.
 - **Acceptance criteria:**
   - All listed specs pass at both viewports; `pnpm check` green; one commit.
