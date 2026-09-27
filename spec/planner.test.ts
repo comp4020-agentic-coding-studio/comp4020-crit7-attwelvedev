@@ -208,12 +208,12 @@ describe("planner", () => {
     expect(html).toContain("Drag a course onto a semester, or use Place in…");
   });
 
-  it("the cutoff has keyboard buttons", async () => {
+  it("the completed semesters have keyboard buttons", async () => {
     const id = await createPlan();
     const page = await fetch(new URL(`/plan/${id}`, baseUrl));
     const html = await page.text();
-    expect(html).toContain("Move cutoff earlier");
-    expect(html).toContain("Move cutoff later");
+    expect(html).toContain('aria-label="One fewer semester completed"');
+    expect(html).toContain('aria-label="One more semester completed"');
   });
 
   it("program checks render with the two-segment bar, and the untracked TDP check shows as not tracked", async () => {

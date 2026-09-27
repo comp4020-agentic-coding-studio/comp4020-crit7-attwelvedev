@@ -5,7 +5,7 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/f
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
-import { dropTargets, outstandingItems, overlayEdges, progressSegments, unplacedCount } from "./planner-logic";
+import { completedReadout, dropTargets, outstandingItems, overlayEdges, progressSegments, unplacedCount } from "./planner-logic";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -182,6 +182,37 @@ describe("outstandingItems", () => {
     expect(items).toContainEqual({
       id: "check-tdp-min",
       text: "At least 12 units of TDP-tagged courses — not tracked, verify on P&C",
+    });
+  });
+});
+
+describe("completedReadout", () => {
+  const terms = [{ label: "S1 2027" }, { label: "S2 2027" }, { label: "S1 2028" }];
+
+  it("reads as nothing completed at 0", () => {
+    expect(completedReadout(0, terms)).toEqual({
+      short: "Nothing completed yet",
+      full: "Nothing on the timeline counts as completed yet. The gold line on the timeline marks that boundary.",
+    });
+  });
+
+  it("treats a negative cutoff the same as 0", () => {
+    expect(completedReadout(-1, terms)).toEqual(completedReadout(0, terms));
+  });
+
+  it("reads as all completed at or past the last term", () => {
+    const all = {
+      short: "All semesters completed",
+      full: "Every semester on the timeline counts as completed. The gold line on the timeline marks that boundary.",
+    };
+    expect(completedReadout(3, terms)).toEqual(all);
+    expect(completedReadout(9, terms)).toEqual(all);
+  });
+
+  it("names the last completed term inside the timeline", () => {
+    expect(completedReadout(2, terms)).toEqual({
+      short: "Completed through S2 2027",
+      full: "Completed through S2 2027 — planned from S1 2028 onward. The gold line on the timeline marks that boundary.",
     });
   });
 });

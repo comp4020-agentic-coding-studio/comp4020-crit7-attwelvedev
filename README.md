@@ -13,9 +13,10 @@ check against P&C's own course data, not a static checklist.
 
 Good means three things hold at once: the state shown for every course is
 never wrong (available/soft-blocked/hard-blocked, with a specific reason, not
-a guess); every mutation (a placement, a moved cutoff, a pin) is enforced
-server-side and persists exactly, so the client can't drift from the source
-of truth; and the app never claims certainty about P&C data it can't actually
+a guess); every mutation (a placement, a change to the completed semesters,
+a pin) is enforced server-side and persists exactly, so the client can't
+drift from the source of truth; and the app never claims certainty about P&C
+data it can't actually
 verify — an unparseable requisite clause shows as "verify on P&C" rather than
 being silently dropped or silently assumed true.
 

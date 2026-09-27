@@ -210,7 +210,7 @@ The nav-hidden `h1` rule keeps indenting the `h1` beside the tab, and its
 
 ### Task 1: Merge the cutoff controls into one completed-semesters row, and drop "cutoff" from user-facing text
 
-- [ ] **Description:** add `completedReadout`, rebuild the row in Planner,
+- [x] **Description:** add `completedReadout`, rebuild the row in Planner,
   restyle it, and rewrite the Help section and the README phrase.
 - **Files touched:**
   - `src/components/planner-logic.ts`

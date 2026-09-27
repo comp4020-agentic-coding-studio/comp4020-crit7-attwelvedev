@@ -3,7 +3,7 @@ import type { PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
 import { applyReqsState, DEFAULT_REQS, type ReqsState, reqsStateFromDataset, saveReqsState } from "./panel-state";
-import { dropTargets } from "./planner-logic";
+import { completedReadout, dropTargets } from "./planner-logic";
 import ReqsResizeHandle from "./ReqsResizeHandle";
 import Sidebar from "./Sidebar";
 import Timeline from "./Timeline";
@@ -141,13 +141,7 @@ export default function Planner({ view: initialView }: Props) {
     }
   }
 
-  const cutoff = view.plan.cutoff;
-  const cutoffReadout =
-    cutoff <= 0
-      ? "Nothing on the timeline counts as completed yet."
-      : cutoff >= view.terms.length
-        ? "Every semester on the timeline counts as completed."
-        : `Completed through ${view.terms[cutoff - 1].label} — planned from ${view.terms[cutoff].label} onward.`;
+  const readout = completedReadout(view.plan.cutoff, view.terms);
 
   useTouchDrag(plannerRef, {
     onDragStart: setDraggingCode,
@@ -167,21 +161,35 @@ export default function Planner({ view: initialView }: Props) {
       <div class="planner-layout">
         <div class="planner-panes">
           <div class="planner-timeline-area">
-            <div class="cutoff-controls" aria-busy={cutoffPending}>
-              <button
-                type="button"
-                disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
-                onClick={() => moveCutoff(-1)}
-              >
-                Move cutoff earlier
-              </button>
-              <button
-                type="button"
-                disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
-                onClick={() => moveCutoff(1)}
-              >
-                Move cutoff later
-              </button>
+            <div class="cutoff-controls">
+              <div class="completed-control" aria-busy={cutoffPending}>
+                <span class="completed-readout" aria-hidden="true">
+                  {readout.short}
+                </span>
+                <span class="visually-hidden">{readout.full}</span>
+                <button
+                  type="button"
+                  class="completed-step"
+                  aria-label="One fewer semester completed"
+                  disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
+                  onClick={() => moveCutoff(-1)}
+                >
+                  <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="m15 6-6 6 6 6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="completed-step"
+                  aria-label="One more semester completed"
+                  disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
+                  onClick={() => moveCutoff(1)}
+                >
+                  <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="m9 6 6 6-6 6" />
+                  </svg>
+                </button>
+              </div>
               <label class="show-links-toggle">
                 <input
                   type="checkbox"
@@ -196,7 +204,6 @@ export default function Planner({ view: initialView }: Props) {
                 </button>
               )}
             </div>
-            <p class="cutoff-readout">{cutoffReadout} The gold line on the timeline marks that boundary.</p>
             <Timeline
               view={view}
               planId={view.plan.id}

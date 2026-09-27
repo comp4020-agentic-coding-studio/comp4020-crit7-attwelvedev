@@ -143,3 +143,25 @@ export function groupLabel(view: PlanView, groupId: string): string {
   }
   return search(view.groups) ?? groupId;
 }
+
+export interface CompletedReadout {
+  short: string;
+  full: string;
+}
+
+// The short form is the completed-semesters control's visible label; the full
+// sentence is what assistive technology hears, so it also names the gold line.
+export function completedReadout(cutoff: number, terms: readonly { label: string }[]): CompletedReadout {
+  const boundary = " The gold line on the timeline marks that boundary.";
+  if (cutoff <= 0) {
+    return { short: "Nothing completed yet", full: `Nothing on the timeline counts as completed yet.${boundary}` };
+  }
+  if (cutoff >= terms.length) {
+    return { short: "All semesters completed", full: `Every semester on the timeline counts as completed.${boundary}` };
+  }
+  const last = terms[cutoff - 1].label;
+  return {
+    short: `Completed through ${last}`,
+    full: `Completed through ${last} — planned from ${terms[cutoff].label} onward.${boundary}`,
+  };
+}

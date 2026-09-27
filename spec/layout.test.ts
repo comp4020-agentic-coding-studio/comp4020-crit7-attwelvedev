@@ -23,6 +23,23 @@ async function withPlan<T>(viewport: Viewport, check: (page: Page) => Promise<T>
   }
 }
 
+// Creates an editable plan with `code` placed in term 0 and returns its id.
+async function planWithPlacement(code: string): Promise<string> {
+  const created = await fetch(new URL("/api/plans", baseUrl), {
+    method: "POST",
+    headers: { origin: baseUrl },
+    redirect: "manual",
+  });
+  const id = created.headers.get("location")!.split("/").pop()!;
+  const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+    method: "POST",
+    headers: { origin: baseUrl, "content-type": "application/json" },
+    body: JSON.stringify({ code, term: 0 }),
+  });
+  expect(placed.status).toBe(200);
+  return id;
+}
+
 describe("layout", { timeout: 30_000 }, () => {
   it("the plan page doesn't scroll sideways on a phone", async () => {
     const page = await openPage(browser, new URL("/plan/example", baseUrl).href, { width: 390, height: 844 });
@@ -564,22 +581,6 @@ describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
 describe("requirements rail as a drop target", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
 
-  async function planWithPlacement(code: string): Promise<string> {
-    const created = await fetch(new URL("/api/plans", baseUrl), {
-      method: "POST",
-      headers: { origin: baseUrl },
-      redirect: "manual",
-    });
-    const id = created.headers.get("location")!.split("/").pop()!;
-    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
-      method: "POST",
-      headers: { origin: baseUrl, "content-type": "application/json" },
-      body: JSON.stringify({ code, term: 0 }),
-    });
-    expect(placed.status).toBe(200);
-    return id;
-  }
-
   it("dragging a placed course onto the collapsed rail removes it", async () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop, {
@@ -810,6 +811,111 @@ describe("requirements resize handle", { timeout: 30_000 }, () => {
     const page = await openPage(browser, planUrl(), desktop, { storage });
     try {
       expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("completed-semesters row", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const fewer = { name: "One fewer semester completed" };
+  const more = { name: "One more semester completed" };
+
+  function verticalCentre(box: { y: number; height: number } | null): number {
+    return box!.y + box!.height / 2;
+  }
+
+  it("shows the short readout, the chevrons and the prerequisite toggle on one row", async () => {
+    await withPlan(desktop, async (page) => {
+      const readout = page.locator(".completed-readout");
+      await expect.poll(() => readout.textContent()).toBe("Completed through S2 2027");
+      const centre = verticalCentre(await readout.boundingBox());
+      for (const name of [fewer, more]) {
+        const chevron = page.getByRole("button", name);
+        expect(await chevron.isDisabled()).toBe(true);
+        const box = await chevron.boundingBox();
+        expect(box!.width).toBeGreaterThanOrEqual(44);
+        expect(box!.height).toBeGreaterThanOrEqual(44);
+        expect(Math.abs(verticalCentre(box) - centre)).toBeLessThanOrEqual(4);
+      }
+      const toggle = await page.locator(".show-links-toggle").boundingBox();
+      expect(Math.abs(verticalCentre(toggle) - centre)).toBeLessThanOrEqual(4);
+      expect(await horizontalOverflow(page)).toBe(0);
+      expect(await verticalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("puts Copy plan link on the same row on an editable plan", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const centre = verticalCentre(await page.locator(".completed-readout").boundingBox());
+      const copy = await page.getByRole("button", { name: "Copy plan link" }).boundingBox();
+      expect(Math.abs(verticalCentre(copy) - centre)).toBeLessThanOrEqual(4);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("the › chevron completes one more semester and enables ‹", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const planner = page.locator(".planner");
+      const readout = page.locator(".completed-readout");
+      const before = Number(await planner.getAttribute("data-cutoff"));
+      const beforeText = await readout.textContent();
+      await page.getByRole("button", more).click();
+      await expect.poll(async () => Number(await planner.getAttribute("data-cutoff"))).toBe(before + 1);
+      await expect.poll(() => readout.textContent()).not.toBe(beforeText);
+      expect(await page.getByRole("button", fewer).isEnabled()).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("gives the first term more room on a phone", async () => {
+    await withPlan({ width: 390, height: 844 }, async (page) => {
+      const offset = await page.evaluate(() => {
+        const area = document.querySelector(".planner-timeline-area")!.getBoundingClientRect();
+        const term = document.querySelector(".term")!.getBoundingClientRect();
+        return term.top - area.top;
+      });
+      expect(offset).toBeLessThanOrEqual(100);
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("no user-facing text says cutoff", async () => {
+    const id = await planWithPlacement("COMP1130");
+    for (const path of ["/plan/example", `/plan/${id}`, "/help/", "/readme/"]) {
+      const page = await openPage(browser, new URL(path, baseUrl).href, desktop);
+      try {
+        const text = await page.evaluate(() =>
+          [
+            document.body.innerText,
+            ...[...document.querySelectorAll("[aria-label],[aria-valuetext],[title]")].flatMap((el) => [
+              el.getAttribute("aria-label"),
+              el.getAttribute("aria-valuetext"),
+              el.getAttribute("title"),
+            ]),
+          ].join(" "),
+        );
+        expect(text, path).not.toMatch(/cutoff/i);
+      } finally {
+        await page.close();
+      }
+    }
+  });
+
+  it("Help describes the chevrons by name and the gold line", async () => {
+    const page = await openPage(browser, new URL("/help/", baseUrl).href, desktop);
+    try {
+      const text = await page.evaluate(() => document.body.innerText);
+      expect(text).toContain("One more semester completed");
+      expect(text).toContain("One fewer semester completed");
+      expect(text).toContain("gold line");
     } finally {
       await page.close();
     }
