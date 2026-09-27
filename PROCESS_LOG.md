@@ -485,3 +485,36 @@ and two API specs (409 for an unchosen option; switch capstone → 200,
 page 200, and switching back doesn't revive the pin). After the fix the
 same curl sequence gave 409 / 200 / 200, and Pin to lists only the
 chosen option's labelled groups at both viewports.
+
+## 2026-09-27 — A labelling rule tested on two courses, run on all of them
+
+Resolved by 4034947.
+
+The manual-checks spec labels a verify item with the course it's AND'ed
+with, so MATH1116's fragment "with a mark of 60 or above" reads "MATH1115
+with a mark of 60 or above". The plan wrote that as "an unverifiable leaf
+whose parent AND contains exactly one course leaf", with label tests on
+MATH1116 and COMP4550 only. Two of the plan's own synthetic tests then
+failed: their fixture, `AND(course, item)`, qualified under the rule, but
+the expected strings used the bare text.
+
+The obvious fix was to make the tests match the code, or the code match
+the tests. I did neither before running the rule over every undergrad
+course and listing each label that differed from its text. The rule got
+MATH1116 and MATH2222 right but produced "COMP2100 Competitive entry based
+on application and interviews" on COMP4820, "COMP3900 You will need to
+contact the School of Computing…" on COMP4020, and similar labels on
+COMP3770 and COMP3430. Those are sentence-level ANDs that happen to hold
+one course. The earlier parse change (b5f5984) had just moved COMP4820's
+permission items into that AND, so the rule would have mislabelled the
+feature's headline example.
+
+The call was to narrow the rule to the parser's real shape for "CODE
+followed by its qualifier": an AND of exactly one course and one item.
+It's the same shape the synthetic fixture has, so those tests now expect
+the labelled string, as FR 5 says they should. I checked it by re-running
+the catalogue-wide listing. The labelled set shrank to MATH1115, MATH1116
+and MATH2222, all correct readings. The correction also lives in the
+harness: `verify-labels.test.ts` now pins COMP4820's and COMP4020's items
+to plain text, so a rule that widens again fails on real data, not just
+on the one course the plan thought of.
