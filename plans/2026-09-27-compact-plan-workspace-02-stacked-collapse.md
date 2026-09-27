@@ -559,12 +559,12 @@ observer (`useReqsFit`), passes `fit` down to the handle, and adds
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 4–5 complete, with their tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Two commits, one per task
-- [ ] Task 4's human review accepted by the user
-- [ ] Tick Phase 02 in overview §5 and commit
+- [x] Tasks 4–5 complete, with their tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Two commits, one per task
+- [x] Task 4's human review accepted by the user
+- [x] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

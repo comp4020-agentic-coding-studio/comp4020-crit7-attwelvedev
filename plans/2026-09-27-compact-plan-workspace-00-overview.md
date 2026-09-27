@@ -392,7 +392,7 @@ toast above the bar with it.
 | Phase | File | Tasks | Needs | Ends with | Done |
 | --- | --- | --- | --- | --- | --- |
 | 01 | `…-01-row-and-title.md` | 1–3 | — | Three commits. The completed-semesters control, no "cutoff" in any user-facing text, the ⋯ "More options" panel, and the compact title row that carries both. Human review of each | [x] |
-| 02 | `…-02-stacked-collapse.md` | 4–5 | — | Two commits. Stacked "Hide requirements" and the bottom bar (a drop target, shared key), and the toast above the bar. Human review of the bar | [ ] |
+| 02 | `…-02-stacked-collapse.md` | 4–5 | — | Two commits. Stacked "Hide requirements" and the bottom bar (a drop target, shared key), and the toast above the bar. Human review of the bar | [x] |
 | 03 | `…-03-stacked-split.md` | 6–7 | 02 | One commit. The handle turns horizontal in stacked and snaps 30/50/70/Collapsed, saved and applied before paint. Human review of the split | [ ] |
 
 Phase 02 doesn't need Phase 01: its code and tests don't touch the title
