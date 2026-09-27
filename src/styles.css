@@ -707,9 +707,12 @@ fieldset[aria-busy="true"] {
   align-items: flex-end;
 }
 
+/* Stretch explicitly: the search sits inside a .requirement-group, whose
+   label rule centres items — that shrank the input to its min-width. */
 .course-search label {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 0.3rem;
   flex: 1;
   font-size: 0.85rem;
