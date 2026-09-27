@@ -74,7 +74,12 @@ export default function Timeline({
     el.focus({ preventScroll: true });
     el.classList.add("course-card-highlighted");
     const timer = setTimeout(() => el.classList.remove("course-card-highlighted"), 2000);
-    return () => clearTimeout(timer);
+    // A newer locate cancels this timer, so it has to unhighlight this card
+    // itself — otherwise the card keeps the class for good.
+    return () => {
+      clearTimeout(timer);
+      el.classList.remove("course-card-highlighted");
+    };
   }, [locateRequest]);
   const placementsByTerm = new Map<number, PlacementView[]>();
   for (const placement of view.placements) {

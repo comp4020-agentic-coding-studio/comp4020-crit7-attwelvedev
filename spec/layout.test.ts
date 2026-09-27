@@ -811,6 +811,31 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
   });
 });
 
+describe("locating a placed course from its term badge", { timeout: 30_000 }, () => {
+  it("clears every card's highlight, not just the last one clicked", async () => {
+    const id = await planWithPlacement("COMP1100");
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP1110", term: 1 }),
+    });
+    expect(placed.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    const highlighted = () =>
+      page.locator(".course-card-highlighted").evaluateAll((els) => els.map((el) => el.getAttribute("data-placed")));
+    try {
+      await page.getByRole("button", { name: /^COMP1100 is placed in/ }).first().click();
+      await expect.poll(highlighted).toEqual(["COMP1100"]);
+      await page.getByRole("button", { name: /^COMP1110 is placed in/ }).first().click();
+      // One highlight at a time: the newer locate takes over from the older.
+      await expect.poll(highlighted).toEqual(["COMP1110"]);
+      await expect.poll(highlighted, { timeout: 4000 }).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+});
+
 describe("stacked requirements collapse", { timeout: 30_000 }, () => {
   const phone = { width: 390, height: 844 };
   const reqsCollapsed = { storage: { "panel-reqs": "collapsed" } };
