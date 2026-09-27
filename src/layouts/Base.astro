@@ -33,11 +33,6 @@ const { title } = Astro.props;
   </head>
   <body>
     <div class="app-shell">
-      <button type="button" class="nav-show" aria-controls="site-nav" aria-expanded="false"
-        ><svg class="nav-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"
-          ><path d="m9 6 6 6-6 6"></path></svg
-        ><span class="visually-hidden">Show navigation</span></button
-      >
       <nav aria-label="site" id="site-nav">
         <a href="/" class="brand">ANU Degree Planner</a>
         <div class="nav-links">
@@ -53,6 +48,12 @@ const { title } = Astro.props;
         >
       </nav>
       <main>
+        {/* In the top bar's layout the tab has no insets, so it sits where main's content starts, which is where every page's title starts; see styles.css. */}
+        <button type="button" class="nav-show" aria-controls="site-nav" aria-expanded="false"
+          ><svg class="nav-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+            ><path d="m9 6 6 6-6 6"></path></svg
+          ><span class="visually-hidden">Show navigation</span></button
+        >
         <slot />
       </main>
     </div>

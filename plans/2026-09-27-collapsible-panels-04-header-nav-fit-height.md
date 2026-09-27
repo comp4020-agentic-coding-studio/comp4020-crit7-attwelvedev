@@ -324,7 +324,7 @@ desktop-only.
 
 ### Task 9: Hide the nav at every width, with a tab beside the title in top-bar mode
 
-- [ ] **Description:** show the hide button in the top bar, let a saved or
+- [x] **Description:** show the hide button in the top bar, let a saved or
   clicked `data-nav="hidden"` take effect below 1100px, and place the tab
   beside the page title there.
 - **Files touched:**

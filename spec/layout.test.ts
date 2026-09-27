@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import type { Browser, Page } from "playwright";
 import { axeViolations, horizontalOverflow, launch, openPage, type Viewport } from "./browser";
+import { ROUTES } from "./routes";
 
 const baseUrl = inject("baseUrl");
 let browser: Browser;
@@ -178,17 +179,6 @@ describe("site nav", { timeout: 30_000 }, () => {
     }
   });
 
-  it("ignores the saved state on a phone, where there's no toggle", async () => {
-    const page = await openPage(browser, planUrl(), { width: 390, height: 844 }, navHidden);
-    try {
-      expect(await page.locator('nav[aria-label="site"]').isVisible()).toBe(true);
-      expect(await page.locator("button.nav-hide").isVisible()).toBe(false);
-      expect(await page.locator("button.nav-show").isVisible()).toBe(false);
-    } finally {
-      await page.close();
-    }
-  });
-
   it("passes axe with the nav hidden", async () => {
     const page = await openPage(browser, planUrl(), desktop, navHidden);
     try {
@@ -207,6 +197,140 @@ describe("site nav", { timeout: 30_000 }, () => {
       expect(width).toBe(715);
     } finally {
       await page.close();
+    }
+  });
+});
+
+describe("site nav in the top bar", { timeout: 30_000 }, () => {
+  const phone = { width: 390, height: 844 };
+  const navHidden = { storage: { "panel-nav": "hidden" } };
+  // Degrees the element is turned clockwise: 90 for a chevron rotated onto
+  // the bar's axis, 0 when untransformed.
+  const rotation = (page: Page, selector: string) =>
+    page.evaluate((s) => {
+      const transform = getComputedStyle(document.querySelector(s)!).transform;
+      const m = new DOMMatrix(transform === "none" ? "" : transform);
+      return Math.round((Math.atan2(m.b, m.a) * 180) / Math.PI);
+    }, selector);
+  const focused = (page: Page, selector: string) =>
+    page.evaluate((s) => document.activeElement === document.querySelector(s), selector);
+
+  it("hides from the brand row, moves focus between the controls, and remembers the choice", async () => {
+    const page = await openPage(browser, planUrl(), phone);
+    try {
+      const nav = page.locator('nav[aria-label="site"]');
+      const show = page.locator("button.nav-show");
+      const hide = page.locator("button.nav-hide");
+
+      expect(await hide.isVisible()).toBe(true);
+      expect((await hide.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      const row = await page.evaluate(() => {
+        const button = document.querySelector("button.nav-hide")!.getBoundingClientRect();
+        const brand = document.querySelector(".brand")!.getBoundingClientRect();
+        const link = document.querySelector(".nav-links a")!.getBoundingClientRect();
+        return {
+          centreGap: Math.abs(button.top + button.height / 2 - (brand.top + brand.height / 2)),
+          aboveLinks: button.top < link.top,
+        };
+      });
+      expect(row.centreGap).toBeLessThanOrEqual(4);
+      expect(row.aboveLinks).toBe(true);
+      expect(await rotation(page, "button.nav-hide .nav-toggle-icon")).toBe(90);
+
+      await hide.click();
+      expect(await nav.isVisible()).toBe(false);
+      expect(await show.isVisible()).toBe(true);
+      expect(await focused(page, "button.nav-show")).toBe(true);
+      expect(await rotation(page, "button.nav-show .nav-toggle-icon")).toBe(90);
+      expect(await page.evaluate(() => localStorage.getItem("panel-nav"))).toBe("hidden");
+      expect(await horizontalOverflow(page)).toBe(0);
+
+      await show.click();
+      expect(await nav.isVisible()).toBe(true);
+      expect(await focused(page, "button.nav-hide")).toBe(true);
+      expect(await page.evaluate(() => localStorage.getItem("panel-nav"))).toBeNull();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each(ROUTES.flatMap((route) => [[route, 390, 844] as const, [route, 900, 800] as const]))(
+    "on %s at %i×%i the tab shares the title's row and covers nothing",
+    async (route, width, height) => {
+      const page = await openPage(browser, new URL(route, baseUrl).href, { width, height }, navHidden);
+      try {
+        expect(await page.locator("button.nav-show").isVisible()).toBe(true);
+        const layout = await page.evaluate(() => {
+          const tab = document.querySelector("button.nav-show")!;
+          const h1 = document.querySelector("h1")!;
+          const t = tab.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(h1);
+          const text = range.getBoundingClientRect();
+          const covered = [...document.querySelectorAll("main *")]
+            .filter((el) => !tab.contains(el) && !h1.contains(el) && !el.contains(h1))
+            .filter((el) => {
+              const r = el.getBoundingClientRect();
+              return (
+                r.width > 0 && r.height > 0 && r.left < t.right && r.right > t.left && r.top < t.bottom && r.bottom > t.top
+              );
+            })
+            .map((el) => `${el.tagName}.${el.className}`);
+          return {
+            clearOfText: text.left >= t.right,
+            sameRow: t.top < text.bottom && t.bottom > text.top,
+            covered,
+          };
+        });
+        expect(layout.clearOfText).toBe(true);
+        expect(layout.sameRow).toBe(true);
+        expect(layout.covered).toEqual([]);
+        expect(await horizontalOverflow(page)).toBe(0);
+      } finally {
+        await page.close();
+      }
+    },
+  );
+
+  it("applies the saved state before any bundled script runs", async () => {
+    const page = await openPage(browser, new URL("/help/", baseUrl).href, phone, {
+      ...navHidden,
+      blockScripts: true,
+    });
+    try {
+      expect(await page.locator('nav[aria-label="site"]').isVisible()).toBe(false);
+      expect(await page.locator("button.nav-show").isVisible()).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("passes axe with the nav hidden", async () => {
+    const page = await openPage(browser, planUrl(), phone, navHidden);
+    try {
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("leaves the desktop rail's controls as they were", async () => {
+    const desktop = { width: 1920, height: 1080 };
+    const shown = await openPage(browser, planUrl(), desktop);
+    try {
+      expect(await rotation(shown, "button.nav-hide .nav-toggle-icon")).toBe(0);
+    } finally {
+      await shown.close();
+    }
+    const hidden = await openPage(browser, planUrl(), desktop, navHidden);
+    try {
+      const styles = await hidden.evaluate(() => ({
+        position: getComputedStyle(document.querySelector("button.nav-show")!).position,
+        indent: getComputedStyle(document.querySelector("h1")!).paddingInlineStart,
+      }));
+      expect(styles).toEqual({ position: "fixed", indent: "0px" });
+    } finally {
+      await hidden.close();
     }
   });
 });
