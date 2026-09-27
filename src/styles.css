@@ -7,6 +7,8 @@
 :root {
   --ink: #17181a;
   --unigrey: #333333;
+  /* Receded text that still clears WCAG AA on --paper (4.7:1). */
+  --muted: #6b6f76;
   --paper: #f5f6f8;
   --surface: #ffffff;
   --line: #e0e2e7;
@@ -1194,9 +1196,18 @@ fieldset[aria-busy="true"] {
   border-color: var(--line);
 }
 
+/* Recedes through its text and background, not opacity: a parent's opacity
+   can't be undone by its children, so it faded the term and Details
+   buttons too, making working controls look disabled. */
 .course-card-sidebar-placed {
-  opacity: 0.55;
+  background: var(--paper);
   border-color: var(--line);
+  color: var(--muted);
+}
+
+.course-card-sidebar-placed strong,
+.course-card-sidebar-placed .course-card-units {
+  color: var(--muted);
 }
 
 /* Words, not a tick: "Placed in" says what the card's state is, and the

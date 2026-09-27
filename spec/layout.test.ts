@@ -2008,4 +2008,26 @@ describe("course cards", { timeout: 30_000 }, () => {
       expect(await border()).toBe(atRest);
     });
   });
+
+  it("a placed sidebar card recedes without fading its buttons", async () => {
+    await withPlan({ width: 1920, height: 1080 }, async (page) => {
+      const card = page.locator(".course-card-sidebar-placed").first();
+      // Opacity compounds down the tree and a child can't undo it, so walk
+      // every ancestor of each button, not just the button itself.
+      const opacities = await card.locator("button").evaluateAll((buttons) =>
+        buttons
+          .filter((b) => !b.closest("dialog"))
+          .map((b) => {
+            let product = 1;
+            for (let el: Element | null = b; el; el = el.parentElement) product *= Number(getComputedStyle(el).opacity);
+            return product;
+          }),
+      );
+      expect(opacities.length).toBeGreaterThan(0);
+      expect(opacities.every((o) => o === 1)).toBe(true);
+      const titleColour = (selector: string) =>
+        page.locator(`${selector} strong`).first().evaluate((el) => getComputedStyle(el).color);
+      expect(await titleColour(".course-card-sidebar-placed")).not.toBe(await titleColour(".course-card-unplaced"));
+    });
+  });
 });
