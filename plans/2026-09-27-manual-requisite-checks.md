@@ -142,7 +142,7 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
 
 ### Task 2: Store answers — `plan_checks` table, repo, service, API, client
 
-- [ ] Done
+- [x] Done
 - **Description:** Persist answers per plan + course + item text and
   expose `PUT /api/plans/:id/checks`. No evaluation change yet.
 - **Files touched:** `src/lib/domain/types.ts`, `src/lib/schema.ts`,

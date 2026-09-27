@@ -1,3 +1,4 @@
+import type { CheckAnswer } from "../lib/domain/types";
 import type { CourseCard, PlanView } from "../lib/domain/view";
 
 export type ApiResult = PlanView | { error: string };
@@ -39,6 +40,10 @@ export function setChoice(planId: string, groupId: string, childId: string | nul
 
 export function setPin(planId: string, code: string, groupId: string | null): Promise<ApiResult> {
   return request(`/api/plans/${planId}/pins`, jsonInit("PUT", { code, groupId }));
+}
+
+export function setCheck(planId: string, code: string, item: string, answer: CheckAnswer | null): Promise<ApiResult> {
+  return request(`/api/plans/${planId}/checks`, jsonInit("PUT", { code, item, answer }));
 }
 
 export function isError(result: ApiResult): result is { error: string } {

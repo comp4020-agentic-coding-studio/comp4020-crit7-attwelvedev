@@ -3,12 +3,13 @@ import { activeEligibleLeaves } from "./domain/allocation";
 import { createFeasibility } from "./domain/feasibility";
 import { buildPlanView, type PlanView } from "./domain/view";
 import { TERMS } from "./domain/terms";
-import type { Catalogue, GroupDef } from "./domain/types";
+import type { Catalogue, CheckAnswer, GroupDef } from "./domain/types";
 import {
   deletePlacement,
   getPlan,
   loadCatalogue,
   loadProgram,
+  setCheck as repoSetCheck,
   setChoice as repoSetChoice,
   setCutoff as repoSetCutoff,
   setPin as repoSetPin,
@@ -142,5 +143,21 @@ export function setPin(planId: string, code: string, groupId: string | null): Se
   }
 
   repoSetPin(db, planId, code, groupId);
+  return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
+}
+
+export function setCheck(planId: string, code: string, item: string, answer: CheckAnswer | null): ServiceResult {
+  const plan = getPlan(db, planId);
+  if (!plan) return { status: 404, error: "plan not found" };
+  if (plan.readOnly) return { status: 403, error: "this plan is read-only" };
+
+  if (!plan.placements.some((p) => p.code === code)) {
+    return { status: 400, error: `${code} is not placed in this plan` };
+  }
+  if (!loadCatalogue(db).courses.get(code)?.requisites.unverifiable.includes(item)) {
+    return { status: 400, error: `"${item}" is not a verify item of ${code}` };
+  }
+
+  repoSetCheck(db, planId, code, item, answer);
   return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
 }

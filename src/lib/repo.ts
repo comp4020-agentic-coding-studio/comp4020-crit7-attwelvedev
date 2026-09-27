@@ -5,10 +5,12 @@ import { emptyParse } from "./catalogue/from-pandc";
 import type {
   Catalogue,
   CatalogueCourse,
+  CheckAnswer,
   CourseFilter,
   GroupDef,
   Offering,
   ParsedRequisites,
+  PlanChecks,
   PlanState,
   ProgramCheckDef,
   ProgramDef,
@@ -17,6 +19,7 @@ import {
   courseOfferings,
   courseRequisites,
   courses,
+  planChecks,
   planChoices,
   planCourses,
   plans,
@@ -186,6 +189,12 @@ export function getPlan(db: Db, id: string): PlanState | null {
 
   const placementRows = db.select().from(planCourses).where(eq(planCourses.planId, id)).all();
 
+  const checkRows = db.select().from(planChecks).where(eq(planChecks.planId, id)).all();
+  const checks: PlanChecks = {};
+  for (const row of checkRows) {
+    (checks[row.courseCode] ??= {})[row.itemText] = row.answer as CheckAnswer;
+  }
+
   return {
     id: planRow.id,
     readOnly: planRow.readOnly === 1,
@@ -196,6 +205,7 @@ export function getPlan(db: Db, id: string): PlanState | null {
       term: row.termIndex,
       pinnedGroupId: row.pinnedGroupId,
     })),
+    checks,
   };
 }
 
@@ -253,6 +263,19 @@ export function setPin(db: Db, planId: string, code: string, groupId: string | n
   db.update(planCourses)
     .set({ pinnedGroupId: groupId })
     .where(and(eq(planCourses.planId, planId), eq(planCourses.courseCode, code)))
+    .run();
+}
+
+// Like planChoices, "Not sure" is row absence: a null answer deletes the row.
+export function setCheck(db: Db, planId: string, code: string, item: string, answer: CheckAnswer | null): void {
+  const key = and(eq(planChecks.planId, planId), eq(planChecks.courseCode, code), eq(planChecks.itemText, item));
+  if (answer === null) {
+    db.delete(planChecks).where(key).run();
+    return;
+  }
+  db.insert(planChecks)
+    .values({ planId, courseCode: code, itemText: item, answer })
+    .onConflictDoUpdate({ target: [planChecks.planId, planChecks.courseCode, planChecks.itemText], set: { answer } })
     .run();
 }
 

@@ -5,6 +5,7 @@ import {
   courseOfferings,
   courseRequisites,
   courses,
+  planChecks,
   planChoices,
   planCourses,
   plans,
@@ -188,6 +189,7 @@ function seedCourses(db: Db, jsonCourses: PandcCourseJson[], tdpCourses: string[
 }
 
 function seedExamplePlan(db: Db, example: PlanState, program: ProgramDef): void {
+  db.delete(planChecks).where(eq(planChecks.planId, example.id)).run();
   db.delete(planChoices).where(eq(planChoices.planId, example.id)).run();
   db.delete(planCourses).where(eq(planCourses.planId, example.id)).run();
   db.delete(plans).where(eq(plans.id, example.id)).run();

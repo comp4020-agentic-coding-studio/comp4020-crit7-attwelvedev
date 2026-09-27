@@ -24,10 +24,13 @@ export interface CatalogueCourse {
 export interface Catalogue { courses: Map<string, CatalogueCourse>; horizonYear: number }
 export type OfferingStatus = "offered" | "not-offered" | "projected" | "unknown";
 export interface Placement { code: string; term: number; pinnedGroupId: string | null }
+export type CheckAnswer = "met" | "not-met";
+export type PlanChecks = Record<string, Record<string, CheckAnswer>>; // course code -> verify item text -> answer; absent = "Not sure"
 export interface PlanState {
   id: string; readOnly: boolean; cutoff: number;
   choices: Record<string, string>; // selectable groupId -> chosen child groupId
   placements: Placement[];
+  checks?: PlanChecks;
 }
 export type GroupKind = "core" | "major" | "minor" | "specialisation" | "elective";
 export type RuleType = "ALL" | "UNITS" | "CHOOSE_N";

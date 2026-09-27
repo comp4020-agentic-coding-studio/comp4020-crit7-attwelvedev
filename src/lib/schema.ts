@@ -119,3 +119,16 @@ export const planCourses = sqliteTable(
   },
   (table) => [primaryKey({ columns: [table.planId, table.courseCode] })],
 );
+
+// A student's own answer to a "Verify on P&C" item. Kept apart from
+// plan_courses so removing a placement doesn't lose it; no row = "Not sure".
+export const planChecks = sqliteTable(
+  "plan_checks",
+  {
+    planId: text("plan_id").notNull(),
+    courseCode: text("course_code").notNull(),
+    itemText: text("item_text").notNull(),
+    answer: text().notNull(), // "met" | "not-met"
+  },
+  (table) => [primaryKey({ columns: [table.planId, table.courseCode, table.itemText] })],
+);

@@ -174,6 +174,54 @@ describe("planner", () => {
     expect((await back.json()).placements.find((p: { code: string }) => p.code === "COMP4500").pinned).toBe(false);
   });
 
+  it("PUT checks stores an answer (200)", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "MATH1116", term: 1 });
+    const res = await putJson(`/api/plans/${id}/checks`, {
+      code: "MATH1116",
+      item: "with a mark of 60 or above",
+      answer: "met",
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("PUT checks on the read-only example returns 403", async () => {
+    const res = await putJson("/api/plans/example/checks", {
+      code: "COMP4550",
+      item: "find a project/supervisor",
+      answer: "met",
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("PUT checks for an unplaced course returns 400", async () => {
+    const id = await createPlan();
+    const res = await putJson(`/api/plans/${id}/checks`, {
+      code: "MATH1116",
+      item: "with a mark of 60 or above",
+      answer: "met",
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("PUT checks with an item the course doesn't have returns 400", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "MATH1116", term: 1 });
+    const res = await putJson(`/api/plans/${id}/checks`, { code: "MATH1116", item: "find a project/supervisor", answer: "met" });
+    expect(res.status).toBe(400);
+  });
+
+  it("PUT checks with a bad answer returns 400", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "MATH1116", term: 1 });
+    const res = await putJson(`/api/plans/${id}/checks`, {
+      code: "MATH1116",
+      item: "with a mark of 60 or above",
+      answer: "yes",
+    });
+    expect(res.status).toBe(400);
+  });
+
   it("/plan/example renders a two-segment progress bar per group with aria-valuenow and text", async () => {
     const res = await fetch(new URL("/plan/example", baseUrl));
     const html = await res.text();
