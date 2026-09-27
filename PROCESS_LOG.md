@@ -420,3 +420,34 @@ invariant: the example plan, which is meant to be a complete plan, must
 have no placement still flagged "soft". It failed on five courses before
 the change and passes now. I also rendered the new badge at both marking
 viewports, against the built server and a throwaway database.
+
+## 2026-09-27 — A passing invariant that checked presence, not structure
+
+Resolved by 09b79ac..4ff0f9c.
+
+I had just tightened the parser's harness so no course code could be
+left in unverifiable prose, and it passed. Then I noticed COMP4500 was
+still read completely wrong. Its two degree routes (AACOM with COMP2120
+and 12 units at 3000/4000 level, *or* AENSE with COMP3500) had been AND'd
+into one list. An AACOM student was being asked for COMP3500 and the
+AENSE degree too. Every code was in the tree, just joined the wrong way,
+so a presence check could never see it.
+
+The obvious fix was a COMP4500 fixture next to the others. I did that,
+fixing the four gaps behind it: an "OR" opening a sentence now joins the
+routes, "You also must be studying:" is a lead-in, program names can
+carry a mid-name "(Honours)", and a level total can have no subject. But
+a fixture only protects the one course. What actually went missing was
+the degree codes "(AACOM)" and "(AENSE)", which fell into prose. So a
+second invariant now fails on any bracketed program or subject code left
+in an unverifiable leaf.
+
+How I knew it was right: I ran the new invariant against the *previous*
+parser and it flagged exactly COMP3500 and COMP4500. COMP3500 had the
+same lead-in bug, unreported. The invariant passes on the fixed one. A
+before/after dump of every tree showed the evaluation changed only for
+those two courses; everything else was prose merging into one verify
+line. A real-catalogue test checks the AACOM route alone reaches "Check
+requirements" and drops to "Needs prerequisites" without COMP2120. In
+the built app's Details panel, the two routes show as separate "All of"
+groups.
