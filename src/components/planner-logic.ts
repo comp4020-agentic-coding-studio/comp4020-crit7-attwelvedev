@@ -1,6 +1,6 @@
 import { matchesFilter } from "../lib/domain/filters";
 import type { CourseFilter, ReqExpr } from "../lib/domain/types";
-import type { GroupView, PlanView } from "../lib/domain/view";
+import type { GroupView, PlacementView, PlanView } from "../lib/domain/view";
 
 export interface DropTarget {
   term: number;
@@ -222,6 +222,20 @@ export function unitsLabel(course: { units: number; twoSemester: boolean }): Uni
 // The card only counts what's left to confirm; Details lists each item.
 export function verifyBadgeText(count: number): string {
   return `Verify on P&C: ${count} item${count === 1 ? "" : "s"}`;
+}
+
+export interface PlacedStatus {
+  word: "Completed" | "Planned";
+  termLabel: string;
+}
+
+// A placed row's status, from the same `completed` flag the progress numbers
+// use, so a row never disagrees with its group's bar.
+export function placedStatus(view: PlanView, placement: PlacementView): PlacedStatus {
+  return {
+    word: placement.completed ? "Completed" : "Planned",
+    termLabel: view.terms[placement.term].label,
+  };
 }
 
 export interface CompletedReadout {

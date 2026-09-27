@@ -160,7 +160,7 @@ under `@container (min-width: 24rem)`. The title button is
 
 ### Task 5: `PlacedCourseRow` in requirement groups
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `placedStatus`.
   - Create `PlacedCourseRow`.
   - In `Group`, split the leaf's courses into unplaced (the card grid, as
@@ -291,8 +291,11 @@ under `@container (min-width: 24rem)`. The title button is
     - `.placed-row-title` (the `.course-card-title` reset, plus
       `grid-area: title; white-space: nowrap; overflow: hidden;
       text-overflow: ellipsis; color: var(--muted);`)
-    - `.placed-row-status { grid-area: status; margin: 0; display: flex;
-      align-items: center; gap: 0.35rem; }`
+    - `.placed-row-status { grid-area: status; margin: 0; }`: plain
+      inline text. *Amended 2026-09-28 (user ruling):* the original
+      `display: flex; align-items: center; gap: 0.35rem` blockified the
+      children, so `innerText` read "Completed\nS1 2027" and contradicted
+      test 1. The source's space separates the word from the button.
 - **Refactor:** none. `AvailableCourseCard`'s placed branch is still used
   by search until Task 6.
 - **Acceptance criteria:**

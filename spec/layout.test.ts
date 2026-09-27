@@ -832,9 +832,9 @@ describe("locating a placed course from its term badge", { timeout: 30_000 }, ()
     const highlighted = () =>
       page.locator(".course-card-highlighted").evaluateAll((els) => els.map((el) => el.getAttribute("data-placed")));
     try {
-      await page.getByRole("button", { name: /^COMP1100 is placed in/ }).first().click();
+      await page.getByRole("button", { name: /^COMP1100 is (completed in|planned for)/ }).first().click();
       await expect.poll(highlighted).toEqual(["COMP1100"]);
-      await page.getByRole("button", { name: /^COMP1110 is placed in/ }).first().click();
+      await page.getByRole("button", { name: /^COMP1110 is (completed in|planned for)/ }).first().click();
       // One highlight at a time: the newer locate takes over from the older.
       await expect.poll(highlighted).toEqual(["COMP1110"]);
       await expect.poll(highlighted, { timeout: 4000 }).toEqual([]);
@@ -2031,7 +2031,7 @@ describe("course cards", { timeout: 30_000 }, () => {
     // Guards a cascade slip: a later same-specificity rule gave this button
     // a border its own :hover rule then took away.
     await withPlan({ width: 1920, height: 1080 }, async (page) => {
-      const button = page.locator(".course-card-sidebar-placed .course-card-term-link").first();
+      const button = page.locator(".placed-row .course-card-term-link").first();
       const border = () => button.evaluate((el) => getComputedStyle(el).borderTopWidth);
       const atRest = await border();
       await button.hover();
@@ -2073,9 +2073,9 @@ describe("course cards", { timeout: 30_000 }, () => {
     }
   });
 
-  it("a placed sidebar card recedes without fading its buttons", async () => {
+  it("a placed row recedes without fading its buttons", async () => {
     await withPlan({ width: 1920, height: 1080 }, async (page) => {
-      const card = page.locator(".course-card-sidebar-placed").first();
+      const card = page.locator(".placed-row").first();
       // Opacity compounds down the tree and a child can't undo it, so walk
       // every ancestor of each button, not just the button itself.
       const opacities = await card.locator("button").evaluateAll((buttons) =>
@@ -2091,8 +2091,84 @@ describe("course cards", { timeout: 30_000 }, () => {
       expect(opacities.every((o) => o === 1)).toBe(true);
       const titleColour = (selector: string) =>
         page.locator(`${selector} strong`).first().evaluate((el) => getComputedStyle(el).color);
-      expect(await titleColour(".course-card-sidebar-placed")).not.toBe(await titleColour(".course-card-unplaced"));
+      expect(await titleColour(".placed-row")).not.toBe(await titleColour(".course-card-unplaced"));
     });
+  });
+});
+
+describe("placed rows", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const phone = { width: 390, height: 844 };
+  // The one group COMP1130 belongs to: its label is also the start of
+  // COMP1130's own title, so match the section by its heading instead.
+  const group = (page: Page) =>
+    page.locator(".requirement-group").filter({ has: page.getByRole("heading", { name: "Programming as Problem Solving", exact: true }) });
+  const row = (page: Page) => group(page).locator(".placed-rows .placed-row");
+
+  it("lists a completed course as one row below its group's unplaced cards, not draggable", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await row(page).count()).toBe(1);
+      expect(await row(page).locator(".placed-row-status").innerText()).toBe("Completed S1 2027");
+      const cards = group(page).locator(".available-courses .course-card");
+      expect(await cards.count()).toBeGreaterThan(0);
+      const lastCard = (await cards.last().boundingBox())!;
+      expect((await row(page).boundingBox())!.y).toBeGreaterThanOrEqual(lastCard.y + lastCard.height);
+      expect(await row(page).getAttribute("draggable")).toBeNull();
+    });
+  });
+
+  it("says a planned course is planned, and its term locates it on the timeline", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      expect(await row(page).locator(".placed-row-status").innerText()).toBe("Planned S1 2027");
+      const locate = page.getByRole("button", { name: /^COMP1130 is planned for S1 2027/ });
+      expect(await locate.count()).toBe(1);
+      await locate.click();
+      await expect
+        .poll(() => page.locator('[data-placed="COMP1130"]').evaluate((el) => el.classList.contains("course-card-highlighted")))
+        .toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("opens Details from the row's title", async () => {
+    await withPlan(desktop, async (page) => {
+      const title = row(page).locator(".placed-row-title");
+      expect(await title.getAttribute("title")).toBe("Programming as Problem Solving (Advanced)");
+      expect(await row(page).getByRole("button", { name: "Programming as Problem Solving (Advanced), details", exact: true }).count()).toBe(1);
+      await title.click();
+      await page.locator("dialog[open]").waitFor(); // showModal() runs in an effect, after the click
+      expect(await page.locator('dialog[open][aria-label="COMP1130 details"]').count()).toBe(1);
+    });
+  });
+
+  it.each([
+    ["wraps to two lines on a phone", phone, true],
+    ["fits on one line in the wide sidebar", desktop, false],
+  ])("%s", async (_name, viewport, twoLines) => {
+    await withPlan(viewport, async (page) => {
+      const target = row(page);
+      await target.scrollIntoViewIfNeeded();
+      const code = (await target.locator(".placed-row-code").boundingBox())!;
+      const status = (await target.locator(".placed-row-status").boundingBox())!;
+      if (twoLines) {
+        expect(status.y).toBeGreaterThanOrEqual(code.y + code.height);
+      } else {
+        expect(Math.abs(status.y + status.height / 2 - (code.y + code.height / 2))).toBeLessThanOrEqual(4);
+      }
+      const title = await target.locator(".placed-row-title").evaluate((el) => ({
+        overflows: el.scrollWidth > el.clientWidth,
+        textOverflow: getComputedStyle(el).textOverflow,
+      }));
+      if (title.overflows) expect(title.textOverflow).toBe("ellipsis");
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("stays axe-clean", async () => {
+    expect(await withPlan(desktop, axeViolations)).toEqual([]);
   });
 });
 

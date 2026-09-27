@@ -3,6 +3,7 @@ import type { CourseCard, GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
+import PlacedCourseRow from "./PlacedCourseRow";
 import { outstandingItems, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 import SidebarSection from "./SidebarSection";
@@ -107,13 +108,15 @@ function Group({
     }
   }
 
-  // Placed courses stay in the list (marked "Placed in <term>", non-draggable) rather
-  // than disappearing, so a student can still compare them against the
-  // group's unplaced courses instead of losing track of which ones they'd
-  // already decided on.
+  // Placed courses stay in the group, as compact rows below the cards
+  // ("Completed"/"Planned <term>", non-draggable), rather than disappearing,
+  // so a student can still compare them against the group's unplaced
+  // courses instead of losing track of which ones they'd already decided on.
   const placedByCode = new Map(view.placements.map((p) => [p.code, p]));
   const courses = group.children.length === 0 ? group.courses : [];
-  const columns = Math.min(courses.length, MAX_COLUMNS) || 1;
+  const unplaced = courses.filter((c) => !placedByCode.has(c));
+  const placed = courses.filter((c) => placedByCode.has(c));
+  const columns = Math.min(unplaced.length, MAX_COLUMNS) || 1;
 
   const progress = (
     <ProgressBar
@@ -143,14 +146,14 @@ function Group({
           ))}
         </fieldset>
       )}
-      {courses.length > 0 && (
+      {unplaced.length > 0 && (
         <ul class="available-courses" data-columns={columns}>
-          {courses.map((code) => (
+          {unplaced.map((code) => (
             <AvailableCourseCard
               key={code}
               view={view}
               code={code}
-              placement={placedByCode.get(code) ?? null}
+              placement={null}
               planId={planId}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
@@ -158,6 +161,22 @@ function Group({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+              onLocateCourse={onLocateCourse}
+            />
+          ))}
+        </ul>
+      )}
+      {placed.length > 0 && (
+        <ul class="placed-rows">
+          {placed.map((code) => (
+            <PlacedCourseRow
+              key={code}
+              view={view}
+              code={code}
+              placement={placedByCode.get(code)!}
+              planId={planId}
+              onChanged={onChanged}
+              onAnnounce={onAnnounce}
               onLocateCourse={onLocateCourse}
             />
           ))}

@@ -267,13 +267,14 @@ describe("planner", () => {
     expect(htmlAfter).not.toMatch(/course-card-unplaced[\s\S]{0,40}COMP1100/);
   });
 
-  it("a placed course stays in its group's list, saying where it's placed, and is no longer draggable", async () => {
+  it("a placed course stays in its group's list as a compact row, and is no longer draggable", async () => {
     const id = await createPlan();
     await postJson(`/api/plans/${id}/placements`, { code: "COMP1100", term: 0 });
     const page = await fetch(new URL(`/plan/${id}`, baseUrl));
     const html = await page.text();
-    expect(html).toMatch(/class="course-card course-card-sidebar-placed" draggable="false"(?:(?!<dialog)[\s\S])*?class="course-card-code">COMP1100</);
-    expect(html).toMatch(/COMP1100[\s\S]{0,400}Placed in[\s\S]{0,40}class="course-card-term-link"[^>]*>S1 2027</);
+    expect(html).toMatch(/<li class="placed-row"[^>]*>[\s\S]{0,80}COMP1100/);
+    expect(html).toMatch(/COMP1100[\s\S]{0,600}Planned[\s\S]{0,60}class="course-card-term-link"[^>]*>S1 2027</);
+    expect(html).not.toMatch(/draggable="true"[^>]*>[\s\S]{0,200}course-card-code">COMP1100</);
   });
 
   it("the empty plan shows the hint", async () => {

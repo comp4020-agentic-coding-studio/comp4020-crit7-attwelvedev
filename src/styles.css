@@ -1303,6 +1303,80 @@ fieldset[aria-busy="true"] {
   border-radius: 0.35rem;
 }
 
+/* Courses already on the timeline, as rows below a group's cards. The
+   container query follows the group's own width, not the viewport's: a row
+   fits on one line only when its list does, whatever the sidebar's tier. */
+.placed-rows {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  container-type: inline-size;
+}
+
+.placed-row {
+  display: grid;
+  grid-template-areas: "code title" "status status";
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.15rem 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@container (min-width: 24rem) {
+  .placed-row {
+    grid-template-areas: "code title status";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+
+.placed-row-code {
+  grid-area: code;
+  color: var(--muted);
+}
+
+/* The .course-card-title reset (border on :hover too, or the base button
+   rule draws one), cut to one line: the full title is its `title` and
+   accessible name. */
+.placed-row-title,
+.placed-row-title:hover {
+  border: 0;
+}
+
+.placed-row-title {
+  grid-area: title;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: start;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.placed-row-title:hover,
+.placed-row-title:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Plain inline text, not flex: flex items are blockified, so the status
+   would read "Completed", line break, "S1 2027" instead of one phrase. */
+.placed-row-status {
+  grid-area: status;
+  margin: 0;
+}
+
 .course-card-highlighted {
   outline: 3px solid var(--gold);
   outline-offset: 2px;

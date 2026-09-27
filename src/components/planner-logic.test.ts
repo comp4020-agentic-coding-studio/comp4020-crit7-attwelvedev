@@ -11,6 +11,7 @@ import {
   menuTargets,
   outstandingItems,
   overlayEdges,
+  placedStatus,
   progressSegments,
   unitsLabel,
   unplacedCount,
@@ -330,5 +331,25 @@ describe("verifyBadgeText", () => {
 
   it("counts several items in the plural", () => {
     expect(verifyBadgeText(2)).toBe("Verify on P&C: 2 items");
+  });
+});
+
+describe("placedStatus", () => {
+  const view = buildPlanView(cat, AACOM_2027, {
+    ...emptyPlan(),
+    cutoff: 1,
+    placements: [
+      { code: "COMP1100", term: 0, pinnedGroupId: null },
+      { code: "COMP1110", term: 1, pinnedGroupId: null },
+    ],
+  });
+  const placement = (code: string) => view.placements.find((p) => p.code === code)!;
+
+  it("says a placement before the cutoff is completed, in its term", () => {
+    expect(placedStatus(view, placement("COMP1100"))).toEqual({ word: "Completed", termLabel: "S1 2027" });
+  });
+
+  it("says a placement from the cutoff on is planned, in its term", () => {
+    expect(placedStatus(view, placement("COMP1110"))).toEqual({ word: "Planned", termLabel: "S2 2027" });
   });
 });
