@@ -361,6 +361,48 @@ body:has(.planner) main {
   padding: 0.9rem 0.75rem;
 }
 
+/* The section heading is itself the compact/expand toggle, so it's reset
+   to read as the heading it replaces — not as another bordered button —
+   with a chevron as the only affordance. */
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: 0.3rem;
+}
+
+.section-toggle-icon {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.12s ease;
+}
+
+.section-toggle[aria-expanded="false"] .section-toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.section-toggle:hover .section-toggle-icon {
+  stroke: var(--gold);
+}
+
+.outstanding-count {
+  font-weight: 600;
+  margin: 0.6rem 0 0;
+}
+
 /* The one requirement-group styled to stand out from the rest — everything
    else in the sidebar is "one requirement, scan its own bar"; this is the
    dashboard-style rollup answering "what's actually left" across all of

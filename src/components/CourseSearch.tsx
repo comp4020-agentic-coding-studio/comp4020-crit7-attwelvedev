@@ -4,6 +4,7 @@ import { isError, placeCourse, searchCourses, type SearchResult } from "./api";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
 import { dropTargets } from "./planner-logic";
+import SidebarSection from "./SidebarSection";
 
 interface Props {
   view: PlanView;
@@ -14,6 +15,9 @@ interface Props {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  compact: boolean;
+  onToggleCompact: () => void;
+  onExpand: () => void;
 }
 
 // Same shape the search endpoint uses to decide whether to fetch from P&C.
@@ -156,6 +160,9 @@ export default function CourseSearch({
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
+  compact,
+  onToggleCompact,
+  onExpand,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CourseCardData[]>([]);
@@ -169,6 +176,8 @@ export default function CourseSearch({
     if (!q || pending) return;
     setPending(true);
     setStatus(null);
+    // A new search is a request to see results, so it undoes compacting.
+    onExpand();
     try {
       const result = await searchCourses(q, planId);
       setResults(result.courses);
@@ -181,28 +190,44 @@ export default function CourseSearch({
   }
 
   return (
-    <section aria-label="course search" class="course-search">
-      <h2>Search courses</h2>
-      <form onSubmit={onSubmit}>
-        <label>
-          Course code or title
-          <span class="course-search-field">
-            <svg class="course-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-4-4" />
-            </svg>
-            <input
-              type="text"
-              placeholder="e.g. COMP1100 or Software Engineering"
-              value={query}
-              onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
-            />
-          </span>
-        </label>
-        <button type="submit" disabled={pending}>
-          Search
-        </button>
-      </form>
+    // Compacting keeps the search box — it's the section's whole point and
+    // costs one row — and hides only the results, which are what grow long.
+    <SidebarSection
+      id="search"
+      label="Search courses"
+      class="course-search"
+      compact={compact}
+      onToggle={onToggleCompact}
+      summary={
+        <form onSubmit={onSubmit}>
+          <label>
+            Course code or title
+            <span class="course-search-field">
+              <svg class="course-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-4-4" />
+              </svg>
+              <input
+                type="text"
+                placeholder="e.g. COMP1100 or Software Engineering"
+                value={query}
+                onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
+              />
+            </span>
+          </label>
+          <button type="submit" disabled={pending}>
+            Search
+          </button>
+        </form>
+      }
+      compactSummary={
+        results.length > 0 && (
+          <p class="course-search-status">
+            {results.length} result{results.length === 1 ? "" : "s"} hidden
+          </p>
+        )
+      }
+    >
       {pending && <p class="course-search-status">Searching…</p>}
       {!pending && status && results.length === 0 && <p class="course-search-status">{status.message}</p>}
       {results.length > 0 && (
@@ -224,6 +249,6 @@ export default function CourseSearch({
           ))}
         </ul>
       )}
-    </section>
+    </SidebarSection>
   );
 }
