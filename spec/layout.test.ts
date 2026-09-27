@@ -674,6 +674,96 @@ describe("requirements rail as a drop target", { timeout: 30_000 }, () => {
   });
 });
 
+describe("term drop-target outline", { timeout: 30_000 }, () => {
+  // COMP3630 is hard-blocked from term 0 (see planner-logic.test.ts) but
+  // allowed in a later one, so one drag passes over both kinds of column.
+  const outlined = (page: Page, term: number) =>
+    page
+      .locator(`[data-term="${term}"]`)
+      .evaluate((el) => getComputedStyle(el).outlineStyle !== "none" && getComputedStyle(el).outlineWidth !== "0px");
+  // Playwright delivers each dragover a move behind the pointer (a real
+  // browser keeps firing it while the pointer rests), so settle with a
+  // second small move inside the target.
+  async function hoverInside(page: Page, box: { x: number; y: number; width: number; height: number }) {
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+    await page.mouse.move(box.x + box.width / 2 + 4, box.y + box.height / 2 + 4, { steps: 2 });
+  }
+  // Only meaningful mid-drag, once the timeline has greyed the blocked terms.
+  const openTerm = async (page: Page) =>
+    Number(await page.locator("[data-term]:not(.term-disallowed)").first().getAttribute("data-term"));
+
+  it("outlines the term under a mouse drag, but not a hard-blocked one", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    try {
+      const card = page.locator('[data-drag-code="COMP3630"]').first();
+      await card.scrollIntoViewIfNeeded();
+      await card.hover();
+      await page.mouse.down();
+      const start = (await card.boundingBox())!;
+      await page.mouse.move(start.x + start.width / 2 + 20, start.y + start.height / 2, { steps: 4 }); // starts the drag, so terms grey out
+      const term = await openTerm(page);
+      const open = (await page.locator(`[data-term="${term}"]`).boundingBox())!;
+      await hoverInside(page, open);
+      await expect.poll(() => outlined(page, term)).toBe(true);
+
+      const blocked = (await page.locator('[data-term="0"]').boundingBox())!;
+      await hoverInside(page, blocked);
+      expect(await page.locator('[data-term="0"].term-disallowed').count()).toBe(1);
+      expect(await outlined(page, 0)).toBe(false);
+      expect(await outlined(page, term)).toBe(false);
+      await page.mouse.up();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("outlines the term under a touch drag, but not a hard-blocked one", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto(new URL(`/plan/${id}`, baseUrl).href, { waitUntil: "networkidle" });
+      const cdp = await context.newCDPSession(page);
+      const touch = (type: string, x = 0, y = 0) =>
+        cdp.send("Input.dispatchTouchEvent", {
+          type,
+          touchPoints: type === "touchEnd" ? [] : [{ x, y }],
+        } as never);
+      const centre = async (selector: string) => {
+        const box = (await page.locator(selector).first().boundingBox())!;
+        return [box.x + box.width / 2, box.y + Math.min(box.height / 2, 40)] as const;
+      };
+
+      const card = page.locator('[data-drag-code="COMP3630"]').first();
+      await card.scrollIntoViewIfNeeded();
+      const [cx, cy] = await centre('[data-drag-code="COMP3630"]');
+      await touch("touchStart", cx, cy);
+      await page.waitForTimeout(450); // past touch-drag.ts's HOLD_MS
+      await expect.poll(() => page.locator(".drag-ghost").count()).toBe(1);
+
+      const [bx, by] = await centre('[data-term="0"]');
+      await touch("touchMove", bx, by);
+      await touch("touchMove", bx + 4, by + 4);
+      // The hover class does land on the blocked term — only the outline is withheld.
+      await expect.poll(() => page.locator('[data-term="0"].drag-hover-target').count()).toBe(1);
+      expect(await page.locator('[data-term="0"].term-disallowed').count()).toBe(1);
+      expect(await outlined(page, 0)).toBe(false);
+
+      const term = await openTerm(page);
+      // Narrow timeline: bring the allowed column on-screen mid-drag.
+      await page.locator(`[data-term="${term}"]`).evaluate((el) => el.scrollIntoView({ inline: "center" }));
+      const [ox, oy] = await centre(`[data-term="${term}"]`);
+      await touch("touchMove", ox, oy);
+      await touch("touchMove", ox + 4, oy + 4); // pointermove is frame-aligned; settle as hoverInside does
+      await expect.poll(() => outlined(page, term)).toBe(true);
+      await touch("touchEnd");
+    } finally {
+      await context.close();
+    }
+  });
+});
+
 describe("stacked requirements collapse", { timeout: 30_000 }, () => {
   const phone = { width: 390, height: 844 };
   const reqsCollapsed = { storage: { "panel-reqs": "collapsed" } };

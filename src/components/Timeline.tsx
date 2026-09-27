@@ -38,6 +38,26 @@ export default function Timeline({
   locateRequest,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
+  // The term a mouse drag is currently over — the same gold outline
+  // touch-drag.ts paints for a finger, since the browser's native drag
+  // shows no drop-target feedback of its own. Read off document-level
+  // dragover rather than per-term dragenter/dragleave: dragleave fires on
+  // every move between a term's own children, and Chromium leaves its
+  // relatedTarget null, so there's no telling "left the column" from
+  // "moved onto a card inside it".
+  const [dragOverTerm, setDragOverTerm] = useState<number | null>(null);
+  useEffect(() => {
+    if (draggingCode === null) {
+      setDragOverTerm(null);
+      return;
+    }
+    function onDragOver(event: DragEvent) {
+      const term = (event.target as Element | null)?.closest?.("[data-term]")?.getAttribute("data-term");
+      setDragOverTerm(term == null ? null : Number(term));
+    }
+    document.addEventListener("dragover", onDragOver);
+    return () => document.removeEventListener("dragover", onDragOver);
+  }, [draggingCode]);
 
   useEffect(() => {
     if (!locateRequest) return;
@@ -92,12 +112,13 @@ export default function Timeline({
         {view.terms.map((term) => {
           const target = dragTargets?.find((t) => t.term === term.index) ?? null;
           const greyed = draggingCode !== null && target !== null && !target.allowed;
+          const dragOver = draggingCode !== null && dragOverTerm === term.index;
           return (
             <section
               key={term.index}
               data-term={term.index}
               aria-label={term.label}
-              class={greyed ? "term term-disallowed" : "term"}
+              class={["term", greyed && "term-disallowed", dragOver && "drag-hover-target"].filter(Boolean).join(" ")}
               onDragOver={(event) => {
                 if (draggingCode === null) return;
                 event.preventDefault();

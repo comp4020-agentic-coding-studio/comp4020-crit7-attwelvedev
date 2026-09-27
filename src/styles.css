@@ -941,10 +941,11 @@ dialog::backdrop {
 }
 
 /* The term column (or the requirements aside, to remove) currently under
-   the finger — touch's substitute for the browser's native drag-over
-   outline, which (like the rest of HTML5 drag-and-drop) doesn't exist for
-   a touch-driven drag. */
-.term.drag-hover-target {
+   the drag — set by touch-drag.ts for a finger, and by Timeline's
+   dragover/dragleave for a mouse, since neither gets any drop-target
+   feedback from the browser itself. A hard-blocked term stays greyed
+   instead: outlining it would promise a drop the planner will refuse. */
+.term.drag-hover-target:not(.term-disallowed) {
   outline: 2px solid var(--gold);
   outline-offset: -2px;
 }
