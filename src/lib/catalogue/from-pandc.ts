@@ -43,7 +43,11 @@ export function fromPandc(
     offerings.push({ year: Number(o.year), session: o.semester });
   }
 
-  const requisites = parse({ prerequisites: json.prerequisites, incompatibilities: json.incompatibilities });
+  const parsed = parse({ prerequisites: json.prerequisites, incompatibilities: json.incompatibilities });
+  // The parser pulls every code out of an incompatibility sentence, and
+  // MATH1116's names the course itself ("You may not enrol in MATH1116 if
+  // ... MATH1014") — only here is the course's own code known to drop.
+  const requisites = { ...parsed, incompatible: parsed.incompatible.filter((code) => code !== json.code) };
 
   return {
     code: json.code,

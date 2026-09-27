@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { parseRequisites } from "../domain/requisites";
 import { fromPandc, isUndergrad, type PandcCourseJson } from "./from-pandc";
 
 function loadCourse(code: string): PandcCourseJson {
@@ -39,5 +40,20 @@ describe("fromPandc", () => {
     expect(fromPandc(loadCourse("COMP4500"), ["COMP4500"]).isTdp).toBe(true);
     expect(fromPandc(loadCourse("COMP2100"), ["COMP4500"]).isTdp).toBe(false);
     expect(fromPandc(loadCourse("COMP2100"), null).isTdp).toBe(false);
+  });
+
+  // MATH1116's incompatibility sentence names the course itself ("You may
+  // not enrol in MATH1116 if ... MATH1014"), which the code-extracting
+  // parser read as MATH1116 conflicting with itself — on its card, in
+  // Details, and in the conflict check.
+  it("MATH1116 isn't incompatible with itself, only MATH1014", () => {
+    expect(fromPandc(loadCourse("MATH1116"), null, parseRequisites).requisites.incompatible).toEqual(["MATH1014"]);
+  });
+
+  it("no catalogue course is incompatible with itself", () => {
+    for (const file of globSync("data/2027/courses/*.json")) {
+      const course = fromPandc(JSON.parse(readFileSync(file, "utf-8")), null, parseRequisites);
+      expect(course.requisites.incompatible, course.code).not.toContain(course.code);
+    }
   });
 });
