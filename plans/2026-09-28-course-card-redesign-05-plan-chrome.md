@@ -1,0 +1,393 @@
+# Course card redesign — Phase 05: Plan chrome
+
+- **Date:** 2026-09-28
+- **Status:** Approved
+- **Requirements confirmed by user:** yes — 2026-09-27; E2's scope and
+  placement ruled 2026-09-28 (overview §2.4)
+- **Part of:** `plans/2026-09-28-course-card-redesign-00-overview.md`. Read
+  it first: E2, E6, E7, E9, §2.4 and §3.
+- **Depends on phases:** none. It touches only the title row, term
+  headers, the sidebar's hide button and the Total section, so it can run
+  before or after Phases 01–04.
+
+## 1. Summary
+
+Four clarity fixes around the planner:
+- **E6:** the completed-semesters chevrons, which looked like carousel
+  arrows, become a native "Completed through [▾]" picker.
+- **E7:** past terms say "Completed" in their headers.
+- **E2:** "Hide requirements" sits in an opaque sticky bar, so it no
+  longer floats over the sidebar's content in either layout.
+- **E9:** the "Checks" subheading gets breathing room.
+
+## 2. Requirements (this phase)
+
+### 2.1 Functional
+
+- **E6:** Task 14.
+- **E7:** Task 15.
+- **E2:** Task 16.
+- **E9:** Task 17.
+
+### 2.2 Non-functional
+
+- The picker is at least 44px tall.
+- The title row still fits on one row at 1920 (CW4).
+- The page doesn't overflow at either viewport.
+- Axe clean.
+
+### 2.3 Out of scope for this phase
+
+- Help copy (Task 19). Until then, `/help/` still describes the chevrons.
+  The Help tests at `spec/layout.test.ts:1422` stay green because Help is
+  unchanged; Task 19 updates both together.
+
+### 2.4 Assumptions
+
+- See overview §2.4.
+- **E6's last option** is labelled "All semesters" (cutoff 8).
+- **Picker width:** Chromium sizes a `<select>` to its widest option, so
+  changing its value doesn't move the controls after it. Task 14's test
+  checks this rather than assuming it.
+
+## 3. Existing code context (verified 2026-09-28)
+
+**`src/components/Planner.tsx`:**
+
+```tsx
+async function moveCutoff(delta: 1 | -1) {
+  const next = view.plan.cutoff + delta;
+  if (next < 0 || next > 8) return;
+  setCutoffPending(true);
+  try {
+    const result = await setCutoff(view.plan.id, next);
+    if (isError(result)) setAnnouncement(result.error);
+    else setView(result);
+  } finally {
+    setCutoffPending(false);
+  }
+}
+// …
+const readout = completedReadout(view.plan.cutoff, view.terms);
+// …
+<div class="plan-actions">
+  <div class="completed-control" aria-busy={cutoffPending}>
+    <span class="completed-readout" aria-hidden="true">{readout.short}</span>
+    <span class="visually-hidden">{readout.full}</span>
+    <button type="button" class="completed-step" aria-label="One fewer semester completed"
+      disabled={readOnly || cutoffPending || view.plan.cutoff <= 0} onClick={() => moveCutoff(-1)}>…‹ svg…</button>
+    <button type="button" class="completed-step" aria-label="One more semester completed"
+      disabled={readOnly || cutoffPending || view.plan.cutoff >= 8} onClick={() => moveCutoff(1)}>…› svg…</button>
+  </div>
+  <MoreOptions …>…</MoreOptions>
+</div>
+```
+
+**`src/components/planner-logic.ts`:** `completedReadout(cutoff, terms) →
+{ short; full }`. `full` for cutoff 2 is "Completed through S2 2027 —
+planned from S1 2028 onward. The gold line on the timeline marks that
+boundary."
+
+**`src/components/api.ts`:** `setCutoff(planId: string, cutoff: number):
+Promise<ApiResult>`.
+
+**`src/components/Timeline.tsx`**, term header: `<h2>{term.label}</h2><p
+class="term-units">{term.units}/{NORMAL_TERM_UNITS} units</p>`. Phase 03
+(Task 10) may already have added `div.term-bar` after it. Either order
+works, because this phase only adds inside `p.term-units`.
+
+**`src/components/Sidebar.tsx`:**
+- `<aside id="requirements" …>` holds `<button type="button"
+  class="reqs-hide" ref={hideRef} aria-controls="requirements-content"
+  aria-expanded="true" onClick=…><svg class="section-toggle-icon"
+  …/>Hide requirements</button>`, then `button.reqs-rail`, then
+  `ul.requirements-scroll#requirements-content`;
+- the Total section renders `<section aria-label="program checks"><h3>Checks</h3><ul
+  class="checks-list">…`.
+
+**CSS (`src/styles.css`):**
+- lines 476–488:
+  ```css
+  .reqs-hide, .reqs-rail { display: none; }
+  .reqs-hide { align-self: flex-end; position: sticky; top: 0; z-index: 1; margin-block-end: 0.5rem; min-height: 2.75rem; }
+  ```
+- `.completed-control` (inline-flex, gap `0.25rem`), `.completed-readout`
+  (0.9rem, 600, ink) and `.completed-step` (2.75rem square), lines 537–557;
+- side-by-side collapsed block (≈1686): `.reqs-hide { display:
+  inline-flex; align-items: center; gap: 0.35rem; }`, and
+  `:root[data-reqs="collapsed"] .requirements-scroll,
+  :root[data-reqs="collapsed"] .reqs-hide { display: none; }`;
+- stacked block (≈1720): `.reqs-hide { display: flex; align-items:
+  center; gap: 0.35rem; width: fit-content; margin-inline-start: auto; }`,
+  `.reqs-hide .section-toggle-icon { transform: rotate(-90deg); }`, and
+  the same collapsed hide rule;
+- the aside is the vertical scroller in both layouts: `overflow-y: auto`
+  in the side-by-side tier block (≈1403) and in the fitted stacked block
+  (≈1515);
+- headings: `h1–h6 { margin: 0 0 0.5rem; }`.
+
+**Tests this phase supersedes:**
+- `spec/planner.test.ts:284`, "the completed semesters have keyboard
+  buttons" (the two `aria-label`s).
+- `spec/layout.test.ts` `describe("completed-semesters row")`, tests at
+  1349, 1371 and 1383. They use `.completed-readout`, the chevron names
+  `fewer`/`more`, and clicks.
+- `spec/layout.test.ts` `describe("plan title row")`:
+  - `rowRects` reads `readout: .completed-readout`;
+  - 1729 compares readout and h1 centres;
+  - 1778 compares More options and readout centres;
+  - 1811 is "stepping the completed semesters doesn't move the buttons",
+    and clicks "One more semester completed".
+- `spec/layout.test.ts:1422`, "Help describes the chevrons by name…".
+  Task 19 replaces it, not this phase.
+- `.reqs-hide` tests (530–590, 846–955, 1298) select `button.reqs-hide`
+  and check its focus/visibility. Keep that class on the button, so they
+  stay valid.
+
+### Interfaces from earlier phases (exact)
+
+None required. If Phase 03 has run, `div.term-bar` follows `p.term-units`.
+Nothing here depends on it.
+
+## 4. Approach
+
+- **Picker:** a real `<label>` wraps the text and the `<select>`, so its
+  accessible name is "Completed through". `aria-describedby` points at the
+  existing full sentence. One `changeCutoff(next)` replaces `moveCutoff`.
+- **Hide bar:** wrap the button in `div.reqs-hide-bar`. The bar is the
+  sticky, opaque element (paper background, full aside width), and the
+  button inside is static. Every `display` rule that showed or hid
+  `.reqs-hide` moves to `.reqs-hide-bar`. The bar's height is the
+  button's (2.75rem) plus the 0.5rem the button's margin used, so it
+  takes no extra height.
+
+## 5. Task breakdown
+
+### Task 14: "Completed through" picker replaces the chevrons
+
+- [ ] **Description:**
+  - Add `cutoffOptions`.
+  - Replace the readout span and both chevron buttons with a labelled
+    `<select>`, and `moveCutoff` with `changeCutoff`.
+  - Update the superseded tests.
+- **Files touched:**
+  - `src/components/planner-logic.ts`
+  - `src/components/planner-logic.test.ts`
+  - `src/components/Planner.tsx`
+  - `src/styles.css`
+  - `spec/planner.test.ts`
+  - `spec/layout.test.ts`
+- **Tests first (red):**
+  - **Unit, `describe("cutoffOptions")`,** with 8 terms labelled "S1
+    2027"…"S2 2030":
+    - it returns 9 options;
+    - `[0]` is `{ value: 0, label: "Nothing yet" }`;
+    - `[1]` is `{ value: 1, label: "S1 2027" }`;
+    - `[7]` is `{ value: 7, label: "S1 2030" }`;
+    - `[8]` is `{ value: 8, label: "All semesters" }`.
+    - With 3 terms, the values are 0–3, and 3 is "All semesters".
+  - **`spec/planner.test.ts:284`,** renamed "the completed semesters have
+    a picker":
+    - the fresh plan's HTML matches `/<div class="completed-control"[^>]*>[\s\S]*?<label[^>]*>Completed
+      through<\/label>[\s\S]*?<select/`;
+    - it contains `>Nothing yet</option>` and `>All semesters</option>`;
+    - it doesn't contain `One more semester completed`.
+  - **`describe("completed-semesters row")`:**
+    - `picker = page.getByLabel("Completed through")`.
+    - **1349,** renamed "shows the picker and More options on one row": on
+      the example, `picker` has `inputValue()` "2" and is disabled, its
+      box height is ≥ 44, and More options' centre is within 4px of the
+      picker's. There's no overflow.
+    - **1371:** the same centre check on an editable plan.
+    - **1383,** renamed "choosing a later semester completes it": on an
+      editable plan, `picker.selectOption("3")` makes `.planner`
+      `data-cutoff` poll to 3, and `picker` is enabled.
+    - **New:** `picker`'s `aria-describedby` element text is `readout.full`
+      for the example ("Completed through S2 2027 — planned from S1 2028
+      onward. The gold line…").
+  - **`describe("plan title row")`:**
+    - `rowRects.readout` becomes `box(document.querySelector(".completed-control
+      select"))`, and 1729 and 1778 are unchanged otherwise;
+    - **1811,** renamed "at %i×%i changing the completed semesters doesn't
+      move More options": record `.more-options-toggle` and the select's
+      boxes, `selectOption("5")`, poll `data-cutoff` to 5, and assert both
+      boxes moved ≤ 1px.
+- **Implementation (green):**
+  - `planner-logic.ts`: `export function cutoffOptions(terms: readonly {
+    label: string }[]): { value: number; label: string }[]`.
+  - `Planner.tsx`:
+    - `async function changeCutoff(next: number)` is the same body as
+      `moveCutoff` without the delta, and keeps the `0..terms.length`
+      guard;
+    - `const readoutId = useId();` (import from `preact/hooks`);
+    - render the following. The description span sits outside the
+      `<label>`, so the picker's accessible name stays exactly "Completed
+      through":
+      ```tsx
+      <div class="completed-control" aria-busy={cutoffPending}>
+        <label class="completed-label" for={pickerId}>Completed through</label>
+        <select id={pickerId} value={String(view.plan.cutoff)} disabled={readOnly || cutoffPending}
+          aria-describedby={readoutId}
+          onChange={(event) => void changeCutoff(Number((event.target as HTMLSelectElement).value))}>
+          {cutoffOptions(view.terms).map((o) => <option key={o.value} value={String(o.value)}>{o.label}</option>)}
+        </select>
+        <span id={readoutId} class="visually-hidden">{readout.full}</span>
+      </div>
+      ```
+      with `const pickerId = useId();` beside `readoutId`.
+    - keep the one comment explaining why the full sentence exists.
+  - `styles.css`:
+    - remove `.completed-readout` and `.completed-step`;
+    - `.completed-control` stays inline-flex and gains `gap: 0.5rem`;
+    - `.completed-label { font-size: 0.9rem; font-weight: 600; color:
+      var(--ink); }`;
+    - `.completed-control select { min-height: 2.75rem; font-size:
+      0.9rem; font-weight: 600; }`;
+    - `.completed-control[aria-busy="true"]` keeps its existing dimming
+      rule (it's a pending state, not a disabled look).
+  - The `completedReadout().short` field is still used by nothing
+    visible. Keep it, because `planner-logic.test.ts` covers it and
+    removing it isn't part of E6.
+- **Refactor:** grep `src/` and `spec/` for `completed-step`,
+  `completed-readout` and "One more semester completed". The only
+  remaining hits may be in `src/pages/help.astro` and the Help test,
+  which are left for Task 19.
+- **Acceptance criteria:**
+  - Tests pass.
+  - `pnpm check` is green.
+  - A screenshot of the title row at 1920×1080 and 390×844.
+- **Depends on:** none.
+
+### Task 15: "Completed" in completed terms' headers
+
+- [ ] **Description:** each term whose index is below `view.plan.cutoff`
+  shows a "Completed" label in its units line.
+- **Files touched:**
+  - `src/components/Timeline.tsx`
+  - `src/styles.css`
+  - `spec/layout.test.ts`
+- **Tests first (red):** a new `describe("completed terms")`:
+  - on `withPlan`, the `.term-completed` count is 2, inside
+    `[data-term="0"]` and `[data-term="1"]`, with text "Completed";
+  - `[data-term="2"] .term-completed` has count 0;
+  - on a fresh plan (cutoff 0) the count is 0, and after
+    `getByLabel("Completed through").selectOption("1")` it polls to 1.
+    If Task 14 hasn't run, use the "One more semester completed" button
+    instead.
+- **Implementation (green):**
+  - `Timeline.tsx`: inside `p.term-units`, after the units text: `{term.index <
+    view.plan.cutoff && <span class="term-completed">Completed</span>}`.
+  - `styles.css`:
+    - `.term-units { display: flex; align-items: center; gap: 0.5rem; }`
+      (keep its margin);
+    - `.term-completed { font-size: 0.75rem; font-weight: 600; color:
+      var(--moss); background: var(--moss-tint); border-radius: 0.35rem;
+      padding: 0.05rem 0.4rem; }`.
+- **Refactor:** none.
+- **Acceptance criteria:**
+  - Tests pass.
+  - `pnpm check` is green.
+  - The header height is unchanged: `[data-term="0"] h2` to the first
+    card top is within 2px of `[data-term="2"]`'s.
+- **Depends on:** none.
+
+### Task 16: Opaque sticky bar for "Hide requirements" in both layouts
+
+- [ ] **Description:**
+  - Wrap `button.reqs-hide` in `div.reqs-hide-bar`.
+  - Move stickiness, the background and every show/hide `display` rule
+    from `.reqs-hide` to the bar.
+- **Files touched:**
+  - `src/components/Sidebar.tsx`
+  - `src/styles.css`
+  - `spec/layout.test.ts`
+- **Tests first (red):** a new `describe("hide requirements bar")`, on
+  `withPlan` at 1920×1080 and at 390×844:
+  1. `#requirements.scrollTop` is set to 600 (the stacked aside also
+     scrolls vertically), then wait a frame.
+  2. Take the point 8px in from `#requirements`' left edge, at the
+     vertical centre of `button.reqs-hide`. The button exists before and
+     after the task, so red fails for the right reason.
+     `document.elementFromPoint` there is not inside a `.requirement-group`,
+     and is inside `.reqs-hide-bar`.
+  3. Red on today's build: that point is a group, because nothing opaque
+     spans the button's row.
+  4. The bar's computed `background-color` is `rgb(245, 246, 248)`
+     (`--paper`), and its width is within 1px of `#requirements`'
+     `clientWidth`.
+  5. At `scrollTop` 0, the first `.requirement-group`'s top minus
+     `#requirements`' top is ≤ 53px. That's the button's 44px plus the
+     old 8px margin, plus 1px.
+  6. The existing collapse tests (`describe("requirements sidebar
+     collapse")` and `describe("stacked requirements collapse")`) pass
+     unchanged.
+- **Implementation (green):**
+  - `Sidebar.tsx`: `<div class="reqs-hide-bar"><button type="button"
+    class="reqs-hide" …unchanged…>…</button></div>`.
+  - `styles.css`:
+    - line 476: `.reqs-hide-bar, .reqs-rail { display: none; }`;
+    - replace the `.reqs-hide` block at 481 with `.reqs-hide-bar {
+      position: sticky; top: 0; z-index: 1; justify-content: flex-end;
+      padding-block-end: 0.5rem; background: var(--paper); }` and
+      `.reqs-hide { min-height: 2.75rem; }`;
+    - side-by-side block: `.reqs-hide-bar { display: flex; }` and
+      `.reqs-hide { display: inline-flex; align-items: center; gap:
+      0.35rem; }`;
+    - stacked block: `.reqs-hide-bar { display: flex; }` and `.reqs-hide {
+      display: flex; align-items: center; gap: 0.35rem; }`, dropping
+      `width: fit-content; margin-inline-start: auto` (the bar's
+      `justify-content` does it);
+    - both collapsed rules: `.reqs-hide` becomes `.reqs-hide-bar`.
+    - Update the comments that say the collapse controls are shown by the
+      collapsed blocks.
+- **Refactor:** none.
+- **Acceptance criteria:**
+  - Tests pass.
+  - Every existing `.reqs-hide` test passes.
+  - `pnpm check` is green.
+  - Screenshots of the scrolled sidebar at both viewports, with no card
+    showing through beside the button.
+- **Depends on:** none.
+
+### Task 17: Space above the "Checks" subheading
+
+- [ ] **Description:** give the Total section's "Checks" `h3` top margin.
+- **Files touched:**
+  - `src/styles.css`
+  - `spec/layout.test.ts`
+- **Tests first (red):** a new `it` in `describe("layout")` (top of
+  `spec/layout.test.ts`), "the Checks subheading has room above it". On
+  `withPlan` at 1920×1080, `section[aria-label="program checks"] h3`'s
+  top minus the Total section's `.progress-bar-text` bottom is ≥ 12px.
+  Red today: ≈ 0 (the `h3` has no top margin).
+- **Implementation (green):** `section[aria-label="program checks"] > h3 {
+  margin-block-start: 0.9rem; }`.
+- **Refactor:** none.
+- **Acceptance criteria:**
+  - The test passes.
+  - `pnpm check` is green.
+- **Depends on:** none.
+
+## 6. Phase Definition of Done
+
+- [ ] Tasks 14–17 complete, their tests passing
+- [ ] `pnpm exec vitest run --project unit` passes
+- [ ] `pnpm check` passes
+- [ ] Screenshots at 1920×1080 and 390×844: title row, a completed term
+      header, the scrolled sidebar with the hide bar, and the Total
+      section
+- [ ] Tick Phase 05 in overview §5 and commit
+
+## 7. Requirements coverage (this phase)
+
+| Requirement | Covered by |
+| --- | --- |
+| E6 | Task 14 |
+| E7 | Task 15 |
+| E2 | Task 16 |
+| E9 | Task 17 |
+| CR25 | Task 14 (superseded cutoff tests) |
+
+## 8. Risks / open questions
+
+None.
