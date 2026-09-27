@@ -29,7 +29,7 @@ lifts above the bar while it's showing. The phase ends with two commits.
 - CW16, CW18, CW19, CW20 and CW21 in full.
 - CW17: expanding to 50%. Restoring a saved 30 or 70 is Phase 03, since the
   split doesn't exist yet.
-- CW22 in full (Task 4).
+- CW22 in full (Task 5).
 - FR15 is replaced; FR29's collapsed clause ("all of it but the collapsed
   bar").
 
@@ -118,7 +118,7 @@ touch drop target by construction. From `src/components/touch-drag.ts:58`:
   - after `.planner-layout`: `{removed && (<div class="undo-toast"
     role="status"> … </div>)}`
 
-**`src/components/ReqsResizeHandle.tsx`**, current, to be changed by Task 4:
+**`src/components/ReqsResizeHandle.tsx`**, current, to be changed by Task 5:
 
 ```tsx
 import { useEffect, useRef, useState } from "preact/hooks";
@@ -244,7 +244,7 @@ supersede (FR15 is replaced):
   either way".
 - `describe("requirements resize handle")` (Phase 05) covers the fit cap:
   `aria-valuemax` 2 at 1280×800 and 1 at 1100×800. It's the safety net for
-  Task 4's refactor.
+  Task 5's refactor.
 - Example-plan totals: "48 completed, 144 planned of 192", so completed is
   25% and planned 75%.
 
@@ -274,7 +274,7 @@ stacked, to `width`/`inset-inline-start`.
 works at every height (CW21). One more block, wrapped in `@media
 (min-height: 30rem)`, lets the fitted timeline grow into the freed height.
 
-**The toast (Task 4).** A container query only matches descendants of the
+**The toast (Task 5).** A container query only matches descendants of the
 container, and `.undo-toast` has to live outside `.planner-layout` (a
 container would become the containing block for the fixed toast). So CSS
 can't know the layout is stacked. `Planner` takes over the `--reqs-fit`
@@ -283,7 +283,7 @@ observer (`useReqsFit`), passes `fit` down to the handle, and adds
 
 ## 5. Task breakdown
 
-### Task 3: Let the stacked requirements collapse to a bar along the bottom of the planner
+### Task 4: Let the stacked requirements collapse to a bar along the bottom of the planner
 
 - [ ] **Description:** show "Hide requirements" in stacked, draw the
   collapsed rail as a bottom bar, move the fill to CSS variables, and
@@ -482,7 +482,7 @@ observer (`useReqsFit`), passes `fit` down to the handle, and adds
   The user accepts explicitly.
 - **Depends on:** none.
 
-### Task 4: Keep the undo toast above the stacked requirements bar
+### Task 5: Keep the undo toast above the stacked requirements bar
 
 - [ ] **Description:** move the `--reqs-fit` observer into a `useReqsFit`
   hook owned by `Planner`, pass `fit` to the handle, and raise the toast
@@ -555,34 +555,34 @@ observer (`useReqsFit`), passes `fit` down to the handle, and adds
     bar".
   - Log the container-query finding to `PROCESS_LOG.md` if it qualifies
     (overview §3), citing this commit.
-- **Depends on:** Task 3 (the bar and `--reqs-bar-h`).
+- **Depends on:** Task 4 (the bar and `--reqs-bar-h`).
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 3–4 complete, with their tests passing
+- [ ] Tasks 4–5 complete, with their tests passing
 - [ ] `pnpm test:unit` passes
 - [ ] `pnpm check` passes
 - [ ] Two commits, one per task
-- [ ] Task 3's human review accepted by the user
+- [ ] Task 4's human review accepted by the user
 - [ ] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
 | Requirement | Covered by |
 | --- | --- |
-| CW15 (button) | Task 3: test 1 |
-| CW16 | Task 3: tests 1 and 3 |
-| CW17 (to 50) | Task 3: test 1 |
-| CW18 | Task 3: test 4 |
-| CW19 | Task 3: the replaced test, tests 1–2 |
-| CW20 | Task 3: test 1 |
-| CW21 | Task 3: test 5 |
-| CW22 | Task 4: tests 1–2 |
-| FR15 (replaced) | Task 3: the replaced test |
-| FR29 (collapsed clause) | Task 3: test 1 |
-| N1 | Task 3: fit rows, test 1 |
-| N2 | Task 3: test 1 |
-| N3 (collapsed) | Task 3: test 6 |
+| CW15 (button) | Task 4: test 1 |
+| CW16 | Task 4: tests 1 and 3 |
+| CW17 (to 50) | Task 4: test 1 |
+| CW18 | Task 4: test 4 |
+| CW19 | Task 4: the replaced test, tests 1–2 |
+| CW20 | Task 4: test 1 |
+| CW21 | Task 4: test 5 |
+| CW22 | Task 5: tests 1–2 |
+| FR15 (replaced) | Task 4: the replaced test |
+| FR29 (collapsed clause) | Task 4: test 1 |
+| N1 | Task 4: fit rows, test 1 |
+| N2 | Task 4: test 1 |
+| N3 (collapsed) | Task 4: test 6 |
 
 ## 8. Risks / open questions
 

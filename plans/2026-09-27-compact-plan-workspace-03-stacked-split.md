@@ -168,7 +168,7 @@ from earlier phases" for its Props):
 **`src/styles.css`**
 
 The fit group's stacked part, inside `@media (min-height: 30rem)`. Its
-timeline rule changes in Task 6 (FR29 amended):
+timeline rule changes in Task 7 (FR29 amended):
 
 ```css
   @container planner (width < 49.5rem) {
@@ -232,7 +232,7 @@ Phase 02 stacked blocks.
 
 ### Interfaces from earlier phases (exact)
 
-**From Task 3 (Phase 02)**
+**From Task 4 (Phase 02)**
 
 - In stacked, `:root[data-reqs="collapsed"]` shows `.reqs-rail` as a bar
   along the bottom, with `min-height: var(--reqs-bar-h)`, and hides
@@ -246,7 +246,7 @@ Phase 02 stacked blocks.
 - `planWithPlacement(code: string): Promise<string>` is at module scope in
   `spec/layout.test.ts`.
 
-**From Task 4 (Phase 02)**
+**From Task 5 (Phase 02)**
 
 - `src/components/reqs-fit.ts`: `export function useReqsFit(panesRef:
   RefObject<HTMLElement>): 0 | ReqsColumns;` It starts at 3, then reads
@@ -293,12 +293,12 @@ position 3). It's `@media (min-height: 30rem) { @container planner (width <
 - sets `:root[data-split="30"|"70"] .planner-timeline-area { flex-basis }`
 
 The fit group's stacked timeline rule becomes `flex: 0 0 50%; max-height:
-none` (FR29 amended). Task 3's collapsed rule comes later with equal
+none` (FR29 amended). Task 4's collapsed rule comes later with equal
 specificity, so Collapsed still wins over any split.
 
 ## 5. Task breakdown
 
-### Task 5: Pure snapping logic and stored state for the stacked split
+### Task 6: Pure snapping logic and stored state for the stacked split
 
 - [ ] **Description:** add `nearestIndex` (with `snapSize` refactored onto
   it), `split-resize.ts`, the split storage in `panel-state.ts` and the
@@ -406,10 +406,10 @@ specificity, so Collapsed still wins over any split.
   - `pnpm test:unit` is green, including every pre-existing
     `reqs-resize.test.ts` case, unchanged.
   - `astro check` is clean.
-  - No commit on its own: this commits with Task 6.
+  - No commit on its own: this commits with Task 7.
 - **Depends on:** none (Phase 02 done).
 
-### Task 6: Turn the resize handle horizontal in the stacked layout to snap the timeline/requirements split
+### Task 7: Turn the resize handle horizontal in the stacked layout to snap the timeline/requirements split
 
 - [ ] **Description:** teach `ReqsResizeHandle` the stacked axis, give
   `Planner` the split state, add the stacked CSS, and replace the
@@ -619,7 +619,7 @@ specificity, so Collapsed still wins over any split.
   - `pnpm check` passes.
   - Render check at 1920×1080, 900×800 and 390×844, and at 390×844 at each
     stop.
-  - Commit (Tasks 5 and 6 together): "Let the stacked timeline/requirements
+  - Commit (Tasks 6 and 7 together): "Let the stacked timeline/requirements
     split snap between 30, 50, 70 percent and collapsed".
 - **Human review:** screenshots (or a recording) at 390×844:
   - the handle at rest, hovered and focused
@@ -632,15 +632,15 @@ specificity, so Collapsed still wins over any split.
   - dragging into Collapsed and back out feels natural
 
   The user accepts explicitly.
-- **Depends on:** Task 5, and Phase 02 (Tasks 3–4).
+- **Depends on:** Task 6, and Phase 02 (Tasks 4–5).
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 5–6 complete, with their tests passing
+- [ ] Tasks 6–7 complete, with their tests passing
 - [ ] `pnpm test:unit` passes
 - [ ] `pnpm check` passes
-- [ ] One commit covering Tasks 5 and 6
-- [ ] Task 6's human review accepted by the user
+- [ ] One commit covering Tasks 6 and 7
+- [ ] Task 7's human review accepted by the user
 - [ ] Feature DoD (overview §6) walked through with `agent-browser`
 - [ ] Tick Phase 03 in overview §5 and commit
 
@@ -648,18 +648,18 @@ specificity, so Collapsed still wins over any split.
 
 | Requirement | Covered by |
 | --- | --- |
-| CW10 | Task 6: test 1 |
-| CW11 | Task 5: `stepSplit`/`splitLabel`; Task 6: tests 1–2 |
-| CW12 | Task 5: `snapSplit`; Task 6: test 3 |
-| CW13 | Task 5: panel-state tests, drift guard; Task 6: test 4 |
-| CW14 | Task 6: test 1 (700×400) |
-| CW15 (Collapsed stop) | Task 6: tests 2–3 |
-| CW17 (restores 30/70) | Task 6: test 5 |
-| FR29 (exact share) | Task 6: tests 2–5 |
-| N1 | Task 6: tests 2 and 8 |
-| N2 | Task 6: test 1 (hit area) |
-| N3 | Task 6: test 7 |
-| N6 | Task 6: human review |
+| CW10 | Task 7: test 1 |
+| CW11 | Task 6: `stepSplit`/`splitLabel`; Task 7: tests 1–2 |
+| CW12 | Task 6: `snapSplit`; Task 7: test 3 |
+| CW13 | Task 6: panel-state tests, drift guard; Task 7: test 4 |
+| CW14 | Task 7: test 1 (700×400) |
+| CW15 (Collapsed stop) | Task 7: tests 2–3 |
+| CW17 (restores 30/70) | Task 7: test 5 |
+| FR29 (exact share) | Task 7: tests 2–5 |
+| N1 | Task 7: tests 2 and 8 |
+| N2 | Task 7: test 1 (hit area) |
+| N3 | Task 7: test 7 |
+| N6 | Task 7: human review |
 
 ## 8. Risks / open questions
 

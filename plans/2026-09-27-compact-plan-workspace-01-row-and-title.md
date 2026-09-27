@@ -1,114 +1,156 @@
-# Compact plan workspace — Phase 01: Completed-semesters row and compact title
+# Compact plan workspace — Phase 01: Completed-semesters control and the title row
 
 - **Date:** 2026-09-27
 - **Status:** Approved
-- **Requirements confirmed by user:** yes — 2026-09-27
+- **Requirements confirmed by user:** yes — 2026-09-27. The amendment after
+  Task 1 was confirmed 2026-09-27.
+- **Amended:** 2026-09-27, after Task 1 (`ab8195c`). The user moved the
+  controls into the title row and put the prerequisite toggle and "Copy plan
+  link" behind a ⋯ "More options" panel. Task 2 is new (the panel). The old
+  Task 2 (the title and badge) is rewritten as Task 3, which also moves the
+  controls up.
 - **Part of:** `plans/2026-09-27-compact-plan-workspace-00-overview.md`. Read
   these sections first:
-  - §2.1 A, B and E (FR5)
+  - §2.1 A, B and E (FR5), including amended CW4/CW6 and new CW23–CW24
   - §2.2 N1–N4 and N6
-  - §2.4, the CW5 README ruling and the kept `.cutoff-controls` class
+  - §2.4, from "README reworded" through "Planner renders the title row"
   - §3
+  - §4.1 (the DOM after Task 3)
 - **Depends on phases:** none.
 
 ## 1. Summary
 
-The timeline's three control lines become one row, whose label is the short
-"Completed through …" readout. The word "cutoff" leaves every user-facing
-page. The plan page's title shrinks, and the example note becomes a badge
-beside it. The phase ends with two commits, each human-reviewed.
+Task 1 (done) merged the cutoff buttons and readout into one
+"Completed through … ‹ ›" control, and took "cutoff" out of every
+user-facing page. Task 2 moves "Show prerequisite links" and "Copy plan
+link" into a ⋯ "More options" disclosure panel beside the chevrons. Task 3
+moves the Planner's controls up into the plan page's title row, next to a
+1.4rem `h1` and the example badge, so nothing sits above the timeline. The
+phase ends with three commits, each human-reviewed.
 
 ## 2. Requirements (this phase)
 
 ### 2.1 Functional
 
-- CW1–CW6 in full (Task 1).
-- CW7–CW9 in full (Task 2).
+- CW1–CW3 and CW5 in full (Task 1, done).
+- CW6 as amended: the names and the gold line (Task 1, done), "More
+  options" (Task 2), and the position beside the title (Task 3).
+- CW23 in full (Task 2).
+- CW4 as amended, CW7–CW9 and CW24 in full (Task 3).
 - FR5 as amended: the 1920/900/390 renders change only as A and B describe
-  (both tasks' human reviews).
+  (the human reviews of all three tasks).
 
 ### 2.2 Non-functional
 
-- N1: no overflow either way at 1920×1080 and 390×844 with the new row.
-- N2: each chevron is at least 44×44px.
-- N3: axe is clean at 1920×1080 with the new row and title.
-- N4: the invariants stay green.
+- N1: no overflow either way at 1920×1080 and 390×844, with the ⋯ panel
+  open and closed and the nav shown and hidden.
+- N2: each chevron and the ⋯ button is at least 44×44px.
+- N3: axe is clean at 1920×1080 with the ⋯ panel open (Task 2), and with
+  the new title row (Task 3).
+- N4: the invariants stay green, including one `h1` per page (Task 3).
 - N6: the human reviews below.
 
 ### 2.3 Out of scope for this phase
 
 - Anything in the requirements pane or the split: Phases 02 and 03.
 - Renaming internal identifiers (overview §2.3).
+- Arrow-key navigation in the ⋯ panel, and any change to `PlaceInMenu`.
+- "Plan not found" (it keeps its own `h1` in `[id].astro`).
 
 ### 2.4 Assumptions
 
 See overview §2.4. Phase-specific assumptions:
 
 - The chevrons use the existing `section-toggle-icon` SVG class, so they
-  don't pick up the `nav-toggle-icon` rotation below 1100px.
-- The short readout carries `aria-hidden="true"`, so screen readers read only
-  the hidden full sentence (CW3), not both.
+  don't pick up the `nav-toggle-icon` rotation below 1100px (Task 1).
+- The short readout carries `aria-hidden="true"`, so screen readers read
+  only the hidden full sentence (CW3) and not both (Task 1).
+- The ⋯ panel shares Planner's existing `openMenuCode` state under a
+  sentinel key, `"more-options"`, which can't collide with a course code.
+  Course codes are four capital letters and four digits.
+- The existing test "on %s at %i×%i the tab shares the title's row and
+  covers nothing" (in `describe("site nav in the top bar")`) already runs
+  on `/plan/example` at 390×844 and 900×800 with the nav hidden. It skips
+  any element containing the `h1`, so it keeps covering CW9 once the `h1`
+  is inside `.plan-title`.
 
-## 3. Existing code context (verified 2026-09-27, at `12059d6`)
+## 3. Existing code context (verified 2026-09-27, at `ab8195c`)
 
-**`src/components/Planner.tsx`, the readout (lines 145–150)**
+**`src/components/Planner.tsx`** (after Task 1)
 
-```tsx
-  const cutoff = view.plan.cutoff;
-  const cutoffReadout =
-    cutoff <= 0
-      ? "Nothing on the timeline counts as completed yet."
-      : cutoff >= view.terms.length
-        ? "Every semester on the timeline counts as completed."
-        : `Completed through ${view.terms[cutoff - 1].label} — planned from ${view.terms[cutoff].label} onward.`;
-```
+- `interface Props { view: PlanView; }`, and
+  `export default function Planner({ view: initialView }: Props)`.
+- State used here:
+  - `const [showPrereqLinks, setShowPrereqLinks] = useState(false);`
+  - `const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);`
+  - `const [cutoffPending, setCutoffPending] = useState(false);`
+  - `const [linkCopied, setLinkCopied] = useState(false);`
+  - `const readOnly = view.plan.readOnly;`
+- `moveCutoff(delta: 1 | -1)` and `copyPlanLink()` exist and stay
+  unchanged. `copyPlanLink` sets `linkCopied` for 2s and announces
+  "Plan link copied to clipboard".
+- `const readout = completedReadout(view.plan.cutoff, view.terms);`
+- `Timeline` and `Sidebar` both get
+  `onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}`,
+  and each `PlaceInMenu` is `open={openMenuCode === <its code>}`. So one
+  shared value already means one open menu at a time.
+- The returned tree, abridged:
 
-**The controls, inside `div.planner-timeline-area` before `<Timeline>`**
-
-`moveCutoff(delta: 1 | -1)` and `copyPlanLink()` exist and are unchanged.
-
-```tsx
-            <div class="cutoff-controls" aria-busy={cutoffPending}>
-              <button
-                type="button"
-                disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
-                onClick={() => moveCutoff(-1)}
-              >
-                Move cutoff earlier
-              </button>
-              <button
-                type="button"
-                disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
-                onClick={() => moveCutoff(1)}
-              >
-                Move cutoff later
-              </button>
-              <label class="show-links-toggle">
-                <input
-                  type="checkbox"
-                  checked={showPrereqLinks}
-                  onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
-                />
-                Show prerequisite links
-              </label>
-              {!readOnly && (
-                <button type="button" onClick={copyPlanLink}>
-                  {linkCopied ? "Copied!" : "Copy plan link"}
-                </button>
-              )}
+  ```tsx
+  <div class="planner" data-cutoff={view.plan.cutoff} ref={plannerRef}>
+    <p aria-live="polite" class="visually-hidden">{announcement}</p>
+    {/* Size container for the panes; … */}
+    <div class="planner-layout">
+      <div class="planner-panes">
+        <div class="planner-timeline-area">
+          <div class="cutoff-controls">
+            <div class="completed-control" aria-busy={cutoffPending}>
+              <span class="completed-readout" aria-hidden="true">{readout.short}</span>
+              <span class="visually-hidden">{readout.full}</span>
+              <button type="button" class="completed-step" aria-label="One fewer semester completed" …>‹ svg</button>
+              <button type="button" class="completed-step" aria-label="One more semester completed" …>› svg</button>
             </div>
-            <p class="cutoff-readout">{cutoffReadout} The gold line on the timeline marks that boundary.</p>
+            <label class="show-links-toggle">
+              <input type="checkbox" checked={showPrereqLinks}
+                onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)} />
+              Show prerequisite links
+            </label>
+            {!readOnly && (
+              <button type="button" onClick={copyPlanLink}>
+                {linkCopied ? "Copied!" : "Copy plan link"}
+              </button>
+            )}
+          </div>
+          <Timeline … />
+        </div>
+        <Sidebar … />
+        <ReqsResizeHandle reqs={reqs} onChange={updateReqs} />
+      </div>
+    </div>
+    {removed && <div class="undo-toast" role="status">…</div>}
+  </div>
+  ```
+
+**`src/components/PlaceInMenu.tsx`** is the look to match, not the
+semantics. It renders `div.place-in-menu` > `button[aria-haspopup="true"]
+[aria-expanded]` and `ul[role="menu"][hidden]`. It has no Escape or
+outside-click handling. Its CSS (`src/styles.css`, around line 1104):
+
+```css
+.place-in-menu { position: relative; display: inline-block; }
+.place-in-menu ul {
+  list-style: none; margin: 0.3rem 0 0; padding: 0.3rem; position: absolute; z-index: 3;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 0.6rem;
+  box-shadow: 0 10px 30px -12px rgb(23 24 26 / 0.3); min-width: 9rem;
+}
 ```
 
-**`src/components/planner-logic.ts`** is pure: no DOM, and unit-tested in
-`planner-logic.test.ts`. Its imports are `import type { ReqExpr } from
-"../lib/domain/types"` and `import type { GroupView, PlanView } from
-"../lib/domain/view"`. `PlanView.terms` is `TermView[]`, where each term
-has `label: string` (e.g. "S1 2027").
-
-**`src/pages/plan/[id].astro`, the body**
+**`src/pages/plan/[id].astro`** (unchanged since `12059d6`)
 
 ```astro
+const title = !view ? "Plan not found" : view.plan.readOnly ? "Example plan" : "Your AACOM 2027 plan";
+---
+
 <Base title={title}>
   {
     view ? (
@@ -124,87 +166,115 @@ has `label: string` (e.g. "S1 2027").
 </Base>
 ```
 
-**`src/pages/help.astro:35–41`**
+**`src/pages/help.astro`** (after Task 1)
 
-```astro
-  <h2>The completion cutoff</h2>
-  <p>
-    The planner needs to know which of your placed courses are already done versus still planned, but it doesn't
-    track individual grades or results — instead, you set one boundary with "Move cutoff earlier/later". Everything
-    before it counts as completed; everything from there on is still planned. It's a simplification: it doesn't
-    handle a failed or repeated course, part-time study, or leave of absence.
-  </p>
-```
-
-**`README.md:16`** (served in full at `/readme/`, where `spec/readme.test.ts`
-asserts the page carries every word, so it follows the edit automatically):
-`a guess); every mutation (a placement, a moved cutoff, a pin) is enforced`.
-
-**`spec/planner.test.ts:211–217`**, superseded by CW2 (its labels change
-because the requirement changes them):
-
-```ts
-  it("the cutoff has keyboard buttons", async () => {
-    const id = await createPlan();
-    const page = await fetch(new URL(`/plan/${id}`, baseUrl));
-    const html = await page.text();
-    expect(html).toContain("Move cutoff earlier");
-    expect(html).toContain("Move cutoff later");
-  });
-```
-
-`spec/planner.test.ts:107` expects `/plan/example` to contain "This is an
-example". That still holds.
+- The "Completed semesters" paragraph starts its second sentence with
+  `Above the timeline, "Completed through …"`.
+- "Keeping your plan" reads: "Starting a plan doesn't need an account — but
+  that also means **the plan's own web address is the only way back to
+  it**. Bookmark it, or save the link somewhere, before you close the tab."
+- Neither "Show prerequisite links" nor "Copy plan link" is mentioned
+  anywhere on the page.
 
 **`src/styles.css`**
 
 - `h1 { font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem); }` (line 69), and
-  `h1, h2, … { margin: 0 0 0.5rem; line-height: 1.2; }`. At 1920 a
+  `h1, h2, … { margin: 0 0 0.5rem; line-height: 1.2; }`. At 1920, a
   document page's `h1` computes to 33.6px.
 - `p { margin: 0 0 0.75rem; max-width: 65ch; }`.
-- Below 1100px, with the nav hidden (lines 341–346):
+- Below 1100px, with the nav hidden:
+  `:root[data-nav="hidden"] h1 { display: flex; align-items: center;
+  min-height: 2.75rem; padding-inline-start: 3.5rem; }`. It is more
+  specific than `.plan-title h1`, so it wins wherever the two conflict. The
+  `.nav-show` tab (2.75rem square, `position: absolute`, no insets) sits at
+  main's content corner, which is where the `h1` starts.
+- The rules from Task 1, around line 486:
+  - `.cutoff-controls { display: flex; align-items: center; gap: 0.5rem
+    1rem; margin-block-end: 0.75rem; flex-wrap: wrap; }`
+  - `.completed-control { display: inline-flex; align-items: center; gap:
+    0.25rem; }`
+  - `.completed-readout`, `.completed-step` (2.75rem square)
+- `.show-links-toggle { display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.9rem; color: var(--unigrey); }`, plus
+  `.show-links-toggle input { flex: 0 0 auto; min-width: 0; }`.
+- `.course-card[aria-busy="true"], .completed-control[aria-busy="true"],
+  fieldset[aria-busy="true"] { opacity: 0.6; }`.
+- The fit group (`@media (min-height: 30rem)`, around line 1255) makes
+  `main`, `.planner` and `.planner-layout` flex columns. It gives
+  `.planner`, `.planner-layout` and `.planner-panes` `flex: 1 1 auto;
+  min-height: 0`. A new `.plan-title` child of `.planner` keeps the default
+  `flex: 0 1 auto` and doesn't shrink below its content.
+- `.planner-timeline-area` has `padding-block-end: 0.75rem` and no top
+  padding. `.term`'s top equals `.timeline`'s top (measured).
+- Tokens: `--ink`, `--gold-tint: #f5edde`, `--gold-ink: #4d3505`,
+  `--surface`, `--line`, `--paper`, `--unigrey`.
 
-  ```css
-  :root[data-nav="hidden"] h1 {
-    display: flex;
-    align-items: center;
-    min-height: 2.75rem;
-    padding-inline-start: 3.5rem;
-  }
-  ```
+**`spec/layout.test.ts`** (after Task 1)
 
-  The `.nav-show` tab (2.75rem square, `position: absolute`, no insets)
-  sits at main's content corner.
-- `.cutoff-controls { display: flex; align-items: center; gap: 0.5rem;
-  margin-block-end: 0.5rem; flex-wrap: wrap; }` and `.cutoff-readout {
-  font-size: 0.85rem; color: var(--unigrey); margin: 0 0 0.75rem; }`
-  (lines 486–498).
-- `.course-card[aria-busy="true"], .cutoff-controls[aria-busy="true"],
-  fieldset[aria-busy="true"] { opacity: 0.6; }` (around line 886).
-- `.section-toggle-icon { flex: 0 0 auto; width: 1rem; height: 1rem;
-  fill: none; stroke: currentColor; stroke-width: 2.5; … }`.
-- `.visually-hidden` exists.
+- Module scope: `baseUrl`, `browser`, `planUrl()`, `withPlan(viewport,
+  check)`, and `planWithPlacement(code): Promise<string>` (creates an
+  editable plan with `code` in term 0).
+- `describe("completed-semesters row")` has these tests:
+  1. "shows the short readout, the chevrons and the prerequisite toggle on
+     one row". It reads `.show-links-toggle`'s `boundingBox()`, which is
+     null once the toggle is inside a closed panel. **Superseded in Task
+     2.**
+  2. "puts Copy plan link on the same row on an editable plan". **Superseded
+     in Task 2.**
+  3. "the › chevron completes one more semester and enables ‹". Still
+     holds.
+  4. "gives the first term more room on a phone" (`.term` at most 100px
+     below `.planner-timeline-area`). **Superseded in Task 3.**
+  5. "no user-facing text says cutoff". Still holds.
+  6. "Help describes the chevrons by name and the gold line". **Extended
+     in Task 2.**
+- `describe("site nav in the top bar")` defines `const navHidden = {
+  storage: { "panel-nav": "hidden" } }` inside it.
 
-**Measured at 390×844 on `/plan/example`** (before this phase):
+**`spec/planner.test.ts:107`** expects `/plan/example`'s HTML to contain
+"This is an example". That still holds.
 
-- the first `.term` sits 150px below the top of `.planner-timeline-area`
-- the `h1` is 25.6px
+**Measured after Task 1** (`.term` top minus `h1` top, on the fitted page):
+
+| Viewport | Editable plan | `/plan/example` |
+| --- | --- | --- |
+| 1920×1080 | 104px | 140px |
+| 390×844 | 142px | 160px |
+
+At 390, main's content box is 350px wide. The completed control is 293px
+wide with "Completed through S2 2027", and 254px with "Nothing completed
+yet".
 
 ### Interfaces from earlier phases (exact)
 
-None.
+None. Task 1 is in this phase: `completedReadout(cutoff: number, terms:
+readonly { label: string }[]): CompletedReadout` from
+`src/components/planner-logic.ts`, with `CompletedReadout { short: string;
+full: string }`.
 
 ## 4. Approach
 
-`completedReadout` is pure, so the three branches are unit-tested without a
-DOM. The row keeps the `.cutoff-controls` class and flex-wrap. The visible
-short readout is `aria-hidden`, and the full sentence sits beside it as
-`.visually-hidden`, so assistive technology hears it exactly once. The
-chevrons carry the accessible names.
+**Task 2: a disclosure, not a menu.** `MoreOptions` is a small component
+that owns only the markup and the closing behaviour. Planner owns whether
+it's open, through the same `openMenuCode` value the course menus use, so
+opening either kind of menu closes the other with no new wiring. The
+panel's children are the existing checkbox and copy button, moved as they
+are, so their behaviour doesn't change. The panel is anchored to the
+button's end edge. It extends toward the row's start, where there's always
+room, so it can't push the page sideways.
 
-The title wraps `h1` and the badge in `div.plan-title`, a wrapping flex row.
-The nav-hidden `h1` rule keeps indenting the `h1` beside the tab, and its
-`min-height: 2.75rem` keeps a wrapped badge below the tab.
+**Task 3: Planner renders the title row.** The controls need Planner's
+state, and a portal can't server-render, so the `h1` moves into Planner.
+`[id].astro` passes `title`, and the server HTML still has exactly one
+`h1`. The row is two flex groups with `justify-content: space-between` and
+`flex-wrap`. When the actions group wraps, it's the only item on its line,
+so space-between puts it at the line's start (CW24). The title group wraps
+internally, so the badge drops below the `h1` only when it doesn't fit. The
+nav-hidden `h1` rule keeps indenting the `h1` beside the tab. Its
+`min-height: 2.75rem` keeps a wrapped badge below the tab. With the row
+gone from the timeline area, `.cutoff-controls` and its CSS rule are
+deleted. The overview ruling that kept the class applied only while the
+row existed.
 
 ## 5. Task breakdown
 
@@ -359,85 +429,304 @@ The nav-hidden `h1` rule keeps indenting the `h1` beside the tab, and its
 
   The user accepts explicitly.
 - **Depends on:** none.
+- **Amended after completion:** done at `ab8195c`, and the user accepted
+  the review. Layout tests 1, 2 and 4 above are superseded by Tasks 2 and
+  3, which name each one. Help's "Above the timeline" wording changes in
+  Task 3.
 
-### Task 2: Shrink the plan page title and turn the example note into a badge beside it
+### Task 2: Put "Show prerequisite links" and "Copy plan link" behind a ⋯ "More options" panel
 
-- [ ] **Description:** wrap the title and the note in `div.plan-title`,
-  size the plan `h1` at 1.4rem, and style the note as a badge.
+- [ ] **Description:** add `MoreOptions`, move the checkbox and the copy
+  button into it (still inside `.cutoff-controls`, right after
+  `.completed-control`), style the panel, and add one Help sentence each
+  about where the two actions now live.
 - **Files touched:**
-  - `src/pages/plan/[id].astro`
+  - `src/components/MoreOptions.tsx` (new)
+  - `src/components/Planner.tsx`
   - `src/styles.css`
+  - `src/pages/help.astro`
   - `spec/layout.test.ts`
-- **Tests first (red):** a new `describe("plan title")` in
-  `spec/layout.test.ts`:
-  1. **At 1920×1080 on `/plan/example`:**
-     - `getComputedStyle(h1).fontSize` is `"22.4px"`
-     - the `[role="note"]` badge's vertical centre is within 4px of the
-       `h1`'s
-     - `h1.getBoundingClientRect().right` < `note.getBoundingClientRect().left`
-       (same row)
-     - the note's text is "This is an example — Start your own plan"
-  2. **Document pages unchanged:** at 1920×1080, `/help/`, `/readme/` and
-     `/` each have an `h1` font-size of `"33.6px"`.
-  3. **Nav hidden, at 390×844 on `/plan/example`** with `{ storage: {
-     "panel-nav": "hidden" } }`:
-     - the `.nav-show` rect doesn't intersect the note's rect
-     - it doesn't intersect the rect of the `h1`'s text: take
-       `document.createRange()`, `selectNodeContents(h1)`, then
-       `getBoundingClientRect()`
-     - `horizontalOverflow` and `verticalOverflow` are 0
-  4. **Axe:** at 1920×1080, `/plan/example` and a fresh editable plan have
-     `axeViolations` equal to `[]` (N3).
+- **Tests first (red):**
+  - **Superseded** in `describe("completed-semesters row")`. Each one
+    changes because CW23 moves the toggle and the copy button into the
+    panel. They aren't weakened.
+    - Test 1 is renamed "shows the short readout, the chevrons and More
+      options on one row". Replace its `.show-links-toggle` check with the
+      same check on `page.getByRole("button", { name: "More options" })`:
+      its vertical centre is within 4px of the readout's, and its
+      `boundingBox()` is at least 44×44. Everything else in the test stays.
+    - Test 2 is renamed "puts More options on the readout's row on an
+      editable plan". It checks the same thing for ⋯ on a fresh
+      `planWithPlacement("COMP1130")` plan, in place of "Copy plan link".
+    - Test 6 also expects `/help/`'s `body.innerText` to contain "More
+      options".
+  - **New `describe("more options")`** in `spec/layout.test.ts`, at
+    1920×1080 unless stated. `more` is `page.getByRole("button", { name:
+    "More options" })`, and `toggle` is `page.getByLabel("Show
+    prerequisite links")`.
+    1. **Opens, stays open, and Escape closes it** (fresh plan):
+       - `more` has `aria-expanded="false"`, and `aria-controls` names an
+         element that exists
+       - `toggle` and the "Copy plan link" button aren't visible
+       - clicking `more` gives `aria-expanded="true"`, and both become
+         visible
+       - `toggle.check()` leaves `aria-expanded="true"` and
+         `toggle.isChecked()` true
+       - `page.keyboard.press("Escape")` gives `aria-expanded="false"`,
+         and `document.activeElement` is `more`: check with
+         `page.evaluate(() => document.activeElement?.getAttribute("aria-label"))`,
+         which equals "More options"
+    2. **An outside press closes it** (fresh plan): open, then
+       `page.locator("h1").click()`. `aria-expanded` is "false".
+    3. **One menu at a time** (fresh plan with COMP1130 placed):
+       - open ⋯, then click COMP1130's "Move to…" button
+         (`page.getByRole("button", { name: "Move to…" }).first()`)
+       - `more` is `aria-expanded="false"`
+       - click `more` again. The "Move to…" button is
+         `aria-expanded="false"`, and `more` is `"true"`.
+    4. **Read-only** (`/plan/example`): after opening, `toggle` is visible
+       and `page.getByRole("button", { name: "Copy plan link" })` has
+       count 0.
+    5. **Fits on a phone** (fresh plan, 390×844, panel open):
+       - the panel's `getBoundingClientRect()` has `left >= 0` and
+         `right <= 390`
+       - `horizontalOverflow` is 0
+    6. **Axe** (fresh plan, 1920×1080, panel open): `axeViolations` is
+       `[]` (N3).
 - **Implementation (green):**
-  - **`[id].astro`:** replace the `h1` and the note with:
+  - **`src/components/MoreOptions.tsx`** (new):
 
-    ```astro
-    <div class="plan-title">
-      <h1>{title}</h1>
-      {view.plan.readOnly && <p role="note" class="plan-badge">This is an example — Start your own plan</p>}
-    </div>
+    ```tsx
+    import type { ComponentChildren } from "preact";
+
+    interface Props {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      children: ComponentChildren;
+    }
+
+    export default function MoreOptions({ open, onOpenChange, children }: Props);
     ```
 
-    "Plan not found" is unchanged.
-  - **`styles.css`,** next to the `h1` rules and before the nav-hidden
-    rules:
-    - `.plan-title { display: flex; flex-wrap: wrap; align-items: center;
-      gap: 0.25rem 0.75rem; margin-block-end: 0.75rem; }`
-    - `.plan-title h1 { font-size: 1.4rem; margin: 0; }`
-    - `.plan-badge { margin: 0; padding: 0.15rem 0.6rem; font-size:
-      0.8rem; font-weight: 500; color: var(--gold-ink); background:
-      var(--gold-tint); border-radius: 999px; }`
-    - A comment: the plan page is a workspace, so its title gives height
-      back to the planner. The badge wraps below only when the row doesn't
-      fit, and the nav-hidden `h1`'s `min-height` keeps a wrapped badge
-      clear of the tab.
+    - It renders `div.more-options` (ref `rootRef`) containing:
+      - `button.more-options-toggle[type=button]` (ref `toggleRef`), with
+        `aria-label="More options"`, `aria-expanded={open}`,
+        `aria-controls="more-options-panel"` and `onClick={() =>
+        onOpenChange(!open)}`, holding
+        `<svg class="more-options-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.75" /><circle cx="12" cy="12" r="1.75" /><circle cx="19" cy="12" r="1.75" /></svg>`
+      - `div#more-options-panel.more-options-panel`, with
+        `hidden={!open}`, holding `children`
+    - `onKeyDown` on the root: on `Escape` while open, call
+      `onOpenChange(false)`, then `toggleRef.current?.focus()`.
+    - A `useEffect` keyed on `open`: while open, add a document
+      `pointerdown` listener that calls `onOpenChange(false)` when
+      `!rootRef.current?.contains(event.target as Node)`. Remove it on
+      cleanup.
+    - Add a comment: it's a disclosure, not an ARIA menu, so the checkbox
+      stays a native checkbox and needs no arrow-key handling. Planner owns
+      whether it's open, so opening a course's menu closes it.
+  - **`Planner.tsx`:**
+    - Add `const MORE_OPTIONS = "more-options";` at module scope, with a
+      comment: it shares `openMenuCode` with the course menus, and course
+      codes never look like this.
+    - Replace the `label.show-links-toggle` and the copy button inside
+      `div.cutoff-controls` with the following. Keep `label` and `button`
+      exactly as they are today.
+
+      ```tsx
+      <MoreOptions
+        open={openMenuCode === MORE_OPTIONS}
+        onOpenChange={(next) => setOpenMenuCode(next ? MORE_OPTIONS : null)}
+      >
+        <label class="show-links-toggle">…unchanged…</label>
+        {!readOnly && <button type="button" onClick={copyPlanLink}>…unchanged…</button>}
+      </MoreOptions>
+      ```
+
+  - **`styles.css`,** after the `.show-links-toggle input` rule:
+    - `.more-options { position: relative; display: inline-flex; }`
+    - `.more-options-toggle { display: inline-flex; align-items: center;
+      justify-content: center; width: 2.75rem; height: 2.75rem; padding: 0;
+      }`
+    - `.more-options-icon { width: 1.25rem; height: 1.25rem; fill:
+      currentColor; }`
+    - `.more-options-panel { position: absolute; top: 100%;
+      inset-inline-end: 0; z-index: 3; display: flex; flex-direction:
+      column; align-items: stretch; gap: 0.25rem; margin-block-start:
+      0.3rem; padding: 0.5rem; min-width: 14rem; background:
+      var(--surface); border: 1px solid var(--line); border-radius:
+      0.6rem; box-shadow: 0 10px 30px -12px rgb(23 24 26 / 0.3); }`
+    - `.more-options-panel[hidden] { display: none; }`
+    - `.more-options-panel > * { min-height: 2.75rem; }`
+    - A comment: the panel matches the Place in… menu's look, and it's
+      anchored to the button's end edge so it opens toward the row's start
+      and never overflows sideways.
+  - **`help.astro`:**
+    - In "The basics", append a sentence: to see which placed courses lead
+      to which, turn on "Show prerequisite links" under "More options"
+      (⋯), next to "Completed through …".
+    - In "Keeping your plan", append a sentence: "Copy plan link", under
+      "More options" (⋯), copies it for you.
 - **Refactor:** none.
 - **Acceptance criteria:**
-  - Tests 1–4 pass.
+  - The superseded tests and new tests 1–6 pass.
+  - `completed-semesters row` tests 3 and 5 still pass unchanged.
+  - `pnpm check` passes.
+  - Render check at 1920×1080, 900×800 and 390×844, with the panel closed
+    and open.
+  - Commit: "Move the prerequisite-links toggle and Copy plan link behind a
+    More options panel".
+- **Human review:** a pass means:
+  - **Screenshots** of a fresh editable plan and `/plan/example` at
+    1920×1080, 900×800 and 390×844, with the panel open: ⋯ reads as "more
+    options", the panel looks like the Place in… menu, and nothing is
+    clipped.
+  - **Copy:** the two new Help sentences.
+
+  The user accepts explicitly.
+- **Depends on:** Task 1.
+
+### Task 3: Move the plan's controls into a compact title row with the example badge
+
+- [ ] **Description:** Planner renders the title row: a 1.4rem `h1`, the
+  example badge, then `.completed-control` and `MoreOptions`. The row above
+  the timeline goes, and Help's position wording follows.
+- **Files touched:**
+  - `src/pages/plan/[id].astro`
+  - `src/components/Planner.tsx`
+  - `src/styles.css`
+  - `src/pages/help.astro`
+  - `spec/layout.test.ts`
+- **Tests first (red):**
+  - **Superseded:** delete test 4 of `describe("completed-semesters row")`,
+    "gives the first term more room on a phone". CW4 (amended) replaces it
+    with tests 3–4 below, which are stricter.
+  - **New `describe("plan title row")`** in `spec/layout.test.ts`:
+    1. **At 1920×1080 on `/plan/example`:**
+       - `getComputedStyle(h1).fontSize` is `"22.4px"`
+       - the `[role="note"]` badge's vertical centre is within 4px of the
+         `h1`'s, `h1.getBoundingClientRect().right` <
+         `note.getBoundingClientRect().left`, and the badge's text is "This
+         is an example — Start your own plan"
+       - `.completed-readout`'s and the ⋯ button's vertical centres are
+         within 4px of the `h1`'s (CW4)
+       - the ⋯ button's `right` is within 1px of `.plan-title`'s `right`
+         (the row's end)
+    2. **Document pages unchanged:** at 1920×1080, `/help/`, `/readme/` and
+       `/` each have an `h1` font-size of `"33.6px"`.
+    3. **Nothing above the timeline:** at 1920×1080 and 390×844, on
+       `/plan/example` and a fresh `planWithPlacement("COMP1130")` plan,
+       `.term`'s top minus `.planner-timeline-area`'s top is at most 4px.
+       There's also no `.cutoff-controls` element (count 0).
+    4. **Height given back** (nav shown), `.term` top minus `h1` top (today's
+       values in this file's §3):
+       - 1920×1080: at most 64px on both plans
+       - 390×844: at most 100px on the fresh plan, and at most 125px on
+         `/plan/example`
+       - `horizontalOverflow` and `verticalOverflow` are 0 in each case
+    5. **Phone wrap (CW24)** at 390×844:
+       - fresh plan: `.plan-actions`' top ≥ the `h1`'s bottom. Its `left` is
+         within 1px of `.plan-title`'s `left`. The ⋯ button's vertical
+         centre is within 4px of `.completed-readout`'s.
+       - `/plan/example`: the badge's top ≥ the `h1`'s bottom, and
+         `.plan-actions`' top ≥ the badge's bottom
+    6. **Nav hidden** at 390×844 on `/plan/example`, with `{ storage: {
+       "panel-nav": "hidden" } }`:
+       - the `.nav-show` rect doesn't intersect the badge's rect
+       - it doesn't intersect the `h1`'s text rect (`document.createRange()`,
+         `selectNodeContents(h1)`, `getBoundingClientRect()`)
+       - `horizontalOverflow` and `verticalOverflow` are 0
+    7. **Axe:** at 1920×1080, `/plan/example` and a fresh editable plan
+       have `axeViolations` equal to `[]` (N3).
+    8. **Help:** `/help/`'s `body.innerText` contains "beside the plan's
+       title" and doesn't contain "Above the timeline".
+- **Implementation (green):**
+  - **`[id].astro`:** the `view` branch becomes `<Planner client:load
+    view={view} title={title} />` alone. The `h1` and the note move into
+    Planner. "Plan not found" is unchanged.
+  - **`Planner.tsx`:**
+    - `interface Props { view: PlanView; title: string; }`, and
+      `export default function Planner({ view: initialView, title }: Props)`.
+    - Directly after the `aria-live` paragraph, and before
+      `div.planner-layout`, render the following. `.completed-control` and
+      `MoreOptions` move here unchanged, with their children.
+
+      ```tsx
+      {/* The plan page is a workspace, so its title row also carries the plan's own controls, leaving the timeline nothing above it. */}
+      <div class="plan-title">
+        <div class="plan-title-main">
+          <h1>{title}</h1>
+          {readOnly && (
+            <p role="note" class="plan-badge">
+              This is an example — Start your own plan
+            </p>
+          )}
+        </div>
+        <div class="plan-actions">
+          <div class="completed-control" aria-busy={cutoffPending}>…unchanged…</div>
+          <MoreOptions …unchanged…>…unchanged…</MoreOptions>
+        </div>
+      </div>
+      ```
+
+    - Delete the now-empty `div.cutoff-controls` from
+      `.planner-timeline-area`, which then holds only `<Timeline>`.
+  - **`styles.css`:**
+    - Delete the `.cutoff-controls` rule.
+    - Next to the `h1` rules, before the nav-hidden rules:
+      - `.plan-title { display: flex; flex-wrap: wrap; align-items: center;
+        justify-content: space-between; gap: 0.5rem 1rem;
+        margin-block-end: 0.75rem; }`
+      - `.plan-title-main { display: flex; flex-wrap: wrap; align-items:
+        center; gap: 0.25rem 0.75rem; min-width: 0; }`
+      - `.plan-title h1 { font-size: 1.4rem; margin: 0; }`
+      - `.plan-badge { margin: 0; padding: 0.15rem 0.6rem; font-size:
+        0.8rem; font-weight: 500; color: var(--gold-ink); background:
+        var(--gold-tint); border-radius: 999px; }`
+      - `.plan-actions { display: flex; align-items: center; gap: 0.5rem; }`
+      - A comment: the plan page is a workspace, so its title row gives
+        height back to the planner. When the row doesn't fit, the actions
+        group wraps as a whole and space-between starts it at the line's
+        start. The badge wraps below the title only when it has to, and
+        the nav-hidden `h1`'s `min-height` keeps a wrapped badge clear of
+        the tab.
+  - **`help.astro`:** in "Completed semesters", change `Above the timeline,
+    "Completed through …"` to `Beside the plan's title, "Completed through
+    …"`. Task 2's two sentences stay as they are, because ⋯ still sits
+    next to "Completed through …".
+- **Refactor:** grep `src/` for `cutoff-controls`. None should remain.
+- **Acceptance criteria:**
+  - The superseded deletion and new tests 1–8 pass.
   - `spec/planner.test.ts:107` ("This is an example") still passes.
   - `spec/invariants.test.ts` still passes (one `h1`).
+  - "on %s at %i×%i the tab shares the title's row and covers nothing"
+    still passes (CW9).
   - `pnpm check` passes.
   - Render check at 1920×1080, 900×800 and 390×844, with the nav shown and
     hidden.
-  - Commit: "Shrink the plan page title and show the example note as a
-    badge beside it".
-- **Human review:** screenshots of `/plan/example` at 1920×1080, 900×800
-  and 390×844, with the nav shown and hidden. A pass means:
-  - the title still reads as the page's heading
-  - the badge is legible without shouting
-  - on the phone with the nav hidden, the tab, title and badge sit
-    together without crowding
+  - Commit: "Move the plan's controls into a compact title row with the
+    example badge".
+- **Human review:** screenshots of `/plan/example` and a fresh editable plan
+  at 1920×1080, 900×800 and 390×844, with the nav shown and hidden. A pass
+  means:
+  - the title still reads as the page's heading, and the badge is legible
+    without shouting
+  - the completed control and ⋯ read as the plan's controls, not as part
+    of the heading
+  - on the phone, the tab, title, badge and controls sit together without
+    crowding
+  - the Help sentence reads naturally
 
   The user accepts explicitly.
-- **Depends on:** none. It's independent of Task 1, but done after it.
+- **Depends on:** Task 2.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 1–2 complete, with their tests passing
+- [ ] Tasks 1–3 complete, with their tests passing
 - [ ] `pnpm test:unit` passes
 - [ ] `pnpm check` passes
-- [ ] Two commits, one per task
-- [ ] Both human reviews accepted by the user
+- [ ] Three commits, one per task
+- [ ] All three human reviews accepted by the user
 - [ ] Tick Phase 01 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
@@ -447,17 +736,20 @@ The nav-hidden `h1` rule keeps indenting the `h1` beside the tab, and its
 | CW1 | Task 1: unit tests, layout test 1 |
 | CW2 | Task 1: planner.test, layout tests 1 and 3 |
 | CW3 | Task 1: unit tests (`full`), markup |
-| CW4 | Task 1: layout tests 1–2 |
+| CW4 (amended) | Task 3: tests 1, 3 and 4 |
 | CW5 | Task 1: layout test 5 |
-| CW6 | Task 1: layout test 6, human review |
-| CW7 | Task 2: tests 1–2 |
-| CW8 | Task 2: test 1 |
-| CW9 | Task 2: test 3 |
-| FR5 (amended) | Tasks 1–2: human reviews |
-| N1 | Task 1: tests 1 and 4; Task 2: test 3 |
-| N2 | Task 1: test 1 |
-| N3 | Task 2: test 4 |
-| N4 | Task 2: `pnpm check` |
+| CW6 (amended) | Task 1: layout test 6; Task 2: "More options" in test 6; Task 3: test 8; all three human reviews |
+| CW7 | Task 3: tests 1–2 |
+| CW8 | Task 3: tests 1 and 5 |
+| CW9 | Task 3: test 6, and the existing "covers nothing" test |
+| CW23 | Task 2: tests 1–5 and the superseded tests 1–2 |
+| CW24 | Task 3: test 5 |
+| FR5 (amended) | Tasks 1–3: human reviews |
+| N1 | Task 1: test 1; Task 2: test 5; Task 3: tests 4 and 6 |
+| N2 | Task 1: test 1; Task 2: superseded test 1 |
+| N3 | Task 2: test 6; Task 3: test 7 |
+| N4 | Task 3: `pnpm check` (invariants) |
+| N6 | Human reviews on Tasks 1–3 |
 
 ## 8. Risks / open questions
 
