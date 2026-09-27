@@ -1,4 +1,4 @@
-import { activeGroups, allocate, eligibleLeaves, type AllocItem } from "./allocation";
+import { activeEligibleLeaves, activeGroups, allocate, type AllocItem } from "./allocation";
 import { createFeasibility } from "./feasibility";
 import { evaluatePlan, type PlacementEval } from "./evaluate";
 import { filterLabel, matchesFilter } from "./filters";
@@ -147,13 +147,11 @@ function buildCard(
     prereq: course.requisites.prereq,
     hardBlocked: feas.hardBlockedTerms(code),
     projectedTerms,
-    eligibleGroups: eligibleLeaves(program, choices, course, tdp),
+    eligibleGroups: activeEligibleLeaves(program, choices, course, tdp),
   };
 }
 
-// Used by search (Task 16) for a context-free card: pass `choices: {}` to
-// list every specialisation option's eligibility rather than just the
-// current plan's chosen branch.
+// Used by search (Task 16): `choices` is the plan's own, or {} with no plan.
 export function courseCard(
   cat: Catalogue,
   program: ProgramDef,
@@ -197,6 +195,19 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
   const tdp = tdpSetOf(program);
   const { placements: placementEvals } = evaluatePlan(cat, feas, plan);
   const pinnedByCode = new Map(plan.placements.map((p) => [p.code, p.pinnedGroupId] as const));
+  // A pin can outlive its group: pinned under one capstone option, then the
+  // choice changed. setChoice clears those, but a plan saved before it did
+  // must still render — so a pin that's no longer eligible counts as
+  // Automatic here rather than reaching allocate(), which throws on it.
+  const eligibleByCode = new Map<string, string[]>();
+  for (const placement of plan.placements) {
+    const course = cat.courses.get(placement.code);
+    if (course) eligibleByCode.set(placement.code, activeEligibleLeaves(program, plan.choices, course, tdp));
+  }
+  const livePin = (code: string): string | null => {
+    const pin = pinnedByCode.get(code) ?? null;
+    return pin !== null && eligibleByCode.get(code)?.includes(pin) ? pin : null;
+  };
 
   // FR20: a loser (the later-placed side of an incompatible pair) counts
   // toward no requirement group, unit-count leaf or program check.
@@ -210,8 +221,8 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
     items.push({
       code: placement.code,
       units: totalUnitsOf(course),
-      eligible: eligibleLeaves(program, plan.choices, course, tdp),
-      pinned: pinnedByCode.get(placement.code) ?? null,
+      eligible: eligibleByCode.get(placement.code) ?? [],
+      pinned: livePin(placement.code),
     });
   }
   const allocation = items.length > 0 ? allocate(groups, items) : { byCourse: {}, unitsByGroup: {} };
@@ -236,7 +247,7 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
   const placements: PlacementView[] = placementEvals.map((p) => ({
     ...p,
     countsToward: allocation.byCourse[p.code] ?? null,
-    pinned: (pinnedByCode.get(p.code) ?? null) !== null,
+    pinned: livePin(p.code) !== null,
   }));
 
   // Every course in the tree, placed, or referenced (transitively) as a

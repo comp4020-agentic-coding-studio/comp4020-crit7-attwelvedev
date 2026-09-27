@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eligibleLeaves } from "./domain/allocation";
+import { activeEligibleLeaves } from "./domain/allocation";
 import { createFeasibility } from "./domain/feasibility";
 import { buildPlanView, type PlanView } from "./domain/view";
 import { TERMS } from "./domain/terms";
@@ -101,8 +101,24 @@ export function setChoice(planId: string, groupId: string, childId: string | nul
     return { status: 400, error: `${childId} is not an option of ${groupId}` };
   }
 
-  repoSetChoice(db, planId, groupId, childId);
-  return { status: 200, view: buildPlanView(loadCatalogue(db), loadProgram(db), getPlan(db, planId)!) };
+  // A pin into the option being left would stop being eligible — clear it
+  // with the choice, so switching back later doesn't silently revive it.
+  const catalogue = loadCatalogue(db);
+  const tdp = program.tdpCourses ? new Set(program.tdpCourses) : null;
+  const choices = { ...plan.choices };
+  if (childId === null) delete choices[groupId];
+  else choices[groupId] = childId;
+  db.transaction((tx) => {
+    repoSetChoice(tx, planId, groupId, childId);
+    for (const placement of plan.placements) {
+      const course = catalogue.courses.get(placement.code);
+      if (placement.pinnedGroupId === null || !course) continue;
+      if (!activeEligibleLeaves(program, choices, course, tdp).includes(placement.pinnedGroupId)) {
+        repoSetPin(tx, planId, placement.code, null);
+      }
+    }
+  });
+  return { status: 200, view: buildPlanView(catalogue, program, getPlan(db, planId)!) };
 }
 
 export function setPin(planId: string, code: string, groupId: string | null): ServiceResult {
@@ -119,7 +135,7 @@ export function setPin(planId: string, code: string, groupId: string | null): Se
     if (!course) return { status: 400, error: `unknown course ${code}` };
     const program = loadProgram(db);
     const tdp = program.tdpCourses ? new Set(program.tdpCourses) : null;
-    const eligible = eligibleLeaves(program, plan.choices, course, tdp);
+    const eligible = activeEligibleLeaves(program, plan.choices, course, tdp);
     if (!eligible.includes(groupId)) {
       return { status: 409, error: `${code} cannot be pinned to ${groupId}: not an eligible group` };
     }

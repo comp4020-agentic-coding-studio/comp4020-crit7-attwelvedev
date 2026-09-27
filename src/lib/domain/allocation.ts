@@ -90,6 +90,20 @@ export function eligibleLeaves(
   return out;
 }
 
+// What a *placed* course can count toward, and so be pinned to: only leaves
+// in active subtrees. Unlike eligibleLeaves({}), a selectable group with no
+// choice yet contributes nothing (FR25), so a new plan's Pin to list and pin
+// check never offer a capstone option the student hasn't picked.
+export function activeEligibleLeaves(
+  program: ProgramDef,
+  choices: Record<string, string>,
+  course: CatalogueCourse,
+  tdp: Set<string> | null,
+): string[] {
+  const active = new Set(activeGroups(program, choices).map((g) => g.id));
+  return eligibleLeaves(program, choices, course, tdp).filter((id) => active.has(id));
+}
+
 // Builds the flow graph's group nodes: every active group (leaf, inner or
 // top-level). A selectable group with no recorded choice contributes only
 // itself, not its children — the whole subtree stays inactive (FR25: an

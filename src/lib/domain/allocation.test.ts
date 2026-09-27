@@ -8,6 +8,7 @@ import type { Catalogue, CatalogueCourse } from "./types";
 import {
   activeGroups,
   allocate,
+  activeEligibleLeaves,
   eligibleLeaves,
   IneligiblePinError,
   type AllocGroup,
@@ -74,6 +75,18 @@ describe("activeGroups / eligibleLeaves (real AACOM 2027 data)", () => {
     const leaves = eligibleLeaves(AACOM_2027, {}, course, null);
     expect(leaves).toContain("arin-a");
     expect(leaves).toContain("thcs-a");
+  });
+
+  // What a placed course can actually count toward (and be pinned to): a
+  // selectable group with no choice yet contributes nothing, as in
+  // activeGroups — not every option's leaves, as eligibleLeaves({}) does.
+  it("activeEligibleLeaves skips an unchosen selectable group's options", () => {
+    const course = cat.courses.get("COMP4500")!;
+    const unchosen = activeEligibleLeaves(AACOM_2027, {}, course, null);
+    expect(unchosen.filter((id) => id.startsWith("cap-"))).toEqual([]);
+    const team = activeEligibleLeaves(AACOM_2027, { capstone: "cap-team" }, course, null);
+    expect(team).toContain("cap-team-proj");
+    expect(team).not.toContain("cap-intern-4k");
   });
 
   it("eligibleLeaves with a real choice restricts to the chosen branch", () => {

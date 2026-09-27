@@ -150,6 +150,30 @@ describe("planner", () => {
     expect(res.status).toBe(409);
   });
 
+  it("PUT pin into a capstone option that isn't chosen returns 409", async () => {
+    const id = await createPlan();
+    await postJson(`/api/plans/${id}/placements`, { code: "COMP4500", term: 6 });
+    const res = await putJson(`/api/plans/${id}/pins`, { code: "COMP4500", groupId: "cap-team-proj" });
+    expect(res.status).toBe(409);
+  });
+
+  it("switching capstone clears a pin into the old option instead of breaking the plan", async () => {
+    const id = await createPlan();
+    await putJson(`/api/plans/${id}/choices`, { groupId: "capstone", childId: "cap-team" });
+    await postJson(`/api/plans/${id}/placements`, { code: "COMP4500", term: 6 });
+    expect((await putJson(`/api/plans/${id}/pins`, { code: "COMP4500", groupId: "cap-team-proj" })).status).toBe(200);
+
+    const switched = await putJson(`/api/plans/${id}/choices`, { groupId: "capstone", childId: "cap-research" });
+    expect(switched.status).toBe(200);
+    const placement = (await switched.json()).placements.find((p: { code: string }) => p.code === "COMP4500");
+    expect(placement.pinned).toBe(false);
+    expect((await fetch(new URL(`/plan/${id}`, baseUrl))).status).toBe(200);
+
+    // Switching back doesn't silently revive the old pin.
+    const back = await putJson(`/api/plans/${id}/choices`, { groupId: "capstone", childId: "cap-team" });
+    expect((await back.json()).placements.find((p: { code: string }) => p.code === "COMP4500").pinned).toBe(false);
+  });
+
   it("/plan/example renders a two-segment progress bar per group with aria-valuenow and text", async () => {
     const res = await fetch(new URL("/plan/example", baseUrl));
     const html = await res.text();

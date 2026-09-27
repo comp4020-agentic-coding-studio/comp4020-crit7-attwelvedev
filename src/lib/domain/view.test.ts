@@ -141,3 +141,25 @@ describe("buildPlanView (a chosen specialisation)", () => {
     expect(findGroup(view.groups, "hccc-core")).toBeUndefined();
   });
 });
+
+describe("buildPlanView: pins and unchosen options", () => {
+  it("Pin to lists no group from a capstone option that isn't chosen", () => {
+    const plan: PlanState = { ...emptyPlan(), placements: [{ code: "COMP4500", term: 6, pinnedGroupId: null }] };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    expect(view.courses.COMP4500!.eligibleGroups.filter((id) => id.startsWith("cap-"))).toEqual([]);
+  });
+
+  it("a pin left on a no-longer-chosen option is ignored, not thrown on", () => {
+    // Pinned while cap-team was chosen, then the capstone switched: the
+    // allocator used to throw IneligiblePinError, and the plan 500'd for good.
+    const plan: PlanState = {
+      ...emptyPlan(),
+      choices: { capstone: "cap-research" },
+      placements: [{ code: "COMP4500", term: 6, pinnedGroupId: "cap-team-proj" }],
+    };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    const placement = view.placements.find((p) => p.code === "COMP4500")!;
+    expect(placement.pinned).toBe(false);
+    expect(placement.countsToward).not.toBe("cap-team-proj");
+  });
+});
