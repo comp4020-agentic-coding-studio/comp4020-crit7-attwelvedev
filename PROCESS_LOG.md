@@ -518,3 +518,33 @@ and MATH2222, all correct readings. The correction also lives in the
 harness: `verify-labels.test.ts` now pins COMP4820's and COMP4020's items
 to plain text, so a rule that widens again fails on real data, not just
 on the one course the plan thought of.
+
+## 2026-09-27 — A spacing test that passed before the fix existed
+
+Resolved by cb2b3f2..a261afe.
+
+A course card's buttons sat flush against each other. The obvious check
+for the fix was to measure the gaps between the children of the new
+`.course-card-actions` row. I wrote that first and ran it against the
+unfixed code as a red step, and it passed. The old markup had no
+`.course-card-actions`, so the check measured nothing and reported "no
+touching pairs". That test would have guarded only the new structure. A
+later refactor that dropped the wrapper would still pass it, which is the
+exact regression it was meant to catch.
+
+The rewrite measures the render, not the markup: every visible button on
+every card, pairwise, at both marking viewports. It asserts that at least
+one pair was measured, so an empty selection fails instead of passing
+quietly. Against the rebuilt unfixed code it went red with the real
+failures (`COMP1130 Move to…/Details: 0.0px`, including a vertical 0px
+between wrapped rows that I hadn't noticed), then green with the fix.
+Because the specs run against the built `dist/`, each red/green step
+needed a fresh `pnpm build`. Without that, the "red" run would have been
+testing stale output.
+
+I applied the same rule to the two sibling fixes in the range. The
+opacity check multiplies opacity up each button's whole ancestor chain,
+because opacity set on the card, not the button, was the actual bug, and
+it went red on the old CSS before going green. The hover-border check
+pins the computed border width at rest and on hover, since the defect
+was a cascade-order slip that no markup inspection would show.
