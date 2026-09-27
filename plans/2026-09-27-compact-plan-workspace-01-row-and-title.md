@@ -739,12 +739,12 @@ row existed.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 1–3 complete, with their tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Three commits, one per task
-- [ ] All three human reviews accepted by the user
-- [ ] Tick Phase 01 in overview §5 and commit
+- [x] Tasks 1–3 complete, with their tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Three commits, one per task
+- [x] All three human reviews accepted by the user
+- [x] Tick Phase 01 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
