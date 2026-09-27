@@ -285,7 +285,7 @@ observer (`useReqsFit`), passes `fit` down to the handle, and adds
 
 ### Task 4: Let the stacked requirements collapse to a bar along the bottom of the planner
 
-- [ ] **Description:** show "Hide requirements" in stacked, draw the
+- [x] **Description:** show "Hide requirements" in stacked, draw the
   collapsed rail as a bottom bar, move the fill to CSS variables, and
   replace the superseded Phase 03 test.
 - **Files touched:**

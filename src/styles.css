@@ -32,6 +32,8 @@
   --reqs-w-3: 44.7rem;
   /* One academic year: two 15rem terms and their gap, rounded up. */
   --timeline-min: 31rem;
+  /* The collapsed stacked requirements bar. */
+  --reqs-bar-h: 2.75rem;
 }
 
 *,
@@ -467,8 +469,8 @@ nav[aria-label="site"] .nav-hide:hover {
   min-width: 0;
 }
 
-/* The collapse controls only exist in the side-by-side layout (see the
-   last @container block); the stacked strip has nothing to collapse into. */
+/* The collapse controls are shown by the collapsed blocks at the end of the
+   planner section, one per layout. */
 .reqs-hide,
 .reqs-rail {
   display: none;
@@ -521,10 +523,13 @@ nav[aria-label="site"] .nav-hide:hover {
 
 .reqs-rail-completed {
   background: var(--gold);
+  height: var(--completed);
 }
 
 .reqs-rail-planned {
   background: var(--gold-tint);
+  height: var(--planned);
+  inset-block-end: var(--completed);
 }
 
 .completed-control {
@@ -1485,10 +1490,10 @@ fieldset[aria-busy="true"] {
   }
 }
 
-/* Collapsed sidebar. This block must stay last in the planner section: its
-   rules have the same specificity as the tier blocks above (and the
-   preference caps that follow them), and the collapsed state has to win
-   over all of them. */
+/* Collapsed sidebar. The collapsed blocks must stay last in the planner
+   section, side-by-side first, then stacked: their rules have the same
+   specificity as the tier blocks above (and the preference caps that follow
+   them), and the collapsed state has to win over all of them. */
 @container planner (min-width: 49.5rem) {
   .reqs-hide {
     display: inline-flex;
@@ -1518,5 +1523,86 @@ fieldset[aria-busy="true"] {
     outline: 2px dashed var(--gold);
     outline-offset: -4px;
     background: var(--gold-tint);
+  }
+}
+
+/* The stacked requirements collapse to a bar along the bottom of the
+   planner. */
+@container planner (width < 49.5rem) {
+  .reqs-hide {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    margin-inline-start: auto;
+  }
+
+  /* Points down: the requirements tuck away toward the bottom. */
+  .reqs-hide .section-toggle-icon {
+    transform: rotate(-90deg);
+  }
+
+  :root[data-reqs="collapsed"] .planner-panes > aside {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  :root[data-reqs="collapsed"] .requirements-scroll,
+  :root[data-reqs="collapsed"] .reqs-hide {
+    display: none;
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--reqs-bar-h);
+    padding: 0 1rem;
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail-bar {
+    width: auto;
+    height: 0.5rem;
+    min-height: 0;
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail-completed,
+  :root[data-reqs="collapsed"] .reqs-rail-planned {
+    inset-block: 0;
+    inset-inline-end: auto;
+    height: auto;
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail-completed {
+    inset-inline-start: 0;
+    width: var(--completed);
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail-planned {
+    inset-inline-start: var(--completed);
+    width: var(--planned);
+  }
+
+  :root[data-reqs="collapsed"] .reqs-drop-ready .reqs-rail {
+    outline: 2px dashed var(--gold);
+    outline-offset: -4px;
+    background: var(--gold-tint);
+  }
+}
+
+/* In the fitted page, the timeline takes the height the requirements gave up. */
+@media (min-height: 30rem) {
+  @container planner (width < 49.5rem) {
+    :root[data-reqs="collapsed"] .planner-timeline-area {
+      flex: 1 1 auto;
+      max-height: none;
+    }
   }
 }

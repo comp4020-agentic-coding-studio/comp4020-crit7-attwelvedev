@@ -315,9 +315,11 @@ export default function Sidebar({
         <span class="reqs-rail-label" aria-hidden="true">
           Requirements
         </span>
-        <span class="reqs-rail-bar" aria-hidden="true">
-          <span class="reqs-rail-completed" style={{ height: `${completedPct}%` }} />
-          <span class="reqs-rail-planned" style={{ height: `${plannedPct}%`, insetBlockEnd: `${completedPct}%` }} />
+        {/* The rail draws the fill vertically and the stacked bar
+            horizontally, from the same two numbers. */}
+        <span class="reqs-rail-bar" aria-hidden="true" style={`--completed: ${completedPct}%; --planned: ${plannedPct}%`}>
+          <span class="reqs-rail-completed" />
+          <span class="reqs-rail-planned" />
         </span>
       </button>
       <ul class="requirements-scroll" id="requirements-content">

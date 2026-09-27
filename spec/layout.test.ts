@@ -366,6 +366,8 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     [390, 844, { "panel-nav": "hidden" }],
     [1920, 1080, { "panel-reqs": "collapsed" }],
     [900, 800, { "panel-reqs": "collapsed" }],
+    [390, 844, { "panel-reqs": "collapsed" }],
+    [390, 844, { "panel-reqs": "collapsed", "panel-nav": "hidden" }],
   ])("at %i×%i with %o the page doesn't scroll either way", async (width, height, storage) => {
     const page = await openPage(browser, planUrl(), { width, height }, { storage });
     try {
@@ -537,11 +539,11 @@ describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
   it.each([
     [390, 844],
     [800, 800],
-  ])("ignores the saved state in the stacked layout at %i×%i", async (width, height) => {
+  ])("applies the saved collapsed state in the stacked layout at %i×%i", async (width, height) => {
     const page = await openPage(browser, planUrl(), { width, height }, reqsCollapsed);
     try {
-      expect(await page.locator(".requirements-scroll").isVisible()).toBe(true);
-      expect(await page.locator(".reqs-rail").isVisible()).toBe(false);
+      expect(await page.locator(".reqs-rail").isVisible()).toBe(true);
+      expect(await page.locator(".requirements-scroll").isVisible()).toBe(false);
       expect(await page.locator(".reqs-hide").isVisible()).toBe(false);
     } finally {
       await page.close();
@@ -636,6 +638,132 @@ describe("requirements rail as a drop target", { timeout: 30_000 }, () => {
       expect(await toast.textContent()).toContain("Removed COMP1130");
       await toast.getByRole("button", { name: "Undo" }).click();
       await expect.poll(() => card.count()).toBe(1);
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("stacked requirements collapse", { timeout: 30_000 }, () => {
+  const phone = { width: 390, height: 844 };
+  const reqsCollapsed = { storage: { "panel-reqs": "collapsed" } };
+  const focused = (page: Page, selector: string) =>
+    page.evaluate((s) => document.activeElement === document.querySelector(s), selector);
+  const panelReqs = (page: Page) => page.evaluate(() => localStorage.getItem("panel-reqs"));
+
+  it("collapses to a bar along the bottom of the planner and expands again", async () => {
+    const page = await openPage(browser, planUrl(), phone);
+    try {
+      const hide = page.locator("button.reqs-hide");
+      const rail = page.locator(".reqs-rail");
+      const content = page.locator(".requirements-scroll");
+      expect(await hide.isVisible()).toBe(true);
+      expect((await hide.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+
+      await hide.click();
+      expect(await rail.isVisible()).toBe(true);
+      expect(await focused(page, ".reqs-rail")).toBe(true);
+      expect(await content.isVisible()).toBe(false);
+      expect(await panelReqs(page)).toBe("collapsed");
+      const bar = (await rail.boundingBox())!;
+      expect(bar.height).toBeGreaterThanOrEqual(44);
+      expect(bar.width).toBeGreaterThan(bar.height);
+      const geometry = await page.evaluate(() => {
+        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const a = rect("aside");
+        const p = rect(".planner-panes");
+        const t = rect(".planner-timeline-area");
+        return {
+          asideGap: Math.abs(a.bottom - p.bottom),
+          timelineFills: t.height >= p.height - a.height - 17,
+        };
+      });
+      expect(geometry.asideGap).toBeLessThanOrEqual(1);
+      expect(geometry.timelineFills).toBe(true);
+      expect(await horizontalOverflow(page)).toBe(0);
+      expect(await verticalOverflow(page)).toBe(0);
+      const named = page.getByRole("button", { name: /^Show requirements: \d+ completed, \d+ planned of 192$/ });
+      expect(await named.evaluate((el) => el.classList.contains("reqs-rail"))).toBe(true);
+
+      await rail.click();
+      expect(await content.isVisible()).toBe(true);
+      expect(await focused(page, ".reqs-hide")).toBe(true);
+      expect(await panelReqs(page)).toBeNull();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("shows the bar before any bundled script runs", async () => {
+    const page = await openPage(browser, planUrl(), phone, { ...reqsCollapsed, blockScripts: true });
+    try {
+      expect(await page.locator(".reqs-rail").isVisible()).toBe(true);
+      expect(await page.locator(".requirements-scroll").isVisible()).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080, "height"],
+    [390, 844, "width"],
+  ] as const)("at %i×%i the fill's %s follows the program's progress", async (width, height, side) => {
+    const page = await openPage(browser, planUrl(), { width, height }, reqsCollapsed);
+    try {
+      const ratio = await page.evaluate((s) => {
+        const rect = (sel: string) => document.querySelector(sel)!.getBoundingClientRect();
+        return rect(".reqs-rail-completed")[s] / rect(".reqs-rail-bar")[s];
+      }, side);
+      expect(Math.abs(ratio - 0.25)).toBeLessThanOrEqual(0.02);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("is a drop target for removing a placed course", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, phone, reqsCollapsed);
+    try {
+      const card = page.locator('[data-placed="COMP1130"]');
+      const rail = page.locator(".reqs-rail");
+      const box = (await rail.boundingBox())!;
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+      await card.hover();
+      await page.mouse.down();
+      await page.mouse.move(x, y, { steps: 10 });
+      expect(await page.locator("aside.reqs-drop-ready").count()).toBe(1);
+      expect(await rail.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("dashed");
+      expect(
+        await page.evaluate(
+          ([px, py]) => !!document.elementFromPoint(px, py)?.closest("aside[aria-label='requirements']"),
+          [x, y],
+        ),
+      ).toBe(true);
+      await page.mouse.up();
+      await expect.poll(() => card.count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("collapses below the fitted height too", async () => {
+    const page = await openPage(browser, planUrl(), { width: 700, height: 400 });
+    try {
+      const hide = page.locator("button.reqs-hide");
+      expect(await hide.isVisible()).toBe(true);
+      await hide.click();
+      expect(await page.locator(".reqs-rail").isVisible()).toBe(true);
+      expect(await panelReqs(page)).toBe("collapsed");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("passes axe with the requirements collapsed", async () => {
+    const page = await openPage(browser, planUrl(), phone, reqsCollapsed);
+    try {
+      expect(await axeViolations(page)).toEqual([]);
     } finally {
       await page.close();
     }
