@@ -231,3 +231,38 @@ failed first with the toast's bottom at 820px over the bar's 780px. Two
 more rows pin the toast at 24px at 1920×1080 collapsed and at 390×844
 expanded, and the existing resize-handle tests confirm the fit cap still
 works after the move.
+
+## 2026-09-27 — Resetting the timeline's stacking, not raising the handle
+
+Resolved by da4a20d.
+
+The plan turned the requirements resize handle horizontal in the stacked
+phone layout, drawn 1rem tall with a 2.75rem hit area from a `::before`
+that reaches 14px into each pane. Its CSS went in as written, and every
+new test passed but one: the plan's hit-area probe, `elementFromPoint`
+12px above the line, returned a course card in the timeline instead of the
+handle. The handle is later in the DOM and positioned, so on paper it
+should have painted on top.
+
+Walking the element chain showed `.planner-timeline-area` at `z-index: 2`.
+That value belongs to the base rule, which keeps the unfitted stacked
+timeline sticky above the requirements scrolling under it. The fitted
+layout makes the pane `position: static`, which I'd assumed disabled the
+z-index. It doesn't on a flex item: flex items honour z-index without
+positioning, so the timeline was its own stacking context above the
+handle.
+
+The obvious fix is `z-index: 3` on the handle. It would have passed the
+probe, but it would also have lifted the handle's lower hit area over the
+sticky "Hide requirements" button (`z-index: 1`). The plan says that button
+must keep winning where the two overlap, and the probe deliberately sits
+near the left edge for that reason. So the call was to remove the
+irrelevant z-index where it stops meaning anything: `z-index: auto` in the
+fitted stacked rule that already makes the timeline static, with a comment
+naming the flex-item rule.
+
+The check is the plan's own `spec/` test, now green on both probes. The
+unchanged "Hide requirements" tests confirm the button still takes its
+clicks, and the fitted-layout and collapse suites all passed (436 of 436).
+The amendment is written into the phase file, so the plan still describes
+what was built.
