@@ -773,11 +773,14 @@ nav[aria-label="site"] .nav-hide:hover {
   color: var(--unigrey);
 }
 
+/* overflow-y is set explicitly: overflow-x: auto alone computes it to auto
+   too, a second vertical scrollbar inside the pane that already scrolls. */
 .timeline-scroll {
   position: relative;
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-block-end: 0.5rem;
 }
 

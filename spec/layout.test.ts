@@ -405,6 +405,33 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     expect(geometry.panesGap).toBeLessThanOrEqual(1);
   });
 
+  // The pane is the timeline's only vertical scroller, and it ends at the
+  // bottom of the tallest semester column — the prereq overlay mustn't pad
+  // it out (it used to size itself from a scrollHeight it was part of).
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the timeline scrolls vertically once, to the bottom of the columns", async (width, height) => {
+    const result = await withPlan({ width, height }, (page) =>
+      page.evaluate(() => {
+        const scroll = document.querySelector<HTMLElement>(".timeline-scroll")!;
+        const svg = document.querySelector(".prereq-overlay")!;
+        const top = scroll.getBoundingClientRect().top;
+        const columnsBottom = Math.max(
+          ...[...scroll.querySelectorAll(".term")].map((t) => t.getBoundingClientRect().bottom - top),
+        );
+        return {
+          innerOverflowY: getComputedStyle(scroll).overflowY,
+          innerExtra: scroll.scrollHeight - scroll.clientHeight,
+          svgExtra: svg.getBoundingClientRect().height - columnsBottom - parseFloat(getComputedStyle(scroll).paddingBottom),
+        };
+      }),
+    );
+    expect(result.innerOverflowY).toBe("hidden");
+    expect(result.innerExtra).toBeLessThanOrEqual(0);
+    expect(result.svgExtra).toBeLessThanOrEqual(1);
+  });
+
   it("scrolls each pane on its own while the title stays put", async () => {
     const result = await withPlan({ width: 1920, height: 1080 }, (page) =>
       page.evaluate(() => {

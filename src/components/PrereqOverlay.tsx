@@ -30,6 +30,7 @@ interface Line {
 export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [lines, setLines] = useState<Line[]>([]);
+  const [layoutTick, setLayoutTick] = useState(0);
 
   // Measuring card positions has to happen in a layout effect, not during
   // render: a render only builds the next tree, it doesn't move any cards
@@ -47,6 +48,11 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
       setLines([]);
       return;
     }
+    // Collapsed first: the svg is itself part of the scroll size it's read
+    // from, so sizing it straight off scrollHeight could only ever grow it —
+    // it kept the timeline scrolling past the bottom of the columns.
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
     svg.setAttribute("width", String(scroll.scrollWidth));
     svg.setAttribute("height", String(scroll.scrollHeight));
 
@@ -74,7 +80,17 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
       if (from && to) next.push({ key: `${edge.from}-${edge.to}`, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
     }
     setLines(next);
-  }, [view, show, hoveredCode]);
+  }, [view, show, hoveredCode, layoutTick]);
+
+  // The columns also change size without a new view — webfonts arriving
+  // after the first measure, a resized window — so measure again then.
+  useLayoutEffect(() => {
+    const scroll = svgRef.current?.parentElement;
+    if (!scroll) return;
+    const observer = new ResizeObserver(() => setLayoutTick((tick) => tick + 1));
+    observer.observe(scroll);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <svg ref={svgRef} class={`prereq-overlay${hoveredCode ? " prereq-overlay-focused" : ""}`} aria-hidden="true">
