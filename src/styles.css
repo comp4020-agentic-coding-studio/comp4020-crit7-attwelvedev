@@ -797,11 +797,14 @@ nav[aria-label="site"] .nav-hide:hover {
   stroke-dasharray: 6 4;
 }
 
-/* Hovering one placed course draws just its own chain — bolder than the
-   "show everything" toggle's uniform lines, since there's only ever a
-   handful of them at once and they're the direct answer to "what does
-   *this* course depend on," not a dense trace to pick a path out of. */
+/* Hovering one placed course with the links on picks out its own chain:
+   the rest of the graph fades back but stays, so the hovered lines read
+   as part of the whole plan rather than replacing it. */
 .prereq-overlay-focused line {
+  opacity: 0.2;
+}
+
+.prereq-overlay-focused line.prereq-hovered {
   stroke-width: 3;
   opacity: 1;
 }

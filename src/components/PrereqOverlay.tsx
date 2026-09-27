@@ -5,15 +5,19 @@ import { overlayEdges, type OverlayEdgeKind } from "./planner-logic";
 interface Props {
   view: PlanView;
   show: boolean;
-  // Hovering a placed card shows just its own chain even with the toggle
-  // off — the toggle is for "trace everything at once"; this is for "what
-  // does *this* course actually depend on," which most of the time is the
-  // question a student actually has.
+  // With the links on, hovering a placed card picks its own lines out of
+  // the graph — bold, with the rest dimmed rather than hidden, so the chain
+  // stays readable against everything around it instead of the graph
+  // vanishing under the pointer. With the links off, hover draws nothing:
+  // lines appearing unasked as the pointer crosses cards read as noise, and
+  // the Details panel already lists one course's prerequisites.
   hoveredCode: string | null;
 }
 
 interface Line {
   key: string;
+  from: string;
+  to: string;
   kind: OverlayEdgeKind;
   x1: number;
   y1: number;
@@ -68,20 +72,15 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
       };
     }
 
-    const allEdges = view.placements.flatMap((p) => overlayEdges(view, p.code));
-    const edges = hoveredCode
-      ? allEdges.filter((e) => e.from === hoveredCode || e.to === hoveredCode)
-      : show
-        ? allEdges
-        : [];
+    const edges = show ? view.placements.flatMap((p) => overlayEdges(view, p.code)) : [];
     const next: Line[] = [];
     for (const edge of edges) {
       const from = centreOf(edge.from);
       const to = centreOf(edge.to);
-      if (from && to) next.push({ key: `${edge.from}-${edge.to}`, kind: edge.kind, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
+      if (from && to) next.push({ key: `${edge.from}-${edge.to}`, from: edge.from, to: edge.to, kind: edge.kind, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
     }
     setLines(next);
-  }, [view, show, hoveredCode, layoutTick]);
+  }, [view, show, layoutTick]);
 
   // The columns also change size without a new view — webfonts arriving
   // after the first measure, a resized window — so measure again then.
@@ -93,10 +92,23 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
     return () => observer.disconnect();
   }, []);
 
+  // Hover only restyles lines already measured, so it needn't re-measure.
+  // The hovered card's lines go last so they paint over the dimmed ones.
+  const focused = show && hoveredCode !== null;
+  const touches = (line: Line) => line.from === hoveredCode || line.to === hoveredCode;
+  const ordered = focused ? [...lines.filter((l) => !touches(l)), ...lines.filter(touches)] : lines;
+
   return (
-    <svg ref={svgRef} class={`prereq-overlay${hoveredCode ? " prereq-overlay-focused" : ""}`} aria-hidden="true">
-      {lines.map((line) => (
-        <line key={line.key} class={`prereq-${line.kind}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+    <svg ref={svgRef} class={`prereq-overlay${focused ? " prereq-overlay-focused" : ""}`} aria-hidden="true">
+      {ordered.map((line) => (
+        <line
+          key={line.key}
+          class={`prereq-${line.kind}${focused && touches(line) ? " prereq-hovered" : ""}`}
+          x1={line.x1}
+          y1={line.y1}
+          x2={line.x2}
+          y2={line.y2}
+        />
       ))}
     </svg>
   );

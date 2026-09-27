@@ -1361,6 +1361,51 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
   });
 });
 
+describe("prerequisite links", { timeout: 30_000 }, () => {
+  // The example plan places COMP3242 after COMP1140 and three of its
+  // "6 units of (COMP3670 or MATH1013 or ... MATH1116)" options, and
+  // later courses that build on it — its lines both in and out.
+  const lineStates = (page: Page) =>
+    page.$$eval(".prereq-overlay line", (lines) =>
+      lines.map((line) => ({
+        hovered: line.classList.contains("prereq-hovered"),
+        option: line.classList.contains("prereq-option"),
+        opacity: Number(getComputedStyle(line).opacity),
+      })),
+    );
+
+  it("hover draws nothing while the links are off", async () => {
+    await withPlan({ width: 1920, height: 1080 }, async (page) => {
+      await page.locator('[data-placed="COMP3242"]').hover();
+      expect(await lineStates(page)).toEqual([]);
+    });
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i hover bolds a course's own links and dims, not hides, the rest", async (width, height) => {
+    await withPlan({ width, height }, async (page) => {
+      await page.getByRole("button", { name: "More options" }).click();
+      await page.getByLabel("Show prerequisite links").check();
+      await page.keyboard.press("Escape");
+      const before = await lineStates(page);
+      expect(before.some((l) => l.option)).toBe(true);
+
+      await page.locator('[data-placed="COMP3242"]').hover();
+      const after = await lineStates(page);
+      const hovered = after.filter((l) => l.hovered);
+      const rest = after.filter((l) => !l.hovered);
+      expect(after).toHaveLength(before.length);
+      expect(hovered.length).toBeGreaterThanOrEqual(4);
+      expect(hovered.filter((l) => l.option).length).toBeGreaterThanOrEqual(4);
+      expect(hovered.every((l) => l.opacity === 1)).toBe(true);
+      expect(rest.length).toBeGreaterThan(0);
+      expect(rest.every((l) => l.opacity > 0 && l.opacity < Math.min(...hovered.map((h) => h.opacity)))).toBe(true);
+    });
+  });
+});
+
 describe("more options", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const moreOptions = (page: Page) => page.getByRole("button", { name: "More options" });
