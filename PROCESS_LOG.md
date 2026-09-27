@@ -266,3 +266,36 @@ unchanged "Hide requirements" tests confirm the button still takes its
 clicks, and the fitted-layout and collapse suites all passed (436 of 436).
 The amendment is written into the phase file, so the plan still describes
 what was built.
+
+## 2026-09-27 — The overlay that measured itself
+
+Resolved by 2f6af65.
+
+The timeline showed two vertical scrollbars, and it scrolled past the
+bottom of the semester columns. The obvious guess was the pane's own
+`overflow-y: auto` plus too much padding. Measuring in Chromium told a
+different story. `.timeline-scroll` only sets `overflow-x: auto`, and CSS
+computes the other axis to `auto` as well, so the strip was a second
+vertical scroller inside the pane. It had something to scroll because it
+was 1463px tall inside against columns 1444px tall.
+
+The extra 19px came from the prerequisite-lines SVG. `PrereqOverlay` sized
+it from `scroll.scrollHeight`, but the absolutely positioned SVG is part of
+that same scroll size. Once it was set from one tall measurement (taken
+before the webfonts arrived and the cards got shorter), every later
+measurement read back its own height. It could grow and never shrink.
+
+Hiding the inner scrollbar with `overflow-y: hidden` alone would have
+looked fixed and left the bug in place: a box with `overflow: hidden` can
+still be scrolled from script, and the timeline's "locate this card"
+`scrollIntoView` would have nudged it by the stale overhang. So the fix
+does both. It pins `overflow-y`, and it collapses the SVG to 0×0 before
+reading the size, so the measurement only sees the columns. A
+ResizeObserver measures again when the columns change size without a new
+view (fonts, window resizes), so the lines stay on the cards as well.
+
+The check is a new `spec/layout.test.ts` case at both marking viewports.
+It asserts the strip's `overflow-y` is `hidden`, that it has no inner
+vertical overflow, and that the SVG ends at the bottom of the tallest
+column. It failed before the change and passes after, with `pnpm check`
+green on all 438 tests.
