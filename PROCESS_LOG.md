@@ -127,3 +127,50 @@ rule. Checked by running the port against two real, live-fetched fixture
 pages and asserting exact string equality against the already-scraped JSON,
 not just "looks plausible" — the same discipline the offline scraper's own
 output already carries.
+
+## 2026-09-27 — "Swipe to hide the nav" was page overflow, found by measuring the render
+
+Resolved by 009ebcf..29a3c5f.
+
+I'd described students swiping sideways to push the site nav off-screen,
+and the obvious reading was a missing feature: add a nav-hide toggle and
+move on. Before planning that, I had headless Chrome measure
+`scrollWidth` on `/plan/example` at five widths. Every desktop width
+overflowed by exactly 208px, the nav's width, and 390 didn't. The "swipe"
+was a layout bug: `main` was a `width: 100%` flex item whose default
+`min-width: auto` pinned it at viewport width beside the nav. Reading the
+CSS wouldn't have shown this. The rule looks harmless, and `width: auto`
+doesn't fix it, because a more specific rule wins.
+
+Fixing only that would have squeezed the timeline to 124px at 1100, so the
+planner now lays itself out from its own width in 3/2/1-column tiers. The
+correction landed in the harness rather than just the CSS. `009ebcf` adds a
+real-browser Playwright spec to `pnpm check` and CI. `29a3c5f` makes it fail
+on any sideways overflow at six widths, and checks tier widths, rendered
+track counts and cards staying inside their groups. Planning the container
+also surfaced a constraint before it shipped: layout containment would
+re-anchor the fixed undo toast, so the toast stays outside the container.
+Checked by the spec going red (+208, a 704px aside at every width) then
+green, and by before/after renders at 1920, 1280, 1100, 900 and 390. 390 is
+pixel-identical.
+
+## 2026-09-27 — The plan's width tokens contradicted its own formula, by 0.2px
+
+Resolved by 29a3c5f.
+
+The plan derived sidebar widths from `n × 13rem + (n − 1) × 0.6rem +
+4.5rem` but listed 31rem and 44.5rem for two and three columns. Both drop
+the gap term. Implemented verbatim, every test passed except the
+card-containment check at 1920, where three cards in a depth-2 group ended
+0.2px past their group. The tempting move was to relax the test's 1px
+margin, since 0.2px is invisible. That would have hidden a real fit
+failure: 2 columns cleared by only 0.4px, so any font or border change
+would tip it. Instead I measured the chain from aside to grid in the
+browser. The overhead was exactly the 69px the plan budgeted, which put the
+error in the tokens, not the budget. I corrected them to 31.1rem and
+44.7rem, with thresholds of 63.1rem and 76.7rem, in the plan set and the
+code. That also caught a knock-on issue for Phase 04's snap logic:
+`(31.1 + 44.7) / 2` isn't exact in floating point, so its "midpoint →
+larger" tie-break now carries a tolerance. Checked by the full layout spec
+passing unweakened, and by each reference viewport landing in the same tier
+as before.
