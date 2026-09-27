@@ -393,7 +393,7 @@ toast above the bar with it.
 | --- | --- | --- | --- | --- | --- |
 | 01 | `…-01-row-and-title.md` | 1–3 | — | Three commits. The completed-semesters control, no "cutoff" in any user-facing text, the ⋯ "More options" panel, and the compact title row that carries both. Human review of each | [x] |
 | 02 | `…-02-stacked-collapse.md` | 4–5 | — | Two commits. Stacked "Hide requirements" and the bottom bar (a drop target, shared key), and the toast above the bar. Human review of the bar | [x] |
-| 03 | `…-03-stacked-split.md` | 6–7 | 02 | One commit. The handle turns horizontal in stacked and snaps 30/50/70/Collapsed, saved and applied before paint. Human review of the split | [ ] |
+| 03 | `…-03-stacked-split.md` | 6–7 | 02 | One commit. The handle turns horizontal in stacked and snaps 30/50/70/Collapsed, saved and applied before paint. Human review of the split | [x] |
 
 Phase 02 doesn't need Phase 01: its code and tests don't touch the title
 row, and the panes keep their shape. Run them in order anyway. Phase 03 needs Phase 02 for:
@@ -403,21 +403,21 @@ row, and the panes keep their shape. Run them in order anyway. Phase 03 needs Ph
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and every task is complete with tests
+- [x] Every phase in §5 is ticked, and every task is complete with tests
       passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Manually verified with `agent-browser`:
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Manually verified with `agent-browser`:
   - at 390×844 on `/plan/example`: a 1.4rem title, the badge under it, and
     "Completed through S2 2027 ‹ › ⋯" under that, with nothing above the
     timeline
   - drag the handle to 70%, reload: still 70% with no flash
   - press End: the bar shows. Reload at 1920×1080: the sidebar is its rail
   - no page scroll either way throughout
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Every `Human review:` task (1, 2, 3, 4, 7) explicitly accepted by
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Every `Human review:` task (1, 2, 3, 4, 7) explicitly accepted by
       the user
-- [ ] No item remains in §8
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 

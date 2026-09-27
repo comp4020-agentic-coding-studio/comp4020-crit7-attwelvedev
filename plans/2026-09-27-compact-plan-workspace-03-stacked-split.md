@@ -643,13 +643,13 @@ specificity, so Collapsed still wins over any split.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 6–7 complete, with their tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] One commit covering Tasks 6 and 7
-- [ ] Task 7's human review accepted by the user
-- [ ] Feature DoD (overview §6) walked through with `agent-browser`
-- [ ] Tick Phase 03 in overview §5 and commit
+- [x] Tasks 6–7 complete, with their tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] One commit covering Tasks 6 and 7
+- [x] Task 7's human review accepted by the user
+- [x] Feature DoD (overview §6) walked through with `agent-browser`
+- [x] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
