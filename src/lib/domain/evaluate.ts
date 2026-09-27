@@ -1,7 +1,8 @@
 import { createFeasibility } from "./feasibility";
 import { filterLabel, matchesFilter } from "./filters";
 import { termLabel, TERMS } from "./terms";
-import type { Catalogue, CatalogueCourse, CourseFilter, PlanState, Placement, ReqExpr } from "./types";
+import type { Catalogue, CatalogueCourse, CheckAnswer, CourseFilter, PlanState, Placement, ReqExpr } from "./types";
+import { verifyItemLabels } from "./verify-labels";
 
 export interface Suggestion {
   code: string;
@@ -12,16 +13,25 @@ export interface Suggestion {
 
 // The parsed ReqExpr tree, annotated per node with whether it's satisfied by
 // the *current placements* (§4.2). `ok` is null for "unknown": an
-// unverifiable leaf, which the app can never evaluate either way, and any
-// and/or whose answer turns on one (three-valued: an unmet sibling still
-// makes an AND false, a met one still makes an OR true).
+// unverifiable leaf the student hasn't answered, which the app can never
+// evaluate either way, and any and/or whose answer turns on one
+// (three-valued: an unmet sibling still makes an AND false, a met one still
+// makes an OR true). An answered leaf takes the student's answer.
 export type RequisiteStatus =
   | { kind: "and"; items: RequisiteStatus[]; ok: boolean | null }
   | { kind: "or"; items: RequisiteStatus[]; ok: boolean | null }
   | { kind: "course"; code: string; concurrent: boolean; ok: boolean }
   | { kind: "units"; units: number; filter: CourseFilter; text: string; ok: boolean }
   | { kind: "program"; code: string | null; name: string; satisfied: boolean; ok: boolean }
-  | { kind: "unverifiable"; text: string; ok: null };
+  | { kind: "unverifiable"; text: string; ok: boolean | null; answer: CheckAnswer | null };
+
+// One "Verify on P&C" item on a placement: its raw text (the answer key),
+// how it's shown, and the student's answer (null = Not sure).
+export interface VerifyCheck {
+  item: string;
+  label: string;
+  answer: CheckAnswer | null;
+}
 
 export interface PlacementEval {
   code: string;
@@ -33,7 +43,9 @@ export interface PlacementEval {
   state: "hard" | "soft" | "check" | "available";
   reasons: string[];
   suggestions: Suggestion[];
+  // Labels of the items still unanswered; empty once "available".
   verify: string[];
+  checks: VerifyCheck[];
   conflictWith: string[];
   loser: boolean;
   completed: boolean;
@@ -76,6 +88,15 @@ function coursesToPlace(node: RequisiteStatus, placed: ReadonlyMap<string, unkno
       return placed.has(node.code) ? 0 : 1;
     default:
       return 0;
+  }
+}
+
+function collectMarkedNotMet(node: RequisiteStatus, out: string[]): void {
+  if (node.ok !== false) return; // only answers that actually sink the requisite are reasons
+  if (node.kind === "and" || node.kind === "or") {
+    for (const item of node.items) collectMarkedNotMet(item, out);
+  } else if (node.kind === "unverifiable" && node.answer === "not-met") {
+    out.push(node.text);
   }
 }
 
@@ -145,7 +166,7 @@ export function evaluatePlan(
     return total;
   }
 
-  function evalNode(expr: ReqExpr, t: number): RequisiteStatus {
+  function evalNode(expr: ReqExpr, t: number, answers: Readonly<Record<string, CheckAnswer>>): RequisiteStatus {
     switch (expr.kind) {
       case "course": {
         const placement = placedByCode.get(expr.code);
@@ -161,19 +182,22 @@ export function evaluatePlan(
         return { kind: "units", units: expr.units, filter: expr.filter, text: expr.text, ok };
       }
       case "and": {
-        const items = expr.items.map((item) => evalNode(item, t));
+        const items = expr.items.map((item) => evalNode(item, t, answers));
         const ok = items.some((item) => item.ok === false) ? false : items.some((item) => item.ok === null) ? null : true;
         return { kind: "and", items, ok };
       }
       case "or": {
-        const items = expr.items.map((item) => evalNode(item, t));
+        const items = expr.items.map((item) => evalNode(item, t, answers));
         const ok = items.some((item) => item.ok === true) ? true : items.some((item) => item.ok === null) ? null : false;
         return { kind: "or", items, ok };
       }
       case "program":
         return { kind: "program", code: expr.code, name: expr.name, satisfied: expr.satisfied, ok: expr.satisfied };
-      case "unverifiable":
-        return { kind: "unverifiable", text: expr.text, ok: null };
+      case "unverifiable": {
+        const answer = answers[expr.text] ?? null;
+        const ok = answer === "met" ? true : answer === "not-met" ? false : null;
+        return { kind: "unverifiable", text: expr.text, ok, answer };
+      }
     }
   }
 
@@ -221,7 +245,14 @@ export function evaluatePlan(
     const span = spanOf(p.code);
     const lastTerm = lastTermOf(p);
     const completed = lastTerm < plan.cutoff;
-    const verify = course?.requisites.unverifiable ?? [];
+
+    // FR 10: only answers to the course's current items count — one left
+    // over from older wording is never shown and reads as unanswered.
+    const answers = plan.checks?.[p.code] ?? {};
+    const items = course?.requisites.unverifiable ?? [];
+    const labels = verifyItemLabels(course?.requisites.prereq ?? null, items);
+    const checks: VerifyCheck[] = items.map((item) => ({ item, label: labels.get(item)!, answer: answers[item] ?? null }));
+    const verify = checks.filter((check) => check.answer === null).map((check) => check.label);
 
     const allPrereqCodes = new Set<string>();
     collectCourseCodes(course?.requisites.prereq ?? null, allPrereqCodes);
@@ -241,6 +272,7 @@ export function evaluatePlan(
         reasons: [hardReason],
         suggestions: [],
         verify,
+        checks,
         conflictWith: conflicts,
         loser,
         completed,
@@ -251,7 +283,7 @@ export function evaluatePlan(
     }
 
     const prereq = course?.requisites.prereq ?? null;
-    const requisiteStatus = prereq ? evalNode(prereq, p.term) : null;
+    const requisiteStatus = prereq ? evalNode(prereq, p.term, answers) : null;
     const available = requisiteStatus === null || requisiteStatus.ok === true;
 
     if (available || requisiteStatus.ok === null) {
@@ -263,7 +295,10 @@ export function evaluatePlan(
         state: available ? "available" : "check",
         reasons: [],
         suggestions: [],
-        verify,
+        // Met overall: whatever's left blank (e.g. the other side of an OR)
+        // isn't needed, so there's nothing to verify.
+        verify: available ? [] : verify,
+        checks,
         conflictWith: conflicts,
         loser,
         completed,
@@ -286,6 +321,9 @@ export function evaluatePlan(
       const missing = leaf.units - achieved;
       return `Needs ${missing} more units of ${filterLabel(leaf.filter)} before ${termLabel(p.term)}`;
     });
+    const markedNotMet: string[] = [];
+    collectMarkedNotMet(requisiteStatus!, markedNotMet);
+    for (const item of markedNotMet) reasons.push(`You marked "${labels.get(item) ?? item}" as not met`);
 
     return {
       code: p.code,
@@ -296,6 +334,7 @@ export function evaluatePlan(
       reasons,
       suggestions,
       verify,
+      checks,
       conflictWith: conflicts,
       loser,
       completed,

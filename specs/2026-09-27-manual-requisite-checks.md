@@ -49,7 +49,11 @@ catalogue can prove.
    (e.g. MATH1116's `AND(MATH1115, "with a mark of 60 or above")`) is
    labelled with that course — "MATH1115 with a mark of 60 or above" —
    everywhere it is shown (Details control, card note, Not met reason).
-   Other items are labelled with their text as-is.
+   "Directly" means the AND is exactly that course and that item — a
+   sentence-level AND that happens to hold one course (COMP4820's
+   `AND(program, COMP2100, units, "Competitive entry…", …)`) doesn't
+   qualify (narrowed during execution, 2026-09-27). Other items are
+   labelled with their text as-is.
 6. Verify items that come from P&C's **incompatibility** field (today
    routed only into `unverifiable`, never into the tree — COMP3820,
    COMP4550, COMP4620, COMP4820, MATH4343) become required: AND'ed with the
@@ -148,8 +152,8 @@ placement becomes the *unanswered* items, and is empty when `state ===
 "available"` (FR 4).
 
 **Labels (FR 5).** A pure helper derives each item's display label from
-the tree: an unverifiable leaf whose parent AND contains exactly one
-course leaf gets `"<CODE> <text>"`; otherwise its text. Answers stay keyed
+the tree: an unverifiable leaf whose parent AND is exactly one course leaf
+plus that leaf gets `"<CODE> <text>"`; otherwise its text. Answers stay keyed
 by raw text (FR 8/10), labels are display only.
 
 **API.** `PUT /api/plans/:id/checks` `{ code, item, answer: "met" |

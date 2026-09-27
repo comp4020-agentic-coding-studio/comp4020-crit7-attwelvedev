@@ -34,9 +34,13 @@ Numbered as in the spec (§2.1 there); restated so this file stands alone.
    item: `You marked "<label>" as not met`.
 4. `PlacementEval.verify` (the card's "Verify on P&C" line) lists only
    unanswered items, as labels, and is `[]` when `state === "available"`.
-5. An unverifiable leaf whose parent AND contains exactly one course leaf
-   is labelled `"<CODE> <text>"` (MATH1116 → "MATH1115 with a mark of 60 or
-   above"); others are labelled with their text. Labels are display only.
+5. An unverifiable leaf whose parent AND has exactly two items — one course
+   leaf and this unverifiable leaf (the parser's shape for a code directly
+   followed by its qualifier) — is labelled `"<CODE> <text>"` (MATH1116 →
+   "MATH1115 with a mark of 60 or above"); others are labelled with their
+   text. Labels are display only. *(Narrowed 2026-09-27 during execution:
+   "parent AND contains exactly one course leaf" also caught sentence-level
+   ANDs, e.g. COMP4820 → "COMP2100 Competitive entry…".)*
 6. Code-less sentences from the incompatibility bucket (today only in
    `unverifiable`, never in `prereq`) become unverifiable leaves AND'ed into
    `prereq` (standing alone if there's no other prereq).
@@ -177,7 +181,7 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
 
 ### Task 3: Evaluate answers — states, Not met reasons, labels, unanswered-only verify
 
-- [ ] Done
+- [x] Done
 - **Description:** Answers change leaf results; placements expose each
   item with its label and answer; `verify` shows only unanswered labels
   and nothing when available.
@@ -189,16 +193,17 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
     - `"an item AND'ed with exactly one course is labelled with it"` — real MATH1116 prereq → `verifyItemLabels(prereq, unverifiable)` maps `"with a mark of 60 or above"` → `"MATH1115 with a mark of 60 or above"` and `"with a mark of 80 or above"` → `"MATH1113 with a mark of 80 or above"`.
     - `"other items keep their text"` — COMP4550: every label equals its text.
     - `"an item AND'ed with two courses keeps its text"` — synthetic `AND(course A, course B, unverifiable x)` → `x` → `x`.
+    - `"an item in a sentence-level AND with one course keeps its text"` — real COMP4820 and COMP4020: every label equals its text (added 2026-09-27 with the FR 5 narrowing).
   - `evaluate.test.ts`: extend the helper to `function plan(placements: { code: string; term: number }[], cutoff = 0, checks: PlanChecks = {}): PlanState` (existing calls unchanged). New `describe("manual checks")` (synthetic: its own copies of the `unverifiable leaves` fixtures — `met` = course `ZZDD1000` placed t0, `unknown` = `{ kind: "unverifiable", text: "request a permission code" }`, dependent `ZZDD2000` t1 with prereq `AND(met, unknown)` and `unverifiable: ["request a permission code"]` — `SyntheticOpts` gains `unverifiable?: string[]` (default `[]`) for this, ruled 2026-09-27 during execution review):
     - `"Met on the only unknown makes met AND unknown available, with no verify line"` — `state` `"available"`, `verify` `[]`.
-    - `"Not met gives soft with a 'You marked … as not met' reason"` — `reasons` contains `You marked "request a permission code" as not met`.
-    - `"Not sure stays check, and verify lists it"` — `verify` equals `["request a permission code"]`.
+    - `"Not met gives soft with a 'You marked … as not met' reason"` — `reasons` contains `You marked "ZZDD1000 request a permission code" as not met` (FR 5 labels it: the AND is exactly course + item).
+    - `"Not sure stays check, and verify lists it"` — `verify` equals `["ZZDD1000 request a permission code"]`.
     - `"a stored answer for text the course no longer has is ignored"` — `checks: { ZZDD2000: { "old wording": "met" } }` → `"check"`, `checks[0].answer` `null`.
   - `evaluate.test.ts` › real catalogue:
     - `"MATH1116: Met on the MATH1115 mark is Available with the MATH1113 item blank"` — `MATH1115` t0, `MATH1116` t1, `checks: { MATH1116: { "with a mark of 60 or above": "met" } }` → `"available"`; `checks` entries carry labels `"MATH1115 with a mark of 60 or above"` / `"MATH1113 with a mark of 80 or above"`.
     - `"the same sentence on two courses is answered separately"` — `COMP4011` t5 and `COMP4020` t7 (both not hard-blocked there, verified 2026-09-27); `checks: { COMP4011: { "You will need to contact the School of Computing to request a permission code to enrol in this course": "met" } }` → COMP4011's matching `checks` entry has `answer: "met"`, COMP4020's has `answer: null`.
 - **Implementation (green):**
-  - `verify-labels.ts`: `export function verifyItemLabels(prereq: ReqExpr | null, items: string[]): Map<string, string>` — walk the tree; for an `and` whose items contain exactly one `course` leaf, each direct `unverifiable` child maps to `` `${course.code} ${text}` ``; every other item in `items` maps to itself.
+  - `verify-labels.ts`: `export function verifyItemLabels(prereq: ReqExpr | null, items: string[]): Map<string, string>` — walk the tree; for an `and` of exactly two items, one `course` leaf and one `unverifiable` leaf, that child maps to `` `${course.code} ${text}` ``; every other item in `items` maps to itself.
   - `evaluate.ts`:
     - `export interface VerifyCheck { item: string; label: string; answer: CheckAnswer | null }`.
     - `RequisiteStatus` unverifiable variant → `{ kind: "unverifiable"; text: string; ok: boolean | null; answer: CheckAnswer | null }`.

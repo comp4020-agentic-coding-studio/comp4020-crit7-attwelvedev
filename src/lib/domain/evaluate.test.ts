@@ -4,7 +4,7 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../catalogue/from-
 import { EXAMPLE_PLAN } from "../../data/example-plan";
 import { createFeasibility } from "./feasibility";
 import { parseRequisites } from "./requisites";
-import type { Catalogue, CatalogueCourse, PlanState, ReqExpr } from "./types";
+import type { Catalogue, CatalogueCourse, PlanChecks, PlanState, ReqExpr } from "./types";
 import { evaluatePlan } from "./evaluate";
 
 function loadRealCatalogue(): Catalogue {
@@ -23,13 +23,14 @@ function loadRealCatalogue(): Catalogue {
   return { courses, horizonYear };
 }
 
-function plan(placements: { code: string; term: number }[], cutoff = 0): PlanState {
+function plan(placements: { code: string; term: number }[], cutoff = 0, checks: PlanChecks = {}): PlanState {
   return {
     id: "p",
     readOnly: false,
     cutoff,
     choices: {},
     placements: placements.map((p) => ({ code: p.code, term: p.term, pinnedGroupId: null })),
+    checks,
   };
 }
 
@@ -39,6 +40,7 @@ interface SyntheticOpts {
   twoSemester?: boolean;
   prereq?: ReqExpr | null;
   incompatible?: string[];
+  unverifiable?: string[];
 }
 
 function synthetic(code: string, opts: SyntheticOpts = {}): CatalogueCourse {
@@ -53,7 +55,7 @@ function synthetic(code: string, opts: SyntheticOpts = {}): CatalogueCourse {
     requisites: {
       prereq: opts.prereq ?? null,
       incompatible: opts.incompatible ?? [],
-      unverifiable: [],
+      unverifiable: opts.unverifiable ?? [],
       otherPrograms: [],
       parseStatus: "ok",
     },
@@ -296,6 +298,50 @@ describe("evaluatePlan (synthetic catalogues)", () => {
       expect(stateOf(prereq)).toEqual({ state, ok });
     });
   });
+
+  // A student's own answer stands in for the check the app can't make.
+  describe("manual checks", () => {
+    const met: ReqExpr = { kind: "course", code: "ZZDD1000", concurrent: false };
+    const unknown: ReqExpr = { kind: "unverifiable", text: "request a permission code" };
+
+    function evalWith(checks: PlanChecks) {
+      const cat = syntheticCatalogue([
+        synthetic("ZZDD1000"),
+        synthetic("ZZDD2000", { prereq: { kind: "and", items: [met, unknown] }, unverifiable: ["request a permission code"] }),
+      ]);
+      const result = evaluatePlan(
+        cat,
+        createFeasibility(cat),
+        plan([{ code: "ZZDD1000", term: 0 }, { code: "ZZDD2000", term: 1 }], 0, checks),
+      );
+      return result.placements.find((p) => p.code === "ZZDD2000")!;
+    }
+
+    it("Met on the only unknown makes met AND unknown available, with no verify line", () => {
+      const p = evalWith({ ZZDD2000: { "request a permission code": "met" } });
+      expect(p.state).toBe("available");
+      expect(p.verify).toEqual([]);
+    });
+
+    it("Not met gives soft with a 'You marked … as not met' reason", () => {
+      const p = evalWith({ ZZDD2000: { "request a permission code": "not-met" } });
+      expect(p.state).toBe("soft");
+      // Labelled with its course (FR 5): the AND is exactly ZZDD1000 + the item.
+      expect(p.reasons).toContain('You marked "ZZDD1000 request a permission code" as not met');
+    });
+
+    it("Not sure stays check, and verify lists it", () => {
+      const p = evalWith({});
+      expect(p.state).toBe("check");
+      expect(p.verify).toEqual(["ZZDD1000 request a permission code"]);
+    });
+
+    it("a stored answer for text the course no longer has is ignored", () => {
+      const p = evalWith({ ZZDD2000: { "old wording": "met" } });
+      expect(p.state).toBe("check");
+      expect(p.checks[0]!.answer).toBeNull();
+    });
+  });
 });
 
 describe("evaluatePlan: 'check' on the real catalogue", () => {
@@ -339,6 +385,32 @@ describe("evaluatePlan: 'check' on the real catalogue", () => {
       ]),
     );
     expect(result.placements.find((p) => p.code === "COMP4820")!.state).toBe("check");
+  });
+
+  it("MATH1116: Met on the MATH1115 mark is Available with the MATH1113 item blank", () => {
+    const result = evaluatePlan(
+      cat,
+      feas,
+      plan([{ code: "MATH1115", term: 0 }, { code: "MATH1116", term: 1 }], 0, {
+        MATH1116: { "with a mark of 60 or above": "met" },
+      }),
+    );
+    const p = result.placements.find((p) => p.code === "MATH1116")!;
+    expect(p.state).toBe("available");
+    expect(p.checks.map((c) => c.label)).toEqual(["MATH1115 with a mark of 60 or above", "MATH1113 with a mark of 80 or above"]);
+  });
+
+  it("the same sentence on two courses is answered separately", () => {
+    const item = "You will need to contact the School of Computing to request a permission code to enrol in this course";
+    const result = evaluatePlan(
+      cat,
+      feas,
+      plan([{ code: "COMP4011", term: 5 }, { code: "COMP4020", term: 7 }], 0, { COMP4011: { [item]: "met" } }),
+    );
+    const answerOn = (code: string) =>
+      result.placements.find((p) => p.code === code)!.checks.find((c) => c.item === item)!.answer;
+    expect(answerOn("COMP4011")).toBe("met");
+    expect(answerOn("COMP4020")).toBeNull();
   });
 
   it("the example plan — a complete, working plan — has nothing still flagged 'soft'", () => {
