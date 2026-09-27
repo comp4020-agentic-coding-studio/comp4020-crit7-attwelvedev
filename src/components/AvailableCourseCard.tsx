@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import type { PlacementView, PlanView } from "../lib/domain/view";
+import type { CourseCard, PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
@@ -8,6 +8,9 @@ import { dropTargets } from "./planner-logic";
 interface Props {
   view: PlanView;
   code: string;
+  // Given for a search result, which usually isn't (yet) part of the plan's
+  // tree and so has no view.courses entry of its own.
+  course?: CourseCard;
   // Present when this course is already on the timeline — the card then
   // shows placed status instead of a "Place in…" menu and stops being
   // draggable, but stays in the list so it can be compared against the
@@ -26,6 +29,7 @@ interface Props {
 export default function AvailableCourseCard({
   view,
   code,
+  course: courseOverride,
   placement,
   planId,
   onChanged,
@@ -36,7 +40,7 @@ export default function AvailableCourseCard({
   onMenuOpenChange,
   onLocateCourse,
 }: Props) {
-  const course = view.courses[code];
+  const course = courseOverride ?? view.courses[code];
   const readOnly = view.plan.readOnly;
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -52,7 +56,7 @@ export default function AvailableCourseCard({
   // plan — there, dropTargets reports every term as disallowed for every
   // course (the plan itself, not this course, is why), which would flag the
   // entire sidebar as "Blocked" and say nothing useful.
-  const targets = placement || readOnly ? [] : dropTargets(view, code);
+  const targets = placement || readOnly ? [] : dropTargets(view, code, courseOverride?.hardBlocked);
   const allBlocked = !placement && !readOnly && targets.length > 0 && targets.every((t) => !t.allowed);
   const blockedReason = allBlocked
     ? Array.from(new Set(targets.map((t) => t.reason).filter((r): r is string => !!r))).join("; ")
@@ -115,6 +119,7 @@ export default function AvailableCourseCard({
           code={code}
           onPlace={place}
           disabled={readOnly || pending}
+          hardBlockedOverride={courseOverride?.hardBlocked}
           open={openMenuCode === code}
           onOpenChange={(open) => onMenuOpenChange(code, open)}
         />
@@ -125,6 +130,7 @@ export default function AvailableCourseCard({
       <CourseDetail
         view={view}
         code={code}
+        course={courseOverride}
         planId={planId}
         open={detailsOpen}
         onChanged={onChanged}

@@ -743,6 +743,28 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     }
   });
 
+  it("shows an already-placed search result as the requirement lists do: dimmed, ticked, term badge, not draggable", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    try {
+      await page.fill(".course-search input", "COMP1130");
+      await page.click(".course-search button[type=submit]");
+      const card = page.locator(".course-search-results .course-card").filter({ hasText: "COMP1130" });
+      await card.waitFor();
+      expect(await card.getAttribute("class")).toBe("course-card course-card-sidebar-placed");
+      expect(await card.getAttribute("draggable")).toBe("false");
+      expect(await card.getAttribute("data-drag-code")).toBeNull();
+      expect(await card.locator(".course-card-tick").count()).toBe(1);
+      expect(await card.getByRole("button", { name: "Place in…" }).count()).toBe(0);
+      const badge = card.locator(".badge-term-link");
+      expect(await badge.textContent()).toBe("S1 2027");
+      await badge.click();
+      await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-placed"))).toBe("COMP1130");
+    } finally {
+      await page.close();
+    }
+  });
+
   it("outlines the term under a touch drag, but not a hard-blocked one", async () => {
     const id = await planWithPlacement("COMP1130");
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });

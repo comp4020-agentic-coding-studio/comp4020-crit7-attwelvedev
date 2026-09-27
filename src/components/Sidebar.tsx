@@ -359,6 +359,7 @@ export default function Sidebar({
           onResults={onSearchResults}
           openMenuCode={openMenuCode}
           onMenuOpenChange={onMenuOpenChange}
+          onLocateCourse={onLocateCourse}
           compact={compact.has("search")}
           onToggleCompact={() => setSectionCompact("search", !compact.has("search"))}
           onExpand={() => setSectionCompact("search", false)}

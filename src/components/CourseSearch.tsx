@@ -1,9 +1,7 @@
 import { useState } from "preact/hooks";
 import type { CourseCard as CourseCardData, PlanView } from "../lib/domain/view";
-import { isError, placeCourse, searchCourses, type SearchResult } from "./api";
-import CourseDetail from "./CourseDetail";
-import PlaceInMenu from "./PlaceInMenu";
-import { dropTargets } from "./planner-logic";
+import AvailableCourseCard from "./AvailableCourseCard";
+import { searchCourses, type SearchResult } from "./api";
 import SidebarSection from "./SidebarSection";
 
 interface Props {
@@ -18,6 +16,7 @@ interface Props {
   onResults?: (courses: CourseCardData[]) => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  onLocateCourse: (code: string) => void;
   compact: boolean;
   onToggleCompact: () => void;
   onExpand: () => void;
@@ -47,113 +46,6 @@ export function outcomeMessage(result: SearchResult, query: string): string {
   }
 }
 
-interface SearchResultCardProps {
-  view: PlanView;
-  planId: string;
-  course: CourseCardData;
-  readOnly: boolean;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
-  onDragStart?: (code: string) => void;
-  onDragEnd?: () => void;
-  openMenuCode: string | null;
-  onMenuOpenChange: (code: string, open: boolean) => void;
-}
-
-// Mirrors AvailableCourseCard's markup (same grid, same card width, same
-// "Details" dialog) so a search result is visually indistinguishable from
-// the requirement-group cards it sits alongside — the only difference is
-// the course card the dialog is given directly, since a searched course
-// usually isn't (yet) part of the plan's tree.
-function SearchResultCard({
-  view,
-  planId,
-  course,
-  readOnly,
-  onChanged,
-  onAnnounce,
-  onDragStart,
-  onDragEnd,
-  openMenuCode,
-  onMenuOpenChange,
-}: SearchResultCardProps) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [pending, setPending] = useState(false);
-  const draggable = !readOnly;
-
-  // See AvailableCourseCard's identical guard: on a read-only plan every
-  // term is reported disallowed for every course (the plan, not the
-  // course, is why), which isn't the "genuinely infeasible" signal this is
-  // meant to be.
-  const targets = readOnly ? [] : dropTargets(view, course.code, course.hardBlocked);
-  const allBlocked = !readOnly && targets.length > 0 && targets.every((t) => !t.allowed);
-  const blockedReason = allBlocked
-    ? Array.from(new Set(targets.map((t) => t.reason).filter((r): r is string => !!r))).join("; ")
-    : null;
-
-  async function place(term: number) {
-    setPending(true);
-    try {
-      const result = await placeCourse(planId, course.code, term);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
-    } finally {
-      setPending(false);
-    }
-  }
-
-  return (
-    <li
-      class={`course-card ${allBlocked ? "course-card-hard" : "course-card-unplaced"}`}
-      aria-busy={pending}
-      draggable={draggable}
-      // See CourseCard's identical attribute: native drag doesn't work from
-      // touch, so Planner's touch-drag effect looks for this instead.
-      data-drag-code={draggable ? course.code : undefined}
-      title={blockedReason ?? undefined}
-      onDragStart={(event) => {
-        if (!draggable) {
-          event.preventDefault();
-          return;
-        }
-        event.dataTransfer?.setData("text/plain", course.code);
-        onDragStart?.(course.code);
-      }}
-      onDragEnd={() => onDragEnd?.()}
-    >
-      <strong>{course.code}</strong>
-      <span> — {course.title}</span>
-      <p class="course-card-units">
-        {course.units} units, {course.offeredLabel}
-      </p>
-      {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
-      {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
-      <PlaceInMenu
-        view={view}
-        code={course.code}
-        onPlace={place}
-        disabled={readOnly || pending}
-        hardBlockedOverride={course.hardBlocked}
-        open={openMenuCode === course.code}
-        onOpenChange={(open) => onMenuOpenChange(course.code, open)}
-      />
-      <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
-        Details
-      </button>
-      <CourseDetail
-        view={view}
-        code={course.code}
-        course={course}
-        planId={planId}
-        open={detailsOpen}
-        onChanged={onChanged}
-        onAnnounce={onAnnounce}
-        onClose={() => setDetailsOpen(false)}
-      />
-    </li>
-  );
-}
-
 export default function CourseSearch({
   view,
   planId,
@@ -164,6 +56,7 @@ export default function CourseSearch({
   onResults,
   openMenuCode,
   onMenuOpenChange,
+  onLocateCourse,
   compact,
   onToggleCompact,
   onExpand,
@@ -172,7 +65,6 @@ export default function CourseSearch({
   const [results, setResults] = useState<CourseCardData[]>([]);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState<{ query: string; message: string } | null>(null);
-  const readOnly = view.plan.readOnly;
 
   async function onSubmit(event: Event) {
     event.preventDefault();
@@ -237,19 +129,22 @@ export default function CourseSearch({
       {!pending && status && results.length === 0 && <p class="course-search-status">{status.message}</p>}
       {results.length > 0 && (
         <ul class="available-courses course-search-results" data-columns={Math.min(results.length, 3) || 1}>
+          {/* The requirement groups' own card, so a result — placed or not — looks and behaves exactly like one. */}
           {results.map((course) => (
-            <SearchResultCard
+            <AvailableCourseCard
               key={course.code}
               view={view}
-              planId={planId}
+              code={course.code}
               course={course}
-              readOnly={readOnly}
+              placement={view.placements.find((p) => p.code === course.code) ?? null}
+              planId={planId}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+              onLocateCourse={onLocateCourse}
             />
           ))}
         </ul>
