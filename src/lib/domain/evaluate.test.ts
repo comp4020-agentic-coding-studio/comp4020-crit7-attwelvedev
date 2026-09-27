@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { fromPandc, isUndergrad, type PandcCourseJson } from "../catalogue/from-pandc";
+import { EXAMPLE_PLAN } from "../../data/example-plan";
 import { createFeasibility } from "./feasibility";
 import { parseRequisites } from "./requisites";
 import type { Catalogue, CatalogueCourse, PlanState, ReqExpr } from "./types";
@@ -267,5 +268,50 @@ describe("evaluatePlan (synthetic catalogues)", () => {
     expect(ok!.ok).toBe(true);
     expect(fail!.ok).toBe(false);
     expect(unverif!.ok).toBe(null);
+  });
+
+  // Kleene logic: an unverifiable leaf is "unknown", not "unmet" — so a
+  // course whose every checkable requirement is met lands in "check", not
+  // a "soft" it could never leave (COMP4550's permission code, MATH1116's
+  // mark), while a genuinely unmet requirement still wins.
+  describe("unverifiable leaves", () => {
+    const met: ReqExpr = { kind: "course", code: "ZZDD1000", concurrent: false };
+    const unmet: ReqExpr = { kind: "course", code: "ZZDD1001", concurrent: false };
+    const unknown: ReqExpr = { kind: "unverifiable", text: "request a permission code" };
+
+    function stateOf(prereq: ReqExpr) {
+      const cat = syntheticCatalogue([synthetic("ZZDD1000"), synthetic("ZZDD1001"), synthetic("ZZDD2000", { prereq })]);
+      const result = evaluatePlan(cat, createFeasibility(cat), plan([{ code: "ZZDD1000", term: 0 }, { code: "ZZDD2000", term: 1 }]));
+      const p = result.placements.find((p) => p.code === "ZZDD2000")!;
+      return { state: p.state, ok: p.requisiteStatus!.ok };
+    }
+
+    it.each([
+      ["met AND unknown", "check", null, { kind: "and", items: [met, unknown] }],
+      ["unmet AND unknown", "soft", false, { kind: "and", items: [unmet, unknown] }],
+      ["met OR unknown", "available", true, { kind: "or", items: [met, unknown] }],
+      ["unmet OR unknown", "check", null, { kind: "or", items: [unmet, unknown] }],
+      ["unknown alone", "check", null, unknown],
+    ] as [string, string, boolean | null, ReqExpr][])("%s → %s", (_label, state, ok, prereq) => {
+      expect(stateOf(prereq)).toEqual({ state, ok });
+    });
+  });
+});
+
+describe("evaluatePlan: 'check' on the real catalogue", () => {
+  const cat = loadRealCatalogue();
+  const feas = createFeasibility(cat);
+
+  it("MATH1116 is 'check' (the mark) once MATH1115 is placed, 'soft' without it", () => {
+    const withIt = evaluatePlan(cat, feas, plan([{ code: "MATH1115", term: 0 }, { code: "MATH1116", term: 1 }]));
+    expect(withIt.placements.find((p) => p.code === "MATH1116")!.state).toBe("check");
+    const without = evaluatePlan(cat, feas, plan([{ code: "MATH1116", term: 1 }]));
+    expect(without.placements[0]!.state).toBe("soft");
+  });
+
+  it("the example plan — a complete, working plan — has nothing still flagged 'soft'", () => {
+    const result = evaluatePlan(cat, feas, EXAMPLE_PLAN);
+    expect(result.placements.filter((p) => p.state === "soft").map((p) => p.code)).toEqual([]);
+    expect(result.placements.find((p) => p.code === "COMP4550")!.state).toBe("check");
   });
 });

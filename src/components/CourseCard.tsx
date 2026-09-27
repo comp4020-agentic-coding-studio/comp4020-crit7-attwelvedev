@@ -92,8 +92,12 @@ export default function CourseCard({
     }
   }
 
-  const stateText =
-    placement.state === "hard" ? "Blocked" : placement.state === "soft" ? "Needs prerequisites" : "Available";
+  const stateText = {
+    hard: "Blocked",
+    soft: "Needs prerequisites",
+    check: "Check requirements",
+    available: "Available",
+  }[placement.state];
 
   return (
     <li

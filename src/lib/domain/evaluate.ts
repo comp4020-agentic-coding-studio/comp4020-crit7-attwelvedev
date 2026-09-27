@@ -11,11 +11,13 @@ export interface Suggestion {
 }
 
 // The parsed ReqExpr tree, annotated per node with whether it's satisfied by
-// the *current placements* (§4.2). `ok` is null only for an unverifiable
-// leaf, which the app can never evaluate either way.
+// the *current placements* (§4.2). `ok` is null for "unknown": an
+// unverifiable leaf, which the app can never evaluate either way, and any
+// and/or whose answer turns on one (three-valued: an unmet sibling still
+// makes an AND false, a met one still makes an OR true).
 export type RequisiteStatus =
-  | { kind: "and"; items: RequisiteStatus[]; ok: boolean }
-  | { kind: "or"; items: RequisiteStatus[]; ok: boolean }
+  | { kind: "and"; items: RequisiteStatus[]; ok: boolean | null }
+  | { kind: "or"; items: RequisiteStatus[]; ok: boolean | null }
   | { kind: "course"; code: string; concurrent: boolean; ok: boolean }
   | { kind: "units"; units: number; filter: CourseFilter; text: string; ok: boolean }
   | { kind: "program"; code: string | null; name: string; satisfied: boolean; ok: boolean }
@@ -26,7 +28,9 @@ export interface PlacementEval {
   term: number;
   span: number;
   lastTerm: number;
-  state: "hard" | "soft" | "available";
+  // "check": every requisite the app can evaluate is met, but one it can't
+  // (a permission code, a mark, a WAM) still decides it — see `verify`.
+  state: "hard" | "soft" | "check" | "available";
   reasons: string[];
   suggestions: Suggestion[];
   verify: string[];
@@ -139,11 +143,13 @@ export function evaluatePlan(
       }
       case "and": {
         const items = expr.items.map((item) => evalNode(item, t));
-        return { kind: "and", items, ok: items.every((item) => item.ok === true) };
+        const ok = items.some((item) => item.ok === false) ? false : items.some((item) => item.ok === null) ? null : true;
+        return { kind: "and", items, ok };
       }
       case "or": {
         const items = expr.items.map((item) => evalNode(item, t));
-        return { kind: "or", items, ok: items.some((item) => item.ok === true) };
+        const ok = items.some((item) => item.ok === true) ? true : items.some((item) => item.ok === null) ? null : false;
+        return { kind: "or", items, ok };
       }
       case "program":
         return { kind: "program", code: expr.code, name: expr.name, satisfied: expr.satisfied, ok: expr.satisfied };
@@ -230,13 +236,13 @@ export function evaluatePlan(
     const requisiteStatus = prereq ? evalNode(prereq, p.term) : null;
     const available = requisiteStatus === null || requisiteStatus.ok === true;
 
-    if (available) {
+    if (available || requisiteStatus.ok === null) {
       return {
         code: p.code,
         term: p.term,
         span,
         lastTerm,
-        state: "available",
+        state: available ? "available" : "check",
         reasons: [],
         suggestions: [],
         verify,

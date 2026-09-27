@@ -1171,6 +1171,13 @@ fieldset[aria-busy="true"] {
   border-color: transparent;
 }
 
+/* Not a warning: everything the planner can check is met, and the verify
+   badge below says what's left for the student to confirm. Outlined
+   rather than filled so it doesn't read as another verify line. */
+.badge-state-check {
+  color: var(--unigrey);
+}
+
 .badge-verify,
 .badge-unknown {
   color: var(--unigrey);
