@@ -387,7 +387,7 @@ export function axeViolations(page: Page): Promise<string[]>;    // "id: target"
 | 02 | `…-02-nav-collapse.md` | 3–4 | 01 | One commit. Nav hides and shows, persists, no flash. Human review of the tab | [x] |
 | 03 | `…-03-sidebar-collapse.md` | 5–6 | 01, 02 | Two commits. Rail collapse with drop target and highlight. Human review of the rail | [x] |
 | 04 | `…-04-header-nav-fit-height.md` | 9–10 | 01, 02, 03 | Two commits. Nav toggle at every width; plan page fits the screen. Human review of both | [x] |
-| 05 | `…-05-snapping-resize.md` | 7–8 | 01, 02, 03, 04 | One commit. Snapping resize by pointer and keyboard. Human review of the handle | [ ] |
+| 05 | `…-05-snapping-resize.md` | 7–8 | 01, 02, 03, 04 | One commit. Snapping resize by pointer and keyboard. Human review of the handle | [x] |
 
 Phase 03 needs Phase 02 for `panel-state.ts` (Task 3) and the head script
 (Task 4). Phase 04 needs Phase 03 for the rail and the collapsed block it
@@ -397,19 +397,19 @@ with.
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and every task is complete with tests
+- [x] Every phase in §5 is ticked, and every task is complete with tests
       passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Manually verified with `agent-browser`: on `/plan/example` at 1920×1080,
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Manually verified with `agent-browser`: on `/plan/example` at 1920×1080,
       hide the nav, collapse the sidebar, drag the handle out to 2 columns,
       and reload. The layout is identical with no flash, and the page never
       scrolls sideways or vertically. At 390×844, hide the nav: the tab
       sits beside the title, and the timeline and requirements split the
       height.
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Every `Human review:` task (2, 4, 5, 8, 9, 10) explicitly accepted by the user
-- [ ] No item remains in §8
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Every `Human review:` task (2, 4, 5, 8, 9, 10) explicitly accepted by the user
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 
