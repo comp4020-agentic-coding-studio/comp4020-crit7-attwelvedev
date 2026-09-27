@@ -408,4 +408,21 @@ describe("parseRequisites: invariants over the whole catalogue", () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  // The same gap one level up: COMP4500's two degree routes lost both
+  // "(AACOM)" and "(AENSE)" to prose, so the routes' own conditions were
+  // AND'd together — every course code was still present, so the check
+  // above passed. A bracketed program (or subject) code left in prose
+  // means the parser missed a program or units clause.
+  it("no bracketed program or subject code is left inside an unverifiable leaf, for the courses the planner loads", () => {
+    const bracketedCodeRe = /\([A-Z][A-Z0-9-]{2,10}\)/;
+    const offenders: string[] = [];
+    for (const file of globSync("data/2027/courses/*.json")) {
+      const raw: RawCourse = JSON.parse(readFileSync(file, "utf-8"));
+      if (!isUndergrad(raw.code) || raw.code in PROSE_WITH_CODES) continue;
+      const result = parseRequisites({ prerequisites: raw.prerequisites, incompatibilities: raw.incompatibilities });
+      for (const text of result.unverifiable) if (bracketedCodeRe.test(text)) offenders.push(`${raw.code}: "${text}"`);
+    }
+    expect(offenders).toEqual([]);
+  });
 });
