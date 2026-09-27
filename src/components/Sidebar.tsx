@@ -37,12 +37,11 @@ interface GroupProps {
   onToggleCompact?: () => void;
 }
 
-// A group with more courses than fit one row would otherwise get an
-// invisible trailing "phantom" grid column from `auto-fill` sizing to the
-// (shared, uniform) sidebar width, which throws off `justify-content:
-// center`'s centering for any group with fewer courses than that. Capping to
-// the group's own course count keeps every group's grid exactly as wide as
-// its own content, still centered within the shared sidebar width.
+// A group never shows more card columns than it has courses: an empty
+// trailing grid track would throw off `justify-content: center` for a group
+// with fewer courses than the sidebar has room for. The list carries this
+// count as `data-columns`, and CSS picks the grid's actual tracks from it
+// and the sidebar's width tier, so each grid stays as wide as its own content.
 const MAX_COLUMNS = 3;
 
 // Per-viewer convenience only: which sections this browser has compacted.
@@ -134,7 +133,7 @@ function Group({
         </fieldset>
       )}
       {courses.length > 0 && (
-        <ul class="available-courses" style={{ "--group-columns": columns }}>
+        <ul class="available-courses" data-columns={columns}>
           {courses.map((code) => (
             <AvailableCourseCard
               key={code}

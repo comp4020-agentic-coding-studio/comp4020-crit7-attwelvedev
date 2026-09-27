@@ -22,6 +22,16 @@
 
   --font: "Public Sans", system-ui, sans-serif;
   --radius: 0.6rem;
+
+  /* Requirements sidebar widths, one per card-column count: n × 13rem cards
+     + (n − 1) × 0.6rem gaps + 4.5rem for group padding and border, two
+     levels of nesting, a classic scrollbar gutter and a little slack. */
+  --reqs-w-rail: 3rem;
+  --reqs-w-1: 17.5rem;
+  --reqs-w-2: 31.1rem;
+  --reqs-w-3: 44.7rem;
+  /* One academic year: two 15rem terms and their gap, rounded up. */
+  --timeline-min: 31rem;
 }
 
 *,
@@ -240,6 +250,10 @@ nav[aria-label="site"] .nav-links a:hover {
 main {
   flex: 1;
   width: 100%;
+  /* A flex item's default `min-width: auto` let this full-width main sit
+     beside the desktop nav at its own content width, so the whole page
+     overflowed sideways by exactly the nav's width. */
+  min-width: 0;
   max-width: 40rem;
   margin: 0 auto;
   padding: 2rem 1.25rem 3rem;
@@ -286,10 +300,15 @@ body:has(.planner) main {
 /* ---------------------------------------------------------------------
    Planner
    ------------------------------------------------------------------- */
-.planner {
+.planner-layout {
+  container: planner / inline-size;
+}
+
+.planner-panes {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  --reqs-fit: 0;
 }
 
 .planner-timeline-area {
@@ -303,7 +322,7 @@ body:has(.planner) main {
   overflow-y: auto;
 }
 
-.planner > aside {
+.planner-panes > aside {
   min-width: 0;
 }
 
@@ -969,27 +988,35 @@ fieldset[aria-busy="true"] {
   margin: 0.25rem 0 0;
 }
 
-@media (min-width: 1100px) {
-  .planner {
+/* The planner lays itself out from its own width, not the viewport's, so
+   the site nav (or anything else beside it) can never push it wider than the
+   page. Each tier's threshold is that tier's sidebar width + the 1rem pane
+   gap + --timeline-min, written as literals because `@container` conditions
+   can't read `var()`. The widths budget for course grids nested two groups
+   deep, the deepest the example plan goes. */
+@container planner (min-width: 49.5rem) {
+  .planner-panes {
     flex-direction: row;
     align-items: flex-start;
+    --reqs-fit: 1;
   }
 
-  .planner > aside {
+  .planner-panes > aside {
     order: -1;
-    flex: 0 0 44rem;
-    width: 44rem;
+    flex: 0 0 var(--reqs-w-1);
+    width: var(--reqs-w-1);
     position: sticky;
     top: 1rem;
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
     /* Always reserves the scrollbar's track, whether or not this particular
        group's content is currently tall enough to scroll: without it, the
-       three-card grid below fits its 13rem columns exactly against the full
-       44rem only when no scrollbar is drawn, and overflows the moment one
-       appears (a real scrollbar eats into content width, it doesn't sit
-       outside the border box) — every group's fit would depend on whatever
-       else in the sidebar happens to be scrolled at that instant. */
+       card grid below fits its 13rem columns against the sidebar width
+       (the --reqs-w-* formula at :root) only when no scrollbar is drawn,
+       and overflows the moment one appears (a real scrollbar eats into
+       content width, it doesn't sit outside the border box) — every group's
+       fit would depend on whatever else in the sidebar happens to be
+       scrolled at that instant. */
     scrollbar-gutter: stable;
   }
 
@@ -1011,8 +1038,34 @@ fieldset[aria-busy="true"] {
     width: 100%;
     min-width: 0;
   }
+}
 
-  .available-courses {
-    grid-template-columns: repeat(var(--group-columns, 1), 13rem);
+@container planner (min-width: 63.1rem) {
+  .planner-panes {
+    --reqs-fit: 2;
+  }
+
+  .planner-panes > aside {
+    flex-basis: var(--reqs-w-2);
+    width: var(--reqs-w-2);
+  }
+
+  .available-courses:not([data-columns="1"]) {
+    grid-template-columns: repeat(2, 13rem);
+  }
+}
+
+@container planner (min-width: 76.7rem) {
+  .planner-panes {
+    --reqs-fit: 3;
+  }
+
+  .planner-panes > aside {
+    flex-basis: var(--reqs-w-3);
+    width: var(--reqs-w-3);
+  }
+
+  .available-courses[data-columns="3"] {
+    grid-template-columns: repeat(3, 13rem);
   }
 }

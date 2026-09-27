@@ -231,7 +231,7 @@ export default function CourseSearch({
       {pending && <p class="course-search-status">Searching…</p>}
       {!pending && status && results.length === 0 && <p class="course-search-status">{status.message}</p>}
       {results.length > 0 && (
-        <ul class="available-courses course-search-results" style={{ "--group-columns": Math.min(results.length, 3) || 1 }}>
+        <ul class="available-courses course-search-results" data-columns={Math.min(results.length, 3) || 1}>
           {results.map((course) => (
             <SearchResultCard
               key={course.code}

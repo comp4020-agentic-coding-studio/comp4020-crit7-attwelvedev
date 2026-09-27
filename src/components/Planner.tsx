@@ -150,51 +150,67 @@ export default function Planner({ view: initialView }: Props) {
       <p aria-live="polite" class="visually-hidden">
         {announcement}
       </p>
-      <div class="planner-timeline-area">
-        <div class="cutoff-controls" aria-busy={cutoffPending}>
-          <button
-            type="button"
-            disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
-            onClick={() => moveCutoff(-1)}
-          >
-            Move cutoff earlier
-          </button>
-          <button
-            type="button"
-            disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
-            onClick={() => moveCutoff(1)}
-          >
-            Move cutoff later
-          </button>
-          <label class="show-links-toggle">
-            <input
-              type="checkbox"
-              checked={showPrereqLinks}
-              onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
+      {/* Size container for the panes; the fixed undo toast stays outside it, since containment would pin it to the container. */}
+      <div class="planner-layout">
+        <div class="planner-panes">
+          <div class="planner-timeline-area">
+            <div class="cutoff-controls" aria-busy={cutoffPending}>
+              <button
+                type="button"
+                disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
+                onClick={() => moveCutoff(-1)}
+              >
+                Move cutoff earlier
+              </button>
+              <button
+                type="button"
+                disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
+                onClick={() => moveCutoff(1)}
+              >
+                Move cutoff later
+              </button>
+              <label class="show-links-toggle">
+                <input
+                  type="checkbox"
+                  checked={showPrereqLinks}
+                  onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
+                />
+                Show prerequisite links
+              </label>
+              {!readOnly && (
+                <button type="button" onClick={copyPlanLink}>
+                  {linkCopied ? "Copied!" : "Copy plan link"}
+                </button>
+              )}
+            </div>
+            <p class="cutoff-readout">{cutoffReadout} The gold line on the timeline marks that boundary.</p>
+            <Timeline
+              view={view}
+              planId={view.plan.id}
+              draggingCode={draggingCode}
+              onChanged={setView}
+              onAnnounce={setAnnouncement}
+              onDragStart={setDraggingCode}
+              onDragEnd={() => setDraggingCode(null)}
+              showPrereqLinks={showPrereqLinks}
+              openMenuCode={openMenuCode}
+              onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
+              onRemoved={handleRemoved}
+              locateRequest={locateRequest}
             />
-            Show prerequisite links
-          </label>
-          {!readOnly && (
-            <button type="button" onClick={copyPlanLink}>
-              {linkCopied ? "Copied!" : "Copy plan link"}
-            </button>
-          )}
+          </div>
+          <Sidebar
+            view={view}
+            planId={view.plan.id}
+            onChanged={setView}
+            onAnnounce={setAnnouncement}
+            onDragStart={setDraggingCode}
+            onDragEnd={() => setDraggingCode(null)}
+            openMenuCode={openMenuCode}
+            onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
+            onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}
+          />
         </div>
-        <p class="cutoff-readout">{cutoffReadout} The gold line on the timeline marks that boundary.</p>
-        <Timeline
-          view={view}
-          planId={view.plan.id}
-          draggingCode={draggingCode}
-          onChanged={setView}
-          onAnnounce={setAnnouncement}
-          onDragStart={setDraggingCode}
-          onDragEnd={() => setDraggingCode(null)}
-          showPrereqLinks={showPrereqLinks}
-          openMenuCode={openMenuCode}
-          onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
-          onRemoved={handleRemoved}
-          locateRequest={locateRequest}
-        />
       </div>
       {removed && (
         <div class="undo-toast" role="status">
@@ -204,17 +220,6 @@ export default function Planner({ view: initialView }: Props) {
           </button>
         </div>
       )}
-      <Sidebar
-        view={view}
-        planId={view.plan.id}
-        onChanged={setView}
-        onAnnounce={setAnnouncement}
-        onDragStart={setDraggingCode}
-        onDragEnd={() => setDraggingCode(null)}
-        openMenuCode={openMenuCode}
-        onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
-        onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}
-      />
     </div>
   );
 }
