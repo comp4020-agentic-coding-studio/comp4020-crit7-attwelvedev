@@ -209,7 +209,7 @@ export default function CourseSearch({
               </svg>
               <input
                 type="text"
-                placeholder="e.g. COMP1100 or Software Engineering"
+                placeholder="e.g. COMP1100"
                 value={query}
                 onInput={(event) => setQuery((event.target as HTMLInputElement).value)}
               />

@@ -85,6 +85,29 @@ describe("layout", { timeout: 30_000 }, () => {
 
   it.each([
     [1920, 1080],
+    [1280, 800],
+    [1100, 800],
+    [900, 800],
+    [390, 844],
+  ])("at %i×%i the course-search placeholder isn't cut off", async (width, height) => {
+    const fit = await withPlan({ width, height }, (page) =>
+      page.evaluate(() => {
+        // An input never scrolls its placeholder, so measure the text itself
+        // in the input's own font against the input's content box.
+        const input = document.querySelector<HTMLInputElement>(".course-search-field input")!;
+        const style = getComputedStyle(input);
+        const context = document.createElement("canvas").getContext("2d")!;
+        context.font = style.font;
+        const text = context.measureText(input.placeholder).width;
+        const box = input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+        return { text: Math.ceil(text), box };
+      }),
+    );
+    expect(fit.text).toBeLessThanOrEqual(fit.box);
+  });
+
+  it.each([
+    [1920, 1080],
     [1440, 900],
     [1100, 800],
     [390, 844],
