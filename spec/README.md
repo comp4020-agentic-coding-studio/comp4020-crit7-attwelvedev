@@ -37,6 +37,18 @@ whole of `README.md`, your account of what the app is and what good looks like
 here. It renders the markdown to text and asks whether the served page contains
 all of it, so styling and navigation around it pass and a trimmed copy fails.
 
+## Layout (real browser)
+
+`layout.test.ts` drives the same built server in headless Chromium (through
+the helpers in `spec/browser.ts`) to check geometry that jsdom can't measure:
+sideways overflow, pane widths, which pane sits beside which, and how many card
+columns a grid actually renders. CI installs Chromium before `pnpm check`;
+locally it's a one-time setup:
+
+```sh
+pnpm exec playwright install chromium
+```
+
 ## The starter's plumbing (shipped, retires with the starter)
 
 `guestbook.test.ts` drives the running app over HTTP to prove the supplied
