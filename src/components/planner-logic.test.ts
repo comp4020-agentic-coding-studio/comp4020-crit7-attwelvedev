@@ -8,6 +8,7 @@ import { buildPlanView } from "../lib/domain/view";
 import {
   completedReadout,
   dropTargets,
+  menuTargets,
   outstandingItems,
   overlayEdges,
   progressSegments,
@@ -294,5 +295,29 @@ describe("unitsLabel", () => {
 
   it("uses the singular for a single unit", () => {
     expect(unitsLabel({ units: 1, twoSemester: false })).toEqual({ short: "1u", full: "1 unit" });
+  });
+});
+
+describe("menuTargets", () => {
+  it("offers only reachable terms other than the current one", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const { targets } = menuTargets(view, "COMP3630", { currentTerm: 2 });
+    expect(targets.length).toBeGreaterThan(0);
+    expect(targets.map((t) => t.term)).not.toContain(0);
+    expect(targets.map((t) => t.term)).not.toContain(2);
+    expect(targets.every((t) => t.allowed)).toBe(true);
+  });
+
+  it("gives each blocked term's reason once", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const { blockedReasons } = menuTargets(view, "COMP3630", { currentTerm: 2 });
+    expect(new Set(blockedReasons).size).toBe(blockedReasons.length);
+    expect(blockedReasons).toContain(view.courses.COMP3630.hardBlocked[0]);
+  });
+
+  it("uses a caller's hardBlocked map for a course outside the plan", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const { blockedReasons } = menuTargets(view, "PSYC1004", { hardBlockedOverride: { 0: "x", 1: "x" } });
+    expect(blockedReasons).toEqual(["x"]);
   });
 });

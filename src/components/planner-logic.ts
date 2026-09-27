@@ -23,6 +23,30 @@ export function dropTargets(view: PlanView, code: string, hardBlockedOverride?: 
   });
 }
 
+export interface MenuTargets {
+  targets: DropTarget[];
+  blockedReasons: string[];
+}
+
+// What a "Place in…" or "Move to" list offers: only terms a drop would
+// also accept, never the one the course already sits in, and when nothing
+// is left, why, deduplicated since several terms often share one reason
+// (e.g. "not offered this semester").
+export function menuTargets(
+  view: PlanView,
+  code: string,
+  options: { currentTerm?: number; hardBlockedOverride?: Record<number, string> } = {},
+): MenuTargets {
+  const allTargets = dropTargets(view, code, options.hardBlockedOverride).filter(
+    (target) => target.term !== options.currentTerm,
+  );
+  const targets = allTargets.filter((target) => target.allowed);
+  const blockedReasons = Array.from(
+    new Set(allTargets.filter((target) => !target.allowed && target.reason).map((target) => target.reason as string)),
+  );
+  return { targets, blockedReasons };
+}
+
 export interface ProgressSegments {
   completedPct: number;
   plannedPct: number;

@@ -1359,7 +1359,7 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
         expect(box!.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(verticalCentre(box) - centre)).toBeLessThanOrEqual(4);
       }
-      const moreOptions = await page.getByRole("button", { name: "More options" }).boundingBox();
+      const moreOptions = await page.getByRole("button", { name: "More options", exact: true }).boundingBox();
       expect(moreOptions!.width).toBeGreaterThanOrEqual(44);
       expect(moreOptions!.height).toBeGreaterThanOrEqual(44);
       expect(Math.abs(verticalCentre(moreOptions) - centre)).toBeLessThanOrEqual(4);
@@ -1373,7 +1373,7 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
       const centre = verticalCentre(await page.locator(".completed-readout").boundingBox());
-      const moreOptions = await page.getByRole("button", { name: "More options" }).boundingBox();
+      const moreOptions = await page.getByRole("button", { name: "More options", exact: true }).boundingBox();
       expect(Math.abs(verticalCentre(moreOptions) - centre)).toBeLessThanOrEqual(4);
     } finally {
       await page.close();
@@ -1447,7 +1447,7 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
     );
 
   const showLinks = async (page: Page) => {
-    await page.getByRole("button", { name: "More options" }).click();
+    await page.getByRole("button", { name: "More options", exact: true }).click();
     await page.getByLabel("Show prerequisite links").check();
     await page.keyboard.press("Escape");
   };
@@ -1496,7 +1496,7 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
   ])("at %i×%i the More options menu opens over the legend, not under it", async (width, height) => {
     await withPlan({ width, height }, async (page) => {
       await showLinks(page);
-      await page.getByRole("button", { name: "More options" }).click();
+      await page.getByRole("button", { name: "More options", exact: true }).click();
       const hit = await page.evaluate(() => {
         const panel = document.querySelector(".more-options-panel:not([hidden])")!.getBoundingClientRect();
         const legend = document.querySelector(".prereq-legend")!.getBoundingClientRect();
@@ -1538,7 +1538,7 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
     [390, 844],
   ])("at %i×%i hover bolds a course's own links and dims, not hides, the rest", async (width, height) => {
     await withPlan({ width, height }, async (page) => {
-      await page.getByRole("button", { name: "More options" }).click();
+      await page.getByRole("button", { name: "More options", exact: true }).click();
       await page.getByLabel("Show prerequisite links").check();
       await page.keyboard.press("Escape");
       const before = await lineStates(page);
@@ -1560,7 +1560,7 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
 
 describe("more options", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
-  const moreOptions = (page: Page) => page.getByRole("button", { name: "More options" });
+  const moreOptions = (page: Page) => page.getByRole("button", { name: "More options", exact: true });
   const prereqToggle = (page: Page) => page.getByLabel("Show prerequisite links");
 
   async function withFreshPlan(viewport: Viewport, check: (page: Page) => Promise<void>): Promise<void> {
@@ -1611,33 +1611,34 @@ describe("more options", { timeout: 30_000 }, () => {
   it("shares one open menu with the course menus", async () => {
     await withFreshPlan(desktop, async (page) => {
       const more = moreOptions(page);
-      const moveTo = page.getByRole("button", { name: "Move to…" }).first();
+      const cardMenu = page.getByRole("button", { name: "More options for COMP1130" });
       await more.click();
-      await moveTo.click();
+      await cardMenu.click();
       expect(await more.getAttribute("aria-expanded")).toBe("false");
-      expect(await moveTo.getAttribute("aria-expanded")).toBe("true");
+      expect(await cardMenu.getAttribute("aria-expanded")).toBe("true");
       await more.click();
-      expect(await moveTo.getAttribute("aria-expanded")).toBe("false");
+      expect(await cardMenu.getAttribute("aria-expanded")).toBe("false");
       expect(await more.getAttribute("aria-expanded")).toBe("true");
     });
   });
 
   // A press on the card itself counts as outside: that's where a drag
   // starts, and an open menu shouldn't ride along under the pointer.
-  it("a press outside a course's Move to… menu closes it, even on its own card", async () => {
+  it("a press outside a course's menu closes it, even on its own card", async () => {
     await withFreshPlan(desktop, async (page) => {
-      const card = page.locator(".course-card").filter({ hasText: "COMP1130" });
-      const moveTo = card.getByRole("button", { name: "Move to…" });
-      await moveTo.click();
-      expect(await moveTo.getAttribute("aria-expanded")).toBe("true");
-      await card.locator(".course-card-allocation").click();
-      expect(await moveTo.getAttribute("aria-expanded")).toBe("false");
+      const card = page.locator('[data-placed="COMP1130"]');
+      const cardMenu = card.getByRole("button", { name: "More options for COMP1130" });
+      await cardMenu.click();
+      expect(await cardMenu.getAttribute("aria-expanded")).toBe("true");
+      await card.locator(".course-card-code").click();
+      expect(await cardMenu.getAttribute("aria-expanded")).toBe("false");
 
-      await moveTo.click();
-      await card.getByRole("menu").click({ position: { x: 2, y: 2 } });
-      expect(await moveTo.getAttribute("aria-expanded")).toBe("true");
+      await cardMenu.click();
+      // A press inside the panel, on its (non-interactive) heading.
+      await card.locator(".card-menu-heading").click();
+      expect(await cardMenu.getAttribute("aria-expanded")).toBe("true");
       await page.locator("h1").click();
-      expect(await moveTo.getAttribute("aria-expanded")).toBe("false");
+      expect(await cardMenu.getAttribute("aria-expanded")).toBe("false");
     });
   });
 
@@ -1862,7 +1863,7 @@ describe("manual checks", { timeout: 30_000 }, () => {
   }
 
   async function openDetails(page: Page, code: string) {
-    await page.locator(`[data-placed="${code}"]`).getByRole("button", { name: "Details", exact: true }).click();
+    await page.locator(`[data-placed="${code}"] .course-card-title`).click();
     const dialog = page.locator("dialog[open]");
     await dialog.waitFor(); // showModal() runs in an effect, after the click
     return dialog;
@@ -2136,5 +2137,213 @@ describe("card header", { timeout: 30_000 }, () => {
       expect(await axeViolations(page)).toEqual([]);
     });
     expect(await withPlan(desktop, axeViolations)).toEqual([]);
+  });
+});
+
+describe("course card menu", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const cardMenu = (page: Page, code: string) =>
+    page.locator(`[data-placed="${code}"]`).getByRole("button", { name: `More options for ${code}` });
+
+  async function withFreshPlan(viewport: Viewport, check: (page: Page) => Promise<void>): Promise<void> {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, viewport);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  it("keeps Move to, Details and Remove out of sight, behind a toggle with its own panel", async () => {
+    const id = await planWithPlacement("COMP1130");
+    await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP1100", term: 1 }),
+    });
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const card = page.locator('[data-placed="COMP1130"]');
+      for (const name of ["Move to…", "Details", "Remove"]) {
+        expect(await card.getByRole("button", { name, exact: true }).filter({ visible: true }).count()).toBe(0);
+      }
+      const controls = await cardMenu(page, "COMP1130").getAttribute("aria-controls");
+      expect(controls).toBeTruthy();
+      expect(await page.locator(`[id="${controls}"]`).count()).toBe(1);
+      const other = await cardMenu(page, "COMP1100").getAttribute("aria-controls");
+      expect(other).toBeTruthy();
+      expect(other).not.toBe(controls);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("lists Details, the Move to terms and Remove in order, and Escape closes it onto the toggle", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const toggle = cardMenu(page, "COMP1130");
+      await toggle.click();
+      const panel = page.locator(`[id="${await toggle.getAttribute("aria-controls")}"]`);
+      const order = await panel.evaluate((el) =>
+        Array.from(el.children).map((child) =>
+          child.matches("ul.card-menu-terms")
+            ? `terms:${Array.from(child.querySelectorAll("button")).map((b) => b.textContent).join(",")}`
+            : `${child.tagName.toLowerCase()}:${child.textContent}`,
+        ),
+      );
+      expect(order[0]).toBe("button:Details");
+      expect(order[1]).toBe("p:Move to");
+      expect(order[2]).toMatch(/^terms:.+/);
+      expect(order[2]).not.toContain("S1 2027");
+      expect(order[3]).toBe("button:Remove");
+      expect(order).toHaveLength(4);
+
+      await panel.getByRole("button", { name: "Details" }).focus();
+      await page.keyboard.press("Escape");
+      expect(await toggle.getAttribute("aria-expanded")).toBe("false");
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe(
+        "More options for COMP1130",
+      );
+    });
+  });
+
+  it("Details in the menu closes it and opens the course's dialog", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const toggle = cardMenu(page, "COMP1130");
+      await toggle.click();
+      await page.locator('[data-placed="COMP1130"] .course-card-menu').getByRole("button", { name: "Details" }).click();
+      const dialog = page.locator("dialog[open]");
+      await dialog.waitFor(); // showModal() runs in an effect, after the click
+      expect(await dialog.getAttribute("aria-label")).toBe("COMP1130 details");
+      expect(await toggle.getAttribute("aria-expanded")).toBe("false");
+    });
+  });
+
+  it("a term in the menu moves the course there", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      await cardMenu(page, "COMP1130").click();
+      await page.locator('[data-placed="COMP1130"] .card-menu-terms').getByRole("button", { name: "S1 2028" }).click();
+      await expect.poll(() => page.locator('[data-term="2"] [data-placed="COMP1130"]').count()).toBe(1);
+    });
+  });
+
+  it("Remove in the menu removes the course, with Undo", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const card = page.locator('[data-placed="COMP1130"]');
+      await cardMenu(page, "COMP1130").click();
+      await card.locator(".course-card-menu").getByRole("button", { name: "Remove" }).click();
+      await expect.poll(() => card.count()).toBe(0);
+      const toast = page.locator(".undo-toast");
+      await expect.poll(() => toast.count()).toBe(1);
+      expect(await toast.textContent()).toContain("Removed COMP1130");
+      await toast.getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => card.count()).toBe(1);
+    });
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the open panel stays inside the timeline", async (width, height) => {
+    await withFreshPlan({ width, height }, async (page) => {
+      const toggle = cardMenu(page, "COMP1130");
+      await toggle.scrollIntoViewIfNeeded();
+      await toggle.click();
+      const id = await toggle.getAttribute("aria-controls");
+      const { panel, scroll } = await page.evaluate((panelId) => {
+        const rect = (el: Element) => {
+          const r = el.getBoundingClientRect();
+          return { left: r.left, right: r.right, width: r.width };
+        };
+        return {
+          panel: rect(document.getElementById(panelId!)!),
+          scroll: rect(document.querySelector(".timeline-scroll")!),
+        };
+      }, id);
+      expect(panel.width).toBeGreaterThan(0);
+      expect(panel.left).toBeGreaterThanOrEqual(scroll.left);
+      expect(panel.right).toBeLessThanOrEqual(scroll.right);
+      expect(await horizontalOverflow(page)).toBe(0);
+
+      // Horizontal bounds alone passed while .timeline-scroll (overflow-y:
+      // hidden) clipped the panel's bottom off: check each button is really
+      // what's under its own centre. scrollIntoView can scroll a hidden
+      // overflow that a user never could, so no such ancestor may move.
+      const hits = await page.evaluate((panelId) => {
+        const buttons = Array.from(document.getElementById(panelId!)!.querySelectorAll("button"));
+        return buttons.map((button) => {
+          button.scrollIntoView({ block: "nearest" });
+          const r = button.getBoundingClientRect();
+          const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const scrolledHidden: string[] = [];
+          for (let el = button.parentElement; el; el = el.parentElement) {
+            const oy = getComputedStyle(el).overflowY;
+            if ((oy === "hidden" || oy === "clip") && el.scrollTop !== 0) scrolledHidden.push(el.className);
+          }
+          return { label: button.textContent, underCentre: !!hit && button.contains(hit), scrolledHidden };
+        });
+      }, id);
+      expect(hits.length).toBeGreaterThan(0);
+      expect(hits.filter((h) => !h.underCentre || h.scrolledHidden.length > 0)).toEqual([]);
+    });
+  });
+
+  it("a floating card menu closes when the timeline scrolls, since it would be left behind", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const toggle = cardMenu(page, "COMP1130");
+      await toggle.click();
+      expect(await toggle.getAttribute("aria-expanded")).toBe("true");
+      await page.locator(".timeline-scroll").evaluate((el) => el.scrollBy({ left: 200 }));
+      await expect.poll(() => toggle.getAttribute("aria-expanded")).toBe("false");
+    });
+  });
+
+  it("is clean under axe with a card menu open", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      await cardMenu(page, "COMP1130").click();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
+  it("a read-only plan renders no card menu and no Place in…, but titles still open Details", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await page.locator("[data-placed]").count()).toBeGreaterThan(0);
+      expect(await page.locator(".course-card-menu").count()).toBe(0);
+      expect(await page.getByRole("button", { name: "Place in…" }).count()).toBe(0);
+      await page.locator("[data-placed] .course-card-title").first().click();
+      await page.locator("dialog[open]").waitFor();
+      expect(await page.locator("dialog[open]").count()).toBe(1);
+    });
+  });
+
+  it("on /plan/example no timeline card shows a disabled button", async () => {
+    await withPlan(desktop, async (page) => {
+      const buttons = page.locator("[data-placed] button:not(dialog button)").filter({ visible: true });
+      expect(await buttons.count()).toBeGreaterThan(0);
+      expect(await page.locator("[data-placed] button:disabled:not(dialog button)").filter({ visible: true }).count()).toBe(0);
+    });
+  });
+
+  it("keeps a soft card's prerequisite suggestions visible with the menu closed", async () => {
+    const created = await fetch(new URL("/api/plans", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      redirect: "manual",
+    });
+    const id = created.headers.get("location")!.split("/").pop()!;
+    await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP2100", term: 3 }),
+    });
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const suggestions = page.locator('[data-placed="COMP2100"] .course-card-suggestions button');
+      expect(await suggestions.count()).toBeGreaterThan(0);
+      expect(await suggestions.first().isVisible()).toBe(true);
+      expect(await cardMenu(page, "COMP2100").getAttribute("aria-expanded")).toBe("false");
+    } finally {
+      await page.close();
+    }
   });
 });

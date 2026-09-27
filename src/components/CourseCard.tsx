@@ -3,8 +3,8 @@ import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
-import PlaceInMenu from "./PlaceInMenu";
-import { groupLabel, unplacedCount } from "./planner-logic";
+import MoreOptions from "./MoreOptions";
+import { groupLabel, menuTargets, unplacedCount } from "./planner-logic";
 
 // What removing this exact placement needs to undo it: not just the code
 // and term, but whether it was pinned — placeCourse always inserts a fresh,
@@ -93,6 +93,8 @@ export default function CourseCard({
     }
   }
 
+  const { targets, blockedReasons } = menuTargets(view, placement.code, { currentTerm: placement.term });
+
   const stateText = {
     hard: "Blocked",
     soft: "Needs prerequisites",
@@ -153,11 +155,6 @@ export default function CourseCard({
       )}
       {course?.offeringUnknown && <p class="badge badge-unknown">No published offering — verify on P&C</p>}
       {course?.projectedTerms.includes(placement.term) && <p class="badge badge-projected">Projected offering</p>}
-      <p class="course-card-allocation">
-        {placement.countsToward
-          ? `Counts toward ${groupLabel(view, placement.countsToward)}`
-          : "Not counting toward any requirement"}
-      </p>
       {placement.state === "soft" && unplacedCount(view, placement.code) > 0 && (
         <p class="badge badge-unplaced-prereqs">
           {unplacedCount(view, placement.code)} prerequisite{unplacedCount(view, placement.code) === 1 ? "" : "s"} not
@@ -179,23 +176,68 @@ export default function CourseCard({
           ))}
         </ul>
       )}
-      <div class="course-card-actions">
-        <PlaceInMenu
-          view={view}
-          code={placement.code}
-          onPlace={move}
-          disabled={readOnly || pending}
-          placed
-          currentTerm={placement.term}
-          open={openMenuCode === placement.code}
-          onOpenChange={(open) => onMenuOpenChange(placement.code, open)}
-        />
-        <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
-          Details
-        </button>
-        <button type="button" disabled={readOnly || pending} onClick={remove}>
-          {pending ? "Removing…" : "Remove"}
-        </button>
+      <div class="course-card-foot">
+        <p class="course-card-allocation">
+          {placement.countsToward
+            ? `Counts toward ${groupLabel(view, placement.countsToward)}`
+            : "Not counting toward any requirement"}
+        </p>
+        {/* Rare actions, out of sight until asked for. A read-only plan gets
+            no menu at all rather than one full of disabled buttons; its
+            title still opens Details. */}
+        {!readOnly && (
+          <MoreOptions
+            class="course-card-menu"
+            label={`More options for ${placement.code}`}
+            fixed
+            open={openMenuCode === placement.code}
+            onOpenChange={(open) => onMenuOpenChange(placement.code, open)}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                onMenuOpenChange(placement.code, false);
+                setDetailsOpen(true);
+              }}
+            >
+              Details
+            </button>
+            <p class="card-menu-heading">Move to</p>
+            {targets.length === 0 ? (
+              <p class="card-menu-empty">
+                No available terms{blockedReasons.length > 0 && <> — {blockedReasons.join("; ")}</>}
+              </p>
+            ) : (
+              <ul class="card-menu-terms" aria-label={`Move ${placement.code} to`}>
+                {targets.map((target) => (
+                  <li key={target.term}>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => {
+                        onMenuOpenChange(placement.code, false);
+                        void move(target.term);
+                      }}
+                    >
+                      {view.terms[target.term].label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              class="card-menu-remove"
+              disabled={pending}
+              onClick={() => {
+                onMenuOpenChange(placement.code, false);
+                void remove();
+              }}
+            >
+              {pending ? "Removing…" : "Remove"}
+            </button>
+          </MoreOptions>
+        )}
       </div>
       <CourseDetail
         view={view}

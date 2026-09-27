@@ -1,18 +1,12 @@
 import { useEffect, useRef } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
-import { dropTargets } from "./planner-logic";
+import { menuTargets } from "./planner-logic";
 
 interface Props {
   view: PlanView;
   code: string;
   onPlace: (term: number) => void;
   disabled?: boolean;
-  // A course already on the timeline is being relocated, not placed for
-  // the first time — "Move to…" reads clearer than "Place in…" there.
-  placed?: boolean;
-  // The term the course is already sitting in, so the menu doesn't offer
-  // it as a destination.
-  currentTerm?: number;
   // For a code that isn't (yet) in view.courses — a search result outside
   // the plan's tree — dropTargets can't look up its hardBlocked map from
   // the plan view, so the caller supplies it directly.
@@ -28,8 +22,6 @@ export default function PlaceInMenu({
   code,
   onPlace,
   disabled = false,
-  placed = false,
-  currentTerm,
   hardBlockedOverride,
   open,
   onOpenChange,
@@ -37,16 +29,7 @@ export default function PlaceInMenu({
   // Only offer terms that are actually reachable — the same rule a drag
   // enforces (a disallowed drop is refused) — rather than listing every
   // term with the blocked ones merely marked unusable.
-  const allTargets = dropTargets(view, code, hardBlockedOverride).filter((target) => target.term !== currentTerm);
-  const targets = allTargets.filter((target) => target.allowed);
-  const buttonLabel = placed ? "Move to…" : "Place in…";
-  const menuLabel = placed ? `Move ${code} to` : `Place ${code} in`;
-  // When nothing's available, say why rather than leaving a dead end — the
-  // same reason a drag onto a greyed-out term already shows, deduplicated
-  // since several terms often share one (e.g. "not offered this semester").
-  const blockedReasons = Array.from(
-    new Set(allTargets.filter((target) => !target.allowed && target.reason).map((target) => target.reason as string)),
-  );
+  const { targets, blockedReasons } = menuTargets(view, code, { hardBlockedOverride });
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Same as MoreOptions: any press outside closes it — including one on
@@ -70,9 +53,9 @@ export default function PlaceInMenu({
         disabled={disabled}
         onClick={() => onOpenChange(!open)}
       >
-        {buttonLabel}
+        Place in…
       </button>
-      <ul hidden={!open} role="menu" aria-label={menuLabel}>
+      <ul hidden={!open} role="menu" aria-label={`Place ${code} in`}>
         {targets.length === 0 && (
           <li role="none">
             No available terms

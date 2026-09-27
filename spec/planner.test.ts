@@ -229,13 +229,13 @@ describe("planner", () => {
     expect(html).toMatch(/\d+ completed, \d+ planned of \d+/);
   });
 
-  it("Move to… for a placed COMP3630 omits both S1 2027 (can't be placed there) and S1 2028 (already there)", async () => {
+  it("the Move to list for a placed COMP3630 omits both S1 2027 (can't be placed there) and S1 2028 (already there)", async () => {
     const id = await createPlan();
     await postJson(`/api/plans/${id}/placements`, { code: "COMP3630", term: 2 });
 
     const page = await fetch(new URL(`/plan/${id}`, baseUrl));
     const html = await page.text();
-    const menuMatch = html.match(/<ul hidden role="menu" aria-label="Move COMP3630 to">[\s\S]*?<\/ul>/);
+    const menuMatch = html.match(/<ul class="card-menu-terms" aria-label="Move COMP3630 to">[\s\S]*?<\/ul>/);
     expect(menuMatch).not.toBeNull();
     const menuHtml = menuMatch![0];
     expect(menuHtml).not.toContain("S1 2027");

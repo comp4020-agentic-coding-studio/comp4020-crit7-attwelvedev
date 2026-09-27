@@ -220,8 +220,22 @@ None.
   card's `MoreOptions` (not rendered on read-only plans).
 - The three-dot toggle is drawn at 2rem, with a 2.75rem hit area from a
   `::before`, so it doesn't grow the card.
-- The panel is anchored at the toggle's end edge with `min-width: 12rem`,
-  so it stays within the 13rem card.
+- The panel **floats with `position: fixed`** (ruling 2026-09-28, option
+  2, chosen over opening in place after side-by-side renders). An
+  absolutely positioned panel was tried first and was clipped:
+  `.timeline-scroll` is `overflow-x: auto`, so it also clips vertically,
+  and it cut the panel off at the column's content height (panel
+  293–547px, scroller 76–353px at 1920×1080). When it opens, before
+  paint:
+  - it's end-aligned to the toggle, 4px below it;
+  - it flips 4px above when there's no room below;
+  - failing both, it's pinned to the viewport's bottom gutter;
+  - it's clamped to an 8px gutter horizontally, with `max-height:
+    100vh − 16px` and its own scroll.
+
+  It closes on any scroll outside the panel (it would otherwise detach
+  from its toggle) and on resize. z-index 9: above the page, below the
+  undo toast (10) and the touch-drag ghost (20).
 
 **Sidebar/search card:** header, `p.course-card-offered`
 (`offeredLabel`), the badges, then `div.course-card-actions` with "Place
@@ -393,7 +407,7 @@ selector list.
 
 ### Task 2: Timeline card three-dot menu; read-only plans render no edit controls
 
-- [ ] **Description:**
+- [x] **Description:**
   - Extract `menuTargets`.
   - Give `MoreOptions` a per-instance ID, a label and a class.
   - Move Details, the "Move to" term list and Remove into a per-card
@@ -435,8 +449,10 @@ selector list.
       its own card":
       - open `cardMenu`, then click the card's `.course-card-code`:
         `aria-expanded` becomes "false";
-      - reopen it and click `.card-menu-terms` at `{x: 2, y: 2}`: it stays
-        "true";
+      - reopen it and click `.card-menu-heading`: it stays "true"
+        (execution call, 2026-09-28: the list reset leaves
+        `.card-menu-terms` unpadded, so `{x: 2, y: 2}` landed on the first
+        term button, moving the course and closing the menu);
       - click `h1`: "false".
   - **New `describe("course card menu")`**, at 1920×1080 on a fresh
     `planWithPlacement("COMP1130")` plan unless stated:
@@ -458,8 +474,21 @@ selector list.
        "Removed COMP1130". "Undo" restores it.
     6. At 390×844 and at 1920×1080, the open panel's `getBoundingClientRect`
        is inside `.timeline-scroll`'s rect horizontally, and
-       `horizontalOverflow` is 0.
+       `horizontalOverflow` is 0. Also (ruling 2026-09-28), for every
+       button in the panel (at least one), after
+       `scrollIntoView({ block: "nearest" })`:
+       - `document.elementFromPoint` at its centre is that button or
+         inside it;
+       - every ancestor with `overflow-y` hidden or clip still has
+         `scrollTop` 0, because `scrollIntoView` can scroll a hidden
+         overflow, which a user can't.
+
+       This catches a panel clipped by a scrolling ancestor, which the
+       horizontal bounds alone missed.
     7. With the menu open, `axeViolations` is `[]`.
+    7a. (ruling 2026-09-28, option 2) With the menu open, scrolling
+       `.timeline-scroll` 200px sideways sets the toggle's `aria-expanded`
+       to "false".
     8. **Read-only**, on `withPlan`: `.course-card-menu` has count 0;
        `getByRole("button", { name: "Place in…" })` has count 0; clicking
        the first timeline card's `.course-card-title` opens a dialog.
@@ -483,7 +512,13 @@ selector list.
     It holds PlaceInMenu's three computations, verbatim, as the body.
   - `MoreOptions.tsx`:
     - Props become `{ open; onOpenChange; label?: string; class?: string;
-      children }`.
+      fixed?: boolean; children }`. `fixed` (ruling 2026-09-28) adds
+      `.more-options-panel-fixed`. A `useLayoutEffect` on `[open,
+      fixed]` then writes the panel's top/left/max-height (§4's rules)
+      straight onto the element, so nothing paints at the wrong spot.
+      While open, it closes on a capture-phase `scroll` whose target
+      isn't inside the panel, and on `resize`. The timeline card passes
+      `fixed`.
     - `const panelId = useId();` (from `preact/hooks`), used for the
       panel's `id` and `aria-controls`.
     - The toggle's `aria-label={label ?? "More options"}`.
@@ -528,7 +563,10 @@ selector list.
     - `.course-card-menu .more-options-toggle { width: 2rem; height:
       2rem; position: relative; }` with `::before { content: "";
       position: absolute; inset: -0.375rem; }`
-    - `.course-card-menu .more-options-panel { min-width: 12rem; }`
+    - in place of an anchored panel (ruling 2026-09-28, option 2):
+      `.more-options-panel-fixed { position: fixed; inset: auto;
+      margin: 0; min-width: 12rem; overflow-y: auto; z-index: 9; }`,
+      with top/left/max-height set inline by `MoreOptions`
     - `.course-card-menu .more-options-panel > .card-menu-heading,
       .card-menu-empty { min-height: 0; margin: 0.25rem 0 0; font-size:
       0.8rem; color: var(--unigrey); }`

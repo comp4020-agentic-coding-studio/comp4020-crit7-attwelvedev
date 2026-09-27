@@ -116,19 +116,19 @@ export default function AvailableCourseCard({
           </button>
         </p>
       )}
-      <div class="course-card-actions">
-        {!placement && (
+      {!readOnly && !placement && (
+        <div class="course-card-actions">
           <PlaceInMenu
             view={view}
             code={code}
             onPlace={place}
-            disabled={readOnly || pending}
+            disabled={pending}
             hardBlockedOverride={courseOverride?.hardBlocked}
             open={openMenuCode === code}
             onOpenChange={(open) => onMenuOpenChange(code, open)}
           />
-        )}
-      </div>
+        </div>
+      )}
       <CourseDetail
         view={view}
         code={code}
