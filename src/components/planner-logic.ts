@@ -1,4 +1,5 @@
-import type { ReqExpr } from "../lib/domain/types";
+import { matchesFilter } from "../lib/domain/filters";
+import type { CourseFilter, ReqExpr } from "../lib/domain/types";
 import type { GroupView, PlanView } from "../lib/domain/view";
 
 export interface DropTarget {
@@ -34,45 +35,78 @@ export function progressSegments(completed: number, planned: number, required: n
   return { completedPct, plannedPct };
 }
 
-function collectPrereqLeaves(expr: ReqExpr | null, out: { code: string; concurrent: boolean }[]): void {
-  if (expr === null) return;
-  if (expr.kind === "and" || expr.kind === "or") {
-    for (const item of expr.items) collectPrereqLeaves(item, out);
-  } else if (expr.kind === "course") {
-    out.push({ code: expr.code, concurrent: expr.concurrent });
-  }
-}
+// "required": a course named outright on an all-AND path — the dependent
+// can't be taken without it. "option": one of several ways through — an OR
+// branch, or a course counting toward an "N units of ..." pool — where
+// another placed course could stand in for it.
+export type OverlayEdgeKind = "required" | "option";
 
 export interface OverlayEdge {
   from: string;
   to: string;
+  kind: OverlayEdgeKind;
 }
 
-// Only an edge from a prereq placed in an earlier term (or the same term,
-// for a concurrent leaf) — matching what actually satisfies the requisite,
-// not just "placed somewhere" (view.placements[].placedPrereqs is looser).
+interface PrereqLeaf {
+  code: string;
+  concurrent: boolean;
+  kind: OverlayEdgeKind;
+}
+
+// A units pool with no constraint at all ("72 units towards a degree")
+// would link every earlier course — noise, not a dependency.
+function isOpenFilter(f: CourseFilter): boolean {
+  return !f.codes && !f.prefixes && f.minLevel === undefined && f.maxLevel === undefined && !f.tdp;
+}
+
+function collectPrereqLeaves(view: PlanView, expr: ReqExpr, optional: boolean, out: PrereqLeaf[]): void {
+  switch (expr.kind) {
+    case "and":
+      for (const item of expr.items) collectPrereqLeaves(view, item, optional, out);
+      return;
+    case "or":
+      for (const item of expr.items) collectPrereqLeaves(view, item, optional || expr.items.length > 1, out);
+      return;
+    case "course":
+      out.push({ code: expr.code, concurrent: expr.concurrent, kind: optional ? "option" : "required" });
+      return;
+    case "units":
+      if (isOpenFilter(expr.filter)) return;
+      for (const p of view.placements) {
+        const card = view.courses[p.code];
+        if (card && matchesFilter(card, expr.filter, null)) out.push({ code: p.code, concurrent: false, kind: "option" });
+      }
+      return;
+    default:
+      return;
+  }
+}
+
+// Only an edge from a prereq that actually counts toward the requisite —
+// finished (its last term, for a two-semester course) before the dependent
+// starts, or by then for a concurrent leaf, and not the losing side of an
+// incompatible pair — the same timing evaluate.ts checks, not just "placed
+// somewhere" (view.placements[].placedPrereqs is looser).
 export function overlayEdges(view: PlanView, code: string): OverlayEdge[] {
   const placement = view.placements.find((p) => p.code === code);
   const course = view.courses[code];
   if (!placement || !course?.prereq) return [];
 
-  const leaves: { code: string; concurrent: boolean }[] = [];
-  collectPrereqLeaves(course.prereq, leaves);
+  const leaves: PrereqLeaf[] = [];
+  collectPrereqLeaves(view, course.prereq, false, leaves);
 
-  const edges: OverlayEdge[] = [];
-  const seen = new Set<string>();
+  // A course reached both ways (named outright and also in a pool) is
+  // drawn once, as required — the stronger of the two claims.
+  const kinds = new Map<string, OverlayEdgeKind>();
   for (const leaf of leaves) {
-    if (seen.has(leaf.code)) continue;
+    if (leaf.code === code) continue;
     const leafPlacement = view.placements.find((p) => p.code === leaf.code);
-    if (!leafPlacement) continue;
-    const earlier = leafPlacement.term < placement.term;
-    const sameTermConcurrent = leaf.concurrent && leafPlacement.term === placement.term;
-    if (earlier || sameTermConcurrent) {
-      edges.push({ from: leaf.code, to: code });
-      seen.add(leaf.code);
-    }
+    if (!leafPlacement || leafPlacement.loser) continue;
+    const counts = leaf.concurrent ? leafPlacement.lastTerm <= placement.term : leafPlacement.lastTerm < placement.term;
+    if (!counts) continue;
+    if (kinds.get(leaf.code) !== "required") kinds.set(leaf.code, leaf.kind);
   }
-  return edges;
+  return [...kinds].map(([from, kind]) => ({ from, to: code, kind }));
 }
 
 export function unplacedCount(view: PlanView, code: string): number {

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
-import { overlayEdges } from "./planner-logic";
+import { overlayEdges, type OverlayEdgeKind } from "./planner-logic";
 
 interface Props {
   view: PlanView;
@@ -14,6 +14,7 @@ interface Props {
 
 interface Line {
   key: string;
+  kind: OverlayEdgeKind;
   x1: number;
   y1: number;
   x2: number;
@@ -77,7 +78,7 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
     for (const edge of edges) {
       const from = centreOf(edge.from);
       const to = centreOf(edge.to);
-      if (from && to) next.push({ key: `${edge.from}-${edge.to}`, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
+      if (from && to) next.push({ key: `${edge.from}-${edge.to}`, kind: edge.kind, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
     }
     setLines(next);
   }, [view, show, hoveredCode, layoutTick]);
@@ -95,7 +96,7 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
   return (
     <svg ref={svgRef} class={`prereq-overlay${hoveredCode ? " prereq-overlay-focused" : ""}`} aria-hidden="true">
       {lines.map((line) => (
-        <line key={line.key} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+        <line key={line.key} class={`prereq-${line.kind}`} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
       ))}
     </svg>
   );

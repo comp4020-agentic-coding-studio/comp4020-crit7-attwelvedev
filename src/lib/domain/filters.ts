@@ -1,6 +1,6 @@
 import type { CatalogueCourse, CourseFilter } from "./types";
 
-export function matchesFilter(course: CatalogueCourse, f: CourseFilter, tdp: Set<string> | null): boolean {
+export function matchesFilter(course: Pick<CatalogueCourse, "code" | "level">, f: CourseFilter, tdp: Set<string> | null): boolean {
   if (f.codes && !f.codes.includes(course.code)) return false;
   if (f.excludeCodes?.includes(course.code)) return false;
   if (f.prefixes && !f.prefixes.some((p) => course.code.startsWith(p))) return false;

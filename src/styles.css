@@ -790,6 +790,13 @@ nav[aria-label="site"] .nav-hide:hover {
   opacity: 0.75;
 }
 
+/* One of several ways through (an OR branch, or a course counting toward
+   an "N units of ..." pool) — dashed so a student doesn't read two MATH
+   lines into the same course as "needs both". */
+.prereq-overlay line.prereq-option {
+  stroke-dasharray: 6 4;
+}
+
 /* Hovering one placed course draws just its own chain — bolder than the
    "show everything" toggle's uniform lines, since there's only ever a
    handful of them at once and they're the direct answer to "what does

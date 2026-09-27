@@ -83,6 +83,10 @@ describe("progressSegments", () => {
   });
 });
 
+function placed(...entries: [string, number][]): PlanState {
+  return { ...emptyPlan(), placements: entries.map(([code, term]) => ({ code, term, pinnedGroupId: null })) };
+}
+
 describe("overlayEdges", () => {
   it("returns an edge only for a prereq placed in an earlier term", () => {
     const plan: PlanState = {
@@ -94,8 +98,51 @@ describe("overlayEdges", () => {
     };
     const view = buildPlanView(cat, AACOM_2027, plan);
     const edges = overlayEdges(view, "COMP2100");
-    expect(edges).toContainEqual({ from: "COMP1140", to: "COMP2100" });
+    expect(edges).toContainEqual({ from: "COMP1140", to: "COMP2100", kind: "option" });
     expect(edges.some((e) => e.from === "COMP1110")).toBe(false);
+  });
+
+  it("marks a course named outright on an all-AND path as required", () => {
+    // COMP3300: "completed COMP2310".
+    const view = buildPlanView(cat, AACOM_2027, placed(["COMP2310", 2], ["COMP3300", 4]));
+    expect(overlayEdges(view, "COMP3300")).toEqual([{ from: "COMP2310", to: "COMP3300", kind: "required" }]);
+  });
+
+  it("links a course in an 'N units of (A or B ...)' list as an option", () => {
+    // COMP3242: "6 units of ( COMP3670 or MATH1013 or ... ) and ( COMP1110 or COMP1140 )".
+    const view = buildPlanView(cat, AACOM_2027, placed(["MATH1013", 0], ["COMP1110", 1], ["COMP3242", 4]));
+    const edges = overlayEdges(view, "COMP3242");
+    expect(edges).toContainEqual({ from: "MATH1013", to: "COMP3242", kind: "option" });
+    expect(edges).toContainEqual({ from: "COMP1110", to: "COMP3242", kind: "option" });
+  });
+
+  it("links every placed course matching an 'N units of <level> <subject>' pool as an option", () => {
+    // COMP2300: "( COMP1100 OR ... ) AND 6 units of 1000-level MATH courses" —
+    // both MATH courses qualify, so both are drawn; MATH2222 is the wrong level.
+    const view = buildPlanView(
+      cat,
+      AACOM_2027,
+      placed(["MATH1013", 0], ["MATH1014", 1], ["MATH2222", 1], ["COMP1100", 0], ["COMP2300", 2]),
+    );
+    const edges = overlayEdges(view, "COMP2300");
+    expect(edges).toContainEqual({ from: "MATH1013", to: "COMP2300", kind: "option" });
+    expect(edges).toContainEqual({ from: "MATH1014", to: "COMP2300", kind: "option" });
+    expect(edges.some((e) => e.from === "MATH2222")).toBe(false);
+  });
+
+  it("waits for a two-semester prereq's last term, as the requisite check does", () => {
+    // COMP4550 spans two terms and counts toward COMP4620's "12 units of
+    // 3000 and/or 4000 level COMP courses" only once both are done.
+    const overlapping = buildPlanView(cat, AACOM_2027, placed(["COMP4550", 4], ["COMP4620", 5]));
+    expect(overlayEdges(overlapping, "COMP4620")).toEqual([]);
+    const after = buildPlanView(cat, AACOM_2027, placed(["COMP4550", 4], ["COMP4620", 6]));
+    expect(overlayEdges(after, "COMP4620")).toContainEqual({ from: "COMP4550", to: "COMP4620", kind: "option" });
+  });
+
+  it("links a concurrent prereq in the same term", () => {
+    // COMP2120: "completed or be currently studying COMP2100".
+    const view = buildPlanView(cat, AACOM_2027, placed(["COMP2100", 2], ["COMP2120", 2]));
+    expect(overlayEdges(view, "COMP2120")).toEqual([{ from: "COMP2100", to: "COMP2120", kind: "required" }]);
   });
 
   it("excludes a prereq placed in the same or a later term unless concurrent", () => {
