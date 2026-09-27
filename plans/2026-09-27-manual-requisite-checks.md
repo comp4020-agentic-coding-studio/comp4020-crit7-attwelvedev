@@ -1,7 +1,7 @@
 # Manual checks for "Verify on P&C" requisite items
 
 - **Date:** 2026-09-27
-- **Status:** Approved
+- **Status:** Done (2026-09-27)
 - **Requirements confirmed by user:** yes — 2026-09-27 (via
   `specs/2026-09-27-manual-requisite-checks.md`, approved in brainstorm)
 
@@ -245,18 +245,19 @@ Data flow: `plan_checks` rows → `getPlan` → `PlanState.checks` →
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every task in §5 complete and its tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Manually verified against the built server with a throwaway DB
+- [x] Every task in §5 complete and its tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Manually verified against the built server with a throwaway DB
   (`HOST=127.0.0.1 PORT=… DATABASE_PATH=<scratch>/x.db node dist/server/entry.mjs`)
   at 1920×1080 and 390×844: MATH1116 golden path (Met → Available, verify
   line gone), Not met → amber with reason, Not sure → back to Check
   requirements, answer survives remove + re-place, example plan controls
-  disabled, COMP4820 shows Check requirements until answered
-- [ ] Every requirement in §2 is covered — see §7
-- [ ] Task 4's Human review explicitly accepted by the user
-- [ ] No item remains in §8
+  disabled, COMP4820 shows Check requirements until answered — all 14
+  checks passed at both viewports, 2026-09-27 (scripted Playwright walk)
+- [x] Every requirement in §2 is covered — see §7
+- [x] Task 4's Human review explicitly accepted by the user
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 
