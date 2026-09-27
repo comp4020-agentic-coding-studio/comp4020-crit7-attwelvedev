@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
-import { isError, removeCourse, setChoice } from "./api";
+import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import { outstandingItems, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
@@ -24,6 +24,9 @@ interface Props {
   // True while a *placed* course is being dragged — the only drag the
   // sidebar accepts (dropping it here removes it from the plan).
   dropReady: boolean;
+  // Removes a placed course dropped here, through the same path as a touch
+  // drop, so both offer the undo toast.
+  onDropRemove: (code: string) => void;
 }
 
 interface GroupProps {
@@ -227,6 +230,7 @@ export default function Sidebar({
   onHide,
   onShow,
   dropReady,
+  onDropRemove,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -266,15 +270,13 @@ export default function Sidebar({
       aria-label="requirements"
       class={dropReady ? "reqs-drop-ready" : undefined}
       onDragOver={(event) => event.preventDefault()}
-      onDrop={async (event) => {
+      onDrop={(event) => {
         event.preventDefault();
         onDragEnd?.();
         if (readOnly) return;
         const code = event.dataTransfer?.getData("text/plain");
         if (!code || !view.placements.some((p) => p.code === code)) return;
-        const result = await removeCourse(planId, code);
-        if (isError(result)) onAnnounce(result.error);
-        else onChanged(result);
+        onDropRemove(code);
       }}
     >
       <button

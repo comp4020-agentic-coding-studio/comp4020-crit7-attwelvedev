@@ -357,4 +357,29 @@ describe("requirements rail as a drop target", { timeout: 30_000 }, () => {
       await page.close();
     }
   });
+
+  it.each([
+    ["expanded", {}, 'aside[aria-label="requirements"]'],
+    ["collapsed", { "panel-reqs": "collapsed" }, ".reqs-rail"],
+  ])("dropping a placed course on the %s sidebar offers to undo the removal", async (_state, storage, target) => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop, { storage });
+    try {
+      const card = page.locator('[data-placed="COMP1130"]');
+      const box = (await page.locator(target).boundingBox())!;
+      await card.hover();
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+      await page.mouse.up();
+      await expect.poll(() => card.count()).toBe(0);
+
+      const toast = page.locator(".undo-toast");
+      await expect.poll(() => toast.count()).toBe(1);
+      expect(await toast.textContent()).toContain("Removed COMP1130");
+      await toast.getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => card.count()).toBe(1);
+    } finally {
+      await page.close();
+    }
+  });
 });

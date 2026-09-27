@@ -78,12 +78,12 @@ export default function Planner({ view: initialView }: Props) {
     undoTimer.current = setTimeout(() => setRemoved(null), UNDO_TIMEOUT_MS);
   }
 
-  // The touch-drag drop handler for both "place/move" and "remove" — the
-  // same two mutations Timeline's native onDrop and Sidebar's native onDrop
-  // already perform for a mouse drag, reimplemented here rather than shared
-  // because touch dragging resolves its drop target through elementFromPoint
-  // at the planner level, not inside whichever card or column the pointer
-  // happens to be over.
+  // The touch-drag drop handler for both "place/move" and "remove". Placing
+  // mirrors Timeline's native onDrop, reimplemented here because touch
+  // dragging resolves its drop target through elementFromPoint at the
+  // planner level, not inside whichever column the pointer is over. Removal
+  // is shared: Sidebar's native onDrop calls performRemove too, so a mouse
+  // drop offers the same undo toast as a touch drop.
   async function performPlace(term: number, code: string) {
     const target = dropTargets(view, code).find((t) => t.term === term);
     if (target && !target.allowed) {
@@ -224,6 +224,7 @@ export default function Planner({ view: initialView }: Props) {
             onHide={() => updateReqs({ ...reqs, collapsed: true }, true)}
             onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
+            onDropRemove={(code) => void performRemove(code)}
           />
         </div>
       </div>
