@@ -718,6 +718,31 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     }
   });
 
+  // COMP2700 is in the local catalogue but outside a new plan's tree, so
+  // view.courses has no entry for it — only the search result knows its
+  // blocked terms (0, 1, 3, 5, 7: S2-only, with prereqs not doable by S2 2027).
+  it("greys a searched course's hard-blocked terms mid-drag, like a requirement-list course", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    try {
+      await page.fill(".course-search input", "COMP2700");
+      await page.click(".course-search button[type=submit]");
+      const card = page.locator('.course-search-results [data-drag-code="COMP2700"]');
+      await card.waitFor();
+      await card.scrollIntoViewIfNeeded();
+      await card.hover();
+      await page.mouse.down();
+      const start = (await card.boundingBox())!;
+      await page.mouse.move(start.x + start.width / 2 + 20, start.y + start.height / 2, { steps: 4 });
+      await expect
+        .poll(() => page.locator(".term-disallowed").evaluateAll((els) => els.map((el) => el.getAttribute("data-term"))))
+        .toEqual(["0", "1", "3", "5", "7"]);
+      await page.mouse.up();
+    } finally {
+      await page.close();
+    }
+  });
+
   it("outlines the term under a touch drag, but not a hard-blocked one", async () => {
     const id = await planWithPlacement("COMP1130");
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });

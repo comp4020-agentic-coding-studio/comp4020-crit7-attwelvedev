@@ -13,6 +13,9 @@ interface Props {
   onAnnounce: (message: string) => void;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
+  // A result outside the plan's tree has no view.courses entry, so the
+  // timeline can only grey its blocked terms mid-drag if it hears about it.
+  onResults?: (courses: CourseCardData[]) => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   compact: boolean;
@@ -158,6 +161,7 @@ export default function CourseSearch({
   onAnnounce,
   onDragStart,
   onDragEnd,
+  onResults,
   openMenuCode,
   onMenuOpenChange,
   compact,
@@ -181,6 +185,7 @@ export default function CourseSearch({
     try {
       const result = await searchCourses(q, planId);
       setResults(result.courses);
+      onResults?.(result.courses);
       const message = outcomeMessage(result, q);
       setStatus({ query: q, message });
       onAnnounce(message);

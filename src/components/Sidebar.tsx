@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { GroupView, PlanView } from "../lib/domain/view";
+import type { CourseCard, GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
@@ -14,6 +14,7 @@ interface Props {
   onAnnounce: (message: string) => void;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
+  onSearchResults?: (courses: CourseCard[]) => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   onLocateCourse: (code: string) => void;
@@ -224,6 +225,7 @@ export default function Sidebar({
   onAnnounce,
   onDragStart,
   onDragEnd,
+  onSearchResults,
   openMenuCode,
   onMenuOpenChange,
   onLocateCourse,
@@ -354,6 +356,7 @@ export default function Sidebar({
           onAnnounce={onAnnounce}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
+          onResults={onSearchResults}
           openMenuCode={openMenuCode}
           onMenuOpenChange={onMenuOpenChange}
           compact={compact.has("search")}

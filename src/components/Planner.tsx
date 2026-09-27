@@ -42,6 +42,11 @@ export default function Planner({ view: initialView, title }: Props) {
   const [view, setView] = useState(initialView);
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
+  // Hard-blocked terms of every course search has returned, by code: a
+  // result outside the plan's tree has no view.courses entry, so without
+  // this a drag of it would grey nothing. Feasibility depends only on the
+  // catalogue, never the plan, so an entry never goes stale.
+  const [searchBlocked, setSearchBlocked] = useState<Record<string, Record<number, string>>>({});
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const [locateRequest, setLocateRequest] = useState<{ code: string; token: number } | null>(null);
@@ -119,7 +124,7 @@ export default function Planner({ view: initialView, title }: Props) {
   // is shared: Sidebar's native onDrop calls performRemove too, so a mouse
   // drop offers the same undo toast as a touch drop.
   async function performPlace(term: number, code: string) {
-    const target = dropTargets(view, code).find((t) => t.term === term);
+    const target = dropTargets(view, code, searchBlocked[code]).find((t) => t.term === term);
     if (target && !target.allowed) {
       if (target.reason) setAnnouncement(target.reason);
       return;
@@ -257,6 +262,7 @@ export default function Planner({ view: initialView, title }: Props) {
               view={view}
               planId={view.plan.id}
               draggingCode={draggingCode}
+              draggingBlocked={draggingCode ? searchBlocked[draggingCode] : undefined}
               onChanged={setView}
               onAnnounce={setAnnouncement}
               onDragStart={setDraggingCode}
@@ -275,6 +281,12 @@ export default function Planner({ view: initialView, title }: Props) {
             onAnnounce={setAnnouncement}
             onDragStart={setDraggingCode}
             onDragEnd={() => setDraggingCode(null)}
+            onSearchResults={(courses) =>
+              setSearchBlocked((prev) => ({
+                ...prev,
+                ...Object.fromEntries(courses.map((course) => [course.code, course.hardBlocked])),
+              }))
+            }
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
             onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}

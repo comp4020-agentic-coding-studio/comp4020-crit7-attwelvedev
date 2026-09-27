@@ -10,6 +10,9 @@ interface Props {
   view: PlanView;
   planId: string;
   draggingCode: string | null;
+  // The dragged course's hardBlocked map when view.courses may lack it (a
+  // search result) — see dropTargets.
+  draggingBlocked?: Record<number, string>;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
   onDragStart: (code: string) => void;
@@ -28,6 +31,7 @@ export default function Timeline({
   view,
   planId,
   draggingCode,
+  draggingBlocked,
   onChanged,
   onAnnounce,
   onDragStart,
@@ -79,7 +83,7 @@ export default function Timeline({
     placementsByTerm.set(placement.term, list);
   }
 
-  const dragTargets = draggingCode ? dropTargets(view, draggingCode) : null;
+  const dragTargets = draggingCode ? dropTargets(view, draggingCode, draggingBlocked) : null;
 
   async function handleDrop(term: number, code: string) {
     onDragEnd();
