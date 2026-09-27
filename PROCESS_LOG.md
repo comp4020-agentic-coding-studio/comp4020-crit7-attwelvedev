@@ -390,3 +390,33 @@ narrowed it to "including" only when a code or "either" follows, and
 pinned that with a test. The final diff changed only the intended
 courses plus five postgrad ones, all improvements. COMP4880 also had a
 real semantic bug, now fixed: COMP3670 alone suffices again.
+
+## 2026-09-27 — "Unknown" as a third answer, not a permanent warning
+
+Resolved by 4f1d275..442bee8.
+
+After the parser fixes, COMP4550 and COMP4011 in the example plan still
+said "Needs prerequisites", even though every checkable requirement was
+placed. The evaluator gave an unverifiable leaf (a permission code, a
+mark, a WAM) `ok: null`, but its "and" demanded every item be exactly
+`true`. Meanwhile feasibility treated the same leaf as met. So the two
+disagreed, and 21 of 87 undergrad courses could never become Available,
+whatever the plan.
+
+The obvious fix was to treat those leaves as met and let the existing
+"Verify on P&C" line carry the caveat. I rejected that because
+"Available" would overclaim for a course gated on a WAM of 70. I chose
+three-valued logic instead: an unmet item still makes an "and" false and
+a met one still makes an "or" true, otherwise "unknown" wins. Unknown
+gets its own neutral "Check requirements" state, not the amber warning.
+The same review found a second false alarm. The card's "N prerequisites
+not placed" counted every alternative of an "or", even one already
+satisfied. It now counts the fewest more courses needed.
+
+How I knew it was right: a truth-table test pins each and/or case, and
+MATH1116 goes to "check" with MATH1115 placed (only the mark is left)
+but "soft" without it. The check that guards against regressions is an
+invariant: the example plan, which is meant to be a complete plan, must
+have no placement still flagged "soft". It failed on five courses before
+the change and passes now. I also rendered the new badge at both marking
+viewports, against the built server and a throwaway database.
