@@ -2040,6 +2040,39 @@ describe("course cards", { timeout: 30_000 }, () => {
     });
   });
 
+  it("a blocked card recedes without fading its controls", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    try {
+      // The server refuses a hard-blocked placement and a fresh plan has no
+      // blocked sidebar card, so give a rendered card the class: this is
+      // about the CSS rule, not how the state arises.
+      const cards = page.locator(".course-card-unplaced");
+      expect(await cards.count()).toBeGreaterThan(1);
+      await cards.first().evaluate((el) => el.classList.replace("course-card-unplaced", "course-card-hard"));
+      const card = page.locator(".course-card-hard").first();
+      expect(await card.locator("button").count()).toBeGreaterThan(0);
+      // Opacity compounds down the tree and a child can't undo it.
+      const opacities = await card.locator("button").evaluateAll((buttons) =>
+        buttons
+          .filter((b) => !b.closest("dialog"))
+          .map((b) => {
+            let product = 1;
+            for (let el: Element | null = b; el; el = el.parentElement) product *= Number(getComputedStyle(el).opacity);
+            return product;
+          }),
+      );
+      expect(opacities.length).toBeGreaterThan(0);
+      expect(opacities.every((o) => o === 1)).toBe(true);
+      const codeColour = (locator: typeof card) =>
+        locator.locator(".course-card-code").first().evaluate((el) => getComputedStyle(el).color);
+      expect(await codeColour(card)).not.toBe(await codeColour(page.locator(".course-card-unplaced").first()));
+      expect(await card.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe("dashed");
+    } finally {
+      await page.close();
+    }
+  });
+
   it("a placed sidebar card recedes without fading its buttons", async () => {
     await withPlan({ width: 1920, height: 1080 }, async (page) => {
       const card = page.locator(".course-card-sidebar-placed").first();

@@ -652,7 +652,7 @@ selector list.
 
 ### Task 4: Blocked cards recede by colour, not opacity
 
-- [ ] **Description:** replace `.course-card-hard`'s opacity with the
+- [x] **Description:** replace `.course-card-hard`'s opacity with the
   receding treatment, shared with `.course-card-sidebar-placed`.
 - **Files touched:**
   - `src/styles.css`
