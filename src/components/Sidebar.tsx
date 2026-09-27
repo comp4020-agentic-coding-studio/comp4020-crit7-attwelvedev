@@ -1,9 +1,9 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, removeCourse, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
-import { outstandingItems } from "./planner-logic";
+import { outstandingItems, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 import SidebarSection from "./SidebarSection";
 
@@ -17,6 +17,13 @@ interface Props {
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   onLocateCourse: (code: string) => void;
+  // Collapses the sidebar to its rail.
+  onHide: () => void;
+  // Expands the sidebar from its rail back to the preferred column count.
+  onShow: () => void;
+  // True while a *placed* course is being dragged — the only drag the
+  // sidebar accepts (dropping it here removes it from the plan).
+  dropReady: boolean;
 }
 
 interface GroupProps {
@@ -217,9 +224,18 @@ export default function Sidebar({
   openMenuCode,
   onMenuOpenChange,
   onLocateCourse,
+  onHide,
+  onShow,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
+  const hideRef = useRef<HTMLButtonElement>(null);
+  const railRef = useRef<HTMLButtonElement>(null);
+  const { completedPct, plannedPct } = progressSegments(
+    view.total.completed,
+    view.total.planned,
+    view.total.required,
+  );
 
   // Starts empty on the server render and on first hydration so the two
   // agree, then picks up this browser's saved state once mounted.
@@ -245,6 +261,7 @@ export default function Sidebar({
 
   return (
     <aside
+      id="requirements"
       aria-label="requirements"
       onDragOver={(event) => event.preventDefault()}
       onDrop={async (event) => {
@@ -258,7 +275,48 @@ export default function Sidebar({
         else onChanged(result);
       }}
     >
-      <ul class="requirements-scroll">
+      <button
+        type="button"
+        class="reqs-hide"
+        ref={hideRef}
+        aria-controls="requirements-content"
+        aria-expanded="true"
+        onClick={() => {
+          onHide();
+          railRef.current?.focus();
+        }}
+      >
+        <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m15 6-6 6 6 6" />
+        </svg>
+        Hide requirements
+      </button>
+      <button
+        type="button"
+        class="reqs-rail"
+        ref={railRef}
+        aria-controls="requirements-content"
+        aria-expanded="false"
+        onClick={() => {
+          onShow();
+          hideRef.current?.focus();
+        }}
+      >
+        {/* One span for the whole name: the rail is a flex container, so each
+            child is blockified and the name algorithm would put a space
+            between separate spans ("Show requirements : …"). */}
+        <span class="visually-hidden">
+          Show requirements: {view.total.completed} completed, {view.total.planned} planned of {view.total.required}
+        </span>
+        <span class="reqs-rail-label" aria-hidden="true">
+          Requirements
+        </span>
+        <span class="reqs-rail-bar" aria-hidden="true">
+          <span class="reqs-rail-completed" style={{ height: `${completedPct}%` }} />
+          <span class="reqs-rail-planned" style={{ height: `${plannedPct}%`, insetBlockEnd: `${completedPct}%` }} />
+        </span>
+      </button>
+      <ul class="requirements-scroll" id="requirements-content">
         <SidebarSection
           {...sectionProps("outstanding")}
           label="What's left"

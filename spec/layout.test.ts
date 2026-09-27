@@ -210,3 +210,96 @@ describe("site nav", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const reqsCollapsed = { storage: { "panel-reqs": "collapsed" } };
+  const asideWidth = (page: Page) =>
+    page.evaluate(() => document.querySelector<HTMLElement>('aside[aria-label="requirements"]')!.offsetWidth);
+  const timelineWidth = (page: Page) =>
+    page.evaluate(() => document.querySelector<HTMLElement>(".planner-timeline-area")!.offsetWidth);
+  const focused = (page: Page, selector: string) =>
+    page.evaluate((s) => document.activeElement === document.querySelector(s), selector);
+
+  it("collapses to a rail, moves focus between the controls, and remembers the choice", async () => {
+    const page = await openPage(browser, planUrl(), desktop);
+    try {
+      const rail = page.locator(".reqs-rail");
+      const content = page.locator(".requirements-scroll");
+      const timelineBefore = await timelineWidth(page);
+
+      await page.locator("button.reqs-hide").click();
+      expect(await rail.isVisible()).toBe(true);
+      expect(await focused(page, ".reqs-rail")).toBe(true);
+      expect(await content.isVisible()).toBe(false);
+      expect(await asideWidth(page)).toBe(48);
+      expect((await timelineWidth(page)) - timelineBefore).toBeGreaterThanOrEqual(600);
+      expect(await horizontalOverflow(page)).toBe(0);
+      expect(await page.evaluate(() => localStorage.getItem("panel-reqs"))).toBe("collapsed");
+
+      await page.reload({ waitUntil: "networkidle" });
+      expect(await rail.isVisible()).toBe(true);
+      expect(await asideWidth(page)).toBe(48);
+
+      await rail.click();
+      expect(await asideWidth(page)).toBe(715);
+      expect(await focused(page, ".reqs-hide")).toBe(true);
+      expect(await page.evaluate(() => localStorage.getItem("panel-reqs"))).toBeNull();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("applies the saved state before any bundled script runs", async () => {
+    const page = await openPage(browser, planUrl(), desktop, { ...reqsCollapsed, blockScripts: true });
+    try {
+      expect(await asideWidth(page)).toBe(48);
+      expect(await page.locator(".reqs-rail").isVisible()).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [390, 844],
+    [800, 800],
+  ])("ignores the saved state in the stacked layout at %i×%i", async (width, height) => {
+    const page = await openPage(browser, planUrl(), { width, height }, reqsCollapsed);
+    try {
+      expect(await page.locator(".requirements-scroll").isVisible()).toBe(true);
+      expect(await page.locator(".reqs-rail").isVisible()).toBe(false);
+      expect(await page.locator(".reqs-hide").isVisible()).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("collapses from the 1-column layout on a tablet", async () => {
+    const page = await openPage(browser, planUrl(), { width: 900, height: 800 });
+    try {
+      await page.locator("button.reqs-hide").click();
+      expect(await asideWidth(page)).toBe(48);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("names the rail with the program's progress", async () => {
+    const page = await openPage(browser, planUrl(), desktop, reqsCollapsed);
+    try {
+      const rail = page.getByRole("button", { name: /^Show requirements: \d+ completed, \d+ planned of 192$/ });
+      expect(await rail.count()).toBe(1);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("passes axe with the sidebar collapsed", async () => {
+    const page = await openPage(browser, planUrl(), desktop, reqsCollapsed);
+    try {
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+});

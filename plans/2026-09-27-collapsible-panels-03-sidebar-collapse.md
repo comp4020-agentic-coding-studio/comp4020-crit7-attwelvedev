@@ -219,7 +219,7 @@ cascade order).
 
 ### Task 5: Collapse the sidebar to a progress rail, applied before first paint
 
-- [ ] **Description:** Planner-owned `ReqsState`, the hide button, the rail,
+- [x] **Description:** Planner-owned `ReqsState`, the hide button, the rail,
   the head-script line and the CSS.
 - **Files touched:**
   - `src/components/Planner.tsx`
@@ -284,9 +284,8 @@ cascade order).
       ```tsx
       <button type="button" class="reqs-rail" ref={railRef} aria-controls="requirements-content" aria-expanded="false"
         onClick={() => { onShow(); hideRef.current?.focus(); }}>
-        <span class="visually-hidden">Show </span>
-        <span class="reqs-rail-label">requirements</span>
-        <span class="visually-hidden">: {view.total.completed} completed, {view.total.planned} planned of {view.total.required}</span>
+        <span class="visually-hidden">Show requirements: {view.total.completed} completed, {view.total.planned} planned of {view.total.required}</span>
+        <span class="reqs-rail-label" aria-hidden="true">Requirements</span>
         <span class="reqs-rail-bar" aria-hidden="true">
           <span class="reqs-rail-completed" style={{ height: `${completedPct}%` }} />
           <span class="reqs-rail-planned" style={{ height: `${plannedPct}%`, insetBlockEnd: `${completedPct}%` }} />
@@ -298,8 +297,13 @@ cascade order).
     - `hideRef` and `railRef` are `useRef<HTMLButtonElement>(null)`.
     - Give `<ul class="requirements-scroll">` the id
       `requirements-content`.
-    - Visible label casing: CSS `text-transform: capitalize` on
-      `.reqs-rail-label` keeps the accessible name "Show requirements…".
+    - The whole name sits in **one** visually-hidden span, and the visible
+      label is `aria-hidden`. *(Amended during execution, 2026-09-27: the
+      original split spans plus `text-transform: capitalize` computed as
+      "Show requirements : …" in Chromium. The rail is `display: flex`, so
+      each child span is blockified, and accessible-name computation puts
+      a space at each block boundary. That failed test 5. The user chose
+      this fix.)*
   - **`Base.astro` head script:** add `if (s.getItem("panel-reqs") ===
     "collapsed") h.dataset.reqs = "collapsed";` after the nav line.
   - **`styles.css`:**

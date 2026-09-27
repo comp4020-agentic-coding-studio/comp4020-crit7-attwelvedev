@@ -1,7 +1,8 @@
-import { useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
+import { applyReqsState, DEFAULT_REQS, type ReqsState, reqsStateFromDataset, saveReqsState } from "./panel-state";
 import { dropTargets } from "./planner-logic";
 import Sidebar from "./Sidebar";
 import Timeline from "./Timeline";
@@ -30,6 +31,17 @@ export default function Planner({ view: initialView }: Props) {
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const plannerRef = useRef<HTMLDivElement>(null);
   const readOnly = view.plan.readOnly;
+
+  const [reqs, setReqs] = useState<ReqsState>(DEFAULT_REQS);
+  // The <head> script already painted the stored state; this just brings
+  // Preact's copy in line after hydration (server render + first client
+  // render stay equal, as with Sidebar's compaction state).
+  useEffect(() => setReqs(reqsStateFromDataset(document.documentElement.dataset)), []);
+  function updateReqs(next: ReqsState, commit: boolean) {
+    setReqs(next);
+    applyReqsState(document.documentElement, next);
+    if (commit) saveReqsState(next);
+  }
 
   async function moveCutoff(delta: 1 | -1) {
     const next = view.plan.cutoff + delta;
@@ -209,6 +221,9 @@ export default function Planner({ view: initialView }: Props) {
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
             onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}
+            onHide={() => updateReqs({ ...reqs, collapsed: true }, true)}
+            onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
+            dropReady={false}
           />
         </div>
       </div>

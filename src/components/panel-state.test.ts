@@ -123,4 +123,9 @@ describe("the inline head script in Base.astro", () => {
     const base = readFileSync("src/layouts/Base.astro", "utf-8");
     expect(base).toContain(`"${NAV_KEY}"`);
   });
+
+  it("uses the same sidebar key", () => {
+    const base = readFileSync("src/layouts/Base.astro", "utf-8");
+    expect(base).toContain(`"${REQS_KEY}"`);
+  });
 });

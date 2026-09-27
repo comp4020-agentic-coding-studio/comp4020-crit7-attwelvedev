@@ -390,6 +390,66 @@ body:has(.planner) main {
   min-width: 0;
 }
 
+/* The collapse controls only exist in the side-by-side layout (see the
+   last @container block); the stacked strip has nothing to collapse into. */
+.reqs-hide,
+.reqs-rail {
+  display: none;
+}
+
+.reqs-hide {
+  align-self: flex-end;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin-block-end: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.reqs-rail {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: min(24rem, calc(100vh - 2rem));
+  padding: 0.9rem 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+}
+
+.reqs-rail-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.reqs-rail-bar {
+  position: relative;
+  width: 0.5rem;
+  flex: 1 1 auto;
+  min-height: 6rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.reqs-rail-completed,
+.reqs-rail-planned {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+}
+
+.reqs-rail-completed {
+  background: var(--gold);
+}
+
+.reqs-rail-planned {
+  background: var(--gold-tint);
+}
+
 .cutoff-controls {
   display: flex;
   align-items: center;
@@ -1067,6 +1127,8 @@ fieldset[aria-busy="true"] {
 
   .planner-panes > aside {
     order: -1;
+    display: flex;
+    flex-direction: column;
     flex: 0 0 var(--reqs-w-1);
     width: var(--reqs-w-1);
     position: sticky;
@@ -1131,5 +1193,33 @@ fieldset[aria-busy="true"] {
 
   .available-courses[data-columns="3"] {
     grid-template-columns: repeat(3, 13rem);
+  }
+}
+
+/* Collapsed sidebar. This block must stay last in the planner section: its
+   rules have the same specificity as the tier blocks above (and the
+   preference caps that follow them), and the collapsed state has to win
+   over all of them. */
+@container planner (min-width: 49.5rem) {
+  .reqs-hide {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  :root[data-reqs="collapsed"] .planner-panes > aside {
+    flex-basis: var(--reqs-w-rail);
+    width: var(--reqs-w-rail);
+    overflow: visible;
+    scrollbar-gutter: auto;
+  }
+
+  :root[data-reqs="collapsed"] .requirements-scroll,
+  :root[data-reqs="collapsed"] .reqs-hide {
+    display: none;
+  }
+
+  :root[data-reqs="collapsed"] .reqs-rail {
+    display: flex;
   }
 }
