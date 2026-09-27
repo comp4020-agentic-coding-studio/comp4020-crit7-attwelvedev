@@ -1,6 +1,7 @@
 import { globSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { CourseFilter, ReqExpr } from "./types";
+import { isUndergrad } from "../catalogue/from-pandc";
 import { parseRequisites } from "./requisites";
 
 interface RawCourse {
@@ -148,6 +149,8 @@ describe("parseRequisites: prereq fixtures", () => {
       expect.arrayContaining(["COMP4500", "COMP4560", "COMP4810", "COMP4820"]),
     );
     expect(result.unverifiable.some((t) => /permission code/i.test(t))).toBe(true);
+    // "including" only joins a code or "either" (MATH2307) — here it's prose.
+    expect(result.unverifiable.some((t) => /student projects including completing/.test(t))).toBe(true);
   });
 
   it("COMP4650: units clause with two prefixes", () => {
@@ -191,6 +194,73 @@ describe("parseRequisites: prereq fixtures", () => {
 
   it("ENVS2015: units towards a degree, empty filter", () => {
     expectPrereq("ENVS2015", U(24, {}));
+  });
+
+  it('COMP4880: ", or you must have completed all of the following:" splits the whole sentence', () => {
+    // COMP3670 alone is enough — the MATH clause belongs to the second route only.
+    expectPrereq(
+      "COMP4880",
+      OR(C("COMP3670"), AND(OR(C("COMP1110"), C("COMP1140")), OR(C("MATH1014"), C("MATH1115")))),
+    );
+  });
+
+  it('COMP2700: "6 units MATH code course" (no "of")', () => {
+    expectPrereq("COMP2700", AND(OR(C("COMP1100"), C("COMP1130")), OR(C("COMP1600"), U(6, { prefixes: ["MATH"] }))));
+  });
+
+  it('COMP3610: "MATHS excluding MATH1003" without parens, inside a group', () => {
+    expectPrereq(
+      "COMP3610",
+      AND(C("COMP2100"), OR(C("COMP1600"), U(6, { prefixes: ["MATH"], excludeCodes: ["MATH1003"] }))),
+    );
+  });
+
+  it('COMP3425: "6 units from A or B or C ; AND D"', () => {
+    expectPrereq("COMP3425", AND(U(6, { codes: ["COMP1100", "COMP1130", "COMP1730"] }), C("COMP2400")));
+  });
+
+  it("COMP3430: a lead-in in the second sentence, spaced codes, two units-from lists", () => {
+    const norm = normalize(parse("COMP3430").prereq) as { kind: string; items: unknown[] };
+    expect(norm.kind).toBe("and");
+    // Before these, only the prose sentence about "introductory courses".
+    expect(norm.items.slice(-3)).toEqual([
+      U(6, { codes: ["COMP1030", "COMP1100", "COMP1130", "COMP1730"] }),
+      U(6, { codes: ["COMP1040", "COMP1110", "COMP1140"] }),
+      C("COMP2400"),
+    ]);
+  });
+
+  it('COMP4528: "either A or B ..."', () => {
+    expectPrereq("COMP4528", OR(C("ENGN2228"), C("COMP2120"), C("COMP3600"), C("COMP3670")));
+  });
+
+  it('COMP4350: "either:" and a comma-listed subject pool', () => {
+    // Over-strict on "either A or B and C" as accepted in overview §2.4.
+    expectPrereq(
+      "COMP4350",
+      AND(
+        OR(
+          U(12, { prefixes: ["COMP"], minLevel: 2000, maxLevel: 2000 }),
+          U(12, { prefixes: ["MUSI", "DESN", "ARTV"], minLevel: 2000, maxLevel: 2000 }),
+        ),
+        C("COMP1720"),
+      ),
+    );
+  });
+
+  it.each([
+    ["INFS2024", ["INFS1001", "COMP1100", "COMP1720", "COMP1730"]],
+    ["INFS3002", ["INFS2005", "INFS2024", "COMP2400"]],
+    ["INFS3024", ["INFS2024", "COMP2400"]],
+  ])('%s: "at least one of the following courses: CODE - Title ..."', (code, options) => {
+    expectPrereq(code, OR(...options.map(C)));
+  });
+
+  it('MATH2307: "units of 1000 levels Mathematics (MATH) courses including either A or B"', () => {
+    expectPrereq(
+      "MATH2307",
+      AND(U(12, { prefixes: ["MATH"], minLevel: 1000, maxLevel: 1000 }), OR(C("MATH1014"), C("MATH1116"))),
+    );
   });
 });
 
@@ -284,5 +354,28 @@ describe("parseRequisites: invariants over the whole catalogue", () => {
         expect(found.has(code), `${raw.code}: ${code} missing from parsed result`).toBe(true);
       }
     }
+  });
+
+  // The check above counts a code sitting inside unverifiable text as
+  // "not dropped" — which is how COMP4880's COMP1110 and COMP3425's whole
+  // units list went unchecked and unlinked: kept as prose, never evaluated.
+  // For the courses the planner loads, a code in an unverifiable leaf is a
+  // parser gap unless the sentence genuinely isn't a checkable requisite.
+  const PROSE_WITH_CODES: Record<string, string> = {
+    MATH1115: "a convener-permission condition on having done MATH1013/MATH1113, not a prerequisite",
+    MATH2222: "advice prose plus per-course mark thresholds the plan can't know",
+    SOCY2166: "a conditional concurrency clause (if SOCY2038 not completed, take it alongside)",
+  };
+
+  it("no course code is left inside an unverifiable leaf, for the courses the planner loads", () => {
+    const codeRe = /\b[A-Z]{4}\s?\d{4}\b/;
+    const offenders: string[] = [];
+    for (const file of globSync("data/2027/courses/*.json")) {
+      const raw: RawCourse = JSON.parse(readFileSync(file, "utf-8"));
+      if (!isUndergrad(raw.code) || raw.code in PROSE_WITH_CODES) continue;
+      const result = parseRequisites({ prerequisites: raw.prerequisites, incompatibilities: raw.incompatibilities });
+      for (const text of result.unverifiable) if (codeRe.test(text)) offenders.push(`${raw.code}: "${text}"`);
+    }
+    expect(offenders).toEqual([]);
   });
 });

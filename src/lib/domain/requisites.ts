@@ -23,6 +23,27 @@ const LEAD_IN_RE =
 // (successfully) completed[:] ..." (COMP4550, COMP4820's second clause).
 const ACTION_FILLER_RE = /^(?:have\s+)?(?:successfully\s+)?completed\s*:?\s*/i;
 
+// "either" opening a disjunction adds nothing the "or"s don't already say
+// (COMP4528 "either ENGN2228 or ...", COMP4350 "either: completed ...",
+// MATH2307 "including either MATH1014 or MATH1116").
+const EITHER_RE = /^either\s*:?\s*/i;
+
+// A second whole route through the requisite, spelled out as its own
+// clause (COMP4880: "completed COMP3670 , or you must have completed all
+// of the following: COMP1110 or COMP1140 and MATH1014 or MATH1115"). It
+// binds looser than everything, so it's split off before parsing — read
+// as an ordinary ", or" it would bind tighter than the "and" and demand
+// the MATH course even on the COMP3670 route.
+const ROUTE_SPLIT_RE =
+  /\s*,?\s*\bor\s+you\s+must\s+(?:have\s+)?(?:successfully\s+)?completed\s*(?:all\s+of\s+the\s+following\s*)?:?\s*/i;
+
+// "at least one of the following courses: INFS1001 - Business Information
+// Systems COMP1100 - Programming as Problem Solving ..." (INFS2024,
+// INFS3002, INFS3024): an OR of the listed codes. Titles carry their own
+// "and"s ("Art and Interaction Computing"), so the list runs to the end of
+// the sentence rather than stopping at a connective.
+const AT_LEAST_ONE_RE = /^at\s+least\s+one\s+of\s+the\s+following(?:\s+courses)?\s*:\s*/i;
+
 // "(have) completed or (be) currently enrolled in/studying CODE" (COMP2120,
 // COMP3620, COMP4550's second OR-branch) — concurrency, not disjunction.
 const CONCURRENT_RE =
@@ -44,12 +65,21 @@ const PROGRAM_BARE_RE = /^Bachelor of Advanced Computing\b/i;
 // N units of <noun phrase>. Each tail pattern below is tried in order after
 // the head; the first to match wins.
 const UNITS_HEAD_RE = /^(\d[\d,]*)\s*units?\s*/i;
-const UNITS_CODE_LIST_RE = /^of\s*\(\s*([A-Z]{4}\s?\d{4}(?:\s*(?:or|OR|,|\/)\s*[A-Z]{4}\s?\d{4})*)\s*\)/;
+const UNITS_CODE_LIST_RE = /^(?:of|from)\s*:?\s*\(\s*([A-Z]{4}\s?\d{4}(?:\s*(?:or|OR|,|\/)\s*[A-Z]{4}\s?\d{4})*)\s*\)/;
+// The same list unbracketed, only after "from" (COMP3425 "6 units from
+// COMP1100 or COMP1130 or COMP1730", COMP3430's "COMP 1030"): after "of", a
+// bare code is COMP3310's "COMP2000 -level" pseudo-code instead.
+const UNITS_FROM_CODES_RE = /^from\s*:?\s*([A-Z]{4}\s?\d{4}(?:\s*(?:or|OR|,)\s*[A-Z]{4}\s?\d{4})*)(?!\s*-?\s*level)/;
+// The subject may be spelled out ahead of its code (MATH2307 "1000 levels
+// Mathematics (MATH) courses") or comma-listed (COMP4350 "MUSI, DESN or ARTV").
 const UNITS_LEVEL_RE =
-  /^of\s*(\d{4})\s*(?:and\/or|\/|-)?\s*(\d{4})?\s*-?\s*level(?:s)?\s+\(?\s*([A-Z]+(?:\s*(?:OR|or)\s*[A-Z]+)*)\s*\)?(?:\s*(?:coded\s+)?courses?\b)?/;
+  /^of\s*(\d{4})\s*(?:and\/or|\/|-)?\s*(\d{4})?\s*-?\s*level(?:s)?\s+(?:[A-Z][a-z]+\s+)?\(?\s*([A-Z]+(?:\s*(?:OR|or|,)\s*[A-Z]+)*)\s*\)?(?:\s*(?:coded\s+)?courses?\b)?/;
 const UNITS_FUSED_LEVEL_RE = /^of\s*([A-Z]+)(\d{4})\s*-\s*level\s+courses\b/;
-const UNITS_PREFIX_RE = /^of\s*([A-Z]+?)(S)?\b(?:\s+(?:coded\s+)?courses\b)?/;
-const UNITS_EXCLUDE_RE = /^\s*\(\s*excluding\s+([A-Z]{4}\s?\d{4})\s*\)/i;
+// "of" is sometimes missing (COMP2700 "6 units MATH code course").
+const UNITS_PREFIX_RE = /^(?:of\s*)?([A-Z]+?)(S)?\b(?:\s+(?:coded?\s+)?courses?\b)?/;
+// Bracketed (COMP3320) or bare (COMP3610 "MATHS excluding MATH1003 )") —
+// the bare form must leave the ")" for the enclosing group to close on.
+const UNITS_EXCLUDE_RE = /^\s*(?:\(\s*excluding\s+([A-Z]{4}\s?\d{4})\s*\)|excluding\s+([A-Z]{4}\s?\d{4}))/i;
 const UNITS_EMPTY_RE = /^(?:of\s*)?(?:towards\s+a\s+degree|towards\s+their\b[^,.]*|(?:of\s*)?tertiary\s+(?:courses|study))\b/i;
 
 interface AtomResult {
@@ -125,7 +155,7 @@ function matchCode(text: string, pos: number): AtomResult | null {
 
 function splitPrefixList(raw: string): string[] {
   return raw
-    .split(/\s*(?:OR|or)\s*/)
+    .split(/\s*(?:OR|or|,)\s*/)
     .map((s) => s.trim())
     .filter(Boolean);
 }
@@ -138,6 +168,15 @@ function unitsCore(rest: string): { filter: CourseFilter; length: number } | nul
       .map((s) => normalizeCode(s.trim()))
       .filter(Boolean);
     return { filter: { codes }, length: codeList[0].length };
+  }
+
+  const fromCodes = UNITS_FROM_CODES_RE.exec(rest);
+  if (fromCodes) {
+    const codes = fromCodes[1]!
+      .split(/\s*(?:or|OR|,)\s*/)
+      .map((s) => normalizeCode(s.trim()))
+      .filter(Boolean);
+    return { filter: { codes }, length: fromCodes[0].length };
   }
 
   const level = UNITS_LEVEL_RE.exec(rest);
@@ -164,7 +203,7 @@ function unitsCore(rest: string): { filter: CourseFilter; length: number } | nul
     const filter: CourseFilter = { prefixes: [word] };
     const exclude = UNITS_EXCLUDE_RE.exec(rest.slice(length));
     if (exclude) {
-      filter.excludeCodes = [normalizeCode(exclude[1]!)];
+      filter.excludeCodes = [normalizeCode((exclude[1] ?? exclude[2])!)];
       length += exclude[0].length;
     }
     return { filter, length };
@@ -213,7 +252,14 @@ function matchParenGroup(text: string, pos: number, parse: (t: string, p: number
 // Word-boundary "and"/"or" is a real connective except: "N or above/below"
 // (mark clauses) and the "and/or" compound (level ranges the units matcher
 // missed) — both are absorbed as ordinary text instead of splitting.
-const CONNECTIVE_SCAN_RE = /\(|\)|\band\/or\b|\bor\s+(?:above|below)\b|\b(and|AND|or|OR)\b|,/gi;
+// "including" narrows a units pool to courses it must contain (MATH2307
+// "12 units of ... MATH courses including either MATH1014 or MATH1116"),
+// which is an AND at the outer level, not an implicit tight AND — but only
+// ahead of a code or "either": COMP4550's "Enrolling in student projects
+// including completing the ... Form" is prose, and splitting it would chop
+// the verify text a student reads.
+const CONNECTIVE_SCAN_RE =
+  /\(|\)|\band\/or\b|\bor\s+(?:above|below)\b|\b(and|AND|or|OR|including(?=\s+(?:either\b|[A-Z]{4}\s?\d{4})))\b|,/gi;
 
 interface Connective {
   type: "AND" | "OR";
@@ -246,7 +292,7 @@ function nextConnective(text: string, from: number): Connective | null {
       if (orAfter) end += orAfter[0].length;
       return { type: "OR", start: m.index, end };
     }
-    return { type: /and/i.test(token) ? "AND" : "OR", start: m.index, end: m.index + token.length };
+    return { type: /^(?:and|including)$/i.test(token) ? "AND" : "OR", start: m.index, end: m.index + token.length };
   }
   return null;
 }
@@ -268,9 +314,20 @@ function skipWs(text: string, pos: number): number {
   return p;
 }
 
+function matchAtLeastOne(text: string, pos: number): AtomResult | null {
+  const head = AT_LEAST_ONE_RE.exec(text.slice(pos));
+  if (!head) return null;
+  const codes = matchAllCodes(text.slice(pos + head[0].length));
+  if (codes.length === 0) return null;
+  const items: ReqExpr[] = codes.map((code) => ({ kind: "course", code, concurrent: false }));
+  return { node: items.length > 1 ? { kind: "or", items } : items[0]!, end: text.length };
+}
+
 function parseAtom(text: string, rawPos: number): AtomResult | null {
-  const pos = skipWs(text, rawPos);
-  for (const matcher of [matchProgram, matchUnits, matchConcurrent, matchCode]) {
+  let pos = skipWs(text, rawPos);
+  const either = EITHER_RE.exec(text.slice(pos));
+  if (either) pos += either[0].length;
+  for (const matcher of [matchAtLeastOne, matchProgram, matchUnits, matchConcurrent, matchCode]) {
     const r = matcher(text, pos);
     if (r) return r;
   }
@@ -337,10 +394,15 @@ function parseAndOuter(text: string, pos: number): AtomResult | null {
 }
 
 function parseExpr(sentence: string): ReqExpr | null {
-  const trimmed = sentence.trim();
+  // "; AND" / "; OR" (COMP3425, COMP3430) is just the connective.
+  const trimmed = sentence.replace(/\s*;\s*(?=(?:and|or)\b)/gi, " ").trim();
   if (!trimmed) return null;
-  const result = parseAndOuter(trimmed, 0);
-  return result ? result.node : null;
+  const routes = trimmed
+    .split(ROUTE_SPLIT_RE)
+    .map((route) => parseAndOuter(route.trim(), 0)?.node)
+    .filter((node): node is ReqExpr => node !== undefined);
+  if (routes.length === 0) return null;
+  return routes.length > 1 ? { kind: "or", items: routes } : routes[0]!;
 }
 
 function splitSentences(text: string): string[] {
@@ -431,8 +493,9 @@ export function parseRequisites(input: { prerequisites: string; incompatibilitie
   for (const [i, sentence] of prereqSentences.entries()) {
     // A sentence split on ". " that begins with a bare connective (e.g.
     // COMP3310's "... COMP2300 . AND 6 units of ...") continues the same
-    // top-level AND chain as the sentence before it.
-    const stripped = i === 0 ? stripLeadIn(sentence) : sentence.replace(/^(?:AND|and|OR|or|,)\s*/, "");
+    // top-level AND chain as the sentence before it. The lead-in can open
+    // a later sentence too (COMP3430's opens with a prose sentence first).
+    const stripped = stripLeadIn(i === 0 ? sentence : sentence.replace(/^(?:AND|and|OR|or|,)\s*/, ""));
     const node = parseExpr(stripped);
     if (node) prereqParts.push(node);
   }
