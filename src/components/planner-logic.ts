@@ -178,6 +178,23 @@ export function groupLabel(view: PlanView, groupId: string): string {
   return search(view.groups) ?? groupId;
 }
 
+export interface UnitsLabel {
+  short: string;
+  full: string;
+}
+
+// The short form fits a card's first line; the full one is what assistive
+// technology hears, since "6u" reads aloud as a letter. A two-semester
+// course's `units` is per semester, so it shows as that amount twice.
+export function unitsLabel(course: { units: number; twoSemester: boolean }): UnitsLabel {
+  const u = course.units;
+  const amount = course.twoSemester ? `${u}+${u}` : `${u}`;
+  return {
+    short: `${amount}u`,
+    full: `${amount} unit${!course.twoSemester && u === 1 ? "" : "s"}`,
+  };
+}
+
 export interface CompletedReadout {
   short: string;
   full: string;

@@ -241,7 +241,7 @@ selector list.
 
 ### Task 1: Shared card header with units, title button and drag grip
 
-- [ ] **Description:** add `unitsLabel`, create `CourseCardHeader`, and use
+- [x] **Description:** add `unitsLabel`, create `CourseCardHeader`, and use
   it in both card components in place of `<strong>` + " — title" (and, in
   `AvailableCourseCard`, the units part of the old units line). The title
   opens Details. `AvailableCourseCard`'s visible "Details" button goes
@@ -334,8 +334,10 @@ selector list.
         aria-hidden="true">{short}</span><span
         class="visually-hidden">{full}</span></span>`
     - `<button type="button" class="course-card-title"
-      onClick={onOpenDetails}>{title}<span class="visually-hidden">,
-      details</span></button>`
+      aria-label={\`${title}, details\`}
+      onClick={onOpenDetails}>{title}</button>` (ruling 2026-09-28: a
+      visually-hidden ", details" span is absolutely positioned, and
+      Chromium then names the button "… , details" with a stray space)
   - `CourseCard.tsx`: replace the `<strong>`/`<span>` pair with
     `<CourseCardHeader code={placement.code} title={course?.title ??
     placement.code} units={course ?? { units: 0, twoSemester: false }}
@@ -368,6 +370,17 @@ selector list.
     class="course-detail-title">{course.title}</span>`, and
     `.course-detail-title { display: block; }` puts the title on its own
     line, as on the card, with no em dash.
+  - Rulings made during execution (2026-09-28):
+    - the dialog's help sentences ("Your checks", "Pin to") are reworded
+      without " — ", and `RequisiteTree`'s "label — status" separators
+      become "label: status", so the em-dash check covers the whole
+      dialog (catalogue data, such as descriptions, is left as is);
+    - `.course-card` gets `position: relative`, so the hidden units text
+      stays inside the card instead of escaping the sidebar's scrolling
+      strip and widening the page at 390px;
+    - `spec/planner.test.ts:272`, `:307` and `:315` swap their
+      `[\s\S]{0,N}` windows for `(?:(?!<dialog)[\s\S])*?`, so the text
+      must be in that card's body however long the header is.
 - **Refactor:** none expected.
 - **Acceptance criteria:**
   - The unit and spec tests above pass.

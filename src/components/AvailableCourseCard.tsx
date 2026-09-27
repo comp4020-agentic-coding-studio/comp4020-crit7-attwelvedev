@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import type { CourseCard, PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
+import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
 import { dropTargets } from "./planner-logic";
@@ -92,11 +93,14 @@ export default function AvailableCourseCard({
       }}
       onDragEnd={() => onDragEnd?.()}
     >
-      <strong>{code}</strong>
-      <span> — {course.title}</span>
-      <p class="course-card-units">
-        {course.units} units, {course.offeredLabel}
-      </p>
+      <CourseCardHeader
+        code={code}
+        title={course.title}
+        units={course}
+        grip={draggable}
+        onOpenDetails={() => setDetailsOpen(true)}
+      />
+      <p class="course-card-offered">{course.offeredLabel}</p>
       {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
       {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
       {placement && (
@@ -124,9 +128,6 @@ export default function AvailableCourseCard({
             onOpenChange={(open) => onMenuOpenChange(code, open)}
           />
         )}
-        <button type="button" disabled={pending} onClick={() => setDetailsOpen(true)}>
-          Details
-        </button>
       </div>
       <CourseDetail
         view={view}

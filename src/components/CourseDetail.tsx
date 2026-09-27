@@ -81,7 +81,7 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
         Close
       </button>
       <h2>
-        {code} — {course.title}
+        {code} <span class="course-detail-title">{course.title}</span>
       </h2>
       <p>{course.description}</p>
       <p>
@@ -101,8 +101,8 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
         <>
           <h3>Your checks</h3>
           <small>
-            The planner can't check these itself. Mark each one for yourself — your answers decide whether this course
-            shows as Available — or leave it on Not sure to confirm with P&amp;C later.
+            The planner can't check these itself. Mark each one for yourself: your answers decide whether this course
+            shows as Available. Or leave it on Not sure to confirm with P&amp;C later.
           </small>
           {placement.checks.map((check, i) => (
             <fieldset key={check.item} class="verify-check" disabled={readOnly || pendingCheck !== null}>
@@ -149,7 +149,7 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
           </label>
           <br />
           <small>
-            This course can count toward more than one requirement — "Automatic" lets the plan choose whichever fits
+            This course can count toward more than one requirement. "Automatic" lets the plan choose whichever fits
             best overall; pin it here only if you want it to count toward a specific one instead.
           </small>
         </p>

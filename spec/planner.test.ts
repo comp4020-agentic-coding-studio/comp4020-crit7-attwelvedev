@@ -258,6 +258,9 @@ describe("planner", () => {
     const html = await page.text();
     expect(html).toMatch(/class="course-card course-card-unplaced" draggable="true"[\s\S]{0,40}COMP1100/);
 
+    expect(html).toMatch(/class="course-card-code">COMP1100</);
+    expect(html).toContain(">6u<");
+
     await postJson(`/api/plans/${id}/placements`, { code: "COMP1100", term: 0 });
     const afterPlacing = await fetch(new URL(`/plan/${id}`, baseUrl));
     const htmlAfter = await afterPlacing.text();
@@ -269,7 +272,7 @@ describe("planner", () => {
     await postJson(`/api/plans/${id}/placements`, { code: "COMP1100", term: 0 });
     const page = await fetch(new URL(`/plan/${id}`, baseUrl));
     const html = await page.text();
-    expect(html).toMatch(/class="course-card course-card-sidebar-placed" draggable="false"[\s\S]{0,60}COMP1100/);
+    expect(html).toMatch(/class="course-card course-card-sidebar-placed" draggable="false"(?:(?!<dialog)[\s\S])*?class="course-card-code">COMP1100</);
     expect(html).toMatch(/COMP1100[\s\S]{0,400}Placed in[\s\S]{0,40}class="course-card-term-link"[^>]*>S1 2027</);
   });
 
@@ -301,7 +304,7 @@ describe("planner", () => {
   it("the example page renders the verify badge on COMP4550", async () => {
     const res = await fetch(new URL("/plan/example", baseUrl));
     const html = await res.text();
-    expect(html).toMatch(/data-placed="COMP4550"[\s\S]{0,400}Verify on P&amp;C/);
+    expect(html).toMatch(/data-placed="COMP4550"(?:(?!<dialog)[\s\S])*?Verify on P&amp;C/);
   });
 
   it("the 'No published offering' badge appears on a placed COMP4600 in a new plan", async () => {
@@ -309,13 +312,13 @@ describe("planner", () => {
     await postJson(`/api/plans/${id}/placements`, { code: "COMP4600", term: 2 });
     const page = await fetch(new URL(`/plan/${id}`, baseUrl));
     const html = await page.text();
-    expect(html).toMatch(/data-placed="COMP4600"[\s\S]{0,400}No published offering/);
+    expect(html).toMatch(/data-placed="COMP4600"(?:(?!<dialog)[\s\S])*?No published offering/);
   });
 
-  it("each placed card has a Details button", async () => {
+  it("each placed card's title opens Details", async () => {
     const res = await fetch(new URL("/plan/example", baseUrl));
     const html = await res.text();
-    expect(html).toMatch(/data-placed="COMP1130"[\s\S]{0,600}>Details</);
+    expect(html).toMatch(/data-placed="COMP1130"[\s\S]{0,600}class="course-card-title"/);
   });
 
   it("the details dialog is closed in the server render", async () => {

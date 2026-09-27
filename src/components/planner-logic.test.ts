@@ -5,7 +5,15 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/f
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
-import { completedReadout, dropTargets, outstandingItems, overlayEdges, progressSegments, unplacedCount } from "./planner-logic";
+import {
+  completedReadout,
+  dropTargets,
+  outstandingItems,
+  overlayEdges,
+  progressSegments,
+  unitsLabel,
+  unplacedCount,
+} from "./planner-logic";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -272,5 +280,19 @@ describe("completedReadout", () => {
       short: "Completed through S2 2027",
       full: "Completed through S2 2027 — planned from S1 2028 onward. The gold line on the timeline marks that boundary.",
     });
+  });
+});
+
+describe("unitsLabel", () => {
+  it("abbreviates a one-semester course and spells it out in full", () => {
+    expect(unitsLabel({ units: 6, twoSemester: false })).toEqual({ short: "6u", full: "6 units" });
+  });
+
+  it("shows a two-semester course's per-semester units twice", () => {
+    expect(unitsLabel({ units: 12, twoSemester: true })).toEqual({ short: "12+12u", full: "12+12 units" });
+  });
+
+  it("uses the singular for a single unit", () => {
+    expect(unitsLabel({ units: 1, twoSemester: false })).toEqual({ short: "1u", full: "1 unit" });
   });
 });

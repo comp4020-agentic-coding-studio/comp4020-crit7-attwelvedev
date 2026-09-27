@@ -2031,3 +2031,110 @@ describe("course cards", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("card header", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+
+  async function withFreshPlan(viewport: Viewport, check: (page: Page) => Promise<void>): Promise<void> {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, viewport);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i a timeline card leads with its code and units, and has no em-dash title", async (width, height) => {
+    await withFreshPlan({ width, height }, async (page) => {
+      const card = page.locator('[data-placed="COMP1130"]');
+      expect(await card.locator(".course-card-code").textContent()).toBe("COMP1130");
+      const units = card.locator(".course-card-unit-count");
+      expect(await units.locator('[aria-hidden="true"]').textContent()).toBe("6u");
+      const spoken = units.locator(".visually-hidden");
+      expect(await spoken.textContent()).toBe("6 units");
+      expect(await spoken.evaluate((el) => getComputedStyle(el).width)).toBe("1px");
+
+      const unitsBox = (await units.boundingBox())!;
+      const headBox = (await card.locator(".course-card-head").boundingBox())!;
+      expect(Math.abs(unitsBox.x + unitsBox.width - (headBox.x + headBox.width))).toBeLessThanOrEqual(1);
+
+      // Every text node, the card's own Details dialog included.
+      const dashed = await card.evaluate((el) => {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        const found: string[] = [];
+        let seen = 0;
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          seen++;
+          if (node.textContent?.includes(" — ")) found.push(node.textContent);
+        }
+        return { seen, found };
+      });
+      expect(dashed.seen).toBeGreaterThan(0);
+      expect(dashed.found).toEqual([]);
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("a timeline card's title is a button that opens its details", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const card = page.locator('[data-placed="COMP1130"]');
+      const title = card.getByRole("button", { name: "Programming as Problem Solving (Advanced), details" });
+      expect(await title.count()).toBe(1);
+      expect(await title.getAttribute("aria-expanded")).toBeNull();
+      await title.click();
+      const dialog = page.locator("dialog[open]");
+      await dialog.waitFor(); // showModal() runs in an effect, after the click
+      expect(await dialog.count()).toBe(1);
+      expect(await dialog.getAttribute("aria-label")).toBe("COMP1130 details");
+    });
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i a sidebar card has a grip, no Details button, and a title that opens its details", async (width, height) => {
+    await withFreshPlan({ width, height }, async (page) => {
+      const card = page.locator(".course-card-unplaced").filter({ hasText: "COMP1100" });
+      const grip = card.locator(".course-card-grip");
+      expect(await grip.count()).toBe(1);
+      expect(await grip.getAttribute("aria-hidden")).toBe("true");
+      expect(await grip.getAttribute("tabindex")).toBeNull();
+      expect(await card.getByRole("button", { name: "Details", exact: true }).count()).toBe(0);
+      await card.locator(".course-card-title").click();
+      const dialog = page.locator("dialog[open]");
+      await dialog.waitFor(); // showModal() runs in an effect, after the click
+      expect(await dialog.count()).toBe(1);
+      expect(await dialog.getAttribute("aria-label")).toBe("COMP1100 details");
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("a drag from a sidebar card's grip places it", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const card = page.locator('.course-card-unplaced[data-drag-code="COMP3630"]').first();
+      await card.scrollIntoViewIfNeeded();
+      const grip = card.locator(".course-card-grip");
+      await grip.hover();
+      await page.mouse.down();
+      const start = (await grip.boundingBox())!;
+      await page.mouse.move(start.x + start.width / 2 + 20, start.y + start.height / 2, { steps: 4 });
+      const term = Number(await page.locator("[data-term]:not(.term-disallowed)").first().getAttribute("data-term"));
+      const open = (await page.locator(`[data-term="${term}"]`).boundingBox())!;
+      await page.mouse.move(open.x + open.width / 2, open.y + open.height / 2, { steps: 10 });
+      await page.mouse.move(open.x + open.width / 2 + 4, open.y + open.height / 2 + 4, { steps: 2 });
+      await page.mouse.up();
+      await expect.poll(() => page.locator('[data-placed="COMP3630"]').count()).toBe(1);
+    });
+  });
+
+  it("is clean under axe on a fresh plan and on the example", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      expect(await axeViolations(page)).toEqual([]);
+    });
+    expect(await withPlan(desktop, axeViolations)).toEqual([]);
+  });
+});

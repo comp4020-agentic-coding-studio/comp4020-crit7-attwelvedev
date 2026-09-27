@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse } from "./api";
+import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
 import PlaceInMenu from "./PlaceInMenu";
 import { groupLabel, unplacedCount } from "./planner-logic";
@@ -126,8 +127,13 @@ export default function CourseCard({
       }}
       onDragEnd={() => onDragEnd?.()}
     >
-      <strong>{placement.code}</strong>
-      {course && <span> — {course.title}</span>}
+      <CourseCardHeader
+        code={placement.code}
+        title={course?.title ?? placement.code}
+        units={course ?? { units: 0, twoSemester: false }}
+        grip={!readOnly}
+        onOpenDetails={() => setDetailsOpen(true)}
+      />
       <p
         class={`badge badge-state-${placement.state}${placement.state === "available" ? " visually-hidden" : ""}`}
       >
