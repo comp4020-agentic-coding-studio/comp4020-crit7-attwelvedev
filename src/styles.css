@@ -1259,38 +1259,18 @@ fieldset[aria-busy="true"] {
   border-color: var(--line);
 }
 
-.course-card-sidebar-placed {
-  border-color: var(--line);
-}
-
-/* One rule for every card that recedes (placed in the sidebar, blocked),
-   through its text and background. Never opacity here: a parent's opacity
-   can't be undone by its children, so it faded the card's buttons too,
-   making working controls look disabled. */
-.course-card-sidebar-placed,
+/* A blocked card recedes through its text and background. Never opacity
+   here: a parent's opacity can't be undone by its children, so it faded
+   the card's buttons too, making working controls look disabled. */
 .course-card-hard {
   background: var(--paper);
   color: var(--muted);
 }
 
-.course-card-sidebar-placed strong,
-.course-card-sidebar-placed .course-card-title,
-.course-card-sidebar-placed .course-card-offered,
 .course-card-hard strong,
 .course-card-hard .course-card-title,
 .course-card-hard .course-card-offered {
   color: var(--muted);
-}
-
-/* Words, not a tick: "Placed in" says what the card's state is, and the
-   term beside it is the way to the course on the timeline. */
-.course-card-placed-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.85em;
-  margin: 0.35rem 0 0;
 }
 
 /* A small button, not a .badge: sharing .badge's equal-specificity border

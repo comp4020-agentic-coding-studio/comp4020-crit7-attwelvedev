@@ -2,6 +2,7 @@ import { useState } from "preact/hooks";
 import type { CourseCard as CourseCardData, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { searchCourses, type SearchResult } from "./api";
+import PlacedCourseRow from "./PlacedCourseRow";
 import SidebarSection from "./SidebarSection";
 
 interface Props {
@@ -66,6 +67,10 @@ export default function CourseSearch({
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState<{ query: string; message: string } | null>(null);
 
+  const placedOf = (code: string) => view.placements.find((p) => p.code === code) ?? null;
+  const unplacedResults = results.filter((c) => !placedOf(c.code));
+  const placedResults = results.filter((c) => placedOf(c.code));
+
   async function onSubmit(event: Event) {
     event.preventDefault();
     const q = query.trim();
@@ -127,16 +132,15 @@ export default function CourseSearch({
     >
       {pending && <p class="course-search-status">Searching…</p>}
       {!pending && status && results.length === 0 && <p class="course-search-status">{status.message}</p>}
-      {results.length > 0 && (
-        <ul class="available-courses course-search-results" data-columns={Math.min(results.length, 3) || 1}>
-          {/* The requirement groups' own card, so a result — placed or not — looks and behaves exactly like one. */}
-          {results.map((course) => (
+      {/* The requirement groups' own card and row, so a result — placed or not — looks and behaves exactly like one. */}
+      {unplacedResults.length > 0 && (
+        <ul class="available-courses course-search-results" data-columns={Math.min(unplacedResults.length, 3) || 1}>
+          {unplacedResults.map((course) => (
             <AvailableCourseCard
               key={course.code}
               view={view}
               code={course.code}
               course={course}
-              placement={view.placements.find((p) => p.code === course.code) ?? null}
               planId={planId}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
@@ -144,6 +148,22 @@ export default function CourseSearch({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+            />
+          ))}
+        </ul>
+      )}
+      {placedResults.length > 0 && (
+        <ul class="placed-rows course-search-placed">
+          {placedResults.map((course) => (
+            <PlacedCourseRow
+              key={course.code}
+              view={view}
+              code={course.code}
+              course={course}
+              placement={placedOf(course.code)!}
+              planId={planId}
+              onChanged={onChanged}
+              onAnnounce={onAnnounce}
               onLocateCourse={onLocateCourse}
             />
           ))}

@@ -307,7 +307,7 @@ under `@container (min-width: 24rem)`. The title button is
 
 ### Task 6: Placed search results as rows; `AvailableCourseCard` drops its placed branch
 
-- [ ] **Description:**
+- [x] **Description:**
   - Split search results the same way.
   - Remove `placement` and `onLocateCourse` from `AvailableCourseCard` and
     its placed-status markup, now that nothing passes a placement.
@@ -323,10 +323,12 @@ under `@container (min-width: 24rem)`. The title button is
   - **`spec/layout.test.ts:746`**, renamed "shows an already-placed search
     result as the requirement lists do: a compact row". It uses a fresh
     `planWithPlacement("COMP1130")` plan and searches "COMP1130":
-    - `.course-search-results .placed-row` containing "COMP1130" has
-      count 1;
-    - `.course-search-results .course-card` containing "COMP1130" has
-      count 0;
+    - `.course-search .placed-row` containing "COMP1130" has count 1;
+    - `.course-search .course-card` containing "COMP1130" has count 0.
+      *Amended 2026-09-28:* these were scoped to `.course-search-results`,
+      which the rows' own list (`ul.placed-rows.course-search-placed`, a
+      sibling of the card grid) never sits inside, so the first could
+      never pass;
     - `.placed-row-status` `innerText` is "Planned S1 2027";
     - clicking its `.course-card-term-link` focuses `[data-placed="COMP1130"]`
       (the same poll as today).
@@ -370,13 +372,13 @@ under `@container (min-width: 24rem)`. The title button is
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 5–6 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Screenshots at 1920×1080 and 390×844 of `/plan/example` (Completed
+- [x] Tasks 5–6 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Screenshots at 1920×1080 and 390×844 of `/plan/example` (Completed
       rows) and a fresh plan (Planned rows, a search with a placed
       result)
-- [ ] Tick Phase 02 in overview §5 and commit
+- [x] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

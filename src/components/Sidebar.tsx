@@ -153,7 +153,6 @@ function Group({
               key={code}
               view={view}
               code={code}
-              placement={null}
               planId={planId}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
@@ -161,7 +160,6 @@ function Group({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
-              onLocateCourse={onLocateCourse}
             />
           ))}
         </ul>

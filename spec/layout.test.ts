@@ -751,23 +751,36 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     }
   });
 
-  it("shows an already-placed search result as the requirement lists do: placed-in term button, not draggable", async () => {
+  it("shows an already-placed search result as the requirement lists do: a compact row", async () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
     try {
       await page.fill(".course-search input", "COMP1130");
       await page.click(".course-search button[type=submit]");
-      const card = page.locator(".course-search-results .course-card").filter({ hasText: "COMP1130" });
-      await card.waitFor();
-      expect(await card.getAttribute("class")).toBe("course-card course-card-sidebar-placed");
-      expect(await card.getAttribute("draggable")).toBe("false");
-      expect(await card.getAttribute("data-drag-code")).toBeNull();
-      expect(await card.locator(".course-card-placed-status").textContent()).toMatch(/^\s*Placed in\s*S1 2027$/);
-      expect(await card.getByRole("button", { name: "Place in…" }).count()).toBe(0);
-      const badge = card.locator(".course-card-term-link");
-      expect(await badge.textContent()).toBe("S1 2027");
-      await badge.click();
+      const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP1130" });
+      await row.waitFor();
+      expect(await row.count()).toBe(1);
+      expect(await page.locator(".course-search .course-card").filter({ hasText: "COMP1130" }).count()).toBe(0);
+      expect(await row.locator(".placed-row-status").innerText()).toBe("Planned S1 2027");
+      await row.locator(".course-card-term-link").click();
       await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-placed"))).toBe("COMP1130");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("lists placed search results as rows after the unplaced cards", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    try {
+      await page.fill(".course-search input", "COMP11");
+      await page.click(".course-search button[type=submit]");
+      const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP1130" });
+      await row.waitFor();
+      const cards = page.locator("ul.available-courses.course-search-results .course-card");
+      expect(await cards.count()).toBeGreaterThan(0);
+      const lastCard = (await cards.last().boundingBox())!;
+      expect((await row.boundingBox())!.y).toBeGreaterThanOrEqual(lastCard.y + lastCard.height);
     } finally {
       await page.close();
     }

@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import type { CourseCard, PlacementView, PlanView } from "../lib/domain/view";
+import type { CourseCard, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
@@ -12,11 +12,6 @@ interface Props {
   // Given for a search result, which usually isn't (yet) part of the plan's
   // tree and so has no view.courses entry of its own.
   course?: CourseCard;
-  // Present when this course is already on the timeline — the card then
-  // shows placed status instead of a "Place in…" menu and stops being
-  // draggable, but stays in the list so it can be compared against the
-  // group's still-unplaced courses.
-  placement: PlacementView | null;
   planId: string;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
@@ -24,14 +19,12 @@ interface Props {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
-  onLocateCourse: (code: string) => void;
 }
 
 export default function AvailableCourseCard({
   view,
   code,
   course: courseOverride,
-  placement,
   planId,
   onChanged,
   onAnnounce,
@@ -39,7 +32,6 @@ export default function AvailableCourseCard({
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
-  onLocateCourse,
 }: Props) {
   const course = courseOverride ?? view.courses[code];
   const readOnly = view.plan.readOnly;
@@ -47,18 +39,17 @@ export default function AvailableCourseCard({
   const [pending, setPending] = useState(false);
   if (!course) return null;
 
-  const draggable = !readOnly && !placement;
+  const draggable = !readOnly;
 
   // A course still has to be actively discovered as a dead end today (open
   // its Place in… menu, read "No available terms"), rather than the sidebar
   // just telling you up front — checked here the same way that menu already
-  // does, so the two never disagree. Doesn't apply once it's placed (that
-  // course's own card already carries its real state), or on a read-only
-  // plan — there, dropTargets reports every term as disallowed for every
-  // course (the plan itself, not this course, is why), which would flag the
-  // entire sidebar as "Blocked" and say nothing useful.
-  const targets = placement || readOnly ? [] : dropTargets(view, code, courseOverride?.hardBlocked);
-  const allBlocked = !placement && !readOnly && targets.length > 0 && targets.every((t) => !t.allowed);
+  // does, so the two never disagree. Doesn't apply on a read-only plan —
+  // there, dropTargets reports every term as disallowed for every course
+  // (the plan itself, not this course, is why), which would flag the entire
+  // sidebar as "Blocked" and say nothing useful.
+  const targets = readOnly ? [] : dropTargets(view, code, courseOverride?.hardBlocked);
+  const allBlocked = !readOnly && targets.length > 0 && targets.every((t) => !t.allowed);
   const blockedReason = allBlocked
     ? Array.from(new Set(targets.map((t) => t.reason).filter((r): r is string => !!r))).join("; ")
     : null;
@@ -76,7 +67,7 @@ export default function AvailableCourseCard({
 
   return (
     <li
-      class={`course-card ${placement ? "course-card-sidebar-placed" : allBlocked ? "course-card-hard" : "course-card-unplaced"}`}
+      class={`course-card ${allBlocked ? "course-card-hard" : "course-card-unplaced"}`}
       draggable={draggable}
       // See CourseCard's identical attribute: native drag doesn't work from
       // touch, so Planner's touch-drag effect looks for this instead.
@@ -103,20 +94,7 @@ export default function AvailableCourseCard({
       <p class="course-card-offered">{course.offeredLabel}</p>
       {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
       {allBlocked && blockedReason && <p class="badge badge-reason">{blockedReason}</p>}
-      {placement && (
-        <p class="course-card-placed-status">
-          Placed in
-          <button
-            type="button"
-            class="course-card-term-link"
-            onClick={() => onLocateCourse(code)}
-            aria-label={`${code} is placed in ${view.terms[placement.term].label} — locate it on the timeline`}
-          >
-            {view.terms[placement.term].label}
-          </button>
-        </p>
-      )}
-      {!readOnly && !placement && (
+      {!readOnly && (
         <div class="course-card-actions">
           <PlaceInMenu
             view={view}
