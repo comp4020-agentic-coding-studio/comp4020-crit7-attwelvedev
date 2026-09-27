@@ -577,3 +577,37 @@ escaped the sidebar's scrolling strip and widened the page to 3351px at
 edge. Making `.course-card` `position: relative` fixed it, and the 390×844
 screenshot confirmed it. The corrections live in the tests themselves, so
 later phases that grow the card can't reintroduce either failure.
+
+## 2026-09-28 — Choosing the card menu's panel from renders, not the plan
+
+Resolved by 6c90d4a.
+
+The plan anchored each timeline card's three-dot panel to its toggle
+with `position: absolute`. Every Task 2 test passed, including one
+asserting the panel sat inside `.timeline-scroll` horizontally. The
+screenshot didn't: only "Details" showed. `.timeline-scroll` is
+`overflow-x: auto`, which forces vertical clipping too, so it cut the
+panel off at the column's content height (panel 293–547px, scroller
+76–353px).
+
+The obvious fix was the simplest one: open the panel in place and let
+the card grow. It was built, and I nearly shipped it. I stopped the
+check run and asked how the floating alternative would handle the edge
+cases instead of judging from a description. Five cases were rendered
+side by side with the floating version simulated by injected CSS/JS:
+top card, lowest card in a full column, last column, and phone top and
+low. In place avoided overlap but pushed the card's own header out of
+view on a phone. Floating stayed next to its toggle in the common cases,
+so I chose it, with a flip-above rule, viewport clamping, a max height,
+and close-on-scroll so it can't detach from its toggle.
+
+How I knew it was right: the test that had let the clipping through was
+changed. For each button in the panel it now requires
+`document.elementFromPoint` at the button's centre to hit that button,
+and requires that no `overflow-y: hidden` ancestor was scrolled to get
+there. The ancestor guard matters: the first version passed on the
+clipped panel, because `scrollIntoView` quietly scrolled the hidden
+overflow. With the guard it failed on the clipped build and passed on
+the floating one. A new close-on-scroll test failed with its listener
+disabled. The real build's screenshots matched the approved simulation
+in all five cases.
