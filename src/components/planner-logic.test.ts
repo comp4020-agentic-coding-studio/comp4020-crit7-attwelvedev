@@ -14,6 +14,7 @@ import {
   progressSegments,
   unitsLabel,
   unplacedCount,
+  verifyBadgeText,
 } from "./planner-logic";
 
 function loadRealCatalogue(): Catalogue {
@@ -319,5 +320,15 @@ describe("menuTargets", () => {
     const view = buildPlanView(cat, AACOM_2027, emptyPlan());
     const { blockedReasons } = menuTargets(view, "PSYC1004", { hardBlockedOverride: { 0: "x", 1: "x" } });
     expect(blockedReasons).toEqual(["x"]);
+  });
+});
+
+describe("verifyBadgeText", () => {
+  it("counts one item in the singular", () => {
+    expect(verifyBadgeText(1)).toBe("Verify on P&C: 1 item");
+  });
+
+  it("counts several items in the plural", () => {
+    expect(verifyBadgeText(2)).toBe("Verify on P&C: 2 items");
   });
 });

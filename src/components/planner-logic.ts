@@ -219,6 +219,11 @@ export function unitsLabel(course: { units: number; twoSemester: boolean }): Uni
   };
 }
 
+// The card only counts what's left to confirm; Details lists each item.
+export function verifyBadgeText(count: number): string {
+  return `Verify on P&C: ${count} item${count === 1 ? "" : "s"}`;
+}
+
 export interface CompletedReadout {
   short: string;
   full: string;

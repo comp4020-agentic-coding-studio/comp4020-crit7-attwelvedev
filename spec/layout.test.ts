@@ -432,12 +432,19 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     expect(result.svgExtra).toBeLessThanOrEqual(1);
   });
 
+  // 800px tall, not 1080: shorter cards let the example's timeline fit a
+  // 1080px pane, leaving nothing to scroll. The overflow preconditions make
+  // the test fail loudly, not pass vacuously, if that happens again.
   it("scrolls each pane on its own while the title stays put", async () => {
-    const result = await withPlan({ width: 1920, height: 1080 }, (page) =>
+    const result = await withPlan({ width: 1920, height: 800 }, (page) =>
       page.evaluate(() => {
         const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
         const aside = document.querySelector<HTMLElement>("aside")!;
         const timeline = document.querySelector<HTMLElement>(".planner-timeline-area")!;
+        const overflows = {
+          aside: aside.scrollHeight > aside.clientHeight,
+          timeline: timeline.scrollHeight > timeline.clientHeight,
+        };
         const titleTop = rect("h1").top;
         aside.scrollTop = 300;
         const afterAside = {
@@ -447,9 +454,10 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
           titleMoved: rect("h1").top !== titleTop,
         };
         timeline.scrollTop = 300;
-        return { afterAside, afterTimeline: { aside: aside.scrollTop, timeline: timeline.scrollTop } };
+        return { overflows, afterAside, afterTimeline: { aside: aside.scrollTop, timeline: timeline.scrollTop } };
       }),
     );
+    expect(result.overflows).toEqual({ aside: true, timeline: true });
     expect(result.afterAside.aside).toBeGreaterThan(0);
     expect(result.afterAside.timeline).toBe(0);
     expect(result.afterAside.page).toBe(0);
@@ -1901,6 +1909,28 @@ describe("manual checks", { timeout: 30_000 }, () => {
       expect(groupSizes).toEqual([3, 3]);
       expect(await horizontalOverflow(page)).toBe(0);
       expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the verify badge opens Details at Your checks", async (width, height) => {
+    const id = await planWithMath1116();
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width, height });
+    try {
+      const card = page.locator('[data-placed="MATH1116"]');
+      const badge = card.locator("button.badge-verify");
+      expect(await badge.textContent()).toBe("Verify on P&C: 2 items");
+      // innerText, not textContent: the card's own closed dialog lists the
+      // items in full, and that's where they belong.
+      expect(await card.innerText()).not.toContain("with a mark of 60");
+      await badge.click();
+      await page.locator("dialog[open]").waitFor(); // showModal() runs in an effect, after the click
+      expect(await page.evaluate(() => document.activeElement?.textContent)).toBe("Your checks");
+      expect(await horizontalOverflow(page)).toBe(0);
     } finally {
       await page.close();
     }

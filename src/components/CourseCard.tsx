@@ -4,7 +4,7 @@ import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
 import MoreOptions from "./MoreOptions";
-import { groupLabel, menuTargets, unplacedCount } from "./planner-logic";
+import { groupLabel, menuTargets, unplacedCount, verifyBadgeText } from "./planner-logic";
 
 // What removing this exact placement needs to undo it: not just the code
 // and term, but whether it was pinned — placeCourse always inserts a fresh,
@@ -45,6 +45,8 @@ export default function CourseCard({
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // Where Details opens: at its top, or at "Your checks" from the badge.
+  const [detailsFocus, setDetailsFocus] = useState<"top" | "checks">("top");
   // Guards this card's own buttons for the duration of its own in-flight
   // request — not a global lock, so moving one card doesn't freeze others,
   // but does stop a slow connection from inviting a double-click that
@@ -134,7 +136,10 @@ export default function CourseCard({
         title={course?.title ?? placement.code}
         units={course ?? { units: 0, twoSemester: false }}
         grip={!readOnly}
-        onOpenDetails={() => setDetailsOpen(true)}
+        onOpenDetails={() => {
+          setDetailsFocus("top");
+          setDetailsOpen(true);
+        }}
       />
       <p
         class={`badge badge-state-${placement.state}${placement.state === "available" ? " visually-hidden" : ""}`}
@@ -145,7 +150,16 @@ export default function CourseCard({
         <p class="badge badge-reason">{placement.reasons.join("; ")}</p>
       )}
       {placement.verify.length > 0 && (
-        <p class="badge badge-verify">Verify on P&C: {placement.verify.join("; ")}</p>
+        <button
+          type="button"
+          class="badge badge-verify"
+          onClick={() => {
+            setDetailsFocus("checks");
+            setDetailsOpen(true);
+          }}
+        >
+          {verifyBadgeText(placement.verify.length)}
+        </button>
       )}
       {placement.conflictWith.length > 0 && (
         <p class="badge badge-conflict">
@@ -197,6 +211,7 @@ export default function CourseCard({
               type="button"
               onClick={() => {
                 onMenuOpenChange(placement.code, false);
+                setDetailsFocus("top");
                 setDetailsOpen(true);
               }}
             >
@@ -244,6 +259,7 @@ export default function CourseCard({
         code={placement.code}
         planId={planId}
         open={detailsOpen}
+        focusChecks={detailsFocus === "checks"}
         onChanged={onChanged}
         onAnnounce={onAnnounce}
         onClose={() => setDetailsOpen(false)}

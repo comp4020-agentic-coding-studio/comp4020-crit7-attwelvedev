@@ -590,7 +590,7 @@ selector list.
 
 ### Task 3: Verify badge that opens Details at "Your checks"
 
-- [ ] **Description:** replace the verify paragraph with a badge button
+- [x] **Description:** replace the verify paragraph with a badge button
   (the class `badge-verify` is kept), and add a `focusChecks` prop to
   `CourseDetail`.
 - **Files touched:**
@@ -607,13 +607,19 @@ selector list.
     verify badge opens Details at Your checks". It uses the existing
     `planWithMath1116()`.
     - `[data-placed="MATH1116"] button.badge-verify` has text "Verify on
-      P&C: 2 items", and the card's text doesn't contain "with a mark of
-      60".
+      P&C: 2 items", and the card's `innerText` doesn't contain "with a
+      mark of 60" (execution call, 2026-09-28: `textContent` includes the
+      card's own closed dialog, whose legends list the items in full).
     - Clicking it opens `dialog[open]`, and
       `document.activeElement.textContent` is "Your checks".
     - At 390×844, `horizontalOverflow` is 0.
   - The existing test at `spec/layout.test.ts:1916` (count 0 after Met)
     must still pass. It proves the badge disappears, not just the text.
+  - **`spec/layout.test.ts:435`**, "scrolls each pane on its own while the
+    title stays put" (ruling 2026-09-28, found in execution): the badge
+    shrinks the example's tallest column so its timeline fits at
+    1920×1080 (scrollHeight 1173 → 887, clientHeight 983). The test runs
+    at 1920×800 instead and first asserts that both panes overflow.
 - **Implementation (green):**
   - `planner-logic.ts`: `export function verifyBadgeText(count: number):
     string`.

@@ -14,6 +14,9 @@ interface Props {
   course?: CourseCard;
   planId: string;
   open: boolean;
+  // Opened from the card's verify badge: land on "Your checks", the part
+  // the badge is about, rather than on Close.
+  focusChecks?: boolean;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
   onClose: () => void;
@@ -25,7 +28,17 @@ interface Props {
 // invariants suite's jsdom, which never runs client JS) render as closed.
 // Client-side, `open` toggles the imperative showModal()/close() calls that
 // give it focus-trapping and Esc-to-close.
-export default function CourseDetail({ view, code, course: courseOverride, planId, open, onChanged, onAnnounce, onClose }: Props) {
+export default function CourseDetail({
+  view,
+  code,
+  course: courseOverride,
+  planId,
+  open,
+  focusChecks = false,
+  onChanged,
+  onAnnounce,
+  onClose,
+}: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const course = courseOverride ?? view.courses[code];
   const placement = view.placements.find((p) => p.code === code);
@@ -37,11 +50,14 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
   // A placed course's dialog renders twice (its timeline card and its
   // sidebar entry): radios sharing a name across both would be one group.
   const radioPrefix = useId();
+  const checksId = useId();
 
   useEffect(() => {
-    if (open) dialogRef.current?.showModal();
-    else dialogRef.current?.close();
-  }, [open]);
+    if (open) {
+      dialogRef.current?.showModal();
+      if (focusChecks) document.getElementById(checksId)?.focus();
+    } else dialogRef.current?.close();
+  }, [open, focusChecks]);
 
   if (!course) return null;
 
@@ -99,7 +115,9 @@ export default function CourseDetail({ view, code, course: courseOverride, planI
       )}
       {placement && placement.checks.length > 0 && (
         <>
-          <h3>Your checks</h3>
+          <h3 id={checksId} tabIndex={-1}>
+            Your checks
+          </h3>
           <small>
             The planner can't check these itself. Mark each one for yourself: your answers decide whether this course
             shows as Available. Or leave it on Not sure to confirm with P&amp;C later.

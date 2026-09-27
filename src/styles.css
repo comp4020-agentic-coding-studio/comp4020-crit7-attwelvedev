@@ -1339,6 +1339,22 @@ fieldset[aria-busy="true"] {
   border-color: transparent;
 }
 
+/* The verify badge opens Details at "Your checks": still a badge, with an
+   underline (not a border) as its affordance. The hover selector matches
+   the base button:hover rule's specificity, so this later rule wins and
+   no border appears. */
+button.badge-verify {
+  text-align: start;
+  cursor: pointer;
+}
+
+button.badge-verify:hover,
+button.badge-verify:focus-visible {
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .badge-projected {
   color: var(--moss);
   background: var(--moss-tint);
