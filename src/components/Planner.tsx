@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
+import MoreOptions from "./MoreOptions";
 import { applyReqsState, DEFAULT_REQS, type ReqsState, reqsStateFromDataset, saveReqsState } from "./panel-state";
 import { completedReadout, dropTargets } from "./planner-logic";
 import ReqsResizeHandle from "./ReqsResizeHandle";
@@ -13,6 +14,11 @@ import { useTouchDrag } from "./touch-drag";
 // act on without thinking, short enough that it isn't still sitting there
 // (offering to restore a now-stale course) minutes into unrelated work.
 const UNDO_TIMEOUT_MS = 8000;
+
+// The More options panel shares openMenuCode with the course menus, so only
+// one is ever open; course codes (four letters, four digits) never look like
+// this.
+const MORE_OPTIONS = "more-options";
 
 interface Props {
   view: PlanView;
@@ -190,19 +196,24 @@ export default function Planner({ view: initialView }: Props) {
                   </svg>
                 </button>
               </div>
-              <label class="show-links-toggle">
-                <input
-                  type="checkbox"
-                  checked={showPrereqLinks}
-                  onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
-                />
-                Show prerequisite links
-              </label>
-              {!readOnly && (
-                <button type="button" onClick={copyPlanLink}>
-                  {linkCopied ? "Copied!" : "Copy plan link"}
-                </button>
-              )}
+              <MoreOptions
+                open={openMenuCode === MORE_OPTIONS}
+                onOpenChange={(next) => setOpenMenuCode(next ? MORE_OPTIONS : null)}
+              >
+                <label class="show-links-toggle">
+                  <input
+                    type="checkbox"
+                    checked={showPrereqLinks}
+                    onChange={(event) => setShowPrereqLinks((event.target as HTMLInputElement).checked)}
+                  />
+                  Show prerequisite links
+                </label>
+                {!readOnly && (
+                  <button type="button" onClick={copyPlanLink}>
+                    {linkCopied ? "Copied!" : "Copy plan link"}
+                  </button>
+                )}
+              </MoreOptions>
             </div>
             <Timeline
               view={view}

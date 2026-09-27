@@ -826,7 +826,7 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
     return box!.y + box!.height / 2;
   }
 
-  it("shows the short readout, the chevrons and the prerequisite toggle on one row", async () => {
+  it("shows the short readout, the chevrons and More options on one row", async () => {
     await withPlan(desktop, async (page) => {
       const readout = page.locator(".completed-readout");
       await expect.poll(() => readout.textContent()).toBe("Completed through S2 2027");
@@ -839,20 +839,22 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
         expect(box!.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(verticalCentre(box) - centre)).toBeLessThanOrEqual(4);
       }
-      const toggle = await page.locator(".show-links-toggle").boundingBox();
-      expect(Math.abs(verticalCentre(toggle) - centre)).toBeLessThanOrEqual(4);
+      const moreOptions = await page.getByRole("button", { name: "More options" }).boundingBox();
+      expect(moreOptions!.width).toBeGreaterThanOrEqual(44);
+      expect(moreOptions!.height).toBeGreaterThanOrEqual(44);
+      expect(Math.abs(verticalCentre(moreOptions) - centre)).toBeLessThanOrEqual(4);
       expect(await horizontalOverflow(page)).toBe(0);
       expect(await verticalOverflow(page)).toBe(0);
     });
   });
 
-  it("puts Copy plan link on the same row on an editable plan", async () => {
+  it("puts More options on the readout's row on an editable plan", async () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
       const centre = verticalCentre(await page.locator(".completed-readout").boundingBox());
-      const copy = await page.getByRole("button", { name: "Copy plan link" }).boundingBox();
-      expect(Math.abs(verticalCentre(copy) - centre)).toBeLessThanOrEqual(4);
+      const moreOptions = await page.getByRole("button", { name: "More options" }).boundingBox();
+      expect(Math.abs(verticalCentre(moreOptions) - centre)).toBeLessThanOrEqual(4);
     } finally {
       await page.close();
     }
@@ -916,8 +918,102 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
       expect(text).toContain("One more semester completed");
       expect(text).toContain("One fewer semester completed");
       expect(text).toContain("gold line");
+      expect(text).toContain("More options");
     } finally {
       await page.close();
     }
+  });
+});
+
+describe("more options", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const moreOptions = (page: Page) => page.getByRole("button", { name: "More options" });
+  const prereqToggle = (page: Page) => page.getByLabel("Show prerequisite links");
+
+  async function withFreshPlan(viewport: Viewport, check: (page: Page) => Promise<void>): Promise<void> {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, viewport);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  it("opens, stays open while used, and Escape closes it back onto the button", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const more = moreOptions(page);
+      const copy = page.getByRole("button", { name: "Copy plan link" });
+      expect(await more.getAttribute("aria-expanded")).toBe("false");
+      const controls = await more.getAttribute("aria-controls");
+      expect(await page.locator(`#${controls}`).count()).toBe(1);
+      expect(await prereqToggle(page).isVisible()).toBe(false);
+      expect(await copy.isVisible()).toBe(false);
+
+      await more.click();
+      expect(await more.getAttribute("aria-expanded")).toBe("true");
+      expect(await prereqToggle(page).isVisible()).toBe(true);
+      expect(await copy.isVisible()).toBe(true);
+
+      await prereqToggle(page).check();
+      expect(await more.getAttribute("aria-expanded")).toBe("true");
+      expect(await prereqToggle(page).isChecked()).toBe(true);
+
+      await page.keyboard.press("Escape");
+      expect(await more.getAttribute("aria-expanded")).toBe("false");
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("More options");
+    });
+  });
+
+  it("a press outside closes it", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const more = moreOptions(page);
+      await more.click();
+      expect(await more.getAttribute("aria-expanded")).toBe("true");
+      await page.locator("h1").click();
+      expect(await more.getAttribute("aria-expanded")).toBe("false");
+    });
+  });
+
+  it("shares one open menu with the course menus", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      const more = moreOptions(page);
+      const moveTo = page.getByRole("button", { name: "Move to…" }).first();
+      await more.click();
+      await moveTo.click();
+      expect(await more.getAttribute("aria-expanded")).toBe("false");
+      expect(await moveTo.getAttribute("aria-expanded")).toBe("true");
+      await more.click();
+      expect(await moveTo.getAttribute("aria-expanded")).toBe("false");
+      expect(await more.getAttribute("aria-expanded")).toBe("true");
+    });
+  });
+
+  it("offers only the prerequisite toggle on a read-only plan", async () => {
+    await withPlan(desktop, async (page) => {
+      await moreOptions(page).click();
+      expect(await prereqToggle(page).isVisible()).toBe(true);
+      expect(await page.getByRole("button", { name: "Copy plan link" }).count()).toBe(0);
+    });
+  });
+
+  it("the open panel fits on a phone", async () => {
+    await withFreshPlan({ width: 390, height: 844 }, async (page) => {
+      await moreOptions(page).click();
+      const panel = await page.evaluate(() => {
+        const r = document.querySelector(".more-options-panel")!.getBoundingClientRect();
+        return { left: r.left, right: r.right };
+      });
+      expect(panel.left).toBeGreaterThanOrEqual(0);
+      expect(panel.right).toBeLessThanOrEqual(390);
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("is clean under axe with the panel open", async () => {
+    await withFreshPlan(desktop, async (page) => {
+      await moreOptions(page).click();
+      expect(await axeViolations(page)).toEqual([]);
+    });
   });
 });

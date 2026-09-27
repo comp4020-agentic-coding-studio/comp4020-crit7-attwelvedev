@@ -436,7 +436,7 @@ row existed.
 
 ### Task 2: Put "Show prerequisite links" and "Copy plan link" behind a ⋯ "More options" panel
 
-- [ ] **Description:** add `MoreOptions`, move the checkbox and the copy
+- [x] **Description:** add `MoreOptions`, move the checkbox and the copy
   button into it (still inside `.cutoff-controls`, right after
   `.completed-control`), style the panel, and add one Help sentence each
   about where the two actions now live.
@@ -543,7 +543,13 @@ row existed.
       </MoreOptions>
       ```
 
-  - **`styles.css`,** after the `.show-links-toggle input` rule:
+  - **`styles.css`:**
+    - In `.cutoff-controls`, change `gap: 0.5rem 1rem` to `gap: 0.5rem`.
+      The row now holds only the completed control and ⋯, and at 390 the
+      1rem gap wraps ⋯ onto its own line: 293 + 16 + 44px is more than the
+      350px row. That broke Task 1's phone test, and the user approved this
+      change during execution. 0.5rem matches Task 3's `.plan-actions`.
+    - After the `.show-links-toggle input` rule:
     - `.more-options { position: relative; display: inline-flex; }`
     - `.more-options-toggle { display: inline-flex; align-items: center;
       justify-content: center; width: 2.75rem; height: 2.75rem; padding: 0;
