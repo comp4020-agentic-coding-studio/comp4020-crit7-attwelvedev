@@ -46,6 +46,10 @@ export function horizontalOverflow(page: Page): Promise<number> {
   return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 }
 
+export function verticalOverflow(page: Page): Promise<number> {
+  return page.evaluate(() => document.documentElement.scrollHeight - document.documentElement.clientHeight);
+}
+
 // The same rules the jsdom invariants disable, so the two runs agree on what
 // counts as a violation; this one just sees the page after real rendering.
 export async function axeViolations(page: Page): Promise<string[]> {

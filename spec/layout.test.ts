@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import type { Browser, Page } from "playwright";
-import { axeViolations, horizontalOverflow, launch, openPage, type Viewport } from "./browser";
+import { axeViolations, horizontalOverflow, launch, openPage, verticalOverflow, type Viewport } from "./browser";
 import { ROUTES } from "./routes";
 
 const baseUrl = inject("baseUrl");
@@ -331,6 +331,139 @@ describe("site nav in the top bar", { timeout: 30_000 }, () => {
       expect(styles).toEqual({ position: "fixed", indent: "0px" });
     } finally {
       await hidden.close();
+    }
+  });
+});
+
+describe("plan page fits the screen", { timeout: 30_000 }, () => {
+  it.each([
+    [1920, 1080, {}],
+    [1440, 900, {}],
+    [1280, 800, {}],
+    [1100, 800, {}],
+    [900, 800, {}],
+    [800, 800, {}],
+    [390, 844, {}],
+    [1920, 1080, { "panel-nav": "hidden" }],
+    [900, 800, { "panel-nav": "hidden" }],
+    [390, 844, { "panel-nav": "hidden" }],
+    [1920, 1080, { "panel-reqs": "collapsed" }],
+    [900, 800, { "panel-reqs": "collapsed" }],
+  ])("at %i×%i with %o the page doesn't scroll either way", async (width, height, storage) => {
+    const page = await openPage(browser, planUrl(), { width, height }, { storage });
+    try {
+      expect(await verticalOverflow(page)).toBe(0);
+      expect(await horizontalOverflow(page)).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [900, 800],
+  ])("at %i×%i the side-by-side panes run to the bottom of the planner", async (width, height) => {
+    const geometry = await withPlan({ width, height }, (page) =>
+      page.evaluate(() => {
+        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const a = rect("aside");
+        const t = rect(".planner-timeline-area");
+        const p = rect(".planner-panes");
+        return {
+          topGap: Math.abs(a.top - t.top),
+          asideGap: Math.abs(a.bottom - p.bottom),
+          timelineGap: Math.abs(t.bottom - p.bottom),
+          panesGap: Math.abs(p.bottom - (innerHeight - parseFloat(getComputedStyle(document.querySelector("main")!).paddingBottom))),
+        };
+      }),
+    );
+    expect(geometry.topGap).toBeLessThanOrEqual(1);
+    expect(geometry.asideGap).toBeLessThanOrEqual(1);
+    expect(geometry.timelineGap).toBeLessThanOrEqual(1);
+    expect(geometry.panesGap).toBeLessThanOrEqual(1);
+  });
+
+  it("scrolls each pane on its own while the title stays put", async () => {
+    const result = await withPlan({ width: 1920, height: 1080 }, (page) =>
+      page.evaluate(() => {
+        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const aside = document.querySelector<HTMLElement>("aside")!;
+        const timeline = document.querySelector<HTMLElement>(".planner-timeline-area")!;
+        const titleTop = rect("h1").top;
+        aside.scrollTop = 300;
+        const afterAside = {
+          aside: aside.scrollTop,
+          timeline: timeline.scrollTop,
+          page: document.scrollingElement!.scrollTop,
+          titleMoved: rect("h1").top !== titleTop,
+        };
+        timeline.scrollTop = 300;
+        return { afterAside, afterTimeline: { aside: aside.scrollTop, timeline: timeline.scrollTop } };
+      }),
+    );
+    expect(result.afterAside.aside).toBeGreaterThan(0);
+    expect(result.afterAside.timeline).toBe(0);
+    expect(result.afterAside.page).toBe(0);
+    expect(result.afterAside.titleMoved).toBe(false);
+    expect(result.afterTimeline.timeline).toBeGreaterThan(0);
+    expect(result.afterTimeline.aside).toBe(result.afterAside.aside);
+  });
+
+  it("stretches the collapsed rail to the bottom of the planner", async () => {
+    const page = await openPage(browser, planUrl(), { width: 1920, height: 1080 }, {
+      storage: { "panel-reqs": "collapsed" },
+    });
+    try {
+      const gaps = await page.evaluate(() => {
+        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const aside = rect("aside");
+        return {
+          rail: Math.abs(rect(".reqs-rail").bottom - aside.bottom),
+          timeline: Math.abs(aside.bottom - rect(".planner-timeline-area").bottom),
+        };
+      });
+      expect(gaps.rail).toBeLessThanOrEqual(1);
+      expect(gaps.timeline).toBeLessThanOrEqual(1);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    ["shown", {}],
+    ["hidden", { "panel-nav": "hidden" }],
+  ])("on a phone with the nav %s the timeline and requirements split the height", async (_state, storage) => {
+    const page = await openPage(browser, planUrl(), { width: 390, height: 844 }, { storage });
+    try {
+      const split = await page.evaluate(() => {
+        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const p = rect(".planner-panes");
+        const t = rect(".planner-timeline-area");
+        const a = rect("aside");
+        return {
+          timelineAtMostHalf: t.height <= p.height / 2 + 1,
+          asideBelow: a.top >= t.bottom,
+          asideGap: Math.abs(a.bottom - p.bottom),
+          asideAtLeastHalf: a.height >= p.height / 2 - 17,
+        };
+      });
+      expect(split.timelineAtMostHalf).toBe(true);
+      expect(split.asideBelow).toBe(true);
+      expect(split.asideGap).toBeLessThanOrEqual(1);
+      expect(split.asideAtLeastHalf).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("keeps the page scrolling with sticky panes on a landscape phone", async () => {
+    const page = await openPage(browser, planUrl(), { width: 844, height: 390 });
+    try {
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector("aside")!).position)).toBe("sticky");
+      expect(await verticalOverflow(page)).toBeGreaterThan(0);
+      expect(await horizontalOverflow(page)).toBe(0);
+    } finally {
+      await page.close();
     }
   });
 });

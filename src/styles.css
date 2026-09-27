@@ -511,7 +511,7 @@ nav[aria-label="site"] .nav-hide:hover {
 }
 
 /* Mobile-first: a horizontal strip, so a course found here can be dragged
-   straight up onto the (sticky, above) timeline without scrolling back.
+   straight up onto the timeline above it without scrolling back.
    The desktop media query below switches this to a vertical list once the
    sidebar has its own wide column beside the timeline instead of above it. */
 .requirements-scroll {
@@ -1226,6 +1226,72 @@ fieldset[aria-busy="true"] {
 
   .available-courses[data-columns="3"] {
     grid-template-columns: repeat(3, 13rem);
+  }
+}
+
+/* The plan page is a workspace, not a document: once the viewport is tall
+   enough for the panes to be useful, the page itself stops scrolling and
+   the timeline and requirements scroll inside it, so the title and the nav
+   (or its tab) never scroll away. Below 30rem tall (a landscape phone) the
+   panes would shrink to slivers, so the page scrolls as before. This group
+   sits after the tier blocks because it undoes their sticky positioning at
+   equal specificity, and before the collapsed block, which must stay last. */
+@media (min-height: 30rem) {
+  body:has(.planner) .app-shell {
+    height: 100dvh;
+    min-height: 0;
+  }
+
+  body:has(.planner) main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* Every box from main down to the panes flexes, so the panes end up
+     with a definite height: whatever the nav, title and note leave. */
+  .planner,
+  .planner-layout,
+  .planner-panes {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .planner,
+  .planner-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @container planner (width < 49.5rem) {
+    .planner-timeline-area {
+      position: static;
+      flex: 0 1 auto;
+      max-height: 50%;
+    }
+
+    .planner-panes > aside {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+    }
+  }
+
+  @container planner (min-width: 49.5rem) {
+    .planner-panes {
+      align-items: stretch;
+    }
+
+    .planner-timeline-area,
+    .planner-panes > aside {
+      position: static;
+      max-height: none;
+    }
+
+    :root[data-reqs="collapsed"] .reqs-rail {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
   }
 }
 

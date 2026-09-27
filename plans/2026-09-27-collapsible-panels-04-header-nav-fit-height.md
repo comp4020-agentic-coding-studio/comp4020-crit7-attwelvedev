@@ -449,7 +449,7 @@ desktop-only.
 
 ### Task 10: Fit the plan page to the screen, each pane scrolling on its own
 
-- [ ] **Description:** add the fit group to `styles.css` and the
+- [x] **Description:** add the fit group to `styles.css` and the
   `verticalOverflow` helper, then test every layout state.
 - **Files touched:**
   - `spec/browser.ts`
@@ -620,12 +620,12 @@ desktop-only.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 9–10 complete, with their tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Two commits, one per task
-- [ ] Human reviews for Tasks 9 and 10 accepted by the user
-- [ ] Tick Phase 04 in overview §5 and commit
+- [x] Tasks 9–10 complete, with their tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Two commits, one per task
+- [x] Human reviews for Tasks 9 and 10 accepted by the user
+- [x] Tick Phase 04 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
