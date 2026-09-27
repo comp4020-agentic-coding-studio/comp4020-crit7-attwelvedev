@@ -1,33 +1,17 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useRef } from "preact/hooks";
 import type { ReqsColumns, ReqsState } from "./panel-state";
-import { parseFit, sizeLabel, sizeOf, snapSize, stateFor, stepSize } from "./reqs-resize";
+import { sizeLabel, sizeOf, snapSize, stateFor, stepSize } from "./reqs-resize";
 
 interface Props {
   reqs: ReqsState;
+  fit: 0 | ReqsColumns;
   onChange: (next: ReqsState, commit: boolean) => void;
 }
 
-export default function ReqsResizeHandle({ reqs, onChange }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  // Starts at 3 so the server render and the first client render agree; the
-  // observer below corrects it once the panes have a real width.
-  const [fit, setFit] = useState<0 | ReqsColumns>(3);
+export default function ReqsResizeHandle({ reqs, fit, onChange }: Props) {
   const dragging = useRef(false);
   const latest = useRef(reqs);
   if (!dragging.current) latest.current = reqs;
-
-  // The CSS tiers already decide how many columns fit and publish it as
-  // --reqs-fit on the panes, so reading it back keeps CSS the single source
-  // of truth rather than repeating the tier thresholds here.
-  useEffect(() => {
-    const panes = ref.current?.parentElement;
-    if (!panes) return;
-    const read = () => setFit(parseFit(getComputedStyle(panes).getPropertyValue("--reqs-fit")));
-    read();
-    const observer = new ResizeObserver(read);
-    observer.observe(panes);
-    return () => observer.disconnect();
-  }, []);
 
   // The handle is hidden by CSS in the stacked layout (fit 0), so this only
   // keeps the ARIA values in range there.
@@ -70,7 +54,6 @@ export default function ReqsResizeHandle({ reqs, onChange }: Props) {
 
   return (
     <div
-      ref={ref}
       class="reqs-resize"
       role="separator"
       tabIndex={0}

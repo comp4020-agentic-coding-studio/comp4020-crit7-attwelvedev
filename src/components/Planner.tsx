@@ -5,6 +5,7 @@ import type { RemovedPlacement } from "./CourseCard";
 import MoreOptions from "./MoreOptions";
 import { applyReqsState, DEFAULT_REQS, type ReqsState, reqsStateFromDataset, saveReqsState } from "./panel-state";
 import { completedReadout, dropTargets } from "./planner-logic";
+import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
 import Sidebar from "./Sidebar";
 import Timeline from "./Timeline";
@@ -38,6 +39,8 @@ export default function Planner({ view: initialView, title }: Props) {
   const [linkCopied, setLinkCopied] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const plannerRef = useRef<HTMLDivElement>(null);
+  const panesRef = useRef<HTMLDivElement>(null);
+  const fit = useReqsFit(panesRef);
   const readOnly = view.plan.readOnly;
 
   const [reqs, setReqs] = useState<ReqsState>(DEFAULT_REQS);
@@ -225,7 +228,7 @@ export default function Planner({ view: initialView, title }: Props) {
       </div>
       {/* Size container for the panes; the fixed undo toast stays outside it, since containment would pin it to the container. */}
       <div class="planner-layout">
-        <div class="planner-panes">
+        <div class="planner-panes" ref={panesRef}>
           <div class="planner-timeline-area">
             <Timeline
               view={view}
@@ -257,11 +260,11 @@ export default function Planner({ view: initialView, title }: Props) {
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void performRemove(code)}
           />
-          <ReqsResizeHandle reqs={reqs} onChange={updateReqs} />
+          <ReqsResizeHandle reqs={reqs} fit={fit} onChange={updateReqs} />
         </div>
       </div>
       {removed && (
-        <div class="undo-toast" role="status">
+        <div class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"} role="status">
           <span>Removed {removed.label}.</span>
           <button type="button" disabled={undoPending} onClick={handleUndo}>
             {undoPending ? "Restoring…" : "Undo"}

@@ -861,6 +861,13 @@ dialog::backdrop {
   border-color: #a8790d;
 }
 
+/* 1.25rem is main's bottom padding on the plan page, so this clears the
+   collapsed stacked bar, the drop target just used, by 0.75rem. The class
+   comes from Planner, because no container query reaches the toast. */
+.undo-toast-above-bar {
+  bottom: calc(1.25rem + var(--reqs-bar-h) + 0.75rem);
+}
+
 /* A gold rule marks where the plan's completion cutoff sits: everything to
    its left counts as completed, everything from here on is still planned.
    Written per exact cutoff/term-position pair rather than computed, since

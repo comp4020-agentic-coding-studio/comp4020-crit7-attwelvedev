@@ -770,6 +770,45 @@ describe("stacked requirements collapse", { timeout: 30_000 }, () => {
   });
 });
 
+describe("undo toast placement", { timeout: 30_000 }, () => {
+  // Drops COMP1130 on `target` in a fresh plan and waits for the undo toast.
+  async function dropAndToast(viewport: Viewport, storage: Record<string, string>, target: string) {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, viewport, { storage });
+    const box = (await page.locator(target).boundingBox())!;
+    await page.locator('[data-placed="COMP1130"]').hover();
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 10 });
+    await page.mouse.up();
+    const toast = page.locator(".undo-toast");
+    await expect.poll(() => toast.count()).toBe(1);
+    return { page, toast };
+  }
+
+  it("sits above the collapsed stacked bar", async () => {
+    const { page, toast } = await dropAndToast({ width: 390, height: 844 }, { "panel-reqs": "collapsed" }, ".reqs-rail");
+    try {
+      const toastBox = (await toast.boundingBox())!;
+      const railBox = (await page.locator(".reqs-rail").boundingBox())!;
+      expect(toastBox.y + toastBox.height).toBeLessThanOrEqual(railBox.y);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080, { "panel-reqs": "collapsed" }, ".reqs-rail"],
+    [390, 844, {}, 'aside[aria-label="requirements"]'],
+  ])("stays in place at %i×%i with %o", async (width, height, storage, target) => {
+    const { page, toast } = await dropAndToast({ width, height }, storage, target);
+    try {
+      expect(await toast.evaluate((el) => getComputedStyle(el).bottom)).toBe("24px");
+    } finally {
+      await page.close();
+    }
+  });
+});
+
 describe("requirements resize handle", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const separator = (page: Page) => page.getByRole("separator", { name: "Resize requirements" });

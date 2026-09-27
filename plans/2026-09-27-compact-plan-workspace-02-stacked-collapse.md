@@ -484,7 +484,7 @@ observer (`useReqsFit`), passes `fit` down to the handle, and adds
 
 ### Task 5: Keep the undo toast above the stacked requirements bar
 
-- [ ] **Description:** move the `--reqs-fit` observer into a `useReqsFit`
+- [x] **Description:** move the `--reqs-fit` observer into a `useReqsFit`
   hook owned by `Planner`, pass `fit` to the handle, and raise the toast
   while the stacked bar shows.
 - **Files touched:**
