@@ -5,7 +5,12 @@
 - **Requirements confirmed by user:** yes — 2026-09-28 (spec approval),
   plus planning rulings on 2026-09-28: the part 1 marker gets its own
   line (TS1), and each semester in a placed row is its own locate button
-  (TS6, added after Phase 02; Task 7)
+  (TS6, added after Phase 02; Task 7). After Phase 03, on 2026-09-28:
+  the timeline shows each part's own units (TS10, Task 10), and part 1's
+  marker term locates part 2 (TS11). Then, for consistency, the part 2
+  stub mirrors part 1's card, and its term is the button back to part 1
+  (TS2 amended). These are Tasks 10–11, and the old Tasks 10–11 became
+  12–13.
 - **Source spec:** `specs/2026-09-28-two-semester-display.md`. Its
   requirement numbers 1–9 are TS1–TS9 here. This file restates them so a
   session never needs the spec.
@@ -18,7 +23,7 @@ Files in this set:
 - `plans/2026-09-28-two-semester-display-01-domain.md`: Tasks 1–2
 - `plans/2026-09-28-two-semester-display-02-labels.md`: Tasks 3–4
 - `plans/2026-09-28-two-semester-display-03-timeline.md`: Tasks 5–9
-- `plans/2026-09-28-two-semester-display-04-help-and-review.md`: Tasks 10–11
+- `plans/2026-09-28-two-semester-display-04-help-and-review.md`: Tasks 10–13
 
 Each implementation session reads **this overview plus exactly one phase
 file**. Task numbers are global. Tick a phase in §5 only once that phase
@@ -47,13 +52,18 @@ placement rules don't change.
 - **TS1: part 1 marker.** The full card stays in the start term. On
   two-semester cards only, a line under the title reads "Part 1 of 2 ·
   continues in S2 2028", or just "Part 1 of 2" when there is no following
-  term.
-- **TS2: part 2 stub.** The next term shows a compact stub, "COMP4550 ·
-  part 2 of 2", in the same family colour.
-  - It is not draggable and has no menu.
-  - Activating it locates and focuses part 1, as the sidebar row's part 1
-    button does.
-  - Accessible name: "COMP4550 part 2 of 2, continued from S1 2028".
+  term. TS11 makes its term a button to part 2.
+- **TS2: part 2 stub** (amended 2026-09-28, after Phase 03). The next term
+  shows a stub in the same family colour, laid out like part 1's card in
+  miniature:
+  - first line: the code and that semester's units, "COMP4550 … 12u" (TS10);
+  - second line: "Part 2 of 2 · continued from S1 2028", where only the
+    term is a button, and it locates and focuses part 1 (TS11);
+  - it is not draggable and has no menu, and it is never `.course-card`.
+
+  Phase 03 shipped it as one whole-stub button, "COMP4550 · part 2 of 2",
+  named "COMP4550 part 2 of 2, continued from S1 2028". Task 10 replaces
+  that.
 - **TS3: linked behaviour.** Part 1 and the stub:
   - recede together when a sidebar group is under hover or focus;
   - both flash when the course is located.
@@ -92,18 +102,43 @@ placement rules don't change.
   "Place COMP4550 in S1 2028 – S2 2028"). The undo toast doesn't name a
   term. Feasibility reasons already mention both semesters.
 - **TS9: help.** `src/pages/help.astro` explains two-semester courses:
-  part 1 / part 2, the range in menus, and per-part completion.
+  part 1 / part 2, the range in menus, per-part completion, per-part units,
+  and the marker's link to part 2.
+- **TS10: per-part units on the timeline** (ruling 2026-09-28, after
+  Phase 03).
+  - Part 1's timeline card shows its per-semester units, "12u" (spoken
+    "12 units"), not "12+12u".
+  - The part 2 stub's first line shows "12u" (spoken "12 units") at its
+    right, as a card's header does.
+  - "12+12u" stays wherever the course appears whole: the unplaced sidebar
+    card and search-result cards. Details shows no units.
+  - Why: each column's header already counts 12, progress is per part
+    (TS5), and a transcript lists the units per semester.
+- **TS11: each part's term goes to the other part** (rulings 2026-09-28,
+  after Phase 03). This is the placed row's rule (TS6), applied to the
+  timeline.
+  - The term in part 1's marker ("S2 2028") is a term-link button. It
+    scrolls to and focuses the stub's button, and both parts flash. Its
+    name matches the row's: "COMP4550 part 2 is planned for S2 2028 —
+    locate it on the timeline".
+  - The term in the stub's line ("S1 2028") is the same kind of button.
+    It scrolls to and focuses part 1, and both flash. Its name matches the
+    row's: "COMP4550 part 1 is planned for S1 2028 — locate it on the
+    timeline".
+  - With no part 2 term (final term), part 1 has no button, just "Part 1
+    of 2".
 
 ### 2.2 Non-functional requirements
 
 - **NF1:** the card height budget (`spec/layout.test.ts`, "card height
-  budget") stays green.
+  budget") stays green. The stub never overflows its column, and neither
+  term breaks inside itself.
   - The stub never carries the `.course-card` class, because the budget
     measures `.term-cards .course-card`.
   - The TS1 line only appears on two-semester cards (one or two per plan),
     so it doesn't move the median.
-- **NF2:** accessible names are accurate for the stub, the marker, the menu
-  ranges and the sidebar status. `spec/invariants.test.ts` axe stays clean.
+- **NF2:** accessible names are accurate for both term buttons (named
+  like the placed row's), the stub's spoken units, the marker, the menu ranges and the sidebar status. `spec/invariants.test.ts` axe stays clean.
 - **NF3:** visually verified at 1920×1080 and 390×844 (CLAUDE.md).
 - **NF4:** `pnpm check` is green before every commit.
 
@@ -142,8 +177,16 @@ placement rules don't change.
 - **Row wrapping (2026-09-28):** in the ~240px phone search pane the
   straddle row already wraps between words ("· planned" / "S2 2029"). Task
   7's second button adds padding, so the range row may wrap too. That's
-  accepted as ordinary wrapping, and Task 11's review looks at it; a term
+  accepted as ordinary wrapping, and Task 13's review looks at it; a term
   label must never break inside itself.
+- **Final-term placement:** the API refuses COMP4550 at term 7 (409,
+  checked 2026-09-28), so the "no part 2 term" cases can only be set up
+  through `buildPlanView` in unit tests.
+- **Ruling (2026-09-28):** the stub mirrors part 1's card, and its wording
+  stays parallel ("continued from"). Prototyped at both viewports, "Part 2
+  of 2 · continued from" is 171px of a 180px line, so the term wraps onto
+  its own line, as part 1's does. The stub grows from 34px to 89px with no
+  overflow. The user accepted the wrap before the term.
 - **Ruling (2026-09-28):** the TS1 marker gets its own line. Measured on
   the 180px header line: ~35px free on a read-only plan and ~15px beside
   the grip, against ~64px for "Part 1 of 2".
@@ -243,6 +286,14 @@ export function partOneMarker(view: PlanView, placement: PlacementView): PartOne
 
 // src/components/planner-logic.ts (Task 6)
 export function partTwoPlacements(view: PlanView, term: number): PlacementView[];
+
+// src/components/PartTwoStub.tsx props: Task 6 had `startLabel: string`;
+// Task 10 replaces it with `part1` (placedStatus(view, p).parts[0]) and adds `units`
+{ code: string; part1: PlacedPart; units: number; family: Family | null; receded: boolean; onLocate: () => void }
+
+// Task 11: part 1's marker asks for part 2 the way the row does
+// src/components/CourseCard.tsx prop, and Timeline.tsx's prop (widened from Task 6's (code: string) => void):
+onLocateCourse: (code: string, part?: 2) => void;
 ```
 
 ### 4.2 DOM contract (Phase 03)
@@ -251,8 +302,13 @@ export function partTwoPlacements(view: PlanView, term: number): PlacementView[]
   target, and the default locate target. A locate request with `part: 2`
   scrolls to and focuses the stub's `<button>` instead, falling back to part
   1 when no stub is rendered (Task 7).
-- The stub is `<li class="part-two-stub" data-part-two="CODE">` holding one
-  `<button>`, and never `.course-card`.
+- The stub is `<li class="part-two-stub" data-part-two="CODE">`, never
+  `.course-card`, holding exactly one `<button>`. From Task 10 it holds
+  `.course-card-head` (`.course-card-code`, `.course-card-unit-count`)
+  then `.course-card-part`, whose term is its one
+  `<button class="course-card-term-link course-card-part-term">`.
+- From Task 11, part 1's marker term is the same
+  `<button class="course-card-term-link course-card-part-term">`.
 - Located cards, including the stub, get `.course-card-highlighted`.
 - `.timeline-scroll` carries `data-drag-span="2"` while a two-semester
   course is being dragged.
@@ -265,7 +321,7 @@ export function partTwoPlacements(view: PlanView, term: number): PlacementView[]
 | 01 | `…-01-domain.md` | 1–2 | — | `termSpanLabel`; suggestions show ranges; `completedParts` and per-part progress split, checked through the API | [x] |
 | 02 | `…-02-labels.md` | 3–4 | 01 | Menus show ranges; sidebar rows show range/straddle status | [x] |
 | 03 | `…-03-timeline.md` | 5–9 | 01, 02 | Part 1 marker, part 2 stub, linked locate/recede, per-part locate buttons in placed rows, drag outline, overlay out-edges from part 2 | [x] |
-| 04 | `…-04-help-and-review.md` | 10–11 | 01–03 | Help text; **human review** of both viewports; feature done | [ ] |
+| 04 | `…-04-help-and-review.md` | 10–13 | 01–03 | Stub mirrors the card with per-part units; term buttons both ways; help text; **human review** of both viewports; feature done | [ ] |
 
 ## 6. Feature-level Definition of Done
 
@@ -273,14 +329,17 @@ export function partTwoPlacements(view: PlanView, term: number): PlacementView[]
 - [ ] `pnpm test:unit` passes
 - [ ] `pnpm check` passes
 - [ ] Manually verified at 1920×1080 and 390×844:
-  - the example plan shows COMP4550 with its part 1 marker in S1 2030 and a
-    part 2 stub in S2 2030;
+  - the example plan shows COMP4550 with "12u" and its part 1 marker in
+    S1 2030, and a part 2 stub in S2 2030 laid out like the card, with
+    "12u";
+  - the marker's "S2 2030" focuses the stub, and the stub's "S1 2030"
+    focuses part 1;
   - a plan with COMP4550 at term 4 and cutoff 5 shows "Completed S1 2029 ·
     planned S2 2029" in search's placed row, and its "S2 2029" button
     focuses the part 2 stub;
   - Move to lists ranges.
 - [ ] Every requirement in §2 is covered (see §7)
-- [ ] Task 11's `Human review:` explicitly accepted by the user
+- [ ] Task 12's and Task 13's `Human review:`s explicitly accepted by the user
 - [ ] No item remains in §8
 
 ## 7. Requirements coverage check
@@ -288,17 +347,19 @@ export function partTwoPlacements(view: PlanView, term: number): PlacementView[]
 | Requirement | Covered by |
 | --- | --- |
 | TS1 | Task 5 |
-| TS2 | Task 6 |
+| TS2 | Task 6, Task 10 (amended: mirrors the card) |
 | TS3 | Task 6 (recede, flash), Task 8 (drag outline) |
 | TS4 | Task 3 |
 | TS5 | Task 2 |
 | TS6 | Task 4 (range/straddle text), Task 7 (per-part buttons and labels) |
 | TS7 | Task 9 |
 | TS8 | Task 1 |
-| TS9 | Task 10 |
-| NF1 | Tasks 5, 6 (budget spec re-run), Task 11 |
-| NF2 | Tasks 3, 4, 6, 7 (accessible-name assertions), invariants axe run in every `pnpm check` |
-| NF3 | Task 11 |
+| TS9 | Task 12 |
+| TS10 | Task 10 |
+| TS11 | Task 10 (the stub's term), Task 11 (part 1's term) |
+| NF1 | Tasks 5, 6, 10, 11 (budget spec re-run), Task 13 |
+| NF2 | Tasks 3, 4, 6, 7, 10, 11 (accessible-name assertions), invariants axe run in every `pnpm check` |
+| NF3 | Task 13 |
 | NF4 | Every task |
 
 ## 8. Risks / open questions
