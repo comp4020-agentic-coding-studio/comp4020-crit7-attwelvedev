@@ -22,6 +22,9 @@ interface Props {
   // The dragged course's hardBlocked map when view.courses may lack it (a
   // search result) — see dropTargets.
   draggingBlocked?: Record<number, string>;
+  // Whether the dragged course is two-semester: it takes the hovered term
+  // and the next, so the drop outline covers both.
+  draggingTwoSemester: boolean;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
   onDragStart: (code: string) => void;
@@ -49,6 +52,7 @@ export default function Timeline({
   planId,
   draggingCode,
   draggingBlocked,
+  draggingTwoSemester,
   onChanged,
   onAnnounce,
   onDragStart,
@@ -145,6 +149,7 @@ export default function Timeline({
       {showPrereqLinks && view.placements.length > 0 && <PrereqLegend />}
       <div
         class="timeline-scroll"
+        data-drag-span={draggingCode !== null && draggingTwoSemester ? "2" : undefined}
         onMouseOver={(event) => {
           const card = (event.target as Element).closest("[data-placed]");
           if (card) setHoveredCode(card.getAttribute("data-placed"));

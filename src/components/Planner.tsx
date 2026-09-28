@@ -49,6 +49,9 @@ export default function Planner({ view: initialView, title }: Props) {
   // this a drag of it would grey nothing. Feasibility depends only on the
   // catalogue, never the plan, so an entry never goes stale.
   const [searchBlocked, setSearchBlocked] = useState<Record<string, Record<number, string>>>({});
+  // Likewise whether each searched course is two-semester, so dragging one
+  // from search outlines both of the terms it would take.
+  const [searchTwoSemester, setSearchTwoSemester] = useState<Record<string, boolean>>({});
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const [locateRequest, setLocateRequest] = useState<{ code: string; token: number; part?: 2 } | null>(null);
@@ -265,6 +268,11 @@ export default function Planner({ view: initialView, title }: Props) {
               planId={view.plan.id}
               draggingCode={draggingCode}
               draggingBlocked={draggingCode ? searchBlocked[draggingCode] : undefined}
+              draggingTwoSemester={
+                draggingCode
+                  ? (view.courses[draggingCode]?.twoSemester ?? searchTwoSemester[draggingCode] ?? false)
+                  : false
+              }
               onChanged={setView}
               onAnnounce={setAnnouncement}
               onDragStart={setDraggingCode}
@@ -286,12 +294,16 @@ export default function Planner({ view: initialView, title }: Props) {
             onAnnounce={setAnnouncement}
             onDragStart={setDraggingCode}
             onDragEnd={() => setDraggingCode(null)}
-            onSearchResults={(courses) =>
+            onSearchResults={(courses) => {
               setSearchBlocked((prev) => ({
                 ...prev,
                 ...Object.fromEntries(courses.map((course) => [course.code, course.hardBlocked])),
-              }))
-            }
+              }));
+              setSearchTwoSemester((prev) => ({
+                ...prev,
+                ...Object.fromEntries(courses.map((course) => [course.code, course.twoSemester])),
+              }));
+            }}
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
             onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}

@@ -489,7 +489,7 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 ### Task 8: Outline both terms while dragging a two-semester course
 
-- [ ] **Description:** while a two-semester course is dragged (mouse or
+- [x] **Description:** while a two-semester course is dragged (mouse or
   touch, from the timeline, sidebar or search), an allowed hovered term T
   and the term after it both show the gold outline.
 - **Files touched:** `src/components/Timeline.tsx`, `src/components/Planner.tsx`,

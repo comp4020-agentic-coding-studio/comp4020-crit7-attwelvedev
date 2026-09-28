@@ -1005,6 +1005,45 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
       await context.close();
     }
   });
+
+  // COMP4550 is hard-blocked only from terms 0, 1 and 7, so term 2 is open.
+  it("outlines both terms under a touch drag of a two-semester course", async () => {
+    const id = await planWithPlacement("COMP4550", 4);
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto(new URL(`/plan/${id}`, baseUrl).href, { waitUntil: "networkidle" });
+      const cdp = await context.newCDPSession(page);
+      const touch = (type: string, x = 0, y = 0) =>
+        cdp.send("Input.dispatchTouchEvent", {
+          type,
+          touchPoints: type === "touchEnd" ? [] : [{ x, y }],
+        } as never);
+      const centre = async (selector: string) => {
+        const box = (await page.locator(selector).first().boundingBox())!;
+        return [box.x + box.width / 2, box.y + Math.min(box.height / 2, 40)] as const;
+      };
+
+      const card = page.locator('[data-drag-code="COMP4550"]').first();
+      await card.scrollIntoViewIfNeeded();
+      const [cx, cy] = await centre('[data-drag-code="COMP4550"]');
+      await touch("touchStart", cx, cy);
+      await page.waitForTimeout(450); // past touch-drag.ts's HOLD_MS
+      await expect.poll(() => page.locator(".drag-ghost").count()).toBe(1);
+
+      // Narrow timeline: bring term 2 on-screen mid-drag.
+      await page.locator('[data-term="2"]').evaluate((el) => el.scrollIntoView({ inline: "center" }));
+      const [ox, oy] = await centre('[data-term="2"]');
+      await touch("touchMove", ox, oy);
+      await touch("touchMove", ox + 4, oy + 4);
+      await expect
+        .poll(async () => [await outlined(page, 2), await outlined(page, 3), await outlined(page, 4)])
+        .toEqual([true, true, false]);
+      await touch("touchEnd");
+    } finally {
+      await context.close();
+    }
+  });
 });
 
 describe("locating a placed course from its term badge", { timeout: 30_000 }, () => {
