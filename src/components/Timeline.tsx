@@ -32,8 +32,9 @@ interface Props {
   onRemoved: (removed: RemovedPlacement) => void;
   // Set from the sidebar's "Placed in <term>" badge, to scroll to and
   // flash the matching card; a token so clicking the same badge twice in a
-  // row re-triggers the effect even though the code didn't change.
-  locateRequest: { code: string; token: number } | null;
+  // row re-triggers the effect even though the code didn't change. A row's
+  // part 2 button asks for the stub with `part: 2`.
+  locateRequest: { code: string; token: number; part?: 2 } | null;
   // A part 2 stub's button asks for its part 1 through this, the same way
   // the sidebar's badge does.
   onLocateCourse: (code: string) => void;
@@ -87,12 +88,15 @@ export default function Timeline({
     if (!locateRequest) return;
     const el = document.querySelector(`[data-placed="${locateRequest.code}"]`);
     if (!(el instanceof HTMLElement)) return;
-    el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    // preventScroll: the smooth scrollIntoView above is already under way;
-    // focus()'s own default jump-to-element would fight it.
-    el.focus({ preventScroll: true });
     // A two-semester course's part 2 stub flashes with it.
     const part2 = document.querySelector(`[data-part-two="${locateRequest.code}"]`);
+    // Part 2 goes to the stub's button; without a stub (the final term) it
+    // falls back to part 1.
+    const target: HTMLElement = (locateRequest.part === 2 && part2?.querySelector("button")) || el;
+    target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    // preventScroll: the smooth scrollIntoView above is already under way;
+    // focus()'s own default jump-to-element would fight it.
+    target.focus({ preventScroll: true });
     el.classList.add("course-card-highlighted");
     part2?.classList.add("course-card-highlighted");
     const timer = setTimeout(() => {

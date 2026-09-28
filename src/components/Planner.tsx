@@ -51,7 +51,7 @@ export default function Planner({ view: initialView, title }: Props) {
   const [searchBlocked, setSearchBlocked] = useState<Record<string, Record<number, string>>>({});
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
-  const [locateRequest, setLocateRequest] = useState<{ code: string; token: number } | null>(null);
+  const [locateRequest, setLocateRequest] = useState<{ code: string; token: number; part?: 2 } | null>(null);
   const [showRequest, setShowRequest] = useState<ShowRequest | null>(null);
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
@@ -294,7 +294,7 @@ export default function Planner({ view: initialView, title }: Props) {
             }
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
-            onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}
+            onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
             onHide={() => updateReqs({ ...reqs, collapsed: true }, true)}
             onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}

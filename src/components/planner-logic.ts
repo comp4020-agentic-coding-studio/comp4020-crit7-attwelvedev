@@ -373,37 +373,44 @@ export function verifyBadgeText(count: number): string {
   return `Verify on P&C: ${count} item${count === 1 ? "" : "s"}`;
 }
 
+export interface PlacedPart {
+  termLabel: string; // this part's locate button text: "S1 2028"
+  spoken: string; // its label after the code: "is planned for S1 2027" / "part 2 is planned for S2 2028"
+}
+
 export interface PlacedStatus {
   word: "Completed" | "Planned";
-  termLabel: string; // the locate button's text: "S1 2028" or "S1 2028 – S2 2028"
-  rest: string | null; // straddle only: "· planned S2 2028"
-  spoken: string; // "planned for S1 2028" / "completed in S1 2028 and planned for S2 2028"
+  parts: PlacedPart[]; // one per locate button, part 1 first; two only when part 2 has a term
+  joiner: string | null; // between the two buttons: "–", or "· planned" when straddling; null with one part
 }
 
 // A placed row's status, per part, from the same `completedParts` the
 // progress numbers use, so a row never disagrees with its group's bar. A
 // two-semester course straddling the cutoff says so, rather than rounding
-// its completed first half to "Planned".
+// its completed first half to "Planned". Each part is its own locate
+// button, so each names its own part and status.
 export function placedStatus(view: PlanView, placement: PlacementView): PlacedStatus {
   const first = view.terms[placement.term].label;
   const second = placement.span === 2 ? (view.terms[placement.lastTerm]?.label ?? null) : null;
-  if (second && placement.completedParts > 0 && !placement.completed) {
-    return {
-      word: "Completed",
-      termLabel: first,
-      rest: `· planned ${second}`,
-      spoken: `completed in ${first} and planned for ${second}`,
-    };
-  }
+  const says = (done: boolean, label: string) => `${done ? "completed in" : "planned for"} ${label}`;
+  const firstDone = placement.completedParts > 0;
   // With no second term (a one-semester course, or a two-semester one in
   // the final term), the single part decides.
-  const done = second ? placement.completed : placement.completedParts > 0;
-  const verb = done ? "completed in" : "planned for";
+  if (!second) {
+    return {
+      word: firstDone ? "Completed" : "Planned",
+      parts: [{ termLabel: first, spoken: `is ${says(firstDone, first)}` }],
+      joiner: null,
+    };
+  }
+  const secondDone = placement.completed;
   return {
-    word: done ? "Completed" : "Planned",
-    termLabel: second ? termSpanLabel(placement.term, 2) : first,
-    rest: null,
-    spoken: second ? `${verb} ${first} to ${second}` : `${verb} ${first}`,
+    word: firstDone ? "Completed" : "Planned",
+    parts: [
+      { termLabel: first, spoken: `part 1 is ${says(firstDone, first)}` },
+      { termLabel: second, spoken: `part 2 is ${says(secondDone, second)}` },
+    ],
+    joiner: firstDone && !secondDone ? "· planned" : "–",
   };
 }
 

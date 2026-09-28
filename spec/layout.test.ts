@@ -641,6 +641,11 @@ describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
 describe("two-semester labels", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const range = /^S[12] \d{4} – S[12] \d{4}$/;
+  // The located course's flashing parts, by code: part 1 and its stub.
+  const highlighted = (page: Page) =>
+    page
+      .locator(".course-card-highlighted")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("data-placed") ?? el.getAttribute("data-part-two")));
 
   it("search's Place in… lists ranges for a two-semester course", async () => {
     const created = await fetch(new URL("/api/plans", baseUrl), {
@@ -709,11 +714,38 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       await row.waitFor();
       expect(await row.locator(".placed-row-status").innerText()).toBe("Completed S1 2029 · planned S2 2029");
       const locate = row.getByRole("button", {
-        name: /^COMP4550 is completed in S1 2029 and planned for S2 2029 — locate it on the timeline$/,
+        name: /^COMP4550 part 1 is completed in S1 2029 — locate it on the timeline$/,
       });
       expect(await locate.count()).toBe(1);
       await locate.click();
       await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-placed"))).toBe("COMP4550");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("a placed row's part 2 button locates the stub", async () => {
+    const id = await planWithPlacement("COMP4550", 4);
+    const cutoff = await fetch(new URL(`/api/plans/${id}/cutoff`, baseUrl), {
+      method: "PUT",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ cutoff: 5 }),
+    });
+    expect(cutoff.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.fill(".course-search input", "COMP4550");
+      await page.click(".course-search button[type=submit]");
+      const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP4550" });
+      await row
+        .getByRole("button", { name: /^COMP4550 part 2 is planned for S2 2029 — locate it on the timeline$/ })
+        .click();
+      await expect
+        .poll(() =>
+          page.evaluate(() => document.activeElement?.closest("[data-part-two]")?.getAttribute("data-part-two")),
+        )
+        .toBe("COMP4550");
+      await expect.poll(() => highlighted(page)).toEqual(["COMP4550", "COMP4550"]);
     } finally {
       await page.close();
     }
@@ -742,11 +774,6 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       );
     });
   });
-
-  const highlighted = (page: Page) =>
-    page
-      .locator(".course-card-highlighted")
-      .evaluateAll((els) => els.map((el) => el.getAttribute("data-placed") ?? el.getAttribute("data-part-two")));
 
   it("the part 2 stub locates part 1 and both flash", async () => {
     await withPlan(desktop, async (page) => {

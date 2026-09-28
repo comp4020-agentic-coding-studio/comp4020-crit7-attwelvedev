@@ -26,7 +26,7 @@ interface Props {
   onSearchResults?: (courses: CourseCard[]) => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
-  onLocateCourse: (code: string) => void;
+  onLocateCourse: (code: string, part?: 2) => void;
   // Collapses the sidebar to its rail.
   onHide: () => void;
   // Expands the sidebar from its rail back to the preferred column count.
@@ -57,7 +57,7 @@ interface GroupProps {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
-  onLocateCourse: (code: string) => void;
+  onLocateCourse: (code: string, part?: 2) => void;
   onFocusGroup: (groupId: string | null) => void;
   // Only top-level groups are compactable; nested ones go with their parent.
   compact?: boolean;

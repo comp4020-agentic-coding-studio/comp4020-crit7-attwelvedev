@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 import type { CourseCard, PlacementView, PlanView } from "../lib/domain/view";
 import CourseDetail from "./CourseDetail";
-import { placedStatus } from "./planner-logic";
+import { placedStatus, type PlacedPart } from "./planner-logic";
 
 interface Props {
   view: PlanView;
@@ -12,7 +12,7 @@ interface Props {
   planId: string;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
-  onLocateCourse: (code: string) => void;
+  onLocateCourse: (code: string, part?: 2) => void;
 }
 
 // A course already on the timeline, in one or two lines instead of a full
@@ -33,7 +33,17 @@ export default function PlacedCourseRow({
   const [detailsOpen, setDetailsOpen] = useState(false);
   if (!course) return null;
 
-  const status = placedStatus(view, placement);
+  const { word, parts, joiner } = placedStatus(view, placement);
+  const locate = (part: PlacedPart, which?: 2) => (
+    <button
+      type="button"
+      class="course-card-term-link"
+      onClick={() => onLocateCourse(code, which)}
+      aria-label={`${code} ${part.spoken} — locate it on the timeline`}
+    >
+      {part.termLabel}
+    </button>
+  );
 
   return (
     <li class="placed-row">
@@ -51,16 +61,15 @@ export default function PlacedCourseRow({
         {course.title}
       </button>
       <p class="placed-row-status">
-        {status.word}{" "}
-        <button
-          type="button"
-          class="course-card-term-link"
-          onClick={() => onLocateCourse(code)}
-          aria-label={`${code} is ${status.spoken} — locate it on the timeline`}
-        >
-          {status.termLabel}
-        </button>
-        {status.rest && <> {status.rest}</>}
+        {word}{" "}
+        {locate(parts[0])}
+        {parts[1] && (
+          <>
+            {" "}
+            {joiner}{" "}
+            {locate(parts[1], 2)}
+          </>
+        )}
       </p>
       <CourseDetail
         view={view}

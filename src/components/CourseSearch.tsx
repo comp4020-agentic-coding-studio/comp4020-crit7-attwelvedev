@@ -17,7 +17,7 @@ interface Props {
   onResults?: (courses: CourseCardData[]) => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
-  onLocateCourse: (code: string) => void;
+  onLocateCourse: (code: string, part?: 2) => void;
   compact: boolean;
   onToggleCompact: () => void;
   onExpand: () => void;

@@ -459,26 +459,24 @@ describe("placedStatus", () => {
   it("says a placement before the cutoff is completed, in its term", () => {
     expect(placedStatus(view, placement("COMP1100"))).toEqual({
       word: "Completed",
-      termLabel: "S1 2027",
-      rest: null,
-      spoken: "completed in S1 2027",
+      parts: [{ termLabel: "S1 2027", spoken: "is completed in S1 2027" }],
+      joiner: null,
     });
   });
 
   it("says a placement from the cutoff on is planned, in its term", () => {
     expect(placedStatus(view, placement("COMP1110"))).toEqual({
       word: "Planned",
-      termLabel: "S2 2027",
-      rest: null,
-      spoken: "planned for S2 2027",
+      parts: [{ termLabel: "S2 2027", spoken: "is planned for S2 2027" }],
+      joiner: null,
     });
   });
 
-  const thesisAt = (cutoff: number) => {
+  const thesisAt = (cutoff: number, term = 4) => {
     const thesisView = buildPlanView(cat, AACOM_2027, {
       ...emptyPlan(),
       cutoff,
-      placements: [{ code: "COMP4550", term: 4, pinnedGroupId: null }],
+      placements: [{ code: "COMP4550", term, pinnedGroupId: null }],
     });
     return placedStatus(thesisView, thesisView.placements.find((p) => p.code === "COMP4550")!);
   };
@@ -486,19 +484,38 @@ describe("placedStatus", () => {
   it("gives a two-semester course's range", () => {
     expect(thesisAt(0)).toEqual({
       word: "Planned",
-      termLabel: "S1 2029 – S2 2029",
-      rest: null,
-      spoken: "planned for S1 2029 to S2 2029",
+      parts: [
+        { termLabel: "S1 2029", spoken: "part 1 is planned for S1 2029" },
+        { termLabel: "S2 2029", spoken: "part 2 is planned for S2 2029" },
+      ],
+      joiner: "–",
     });
-    expect(thesisAt(6)).toMatchObject({ word: "Completed", spoken: "completed in S1 2029 to S2 2029" });
+    expect(thesisAt(6)).toEqual({
+      word: "Completed",
+      parts: [
+        { termLabel: "S1 2029", spoken: "part 1 is completed in S1 2029" },
+        { termLabel: "S2 2029", spoken: "part 2 is completed in S2 2029" },
+      ],
+      joiner: "–",
+    });
   });
 
   it("splits a two-semester course straddling the cutoff", () => {
     expect(thesisAt(5)).toEqual({
       word: "Completed",
-      termLabel: "S1 2029",
-      rest: "· planned S2 2029",
-      spoken: "completed in S1 2029 and planned for S2 2029",
+      parts: [
+        { termLabel: "S1 2029", spoken: "part 1 is completed in S1 2029" },
+        { termLabel: "S2 2029", spoken: "part 2 is planned for S2 2029" },
+      ],
+      joiner: "· planned",
+    });
+  });
+
+  it("gives a final-term two-semester course one part", () => {
+    expect(thesisAt(0, 7)).toEqual({
+      word: "Planned",
+      parts: [{ termLabel: "S2 2030", spoken: "is planned for S2 2030" }],
+      joiner: null,
     });
   });
 });

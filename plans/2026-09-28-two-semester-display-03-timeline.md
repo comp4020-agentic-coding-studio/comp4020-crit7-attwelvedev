@@ -365,7 +365,7 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 ### Task 7: Per-part locate buttons in placed rows
 
-- [ ] **Description:** a two-semester placed row (sidebar and search) gets
+- [x] **Description:** a two-semester placed row (sidebar and search) gets
   one locate button per part: "Planned [S1 2029] – [S2 2029]", or when
   straddling "Completed [S1 2029] · planned [S2 2029]". The part 2 button
   scrolls to and focuses the stub's button, and both parts flash. A
