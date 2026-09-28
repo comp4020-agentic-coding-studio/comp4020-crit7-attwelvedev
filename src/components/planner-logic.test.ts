@@ -19,6 +19,7 @@ import {
   outstandingItems,
   outstandingTarget,
   overlayEdges,
+  partOneMarker,
   placedStatus,
   progressBarNumbers,
   progressSegments,
@@ -498,6 +499,28 @@ describe("placedStatus", () => {
       rest: "· planned S2 2029",
       spoken: "completed in S1 2029 and planned for S2 2029",
     });
+  });
+});
+
+describe("partOneMarker", () => {
+  const markerAt = (code: string, term: number) => {
+    const view = buildPlanView(cat, AACOM_2027, {
+      ...emptyPlan(),
+      placements: [{ code, term, pinnedGroupId: null }],
+    });
+    return partOneMarker(view, view.placements.find((p) => p.code === code)!);
+  };
+
+  it("names the term part 2 continues in", () => {
+    expect(markerAt("COMP4550", 4)).toBe("Part 1 of 2 · continues in S2 2029");
+  });
+
+  it("drops the continuation in the final term, where part 2 has no term", () => {
+    expect(markerAt("COMP4550", 7)).toBe("Part 1 of 2");
+  });
+
+  it("gives a one-semester course no marker", () => {
+    expect(markerAt("COMP1100", 0)).toBeNull();
   });
 });
 

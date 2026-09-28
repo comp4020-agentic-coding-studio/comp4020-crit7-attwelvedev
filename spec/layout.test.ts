@@ -718,6 +718,15 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       await page.close();
     }
   });
+
+  it("marks part 1 on the example plan's COMP4550 card", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await page.locator('[data-placed="COMP4550"] .course-card-part').innerText()).toBe(
+        "Part 1 of 2 · continues in S2 2030",
+      );
+      expect(await page.locator('[data-placed="COMP1130"] .course-card-part').count()).toBe(0);
+    });
+  });
 });
 
 describe("requirements rail as a drop target", { timeout: 30_000 }, () => {

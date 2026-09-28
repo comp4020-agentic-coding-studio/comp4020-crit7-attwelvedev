@@ -225,7 +225,7 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 ### Task 5: Part 1 marker line on two-semester timeline cards
 
-- [ ] **Description:** add `partOneMarker` and render it as a line under
+- [x] **Description:** add `partOneMarker` and render it as a line under
   the title of two-semester timeline cards.
 - **Files touched:** `src/components/planner-logic.ts`,
   `src/components/planner-logic.test.ts`, `src/components/CourseCard.tsx`,

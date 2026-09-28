@@ -407,6 +407,14 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
   };
 }
 
+// The line under a two-semester card's title naming where part 2 is; a
+// course left in the final term (hard-blocked) has no part 2 term.
+export function partOneMarker(view: PlanView, placement: PlacementView): string | null {
+  if (placement.span !== 2) return null;
+  const next = view.terms[placement.lastTerm];
+  return next ? `Part 1 of 2 · continues in ${next.label}` : "Part 1 of 2";
+}
+
 // The completed-semesters menu's options: nothing, then each term by label,
 // with the last term as "All semesters" since completing it completes them all.
 export function cutoffOptions(terms: readonly { label: string }[]): { value: number; label: string }[] {

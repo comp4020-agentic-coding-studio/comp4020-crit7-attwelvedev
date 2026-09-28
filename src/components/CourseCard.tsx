@@ -4,7 +4,7 @@ import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
 import MoreOptions from "./MoreOptions";
-import { familyOf, groupLabel, menuTargets, unplacedCount, verifyBadgeText } from "./planner-logic";
+import { familyOf, groupLabel, menuTargets, partOneMarker, unplacedCount, verifyBadgeText } from "./planner-logic";
 
 // What removing this exact placement needs to undo it: not just the code
 // and term, but whether it was pinned — placeCourse always inserts a fresh,
@@ -101,6 +101,7 @@ export default function CourseCard({
   }
 
   const family = placement.countsToward ? familyOf(view, placement.countsToward) : null;
+  const marker = partOneMarker(view, placement);
 
   const { targets, blockedReasons } = menuTargets(view, placement.code, {
     currentTerm: placement.term,
@@ -152,6 +153,7 @@ export default function CourseCard({
           setDetailsOpen(true);
         }}
       />
+      {marker && <p class="course-card-part">{marker}</p>}
       <p
         class={`badge badge-state-${placement.state}${placement.state === "available" ? " visually-hidden" : ""}`}
       >

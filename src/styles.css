@@ -1619,7 +1619,8 @@ button.badge-verify:focus-visible {
 }
 
 .course-card-offered,
-.course-card-allocation {
+.course-card-allocation,
+.course-card-part {
   font-size: 0.85em;
   color: var(--unigrey);
   margin: 0.35rem 0 0;
