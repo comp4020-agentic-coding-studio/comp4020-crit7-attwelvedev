@@ -198,7 +198,9 @@ search results, unless stated)
   installed, which is acceptable because the CR3 grip is a plain element
   inside the draggable `<li>`, so a drag starting there is ordinary native
   drag.
-- **Persistence:** no schema or API change.
+- **Persistence:** no change to the plan schema or the API. Reference
+  tables that seed rebuilds on every boot are exempt: Task 7 adds a
+  nullable `requirement_groups.family` column (ruling 4, §2.4).
 
 ### 2.3 Out of scope
 
@@ -229,6 +231,11 @@ search results, unless stated)
   3. **E10 phone target:** the user replaced "two full cards" with "first
      card full, half the second", because the pane has 215px below its
      header.
+  4. **Family persistence (2026-09-28, during Phase 03):** the app reads
+     the program from SQLite (`seed.ts` → `requirement_groups` →
+     `repo.ts` `loadProgram`), not from `AACOM_2027`, so `family` needs
+     a nullable column there. The user chose that over a hard-coded
+     id → family lookup in `loadProgram`.
 - **E6's last option:** "All semesters" replaces the last term's label,
   since "Completed through S2 2030" and "all" are the same cutoff.
 - **Hues:** the hues in §4.2 were pre-checked on 2026-09-28 with the same

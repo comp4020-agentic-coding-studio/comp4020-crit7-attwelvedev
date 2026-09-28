@@ -8,6 +8,9 @@ import { buildPlanView } from "../lib/domain/view";
 import {
   completedReadout,
   dropTargets,
+  FAMILY_LABELS,
+  FAMILY_ORDER,
+  familyOf,
   menuTargets,
   outstandingItems,
   overlayEdges,
@@ -351,5 +354,27 @@ describe("placedStatus", () => {
 
   it("says a placement from the cutoff on is planned, in its term", () => {
     expect(placedStatus(view, placement("COMP1110"))).toEqual({ word: "Planned", termLabel: "S2 2027" });
+  });
+});
+
+describe("familyOf", () => {
+  const view = buildPlanView(cat, AACOM_2027, { ...emptyPlan(), choices: { spec: "arin" } });
+
+  it("finds a nested group's inherited family", () => {
+    expect(familyOf(view, "arin-a")).toBe("specialisation");
+  });
+
+  it("finds a top-level group's own family", () => {
+    expect(familyOf(view, "compulsory")).toBe("foundations");
+  });
+
+  it("falls back to neutral for no group or an unknown one", () => {
+    expect(familyOf(view, null)).toBe("neutral");
+    expect(familyOf(view, "nope")).toBe("neutral");
+  });
+
+  it("orders and labels every family", () => {
+    expect(FAMILY_ORDER).toEqual(["foundations", "specialisation", "advanced", "ict", "capstone", "neutral"]);
+    expect(new Set(Object.keys(FAMILY_LABELS))).toEqual(new Set(FAMILY_ORDER));
   });
 });

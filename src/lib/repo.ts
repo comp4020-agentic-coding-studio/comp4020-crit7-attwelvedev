@@ -134,6 +134,7 @@ export function loadProgram(db: Db): ProgramDef {
     if (row.unitsMax != null) node.unitsMax = row.unitsMax;
     if (row.selectable === 1) node.selectable = true;
     if (row.filter != null) node.filter = JSON.parse(row.filter) as CourseFilter;
+    if (row.family != null) node.family = row.family as GroupDef["family"];
     const groupCourses = coursesByGroup.get(row.id);
     if (groupCourses && groupCourses.length > 0) node.courses = groupCourses;
     nodes.set(row.id, node);

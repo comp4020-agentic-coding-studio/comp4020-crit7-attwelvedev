@@ -1,5 +1,5 @@
 import { matchesFilter } from "../lib/domain/filters";
-import type { CourseFilter, ReqExpr } from "../lib/domain/types";
+import type { CourseFilter, Family, ReqExpr } from "../lib/domain/types";
 import type { GroupView, PlacementView, PlanView } from "../lib/domain/view";
 
 export interface DropTarget {
@@ -200,6 +200,31 @@ export function groupLabel(view: PlanView, groupId: string): string {
     return null;
   }
   return search(view.groups) ?? groupId;
+}
+
+// Legend order for the per-term bar and anything else that lists families.
+export const FAMILY_ORDER: readonly Family[] = ["foundations", "specialisation", "advanced", "ict", "capstone", "neutral"];
+export const FAMILY_LABELS: Record<Family, string> = {
+  foundations: "Foundations",
+  specialisation: "Specialisation",
+  advanced: "3000/4000-level COMP",
+  ict: "ICT",
+  capstone: "Capstone",
+  neutral: "Electives",
+};
+
+// A group's colour family, found the way groupLabel finds its label. No
+// group (a course counting toward nothing) or an unknown one is neutral.
+export function familyOf(view: PlanView, groupId: string | null): Family {
+  function search(groups: PlanView["groups"]): Family | null {
+    for (const group of groups) {
+      if (group.id === groupId) return group.family;
+      const found = search(group.children);
+      if (found) return found;
+    }
+    return null;
+  }
+  return (groupId !== null && search(view.groups)) || "neutral";
 }
 
 export interface UnitsLabel {

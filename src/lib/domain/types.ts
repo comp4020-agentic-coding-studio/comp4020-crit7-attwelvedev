@@ -34,10 +34,12 @@ export interface PlanState {
 }
 export type GroupKind = "core" | "major" | "minor" | "specialisation" | "elective";
 export type RuleType = "ALL" | "UNITS" | "CHOOSE_N";
+export type Family = "foundations" | "specialisation" | "advanced" | "ict" | "capstone" | "neutral";
 export interface GroupDef {
   id: string; label: string; kind: GroupKind; ruleType: RuleType;
   unitsRequired: number; unitsMax?: number; selectable?: boolean;
   courses?: string[]; filter?: CourseFilter; children?: GroupDef[];
+  family?: Family; // top-level groups only; nested groups inherit theirs (view.ts)
 }
 export interface ProgramCheckDef { id: string; label: string; bound: "min" | "max"; units: number; filter: CourseFilter }
 export interface ProgramDef {

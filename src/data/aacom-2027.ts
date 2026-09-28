@@ -201,6 +201,7 @@ export const AACOM_2027: ProgramDef = {
   groups: [
     {
       id: "prog-a",
+      family: "foundations",
       label: "Programming as Problem Solving",
       kind: "core",
       ruleType: "UNITS",
@@ -209,6 +210,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "prog-b",
+      family: "foundations",
       label: "Structured Programming",
       kind: "core",
       ruleType: "UNITS",
@@ -217,6 +219,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "math-disc",
+      family: "foundations",
       label: "Discrete mathematics",
       kind: "core",
       ruleType: "UNITS",
@@ -225,6 +228,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "compulsory",
+      family: "foundations",
       label: "Compulsory courses",
       kind: "core",
       ruleType: "ALL",
@@ -233,6 +237,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "spec",
+      family: "specialisation",
       label: "Specialisation",
       kind: "specialisation",
       ruleType: "UNITS",
@@ -242,6 +247,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "comp-upper",
+      family: "advanced",
       label: "3000/4000-level COMP",
       kind: "elective",
       ruleType: "UNITS",
@@ -254,6 +260,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "ict",
+      family: "ict",
       label: "ICT-related courses",
       kind: "elective",
       ruleType: "UNITS",
@@ -266,6 +273,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "capstone",
+      family: "capstone",
       label: "Capstone",
       kind: "core",
       ruleType: "UNITS",
@@ -275,6 +283,7 @@ export const AACOM_2027: ProgramDef = {
     },
     {
       id: "electives",
+      family: "neutral",
       label: "Electives",
       kind: "elective",
       ruleType: "UNITS",

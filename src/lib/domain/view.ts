@@ -6,6 +6,7 @@ import { offeredLabel, offeringStatus, TERMS } from "./terms";
 import type {
   Catalogue,
   CatalogueCourse,
+  Family,
   GroupDef,
   GroupKind,
   PlanState,
@@ -44,6 +45,8 @@ export interface GroupView {
   filterLabel: string | null;
   missing: string[];
   children: GroupView[];
+  // The top-level group's colour family, inherited by every nested group.
+  family: Family;
 }
 
 export interface CheckView {
@@ -301,7 +304,7 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
     leafCourses.set(leaf, codes);
   }
 
-  function buildGroupView(group: GroupDef): GroupView {
+  function buildGroupView(group: GroupDef, family: Family): GroupView {
     const children = group.children ?? [];
     let activeChildren: GroupDef[] = [];
     let chosenId: string | null = null;
@@ -316,7 +319,7 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
       activeChildren = children;
     }
 
-    const childViews = activeChildren.map(buildGroupView);
+    const childViews = activeChildren.map((c) => buildGroupView(c, family));
     const isLeaf = children.length === 0;
 
     let completed = 0;
@@ -356,9 +359,10 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
       filterLabel: group.filter ? filterLabel(group.filter) : null,
       missing,
       children: childViews,
+      family,
     };
   }
-  const groupViews = program.groups.map(buildGroupView);
+  const groupViews = program.groups.map((g) => buildGroupView(g, g.family ?? "neutral"));
 
   const checks = program.checks.map((check) => buildCheckView(check, nonLoserEvals, cat, tdp));
 

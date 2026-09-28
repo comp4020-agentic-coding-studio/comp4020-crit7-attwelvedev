@@ -35,6 +35,7 @@ interface FlatGroup {
   selectable: number;
   sortOrder: number;
   filter: string | null;
+  family: string | null;
   courses: string[];
 }
 
@@ -52,6 +53,7 @@ function flattenGroups(defs: GroupDef[], parentId: string | null, counter: { n: 
       selectable: def.selectable ? 1 : 0,
       sortOrder: counter.n++,
       filter: def.filter ? JSON.stringify(def.filter) : null,
+      family: def.family ?? null,
       courses: def.courses ?? [],
     });
     if (def.children) {
@@ -103,6 +105,7 @@ function seedProgram(db: Db, program: ProgramDef): void {
         selectable: group.selectable,
         sortOrder: group.sortOrder,
         filter: group.filter,
+        family: group.family,
       })
       .run();
     for (const code of group.courses) {

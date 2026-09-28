@@ -140,6 +140,19 @@ describe("buildPlanView (a chosen specialisation)", () => {
     expect(findGroup(view.groups, "arin-a")).toBeDefined();
     expect(findGroup(view.groups, "hccc-core")).toBeUndefined();
   });
+
+  it("nested groups inherit their top-level family", () => {
+    const plan: PlanState = { id: "p", readOnly: false, cutoff: 0, choices: { spec: "arin" }, placements: [] };
+    const view = buildPlanView(cat, AACOM_2027, plan);
+    const spec = findGroup(view.groups, "spec")!;
+    const descendants = (g: typeof spec): (typeof spec)[] => g.children.flatMap((c) => [c, ...descendants(c)]);
+    expect(spec.family).toBe("specialisation");
+    expect(spec.children[0]!.family).toBe("specialisation");
+    const all = descendants(spec);
+    expect(all.length).toBeGreaterThan(1);
+    for (const g of all) expect(g.family, g.id).toBe("specialisation");
+    expect(findGroup(view.groups, "electives")!.family).toBe("neutral");
+  });
 });
 
 describe("buildPlanView: pins and unchosen options", () => {

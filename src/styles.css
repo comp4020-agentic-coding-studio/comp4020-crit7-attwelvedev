@@ -22,6 +22,16 @@
   --rust: #ab3a2e;
   --rust-tint: #fbeae8;
 
+  /* Requirement families (strips, dots, group and term bars). Kept legible
+     against white, each other and the state colours, in normal and
+     colour-blind vision, by src/components/family-palette.test.ts. */
+  --family-foundations: #1f2f86;   /* indigo */
+  --family-specialisation: #8c5fc9; /* violet */
+  --family-advanced: #3a8fc2;      /* steel blue */
+  --family-ict: #b0407d;           /* plum */
+  --family-capstone: #3d4650;      /* slate */
+  --family-neutral: #8d9299;       /* grey: Electives, not counting */
+
   --font: "Public Sans", system-ui, sans-serif;
   --radius: 0.6rem;
 
@@ -37,6 +47,14 @@
   /* The collapsed stacked requirements bar. */
   --reqs-bar-h: 2.75rem;
 }
+
+/* Anything tagged with a family reads its colour through --family. */
+[data-family="foundations"] { --family: var(--family-foundations); }
+[data-family="specialisation"] { --family: var(--family-specialisation); }
+[data-family="advanced"] { --family: var(--family-advanced); }
+[data-family="ict"] { --family: var(--family-ict); }
+[data-family="capstone"] { --family: var(--family-capstone); }
+[data-family="neutral"] { --family: var(--family-neutral); }
 
 *,
 *::before,

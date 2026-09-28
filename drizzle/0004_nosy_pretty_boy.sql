@@ -1,0 +1,1 @@
+ALTER TABLE `requirement_groups` ADD `family` text;

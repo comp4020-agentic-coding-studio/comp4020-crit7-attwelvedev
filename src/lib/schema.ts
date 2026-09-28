@@ -31,6 +31,7 @@ export const requirementGroups = sqliteTable("requirement_groups", {
   selectable: int().notNull().default(0),
   sortOrder: int("sort_order").notNull(),
   filter: text(), // JSON CourseFilter
+  family: text(), // top-level groups only; null = inherit (see view.ts)
 });
 
 export const requirementCourses = sqliteTable(

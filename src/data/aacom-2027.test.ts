@@ -57,4 +57,21 @@ describe("AACOM_2027", () => {
     const tdp = JSON.parse(readFileSync("data/2027/tdp.json", "utf-8"));
     expect(AACOM_2027.tdpCourses).toEqual(tdp.courses);
   });
+
+  it("top-level groups carry the agreed families", () => {
+    expect(Object.fromEntries(AACOM_2027.groups.map((g) => [g.id, g.family]))).toEqual({
+      "prog-a": "foundations",
+      "prog-b": "foundations",
+      "math-disc": "foundations",
+      compulsory: "foundations",
+      spec: "specialisation",
+      "comp-upper": "advanced",
+      ict: "ict",
+      capstone: "capstone",
+      electives: "neutral",
+    });
+    const nested = AACOM_2027.groups.flatMap((g) => flattenGroups(g.children ?? []));
+    expect(nested.length).toBeGreaterThan(0);
+    expect(nested.filter((g) => g.family !== undefined).map((g) => g.id)).toEqual([]);
+  });
 });
