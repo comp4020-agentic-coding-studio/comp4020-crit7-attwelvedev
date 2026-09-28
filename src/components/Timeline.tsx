@@ -1,9 +1,9 @@
 import { useEffect, useState } from "preact/hooks";
 import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
-import { isError, placeCourse } from "./api";
-import CourseCard, { type RemovedPlacement } from "./CourseCard";
+import CourseCard from "./CourseCard";
 import type { DetailsFocus } from "./details-state";
 import PartTwoStub from "./PartTwoStub";
+import { actionFor, type PlanAction } from "./plan-actions";
 import {
   dropTargets,
   familyOf,
@@ -33,7 +33,6 @@ export interface LocateRequest {
 
 interface Props {
   view: PlanView;
-  planId: string;
   draggingCode: string | null;
   // The dragged course's hardBlocked map when view.courses may lack it (a
   // search result) — see dropTargets.
@@ -41,14 +40,13 @@ interface Props {
   // Whether the dragged course is two-semester: it takes the hovered term
   // and the next, so the drop outline covers both.
   draggingTwoSemester: boolean;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
+  // A drop, and every card's own changes, go through Planner's runAction.
+  onAction: (action: PlanAction) => Promise<void>;
   onDragStart: (code: string) => void;
   onDragEnd: () => void;
   showPrereqLinks: boolean;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
-  onRemoved: (removed: RemovedPlacement) => void;
   locateRequest: LocateRequest | null;
   // A part 2 stub's button asks for its part 1 through this, the same way
   // the sidebar's badge does; part 1's marker asks for the stub with
@@ -68,18 +66,15 @@ interface Props {
 
 export default function Timeline({
   view,
-  planId,
   draggingCode,
   draggingBlocked,
   draggingTwoSemester,
-  onChanged,
-  onAnnounce,
+  onAction,
   onDragStart,
   onDragEnd,
   showPrereqLinks,
   openMenuCode,
   onMenuOpenChange,
-  onRemoved,
   locateRequest,
   onLocateCourse,
   onShowGroup,
@@ -151,16 +146,11 @@ export default function Timeline({
 
   const dragTargets = draggingCode ? dropTargets(view, draggingCode, draggingBlocked) : null;
 
-  async function handleDrop(term: number, code: string) {
+  // runAction refuses a disallowed term, with its reason, as it does for
+  // every other way in.
+  function handleDrop(term: number, code: string) {
     onDragEnd();
-    const target = dragTargets?.find((t) => t.term === term);
-    if (target && !target.allowed) {
-      if (target.reason) onAnnounce(target.reason);
-      return;
-    }
-    const result = await placeCourse(planId, code, term);
-    if (isError(result)) onAnnounce(result.error);
-    else onChanged(result);
+    void onAction(actionFor(view, code, term));
   }
 
   return (
@@ -208,7 +198,7 @@ export default function Timeline({
               onDrop={(event) => {
                 event.preventDefault();
                 const code = event.dataTransfer?.getData("text/plain") || draggingCode;
-                if (code) void handleDrop(term.index, code);
+                if (code) handleDrop(term.index, code);
               }}
             >
               <div class="term-head">
@@ -246,14 +236,11 @@ export default function Timeline({
                     key={placement.code}
                     view={view}
                     placement={placement}
-                    planId={planId}
-                    onChanged={onChanged}
-                    onAnnounce={onAnnounce}
+                    onAction={onAction}
                     onDragStart={onDragStart}
                     onDragEnd={onDragEnd}
                     openMenuCode={openMenuCode}
                     onMenuOpenChange={onMenuOpenChange}
-                    onRemoved={onRemoved}
                     onShowGroup={onShowGroup}
                     onLocateCourse={onLocateCourse}
                     receded={recededFor(placement)}

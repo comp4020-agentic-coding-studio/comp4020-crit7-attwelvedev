@@ -1,8 +1,8 @@
 import { useState } from "preact/hooks";
 import type { CourseCard, PlanView } from "../lib/domain/view";
-import { isError, placeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import type { DetailsFocus } from "./details-state";
+import { actionFor, type PlanAction } from "./plan-actions";
 import PlaceInMenu from "./PlaceInMenu";
 import { dropTargets } from "./planner-logic";
 
@@ -12,9 +12,8 @@ interface Props {
   // Given for a search result, which usually isn't (yet) part of the plan's
   // tree and so has no view.courses entry of its own.
   course?: CourseCard;
-  planId: string;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
+  // Place in… goes through Planner's runAction.
+  onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
   openMenuCode: string | null;
@@ -29,9 +28,7 @@ export default function AvailableCourseCard({
   view,
   code,
   course: courseOverride,
-  planId,
-  onChanged,
-  onAnnounce,
+  onAction,
   onDragStart,
   onDragEnd,
   openMenuCode,
@@ -62,9 +59,7 @@ export default function AvailableCourseCard({
   async function place(term: number) {
     setPending(true);
     try {
-      const result = await placeCourse(planId, code, term);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
+      await onAction(actionFor(view, code, term));
     } finally {
       setPending(false);
     }

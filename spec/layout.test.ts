@@ -4151,3 +4151,54 @@ describe("linked highlighting", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("undo for every plan change", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const toast = (page: Page) => page.locator(".undo-toast");
+
+  async function withFreshPlan(check: (page: Page) => Promise<void>): Promise<void> {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  it("a move from the card menu offers Undo, which moves it back", async () => {
+    await withFreshPlan(async (page) => {
+      await page.locator('[data-placed="COMP1130"]').getByRole("button", { name: "More options for COMP1130" }).click();
+      await page.locator('[data-placed="COMP1130"] .card-menu-terms').getByRole("button", { name: "S1 2028" }).click();
+      await expect.poll(() => page.locator('[data-term="2"] [data-placed="COMP1130"]').count()).toBe(1);
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Moved COMP1130 to S1 2028.");
+      await toast(page).getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => page.locator('[data-term="0"] [data-placed="COMP1130"]').count()).toBe(1);
+      expect(await toast(page).count()).toBe(0);
+    });
+  });
+
+  it("Place in… offers Undo, which removes it again", async () => {
+    await withFreshPlan(async (page) => {
+      const card = page.locator(".available-courses .course-card").filter({ hasText: "COMP1100" }).first();
+      await card.getByRole("button", { name: "Place in…" }).click();
+      await page.getByRole("menu", { name: "Place COMP1100 in" }).getByRole("menuitem").first().click();
+      await expect.poll(() => page.locator('[data-placed="COMP1100"]').count()).toBe(1);
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Placed COMP1100 in");
+      await toast(page).getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => page.locator('[data-placed="COMP1100"]').count()).toBe(0);
+    });
+  });
+
+  it("a move from the details strip offers Undo", async () => {
+    await withFreshPlan(async (page) => {
+      await page.locator('[data-placed="COMP1130"] .course-card-title').click();
+      await detailsPanel(page).getByRole("button", { name: "Move to S1 2028" }).click();
+      await expect.poll(() => page.locator('[data-term="2"] [data-placed="COMP1130"]').count()).toBe(1);
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Moved COMP1130 to S1 2028.");
+    });
+  });
+});

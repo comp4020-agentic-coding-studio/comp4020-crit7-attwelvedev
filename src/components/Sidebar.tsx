@@ -4,6 +4,7 @@ import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import type { DetailsFocus } from "./details-state";
+import type { PlanAction } from "./plan-actions";
 import PlacedCourseRow from "./PlacedCourseRow";
 import {
   groupBarTarget,
@@ -29,6 +30,8 @@ interface Props {
   planId: string;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
+  // Place in… on a group's or a search result's card.
+  onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
   onSearchResults?: (courses: CourseCard[]) => void;
@@ -67,6 +70,7 @@ interface GroupProps {
   depth: number;
   onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
+  onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
   openMenuCode: string | null;
@@ -121,6 +125,7 @@ function Group({
   depth,
   onChanged,
   onAnnounce,
+  onAction,
   onDragStart,
   onDragEnd,
   openMenuCode,
@@ -194,9 +199,7 @@ function Group({
               key={code}
               view={view}
               code={code}
-              planId={planId}
-              onChanged={onChanged}
-              onAnnounce={onAnnounce}
+              onAction={onAction}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
@@ -234,6 +237,7 @@ function Group({
               depth={depth + 1}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
+              onAction={onAction}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
@@ -312,6 +316,7 @@ export default function Sidebar({
   planId,
   onChanged,
   onAnnounce,
+  onAction,
   onDragStart,
   onDragEnd,
   onSearchResults,
@@ -502,8 +507,8 @@ export default function Sidebar({
           <CourseSearch
             view={view}
             planId={planId}
-            onChanged={onChanged}
             onAnnounce={onAnnounce}
+            onAction={onAction}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             onResults={onSearchResults}
@@ -560,6 +565,7 @@ export default function Sidebar({
               depth={0}
               onChanged={onChanged}
               onAnnounce={onAnnounce}
+              onAction={onAction}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
-import type { RemovedPlacement } from "./CourseCard";
 import CompletedMenu from "./CompletedMenu";
 import CourseDetailsPanel from "./CourseDetailsPanel";
 import {
@@ -26,6 +25,7 @@ import {
   saveSplit,
   type SplitStop,
 } from "./panel-state";
+import { actionFor, type PlanAction, type UndoEntry, undoEntry } from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
@@ -35,7 +35,7 @@ import Timeline, { type LocateRequest } from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
 import { useCourseDetails } from "./use-course-details";
 
-// How long "Undo" stays offered after a Remove — long enough to notice and
+// How long "Undo" stays offered after a change — long enough to notice and
 // act on without thinking, short enough that it isn't still sitting there
 // (offering to restore a now-stale course) minutes into unrelated work.
 const UNDO_TIMEOUT_MS = 8000;
@@ -109,7 +109,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
   const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
-  const [removed, setRemoved] = useState<RemovedPlacement | null>(null);
+  const [undo, setUndo] = useState<{ entry: UndoEntry } | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -176,69 +176,61 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     }
   }
 
-  function handleRemoved(info: RemovedPlacement) {
-    if (undoTimer.current) clearTimeout(undoTimer.current);
-    setRemoved(info);
-    undoTimer.current = setTimeout(() => setRemoved(null), UNDO_TIMEOUT_MS);
+  function apply(action: PlanAction) {
+    return action.kind === "remove"
+      ? removeCourse(view.plan.id, action.code)
+      : placeCourse(view.plan.id, action.code, action.term);
   }
 
-  // The touch-drag drop handler for both "place/move" and "remove". Placing
-  // mirrors Timeline's native onDrop, reimplemented here because touch
-  // dragging resolves its drop target through elementFromPoint at the
-  // planner level, not inside whichever column the pointer is over. Removal
-  // is shared: Sidebar's native onDrop calls performRemove too, so a mouse
-  // drop offers the same undo toast as a touch drop.
-  async function performPlace(term: number, code: string) {
-    const target = dropTargets(view, code, searchBlocked[code]).find((t) => t.term === term);
-    if (target && !target.allowed) {
-      if (target.reason) setAnnouncement(target.reason);
-      return;
-    }
-    const result = await placeCourse(view.plan.id, code, term);
-    if (isError(result)) setAnnouncement(result.error);
-    else setView(result);
-  }
-
-  async function performRemove(code: string) {
-    const placement = view.placements.find((p) => p.code === code);
-    if (!placement) return;
-    const course = view.courses[code];
-    const info: RemovedPlacement = {
-      code,
-      term: placement.term,
-      pinnedGroupId: placement.pinned ? (placement.countsToward ?? null) : null,
-      label: course ? `${code} — ${course.title}` : code,
-    };
-    const result = await removeCourse(view.plan.id, code);
-    if (isError(result)) setAnnouncement(result.error);
-    else {
-      setView(result);
-      handleRemoved(info);
-    }
-  }
-
-  // Re-placing a course always lands it unpinned (placeCourse's insert
-  // always does) — restoring the pin it had, if any, is a deliberate
-  // second call, not a side effect of the first.
-  async function handleUndo() {
-    if (!removed || undoPending) return;
-    if (undoTimer.current) clearTimeout(undoTimer.current);
-    const { code, term, pinnedGroupId, label } = removed;
-    setUndoPending(true);
-    setRemoved(null);
-    try {
-      const placed = await placeCourse(view.plan.id, code, term);
-      if (isError(placed)) {
-        setAnnouncement(placed.error);
+  // The one path every place, move and remove takes — drag (mouse or touch),
+  // card menu, suggestion, Place in…, the details sidebar — so each is
+  // refused by the same rule as dragging and each offers the same Undo.
+  async function runAction(action: PlanAction): Promise<void> {
+    if (action.kind === "remove") {
+      if (!view.placements.some((p) => p.code === action.code)) return;
+    } else {
+      // A search result has no view.courses entry, so its blocked terms
+      // come from the card search (or the sidebar) fetched.
+      const blocked = knownCards[action.code]?.hardBlocked ?? searchBlocked[action.code];
+      const target = dropTargets(view, action.code, blocked).find((t) => t.term === action.term);
+      if (target && !target.allowed) {
+        if (target.reason) setAnnouncement(target.reason);
         return;
       }
-      if (!pinnedGroupId) {
-        setView(placed);
-      } else {
-        const pinned = await setPin(view.plan.id, code, pinnedGroupId);
-        setView(isError(pinned) ? placed : pinned);
+    }
+    // From the view before the change: it still knows where the course was.
+    const entry = undoEntry(view, action);
+    const result = await apply(action);
+    if (isError(result)) {
+      setAnnouncement(result.error);
+      return;
+    }
+    setView(result);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    setUndo({ entry });
+    undoTimer.current = setTimeout(() => setUndo(null), UNDO_TIMEOUT_MS);
+  }
+
+  // Undoing offers no undo of its own: the toast just goes.
+  async function handleUndo() {
+    if (!undo || undoPending) return;
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    const { entry } = undo;
+    setUndoPending(true);
+    setUndo(null);
+    try {
+      const undone = await apply(entry.undo);
+      if (isError(undone)) {
+        setAnnouncement(undone.error);
+        return;
       }
-      setAnnouncement(`Restored ${label}`);
+      if (!entry.restorePin) {
+        setView(undone);
+      } else {
+        const pinned = await setPin(view.plan.id, entry.undo.code, entry.restorePin);
+        setView(isError(pinned) ? undone : pinned);
+      }
+      setAnnouncement(`Undone: ${entry.message}`);
     } finally {
       setUndoPending(false);
     }
@@ -251,8 +243,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     onDragStart: setDraggingCode,
     onDragEnd: () => setDraggingCode(null),
     onDrop: (target, code) => {
-      if (target.kind === "term") void performPlace(target.term, code);
-      else void performRemove(code);
+      void runAction(target.kind === "term" ? actionFor(view, code, target.term) : { kind: "remove", code });
     },
   });
 
@@ -316,7 +307,6 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           <div class="planner-timeline-area">
             <Timeline
               view={view}
-              planId={view.plan.id}
               draggingCode={draggingCode}
               draggingBlocked={draggingCode ? searchBlocked[draggingCode] : undefined}
               draggingTwoSemester={
@@ -324,14 +314,12 @@ export default function Planner({ view: initialView, title, initialDetails = nul
                   ? (view.courses[draggingCode]?.twoSemester ?? searchTwoSemester[draggingCode] ?? false)
                   : false
               }
-              onChanged={setView}
-              onAnnounce={setAnnouncement}
+              onAction={runAction}
               onDragStart={setDraggingCode}
               onDragEnd={() => setDraggingCode(null)}
               showPrereqLinks={showPrereqLinks}
               openMenuCode={openMenuCode}
               onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
-              onRemoved={handleRemoved}
               locateRequest={locateRequest}
               onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
               onShowGroup={(id) => showInSidebar("group", id)}
@@ -346,6 +334,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             planId={view.plan.id}
             onChanged={setView}
             onAnnounce={setAnnouncement}
+            onAction={runAction}
             onDragStart={setDraggingCode}
             onDragEnd={() => setDraggingCode(null)}
             onSearchResults={(courses) => {
@@ -365,7 +354,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onHide={() => updateReqs({ ...reqs, collapsed: true }, true)}
             onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
-            onDropRemove={(code) => void performRemove(code)}
+            onDropRemove={(code) => void runAction({ kind: "remove", code })}
             showRequest={showRequest}
             onShowInSidebar={showInSidebar}
             onFocusGroup={setFocusGroupId}
@@ -386,17 +375,17 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           onBack={() => setDetails((s) => stepHistory(s, -1))}
           onForward={() => setDetails((s) => stepHistory(s, 1))}
           onClose={() => setDetails(closeDetails)}
-          onPlace={(term) => void performPlace(term, details.code!)}
-          onRemove={() => void performRemove(details.code!)}
+          onPlace={(term) => void runAction(actionFor(view, details.code!, term))}
+          onRemove={() => void runAction({ kind: "remove", code: details.code! })}
           onChanged={setView}
           onAnnounce={setAnnouncement}
         />
       )}
-      {removed && (
+      {undo && (
         <div class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"} role="status">
-          <span>Removed {removed.label}.</span>
+          <span>{undo.entry.message}.</span>
           <button type="button" disabled={undoPending} onClick={handleUndo}>
-            {undoPending ? "Restoring…" : "Undo"}
+            {undoPending ? "Undoing…" : "Undo"}
           </button>
         </div>
       )}

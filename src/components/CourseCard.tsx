@@ -1,9 +1,9 @@
 import { useState } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
-import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import type { DetailsFocus } from "./details-state";
 import MoreOptions from "./MoreOptions";
+import { actionFor, type PlanAction } from "./plan-actions";
 import {
   familyOf,
   groupLabel,
@@ -15,28 +15,15 @@ import {
   verifyBadgeText,
 } from "./planner-logic";
 
-// What removing this exact placement needs to undo it: not just the code
-// and term, but whether it was pinned — placeCourse always inserts a fresh,
-// unpinned placement, so restoring the pin (if there was one) takes a
-// separate setPin call the undo handler makes only when this is non-null.
-export interface RemovedPlacement {
-  code: string;
-  term: number;
-  pinnedGroupId: string | null;
-  label: string;
-}
-
 interface Props {
   view: PlanView;
   placement: PlacementView;
-  planId: string;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
+  // Moves, removes and suggestions all go through Planner's runAction.
+  onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
-  onRemoved: (removed: RemovedPlacement) => void;
   onShowGroup: (groupId: string) => void;
   // A two-semester card's marker term asks for its part 2 stub through
   // this, as the sidebar row's part 2 button does.
@@ -55,14 +42,11 @@ interface Props {
 export default function CourseCard({
   view,
   placement,
-  planId,
-  onChanged,
-  onAnnounce,
+  onAction,
   onDragStart,
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
-  onRemoved,
   onShowGroup,
   onLocateCourse,
   receded,
@@ -78,43 +62,10 @@ export default function CourseCard({
   // fires the same move/remove twice.
   const [pending, setPending] = useState(false);
 
-  async function move(term: number) {
+  async function run(action: PlanAction) {
     setPending(true);
     try {
-      const result = await placeCourse(planId, placement.code, term);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
-    } finally {
-      setPending(false);
-    }
-  }
-
-  async function applySuggestion(code: string, term: number) {
-    setPending(true);
-    try {
-      const result = await placeCourse(planId, code, term);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
-    } finally {
-      setPending(false);
-    }
-  }
-
-  async function remove() {
-    const removed: RemovedPlacement = {
-      code: placement.code,
-      term: placement.term,
-      pinnedGroupId: placement.pinned ? (placement.countsToward ?? null) : null,
-      label: course ? `${placement.code} — ${course.title}` : placement.code,
-    };
-    setPending(true);
-    try {
-      const result = await removeCourse(planId, placement.code);
-      if (isError(result)) onAnnounce(result.error);
-      else {
-        onChanged(result);
-        onRemoved(removed);
-      }
+      await onAction(action);
     } finally {
       setPending(false);
     }
@@ -240,7 +191,7 @@ export default function CourseCard({
               <button
                 type="button"
                 disabled={readOnly || pending}
-                onClick={() => applySuggestion(suggestion.code, suggestion.term)}
+                onClick={() => run(actionFor(view, suggestion.code, suggestion.term))}
               >
                 {suggestion.text}
               </button>
@@ -298,7 +249,7 @@ export default function CourseCard({
                       disabled={pending}
                       onClick={() => {
                         onMenuOpenChange(placement.code, false);
-                        void move(target.term);
+                        void run({ kind: "move", code: placement.code, term: target.term });
                       }}
                     >
                       {target.label}
@@ -313,7 +264,7 @@ export default function CourseCard({
               disabled={pending}
               onClick={() => {
                 onMenuOpenChange(placement.code, false);
-                void remove();
+                void run({ kind: "remove", code: placement.code });
               }}
             >
               {pending ? "Removing…" : "Remove"}

@@ -212,7 +212,7 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
 
 ### Task 9: One `runAction` path for place, move and remove, with undo for all three
 
-- **Description:** WR46. Centralise every plan change and generalise the
+- [x] **Description:** WR46. Centralise every plan change and generalise the
   undo toast.
 - **Files touched:**
   - new `src/components/plan-actions.ts`
@@ -274,6 +274,13 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
       `onPlace`/`onRemove` do the same.
   - Remove `RemovedPlacement`, the `onRemoved` props and `handleRemoved`.
   - The toast text is `{entry.message}.`
+  - As executed (2026-09-29): `CourseDetailsPanel.tsx` needed no change;
+    Planner passes it `(term) => void runAction(actionFor(…))`. The Undo
+    button's pending text is "Undoing…" (was "Restoring…"), since it now
+    also undoes moves and places. `planId` and `onAnnounce` went from the
+    components that only used them for place, move or remove, like
+    `onChanged`. The "drop onto the requirements" case is the existing
+    rail/sidebar drop test (:982), not a new one.
 - **Refactor:**
   - Delete the now-unused `onChanged` props wherever a component only
     passed it along for place, move or remove. Keep it where `setChoice`,

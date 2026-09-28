@@ -3,14 +3,15 @@ import type { CourseCard as CourseCardData, PlanView } from "../lib/domain/view"
 import AvailableCourseCard from "./AvailableCourseCard";
 import type { DetailsFocus } from "./details-state";
 import { searchCourses, type SearchResult } from "./api";
+import type { PlanAction } from "./plan-actions";
 import PlacedCourseRow from "./PlacedCourseRow";
 import SidebarSection from "./SidebarSection";
 
 interface Props {
   view: PlanView;
   planId: string;
-  onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
+  onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
   // A result outside the plan's tree has no view.courses entry, so the
@@ -55,8 +56,8 @@ export function outcomeMessage(result: SearchResult, query: string): string {
 export default function CourseSearch({
   view,
   planId,
-  onChanged,
   onAnnounce,
+  onAction,
   onDragStart,
   onDragEnd,
   onResults,
@@ -148,9 +149,7 @@ export default function CourseSearch({
               view={view}
               code={course.code}
               course={course}
-              planId={planId}
-              onChanged={onChanged}
-              onAnnounce={onAnnounce}
+              onAction={onAction}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
