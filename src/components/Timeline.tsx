@@ -131,7 +131,14 @@ export default function Timeline({
               key={term.index}
               data-term={term.index}
               aria-label={term.label}
-              class={["term", greyed && "term-disallowed", dragOver && "drag-hover-target"].filter(Boolean).join(" ")}
+              class={[
+                "term",
+                term.index >= view.plan.cutoff && "term-planned",
+                greyed && "term-disallowed",
+                dragOver && "drag-hover-target",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               onDragOver={(event) => {
                 if (draggingCode === null) return;
                 event.preventDefault();

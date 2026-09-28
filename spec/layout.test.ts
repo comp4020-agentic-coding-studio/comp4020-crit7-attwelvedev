@@ -2505,6 +2505,14 @@ describe("family colours", { timeout: 30_000 }, () => {
   const FOUNDATIONS = "rgb(31, 47, 134)";
   const NEUTRAL = "rgb(141, 146, 153)";
   const GOLD = "rgb(190, 131, 14)";
+  const rgb: Record<string, string> = {
+    foundations: FOUNDATIONS,
+    specialisation: "rgb(140, 95, 201)",
+    advanced: "rgb(58, 143, 194)",
+    ict: "rgb(176, 64, 125)",
+    capstone: "rgb(61, 70, 80)",
+    neutral: NEUTRAL,
+  };
 
   const style = (page: Page, selector: string, prop: string) =>
     page.locator(selector).first().evaluate((el, p) => getComputedStyle(el).getPropertyValue(p), prop);
@@ -2585,14 +2593,6 @@ describe("family colours", { timeout: 30_000 }, () => {
 
   it("hatches every family bar's planned segment, and leaves Total and the checks plain", async () => {
     await withPlan(desktop, async (page) => {
-      const rgb: Record<string, string> = {
-        foundations: FOUNDATIONS,
-        specialisation: "rgb(140, 95, 201)",
-        advanced: "rgb(58, 143, 194)",
-        ict: "rgb(176, 64, 125)",
-        capstone: "rgb(61, 70, 80)",
-        neutral: NEUTRAL,
-      };
       const bars = await page
         .locator("[data-group] > .progress-bar[data-family]")
         .evaluateAll((els) =>
@@ -2641,6 +2641,28 @@ describe("family colours", { timeout: 30_000 }, () => {
       expect(familyColours).toContain(
         await segments.first().evaluate((el) => getComputedStyle(el).backgroundColor),
       );
+    });
+  });
+
+  it("hatches the family bar of planned terms only", async () => {
+    await withPlan(desktop, async (page) => {
+      const segments = await page.locator("[data-term] .term-bar-segment").evaluateAll((els) =>
+        els.map((el) => ({
+          term: Number(el.closest("[data-term]")!.getAttribute("data-term")),
+          family: el.getAttribute("data-family")!,
+          image: getComputedStyle(el).backgroundImage,
+        })),
+      );
+      // The example is completed through S2 2027 (cutoff 2).
+      const completed = segments.filter((s) => s.term < 2);
+      const planned = segments.filter((s) => s.term >= 2);
+      expect(completed.length).toBeGreaterThan(0);
+      expect(planned.length).toBeGreaterThan(0);
+      for (const s of completed) expect(s.image, `term ${s.term} ${s.family}`).toBe("none");
+      for (const s of planned) {
+        expect(s.image, `term ${s.term} ${s.family}`).toContain("repeating-linear-gradient");
+        expect(s.image, `term ${s.term} ${s.family}`).toContain(rgb[s.family]);
+      }
     });
   });
 

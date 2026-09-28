@@ -532,9 +532,42 @@ arin-a check also asserted the colour of a 0%-wide completed segment.
     top at 330.5px.
 - **Depends on:** Task 7.
 
+### Task 10a: Hatch planned terms' family bars, matching the group bars
+
+Added 2026-09-28, after Phase 03 closed, on the user's go-ahead: the
+same solid = completed / hatched = planned rule as Task 9a, on the
+timeline. A term is wholly completed or wholly planned (the cutoff falls
+between terms), so the whole bar is one or the other.
+
+- [x] **Description:** term sections at or after `view.plan.cutoff` get
+  `term-planned`, and their `.term-bar-segment`s use the same hatch as
+  planned group segments, from one shared CSS rule (a `:root` custom
+  property can't hold it: its `var(--family)` would resolve at `:root`).
+  The `aria-label` text is unchanged.
+- **Files touched:**
+  - `src/components/Timeline.tsx`
+  - `src/styles.css`
+  - `spec/layout.test.ts`
+- **Tests first (red),** in `describe("family colours")`, on `withPlan`
+  (cutoff 2): every `.term-bar-segment` in `[data-term="0"]` and
+  `[data-term="1"]` has `background-image` "none"; every one in terms
+  2–7 has a `repeating-linear-gradient` containing its `data-family`'s
+  rgb. Both sets are non-empty.
+- **Implementation (green):**
+  - `Timeline.tsx`: add `term.index >= view.plan.cutoff && "term-planned"`
+    to the section's class list.
+  - `styles.css`: add `.term-planned .term-bar-segment` to Task 9a's
+    planned-segment selector, so both bars share one declaration.
+- **Acceptance criteria:**
+  - Tests pass, and fail on the Task 9a build.
+  - `pnpm check` is green.
+  - Renders at both viewports: S1/S2 2027 solid, S1 2028 on hatched;
+    no layout change (term 0's first card still at 320.7px at 390×844).
+- **Depends on:** Task 9a, Task 10.
+
 ## 6. Phase Definition of Done
 
-- [x] Tasks 7–10 complete, their tests passing (Task 9a, a later follow-up, tracks its own box)
+- [x] Tasks 7–10 complete, their tests passing (Tasks 9a and 10a, later follow-ups, track their own boxes)
 - [x] `pnpm exec vitest run --project unit` passes
 - [x] `pnpm check` passes
 - [x] Screenshots at 1920×1080 and 390×844: strips, dots, family bars, term bars
@@ -551,7 +584,7 @@ arin-a check also asserted the colour of a 0%-wide completed segment.
 | CR22 | Task 8 (test 5) |
 | CR23 | Task 8 (test 3) |
 | CR4 (dot) | Task 8 (test 3) |
-| E1 | Task 10 |
+| E1 | Task 10, Task 10a (planned terms hatched) |
 | E3 | Task 9, Task 9a (planned segments legible) |
 | NFR colour | Task 7 |
 

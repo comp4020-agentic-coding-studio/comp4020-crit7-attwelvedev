@@ -1661,12 +1661,15 @@ button.badge-verify:focus-visible {
    Total bar and the checks pass no family and stay gold. Planned units are
    hatched rather than just tinted: a light tint of some hues (steel blue,
    grey) is all but identical to the empty track, whereas solid, hatched
-   and plain read apart for every family and in any colour vision. */
+   and plain read apart for every family and in any colour vision. A
+   planned term's family bar shares the hatch, so it means the same thing
+   on the timeline. */
 .progress-bar[data-family] .progress-bar-completed {
   background: var(--family);
 }
 
-.progress-bar[data-family] .progress-bar-planned {
+.progress-bar[data-family] .progress-bar-planned,
+.term-planned .term-bar-segment {
   background: repeating-linear-gradient(
     135deg,
     var(--family) 0 2px,
