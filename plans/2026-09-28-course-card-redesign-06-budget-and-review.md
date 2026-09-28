@@ -117,7 +117,9 @@ The controls Help must name, as built:
   "Nothing yet", each semester and "All semesters"; plain text on the
   read-only example). Revised from a native picker in Phase 05;
 - "Completed" term labels;
-- "Hide requirements".
+- "Hide requirements": an icon-only chevron on the divider between the
+  timeline and the requirements (its name and tooltip). Revised from a
+  text button in Phase 05.
 
 ## 4. Approach
 
@@ -234,7 +236,7 @@ The controls Help must name, as built:
      - a "Counts toward" highlight;
      - heading-hover receding;
      - the Completed menu, open;
-     - the hide bar.
+     - the hide chevron on the handle.
 
      A pass means: the cards read as scannable; the colours feel part of
      the ANU look, not a rainbow; nothing looks disabled that works;

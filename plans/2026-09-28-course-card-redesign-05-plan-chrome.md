@@ -18,8 +18,9 @@ Four clarity fixes around the planner:
   arrows, become a "Completed through S2 2027 ▾" disclosure menu styled
   like More options and Place in….
 - **E7:** past terms say "Completed" in their headers.
-- **E2:** "Hide requirements" sits in an opaque sticky bar, so it no
-  longer floats over the sidebar's content in either layout.
+- **E2:** "Hide requirements" becomes a chevron button on the resize
+  handle, outside the scrolling sidebar, so it neither floats over the
+  content nor takes a row of its own.
 - **E9:** the "Checks" subheading gets breathing room.
 
 ## 2. Requirements (this phase)
@@ -179,12 +180,9 @@ Task 15's placement depends on it (see above).
 - **Completed menu:** a disclosure matching More options (see §2.4, "E6
   revision"). `aria-describedby` points at the existing full sentence.
   One `changeCutoff(next)` replaces `moveCutoff`.
-- **Hide bar:** wrap the button in `div.reqs-hide-bar`. The bar is the
-  sticky, opaque element (paper background, full aside width), and the
-  button inside is static. Every `display` rule that showed or hid
-  `.reqs-hide` moves to `.reqs-hide-bar`. The bar's height is the
-  button's (2.75rem) plus the 0.5rem the button's margin used, so it
-  takes no extra height.
+- **Hide on the handle:** see Task 16's ruling. The button leaves the
+  scrolling aside entirely and rides the resize handle as a zero-size
+  flex item, so it can't float over content or take a row.
 
 ## 5. Task breakdown
 
@@ -348,62 +346,81 @@ Task 15's placement depends on it (see above).
     card top is within 2px of `[data-term="2"]`'s.
 - **Depends on:** none.
 
-### Task 16: Opaque sticky bar for "Hide requirements" in both layouts
+### Task 16: "Hide requirements" moves onto the resize handle
 
+- **Ruling (user, 2026-09-28, mid-task):** the opaque sticky bar (the
+  original Task 16) broke the stacked resize handle's lower hit area.
+  `position: sticky` is its own stacking context, so the handle can't sit
+  above the bar while the button sits above the handle. Asked for
+  alternatives, the user chose a collapse chevron on the handle (VS Code
+  and Figma style): no bar, no row, nothing sticky. Snap-to-close by
+  dragging and Enter on the handle were offered as extras and are **not**
+  part of this task.
 - [ ] **Description:**
-  - Wrap `button.reqs-hide` in `div.reqs-hide-bar`.
-  - Move stickiness, the background and every show/hide `display` rule
-    from `.reqs-hide` to the bar.
+  - `Sidebar` returns a fragment: `button.reqs-hide`, then the `<aside>`.
+    The button is icon-only, with the accessible name "Hide requirements"
+    and the same text as its `title`.
+  - The button is a zero-size flex item, drawn centred on the handle: at
+    its top side by side, and at its right end when stacked. Where the
+    handle is hidden (stacked, under 30rem tall), it's an ordinary
+    right-aligned 2.75rem row above the aside.
 - **Files touched:**
   - `src/components/Sidebar.tsx`
   - `src/styles.css`
   - `spec/layout.test.ts`
-- **Tests first (red):** a new `describe("hide requirements bar")`, on
-  `withPlan` at 1920×1080 and at 390×844:
-  1. `#requirements.scrollTop` is set to 600 (the stacked aside also
-     scrolls vertically), then wait a frame.
-  2. Take the point 8px in from `#requirements`' left edge, at the
-     vertical centre of `button.reqs-hide`. The button exists before and
-     after the task, so red fails for the right reason.
-     `document.elementFromPoint` there is not inside a `.requirement-group`,
-     and is inside `.reqs-hide-bar`.
-  3. Red on today's build: that point is a group, because nothing opaque
-     spans the button's row.
-  4. The bar's computed `background-color` is `rgb(245, 246, 248)`
-     (`--paper`), and its width is within 1px of `#requirements`'
-     `clientWidth`.
-  5. At `scrollTop` 0, the first `.requirement-group`'s top minus
-     `#requirements`' top is ≤ 53px. That's the button's 44px plus the
-     old 8px margin, plus 1px.
-  6. The existing collapse tests (`describe("requirements sidebar
-     collapse")` and `describe("stacked requirements collapse")`) pass
-     unchanged.
+- **Tests first (red):** a new `describe("hide requirements on the
+  handle")`, on `withPlan`:
+  1. At 1920×1080 and 390×844:
+     - `button.reqs-hide` isn't inside `#requirements`;
+     - its accessible name is "Hide requirements";
+     - its box is at least 44×44;
+     - its centre is within 2px of the handle's centre line (x side by
+       side, y stacked);
+     - side by side, its top is within 1rem of the handle's top. Stacked,
+       its right edge is within 1rem of `.planner-panes`' right edge;
+     - the first `.requirement-group`'s top minus `#requirements`' top is
+       ≤ 8px. Red today: ≈ 52px, the old button's row;
+     - axe is clean.
+  2. At 700×400 (stacked, not fitted), the button is visible, ≥ 44px tall,
+     and its bottom is ≤ `#requirements`' top + 1.
+  3. Existing tests pass unchanged:
+     - `describe("requirements sidebar collapse")`,
+       `describe("stacked requirements collapse")` and the resize handle
+       tests, including the phone hit-area probe that failed under the bar;
+     - every `button.reqs-hide` focus handoff.
 - **Implementation (green):**
-  - `Sidebar.tsx`: `<div class="reqs-hide-bar"><button type="button"
-    class="reqs-hide" …unchanged…>…</button></div>`.
+  - `Sidebar.tsx`: move the `<button class="reqs-hide" …>` (ref, aria and
+    onClick unchanged) out of the aside into a leading fragment slot. Its
+    content becomes the chevron `svg` plus `<span
+    class="visually-hidden">Hide requirements</span>`, and it gains
+    `title="Hide requirements"`.
   - `styles.css`:
-    - line 476: `.reqs-hide-bar, .reqs-rail { display: none; }`;
-    - replace the `.reqs-hide` block at 481 with `.reqs-hide-bar {
-      position: sticky; top: 0; z-index: 1; justify-content: flex-end;
-      padding-block-end: 0.5rem; background: var(--paper); }` and
-      `.reqs-hide { min-height: 2.75rem; }`;
-    - side-by-side block: `.reqs-hide-bar { display: flex; }` and
-      `.reqs-hide { display: inline-flex; align-items: center; gap:
-      0.35rem; }`;
-    - stacked block: `.reqs-hide-bar { display: flex; }` and `.reqs-hide {
-      display: flex; align-items: center; gap: 0.35rem; }`, dropping
-      `width: fit-content; margin-inline-start: auto` (the bar's
-      `justify-content` does it);
-    - both collapsed rules: `.reqs-hide` becomes `.reqs-hide-bar`.
-    - Update the comments that say the collapse controls are shown by the
-      collapsed blocks.
+    - base: `.reqs-hide` stays `display: none` until a layout block shows
+      it. The old `align-self`/sticky/margin block goes. The button is a
+      transparent 2.75rem square whose `::after` draws a 1.75rem round
+      chip (surface, line border, chevron), so the target stays 44px while
+      the chip is small;
+    - side by side: `display: flex; order` placing it right after the
+      handle, `flex: 0 0 0; width: 0; align-self: flex-start;
+      position: sticky; top: 1rem` (fitted: `position: relative; top:
+      auto`), with a `translate` centring the 2.75rem square on the
+      handle's line;
+    - stacked, fitted: `order: 1` right before the handle, `flex: 0 0 0;
+      height: 0; align-self: flex-end`, translated to centre on the
+      handle's line;
+    - stacked, not fitted: `display: flex; align-self: flex-end;
+      margin-block-end: 0.5rem`, an in-flow row;
+    - both collapsed rules keep hiding `.reqs-hide`, and the rail and bar
+      are unchanged;
+    - update the comments that describe where the collapse controls
+      live.
 - **Refactor:** none.
 - **Acceptance criteria:**
   - Tests pass.
-  - Every existing `.reqs-hide` test passes.
+  - Every existing `.reqs-hide` test passes unchanged.
   - `pnpm check` is green.
-  - Screenshots of the scrolled sidebar at both viewports, with no card
-    showing through beside the button.
+  - Screenshots at 1920×1080, 390×844 and 700×400, showing the chip on
+    the handle and the sidebar content starting at the top.
 - **Depends on:** none.
 
 ### Task 17: Space above the "Checks" subheading
@@ -431,8 +448,7 @@ Task 15's placement depends on it (see above).
 - [ ] `pnpm exec vitest run --project unit` passes
 - [ ] `pnpm check` passes
 - [ ] Screenshots at 1920×1080 and 390×844: title row, a completed term
-      header, the scrolled sidebar with the hide bar, and the Total
-      section
+      header, the hide chevron on the handle, and the Total section
 - [ ] Tick Phase 05 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
@@ -441,7 +457,7 @@ Task 15's placement depends on it (see above).
 | --- | --- |
 | E6 | Task 14 |
 | E7 | Task 15 |
-| E2 | Task 16 |
+| E2 (revised: chevron on the handle) | Task 16 |
 | E9 | Task 17 |
 | CR25 | Task 14 (superseded cutoff tests) |
 

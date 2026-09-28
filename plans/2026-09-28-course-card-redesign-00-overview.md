@@ -133,10 +133,12 @@ search results, unless stated)
   segments are grey; unused capacity up to 24 is empty; an overloaded term
   scales to its total. The same breakdown is available as text (e.g. "12
   units Foundations, 6 units ICT, 6 units not counting").
-- **E2:** "Hide requirements" sits in a sticky bar with an opaque
-  background spanning the requirements' width, in both layouts, so content
-  scrolls under it instead of showing through. It takes no more height
-  than today, and CW15–CW22 behaviour is unchanged.
+- **E2:** "Hide requirements" becomes a chevron button on the resize
+  handle, outside the scrolling requirements, in both layouts. Where the
+  handle is hidden (stacked, under 30rem tall), it's a plain row above
+  the requirements. It takes no row of its own, and CW15–CW22 behaviour
+  is unchanged. *(Revised 2026-09-28 from an opaque sticky bar, which
+  broke the stacked handle's hit area.)*
 - **E3:** each requirement group's progress bar (nested ones inherit) uses
   its family colour instead of gold; Electives uses grey. The Total bar,
   the check bars and the rail/bar are unchanged.
@@ -211,8 +213,9 @@ search results, unless stated)
 - Any change to requirements data, allocation or evaluation.
 - The Details dialog's layout, beyond CR9's focus target.
 - The Total bar, the check bars and the rail/bar colours.
-- Moving "Hide requirements" into the stacked handle's row (rejected in
-  planning, §2.4).
+- Moving "Hide requirements" into the stacked handle's row *from inside
+  the aside* (rejected in planning, §2.4). Ruling 5 moves it out of the
+  aside onto the handle instead.
 
 ### 2.4 Assumptions
 
@@ -231,6 +234,13 @@ search results, unless stated)
      opaque bar) applies.
   2. **E2 on desktop:** the user extended E2 to desktop, where the aside
      also scrolls and the button floated.
+  5. **E2 revised (2026-09-28, during Phase 05):** the opaque bar from
+     ruling 1 covered the stacked resize handle's lower hit area. A
+     sticky element is its own stacking context, so the bar and the
+     handle can't both win. The user chose a chevron button on the
+     handle itself, outside the aside, over keeping the bar with a
+     trade-off, over the handle alone doing the collapsing, and over a
+     More options item.
   3. **E10 phone target:** the user replaced "two full cards" with "first
      card full, half the second", because the pane has 215px below its
      header.
@@ -347,7 +357,7 @@ export interface ShowRequest { kind: "group" | "check"; id: string; token: numbe
 | 02 | `…-02-placed-rows.md` | 5–6 | 01 | Placed courses are compact Completed/Planned rows in groups and search | [x] |
 | 03 | `…-03-family-colours.md` | 7–10 | 01, 02 | Palette + checks test; strips, dots, family progress bars, per-term bar | [x] |
 | 04 | `…-04-jumps.md` | 11–13 | 01, 02, 03 | "Counts toward" and "What's left" jump to requirements; heading hover recedes other cards | [x] |
-| 05 | `…-05-plan-chrome.md` | 14–17 | — | Completed-through picker, "Completed" term labels, opaque hide bar, Checks spacing | [ ] |
+| 05 | `…-05-plan-chrome.md` | 14–17 | — | Completed-through menu, "Completed" term labels, hide chevron on the handle, Checks spacing | [ ] |
 | 06 | `…-06-budget-and-review.md` | 18–19 | 01–05 | Height budget spec; Help rewrite; **human review** of the render and the Help copy | [ ] |
 
 Phase 05 depends on no other phase and can run any time. Phase 06 is last.
