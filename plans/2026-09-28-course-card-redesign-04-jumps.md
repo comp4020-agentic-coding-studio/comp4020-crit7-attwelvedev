@@ -455,14 +455,14 @@ here calls `focus()` or scrolls.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 11–13 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Manually, at both viewports:
-  - [ ] "Counts toward" with the sidebar hidden;
-  - [ ] a "What's left" check item;
-  - [ ] heading hover
-- [ ] Tick Phase 04 in overview §5 and commit
+- [x] Tasks 11–13 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Manually, at both viewports:
+  - [x] "Counts toward" with the sidebar hidden;
+  - [x] a "What's left" check item;
+  - [x] heading hover
+- [x] Tick Phase 04 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
