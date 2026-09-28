@@ -455,11 +455,49 @@ describe("placedStatus", () => {
   const placement = (code: string) => view.placements.find((p) => p.code === code)!;
 
   it("says a placement before the cutoff is completed, in its term", () => {
-    expect(placedStatus(view, placement("COMP1100"))).toEqual({ word: "Completed", termLabel: "S1 2027" });
+    expect(placedStatus(view, placement("COMP1100"))).toEqual({
+      word: "Completed",
+      termLabel: "S1 2027",
+      rest: null,
+      spoken: "completed in S1 2027",
+    });
   });
 
   it("says a placement from the cutoff on is planned, in its term", () => {
-    expect(placedStatus(view, placement("COMP1110"))).toEqual({ word: "Planned", termLabel: "S2 2027" });
+    expect(placedStatus(view, placement("COMP1110"))).toEqual({
+      word: "Planned",
+      termLabel: "S2 2027",
+      rest: null,
+      spoken: "planned for S2 2027",
+    });
+  });
+
+  const thesisAt = (cutoff: number) => {
+    const thesisView = buildPlanView(cat, AACOM_2027, {
+      ...emptyPlan(),
+      cutoff,
+      placements: [{ code: "COMP4550", term: 4, pinnedGroupId: null }],
+    });
+    return placedStatus(thesisView, thesisView.placements.find((p) => p.code === "COMP4550")!);
+  };
+
+  it("gives a two-semester course's range", () => {
+    expect(thesisAt(0)).toEqual({
+      word: "Planned",
+      termLabel: "S1 2029 – S2 2029",
+      rest: null,
+      spoken: "planned for S1 2029 to S2 2029",
+    });
+    expect(thesisAt(6)).toMatchObject({ word: "Completed", spoken: "completed in S1 2029 to S2 2029" });
+  });
+
+  it("splits a two-semester course straddling the cutoff", () => {
+    expect(thesisAt(5)).toEqual({
+      word: "Completed",
+      termLabel: "S1 2029",
+      rest: "· planned S2 2029",
+      spoken: "completed in S1 2029 and planned for S2 2029",
+    });
   });
 });
 

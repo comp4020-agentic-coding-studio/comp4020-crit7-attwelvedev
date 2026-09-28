@@ -692,6 +692,32 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       await page.close();
     }
   });
+
+  it("search's placed row shows the straddle and locates part 1", async () => {
+    const id = await planWithPlacement("COMP4550", 4);
+    const cutoff = await fetch(new URL(`/api/plans/${id}/cutoff`, baseUrl), {
+      method: "PUT",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ cutoff: 5 }),
+    });
+    expect(cutoff.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.fill(".course-search input", "COMP4550");
+      await page.click(".course-search button[type=submit]");
+      const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP4550" });
+      await row.waitFor();
+      expect(await row.locator(".placed-row-status").innerText()).toBe("Completed S1 2029 · planned S2 2029");
+      const locate = row.getByRole("button", {
+        name: /^COMP4550 is completed in S1 2029 and planned for S2 2029 — locate it on the timeline$/,
+      });
+      expect(await locate.count()).toBe(1);
+      await locate.click();
+      await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-placed"))).toBe("COMP4550");
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("requirements rail as a drop target", { timeout: 30_000 }, () => {

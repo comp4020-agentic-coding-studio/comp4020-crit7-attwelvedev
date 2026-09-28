@@ -33,7 +33,7 @@ export default function PlacedCourseRow({
   const [detailsOpen, setDetailsOpen] = useState(false);
   if (!course) return null;
 
-  const { word, termLabel } = placedStatus(view, placement);
+  const status = placedStatus(view, placement);
 
   return (
     <li class="placed-row">
@@ -51,15 +51,16 @@ export default function PlacedCourseRow({
         {course.title}
       </button>
       <p class="placed-row-status">
-        {word}{" "}
+        {status.word}{" "}
         <button
           type="button"
           class="course-card-term-link"
           onClick={() => onLocateCourse(code)}
-          aria-label={`${code} is ${word === "Completed" ? "completed in" : "planned for"} ${termLabel} — locate it on the timeline`}
+          aria-label={`${code} is ${status.spoken} — locate it on the timeline`}
         >
-          {termLabel}
+          {status.termLabel}
         </button>
+        {status.rest && <> {status.rest}</>}
       </p>
       <CourseDetail
         view={view}

@@ -375,15 +375,35 @@ export function verifyBadgeText(count: number): string {
 
 export interface PlacedStatus {
   word: "Completed" | "Planned";
-  termLabel: string;
+  termLabel: string; // the locate button's text: "S1 2028" or "S1 2028 – S2 2028"
+  rest: string | null; // straddle only: "· planned S2 2028"
+  spoken: string; // "planned for S1 2028" / "completed in S1 2028 and planned for S2 2028"
 }
 
-// A placed row's status, from the same `completed` flag the progress numbers
-// use, so a row never disagrees with its group's bar.
+// A placed row's status, per part, from the same `completedParts` the
+// progress numbers use, so a row never disagrees with its group's bar. A
+// two-semester course straddling the cutoff says so, rather than rounding
+// its completed first half to "Planned".
 export function placedStatus(view: PlanView, placement: PlacementView): PlacedStatus {
+  const first = view.terms[placement.term].label;
+  const second = placement.span === 2 ? (view.terms[placement.lastTerm]?.label ?? null) : null;
+  if (second && placement.completedParts > 0 && !placement.completed) {
+    return {
+      word: "Completed",
+      termLabel: first,
+      rest: `· planned ${second}`,
+      spoken: `completed in ${first} and planned for ${second}`,
+    };
+  }
+  // With no second term (a one-semester course, or a two-semester one in
+  // the final term), the single part decides.
+  const done = second ? placement.completed : placement.completedParts > 0;
+  const verb = done ? "completed in" : "planned for";
   return {
-    word: placement.completed ? "Completed" : "Planned",
-    termLabel: view.terms[placement.term].label,
+    word: done ? "Completed" : "Planned",
+    termLabel: second ? termSpanLabel(placement.term, 2) : first,
+    rest: null,
+    spoken: second ? `${verb} ${first} to ${second}` : `${verb} ${first}`,
   };
 }
 

@@ -240,7 +240,7 @@ lastTerm: number;        // existing: term + span - 1 (8 for a final-term two-se
 
 ### Task 4: Range and straddle status in placed rows
 
-- [ ] **Description:** replace `PlacedStatus` with the overview §4.1 shape.
+- [x] **Description:** replace `PlacedStatus` with the overview §4.1 shape.
   `PlacedCourseRow` renders `word`, the locate button (`termLabel`), then
   `rest`, and takes its accessible label from `spoken`.
 - **Files touched:** `src/components/planner-logic.ts`,
