@@ -2,7 +2,16 @@ import { useEffect, useState } from "preact/hooks";
 import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
-import { dropTargets, groupLeafIds, termBarLabel, termBarWidths, termFamilyUnits } from "./planner-logic";
+import PartTwoStub from "./PartTwoStub";
+import {
+  dropTargets,
+  familyOf,
+  groupLeafIds,
+  partTwoPlacements,
+  termBarLabel,
+  termBarWidths,
+  termFamilyUnits,
+} from "./planner-logic";
 import PrereqLegend from "./PrereqLegend";
 import PrereqOverlay from "./PrereqOverlay";
 
@@ -25,6 +34,9 @@ interface Props {
   // flash the matching card; a token so clicking the same badge twice in a
   // row re-triggers the effect even though the code didn't change.
   locateRequest: { code: string; token: number } | null;
+  // A part 2 stub's button asks for its part 1 through this, the same way
+  // the sidebar's badge does.
+  onLocateCourse: (code: string) => void;
   // Opens a card's "Counts toward" group in the requirements sidebar.
   onShowGroup: (groupId: string) => void;
   // A sidebar group under hover or focus: cards outside it recede.
@@ -45,6 +57,7 @@ export default function Timeline({
   onMenuOpenChange,
   onRemoved,
   locateRequest,
+  onLocateCourse,
   onShowGroup,
   focusGroupId,
 }: Props) {
@@ -78,13 +91,20 @@ export default function Timeline({
     // preventScroll: the smooth scrollIntoView above is already under way;
     // focus()'s own default jump-to-element would fight it.
     el.focus({ preventScroll: true });
+    // A two-semester course's part 2 stub flashes with it.
+    const part2 = document.querySelector(`[data-part-two="${locateRequest.code}"]`);
     el.classList.add("course-card-highlighted");
-    const timer = setTimeout(() => el.classList.remove("course-card-highlighted"), 2000);
+    part2?.classList.add("course-card-highlighted");
+    const timer = setTimeout(() => {
+      el.classList.remove("course-card-highlighted");
+      part2?.classList.remove("course-card-highlighted");
+    }, 2000);
     // A newer locate cancels this timer, so it has to unhighlight this card
     // itself — otherwise the card keeps the class for good.
     return () => {
       clearTimeout(timer);
       el.classList.remove("course-card-highlighted");
+      part2?.classList.remove("course-card-highlighted");
     };
   }, [locateRequest]);
   const placementsByTerm = new Map<number, PlacementView[]>();
@@ -95,6 +115,9 @@ export default function Timeline({
   }
 
   const focusLeafIds = focusGroupId ? groupLeafIds(view, focusGroupId) : null;
+  // One rule for part 1 and its stub, so the two parts always recede together.
+  const recededFor = (p: PlacementView) =>
+    focusLeafIds !== null && !(p.countsToward && focusLeafIds.has(p.countsToward));
 
   const dragTargets = draggingCode ? dropTargets(view, draggingCode, draggingBlocked) : null;
 
@@ -201,10 +224,17 @@ export default function Timeline({
                     onMenuOpenChange={onMenuOpenChange}
                     onRemoved={onRemoved}
                     onShowGroup={onShowGroup}
-                    receded={
-                      focusLeafIds !== null &&
-                      !(placement.countsToward && focusLeafIds.has(placement.countsToward))
-                    }
+                    receded={recededFor(placement)}
+                  />
+                ))}
+                {partTwoPlacements(view, term.index).map((p) => (
+                  <PartTwoStub
+                    key={`${p.code}-2`}
+                    code={p.code}
+                    startLabel={view.terms[p.term].label}
+                    family={p.countsToward ? familyOf(view, p.countsToward) : null}
+                    receded={recededFor(p)}
+                    onLocate={() => onLocateCourse(p.code)}
                   />
                 ))}
               </ul>

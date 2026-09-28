@@ -269,7 +269,7 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 ### Task 6: Part 2 stub, with linked locate, flash and recede
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `partTwoPlacements` and a `PartTwoStub` component.
   - Render stubs in the `lastTerm` column.
   - Share one recede rule between part 1 and its stub.

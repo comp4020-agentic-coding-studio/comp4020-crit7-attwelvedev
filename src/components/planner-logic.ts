@@ -415,6 +415,12 @@ export function partOneMarker(view: PlanView, placement: PlacementView): string 
   return next ? `Part 1 of 2 · continues in ${next.label}` : "Part 1 of 2";
 }
 
+// The two-semester placements whose second part falls in `term`, drawn
+// there as a stub. One in the final term has no second term to show.
+export function partTwoPlacements(view: PlanView, term: number): PlacementView[] {
+  return view.placements.filter((p) => p.span === 2 && p.lastTerm === term && p.lastTerm < view.terms.length);
+}
+
 // The completed-semesters menu's options: nothing, then each term by label,
 // with the last term as "All semesters" since completing it completes them all.
 export function cutoffOptions(terms: readonly { label: string }[]): { value: number; label: string }[] {

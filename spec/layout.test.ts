@@ -727,6 +727,43 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       expect(await page.locator('[data-placed="COMP1130"] .course-card-part').count()).toBe(0);
     });
   });
+
+  it.each([
+    { width: 1920, height: 1080 },
+    { width: 390, height: 844 },
+  ])("shows part 2 of the example's COMP4550 in the next term at $width×$height", async (viewport) => {
+    await withPlan(viewport, async (page) => {
+      const stub = page.locator('[data-term="7"] [data-part-two="COMP4550"]');
+      expect(await stub.count()).toBe(1);
+      expect(await stub.evaluate((el) => el.classList.contains("course-card"))).toBe(false);
+      expect(await stub.getByRole("button", { name: "COMP4550 part 2 of 2, continued from S1 2030", exact: true }).count()).toBe(1);
+      expect(await stub.getAttribute("data-family")).toBe(
+        await page.locator('[data-placed="COMP4550"]').getAttribute("data-family"),
+      );
+    });
+  });
+
+  const highlighted = (page: Page) =>
+    page
+      .locator(".course-card-highlighted")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("data-placed") ?? el.getAttribute("data-part-two")));
+
+  it("the part 2 stub locates part 1 and both flash", async () => {
+    await withPlan(desktop, async (page) => {
+      await page.locator('[data-part-two="COMP4550"] button').click();
+      await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute("data-placed"))).toBe("COMP4550");
+      await expect.poll(() => highlighted(page)).toEqual(["COMP4550", "COMP4550"]);
+    });
+  });
+
+  it("part 2 recedes with part 1", async () => {
+    await withPlan(desktop, async (page) => {
+      // On the example plan COMP4550 counts toward cap-research, not compulsory.
+      await page.locator(`[data-group="compulsory"] > h2 .section-toggle`).hover();
+      await expect.poll(() => page.locator('[data-placed="COMP4550"].course-card-receded').count()).toBe(1);
+      await expect.poll(() => page.locator('[data-part-two="COMP4550"].part-two-stub-receded').count()).toBe(1);
+    });
+  });
 });
 
 describe("requirements rail as a drop target", { timeout: 30_000 }, () => {

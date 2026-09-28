@@ -20,6 +20,7 @@ import {
   outstandingTarget,
   overlayEdges,
   partOneMarker,
+  partTwoPlacements,
   placedStatus,
   progressBarNumbers,
   progressSegments,
@@ -521,6 +522,29 @@ describe("partOneMarker", () => {
 
   it("gives a one-semester course no marker", () => {
     expect(markerAt("COMP1100", 0)).toBeNull();
+  });
+});
+
+describe("partTwoPlacements", () => {
+  const view = buildPlanView(cat, AACOM_2027, {
+    ...emptyPlan(),
+    placements: [
+      { code: "COMP4550", term: 4, pinnedGroupId: null },
+      { code: "COMP4500", term: 7, pinnedGroupId: null },
+      { code: "COMP1100", term: 0, pinnedGroupId: null },
+    ],
+  });
+  const codes = (term: number) => partTwoPlacements(view, term).map((p) => p.code);
+
+  it("puts a two-semester course's part 2 in the term after its start", () => {
+    expect(codes(5)).toEqual(["COMP4550"]);
+  });
+
+  it("gives no part 2 in a start term, a one-semester term, or the final term", () => {
+    expect(codes(4)).toEqual([]);
+    expect(codes(0)).toEqual([]);
+    // COMP4500 at 7 has no part 2 term.
+    expect(codes(7)).toEqual([]);
   });
 });
 

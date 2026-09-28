@@ -1661,6 +1661,49 @@ button.course-card-allocation:focus-visible {
   box-shadow: inset 4px 0 0 var(--family);
 }
 
+/* A two-semester course's second semester: a compact stub in the column
+   after its card, never .course-card, so the card height budget doesn't
+   measure it. It carries part 1's family strip. */
+.part-two-stub {
+  width: 13rem;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+}
+
+.part-two-stub button {
+  display: block;
+  width: 100%;
+  padding: 0.35rem 0.8rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.85em;
+  color: var(--unigrey);
+  text-align: start;
+  cursor: pointer;
+}
+
+.part-two-stub button:hover,
+.part-two-stub button:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.part-two-stub[data-family]:not([data-family="neutral"]) {
+  box-shadow: inset 4px 0 0 var(--family);
+}
+
+.part-two-stub-receded {
+  background: var(--paper);
+}
+
+.part-two-stub-receded button,
+.part-two-stub-receded strong {
+  color: var(--muted);
+}
+
 /* Always beside its group's name ("Counts toward …", a heading), never on
    its own, so colour is never the only signal. */
 .family-dot {
