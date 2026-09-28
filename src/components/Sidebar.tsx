@@ -214,6 +214,8 @@ function Group({
         compact={compact}
         onToggle={() => onToggleCompact?.()}
         summary={progress}
+        family={group.family}
+        groupId={group.id}
       >
         {body}
       </SidebarSection>
@@ -227,7 +229,7 @@ function Group({
   const Heading = `h${Math.min(depth + 2, 6)}` as "h3" | "h4" | "h5" | "h6";
 
   return (
-    <li>
+    <li data-group={group.id}>
       <Heading>{group.label}</Heading>
       {progress}
       {body}

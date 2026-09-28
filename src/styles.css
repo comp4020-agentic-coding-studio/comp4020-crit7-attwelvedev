@@ -1454,6 +1454,26 @@ button.badge-verify:focus-visible {
   margin: 0.35rem 0 0;
 }
 
+/* Timeline cards only: a sidebar card isn't counting toward anything yet,
+   and a row already sits under its group's heading. Electives and
+   not-counting cards stay plain, so a strip always means a named group. */
+.term-cards .course-card[data-family]:not([data-family="neutral"]) {
+  box-shadow: inset 4px 0 0 var(--family);
+}
+
+/* Always beside its group's name ("Counts toward …", a heading), never on
+   its own, so colour is never the only signal. */
+.family-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--family);
+  margin-inline-end: 0.35rem;
+  vertical-align: 0.05em;
+}
+
 /* The card's own controls, in one wrapping row so neighbours never touch —
    as loose inline siblings they sat flush side by side and only got space
    between them from line-height when they wrapped. */

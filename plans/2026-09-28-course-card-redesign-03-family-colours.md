@@ -284,7 +284,7 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
 
 ### Task 8: Strips on timeline cards, dots on "Counts toward" and headings
 
-- [ ] **Description:** timeline cards get `data-family` and a CSS strip;
+- [x] **Description:** timeline cards get `data-family` and a CSS strip;
   "Counts toward" gets a dot; top-level `SidebarSection` headings get a
   dot. Neutral gets neither.
 - **Files touched:**

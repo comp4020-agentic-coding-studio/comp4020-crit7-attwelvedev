@@ -1,4 +1,5 @@
 import type { ComponentChildren } from "preact";
+import type { Family } from "../lib/domain/types";
 
 interface Props {
   id: string;
@@ -13,6 +14,10 @@ interface Props {
   // summary (the outstanding list), so compacting still leaves a signal.
   compactSummary?: ComponentChildren;
   children?: ComponentChildren;
+  // A requirement group's colour family, shown as a dot before its label.
+  family?: Family;
+  // The group's id, for anything that needs to find its section.
+  groupId?: string;
 }
 
 // The heading's own text is the toggle (the WAI-ARIA disclosure pattern), so
@@ -27,15 +32,21 @@ export default function SidebarSection({
   summary,
   compactSummary,
   children,
+  family,
+  groupId,
 }: Props) {
   const bodyId = `sidebar-section-${id}`;
   return (
-    <li class={`requirement-group${className ? ` ${className}` : ""}${compact ? " requirement-group-compact" : ""}`}>
+    <li
+      class={`requirement-group${className ? ` ${className}` : ""}${compact ? " requirement-group-compact" : ""}`}
+      data-group={groupId}
+    >
       <h2>
         <button type="button" class="section-toggle" aria-expanded={!compact} aria-controls={bodyId} onClick={onToggle}>
           <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="m6 9 6 6 6-6" />
           </svg>
+          {family && family !== "neutral" && <span class="family-dot" data-family={family} aria-hidden="true" />}
           {label}
         </button>
       </h2>

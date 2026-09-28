@@ -2499,3 +2499,66 @@ describe("course card menu", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("family colours", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const FOUNDATIONS = "rgb(31, 47, 134)";
+
+  const style = (page: Page, selector: string, prop: string) =>
+    page.locator(selector).first().evaluate((el, p) => getComputedStyle(el).getPropertyValue(p), prop);
+
+  it("strips a timeline card in its family colour", async () => {
+    await withPlan(desktop, async (page) => {
+      const card = page.locator('[data-placed="COMP1130"]');
+      expect(await card.getAttribute("data-family")).toBe("foundations");
+      expect(await style(page, '[data-placed="COMP1130"]', "box-shadow")).toContain(FOUNDATIONS);
+    });
+  });
+
+  it("gives a card counting toward Electives no strip", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await page.locator('[data-placed="INFS1001"]').getAttribute("data-family")).toBe("neutral");
+      expect(await style(page, '[data-placed="INFS1001"]', "box-shadow")).toBe("none");
+    });
+  });
+
+  it("puts a hidden family dot beside Counts toward, keeping the text", async () => {
+    await withPlan(desktop, async (page) => {
+      const selector = '[data-placed="COMP1130"] .course-card-allocation .family-dot';
+      expect(await page.locator(selector).count()).toBe(1);
+      expect(await style(page, selector, "background-color")).toBe(FOUNDATIONS);
+      expect(await page.locator(selector).getAttribute("aria-hidden")).toBe("true");
+      expect(await page.locator('[data-placed="COMP1130"] .course-card-allocation').textContent()).toContain(
+        "Counts toward Programming as Problem Solving",
+      );
+    });
+  });
+
+  it("dots top-level headings only, and not Electives", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await page.locator('[data-group="prog-a"] > h2 .family-dot').count()).toBe(1);
+      expect(await page.locator('[data-group="spec"] > h2 .family-dot').count()).toBe(1);
+      expect(await page.locator('[data-group="electives"] > h2').count()).toBe(1);
+      expect(await page.locator('[data-group="electives"] > h2 .family-dot').count()).toBe(0);
+      expect(await page.locator("[data-group] h3").count()).toBeGreaterThan(0);
+      expect(await page.locator(":is(h3, h4, h5, h6) .family-dot").count()).toBe(0);
+    });
+  });
+
+  it("keeps sidebar cards, compact rows and search results unstriped", async () => {
+    await withPlan(desktop, async (page) => {
+      const shadows = await page
+        .locator(".available-courses .course-card, .placed-row")
+        .evaluateAll((els) => els.map((el) => getComputedStyle(el).boxShadow));
+      expect(await page.locator(".available-courses .course-card").count()).toBeGreaterThan(0);
+      expect(await page.locator(".placed-row").count()).toBeGreaterThan(0);
+      expect(shadows.filter((s) => s !== "none")).toEqual([]);
+    });
+  });
+
+  it("stays axe-clean", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+});

@@ -4,7 +4,7 @@ import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
 import MoreOptions from "./MoreOptions";
-import { groupLabel, menuTargets, unplacedCount, verifyBadgeText } from "./planner-logic";
+import { familyOf, groupLabel, menuTargets, unplacedCount, verifyBadgeText } from "./planner-logic";
 
 // What removing this exact placement needs to undo it: not just the code
 // and term, but whether it was pinned — placeCourse always inserts a fresh,
@@ -95,6 +95,8 @@ export default function CourseCard({
     }
   }
 
+  const family = placement.countsToward ? familyOf(view, placement.countsToward) : null;
+
   const { targets, blockedReasons } = menuTargets(view, placement.code, { currentTerm: placement.term });
 
   const stateText = {
@@ -108,6 +110,7 @@ export default function CourseCard({
     <li
       class={`course-card course-card-${placement.state}`}
       data-placed={placement.code}
+      data-family={family ?? undefined}
       aria-busy={pending}
       // Not in the tab order (no ordinary reason to tab onto a card), but
       // focusable programmatically so the sidebar's "locate on timeline"
@@ -192,6 +195,7 @@ export default function CourseCard({
       )}
       <div class="course-card-foot">
         <p class="course-card-allocation">
+          {family && family !== "neutral" && <span class="family-dot" data-family={family} aria-hidden="true" />}
           {placement.countsToward
             ? `Counts toward ${groupLabel(view, placement.countsToward)}`
             : "Not counting toward any requirement"}
