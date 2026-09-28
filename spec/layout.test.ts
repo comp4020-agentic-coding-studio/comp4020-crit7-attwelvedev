@@ -1496,14 +1496,28 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
     }
   });
 
-  it("Help describes the chevrons by name and the gold line", async () => {
+  it("Help describes the new controls by name", async () => {
     const page = await openPage(browser, new URL("/help/", baseUrl).href, desktop);
     try {
       const text = await page.evaluate(() => document.body.innerText);
-      expect(text).toContain("One more semester completed");
-      expect(text).toContain("One fewer semester completed");
-      expect(text).toContain("gold line");
-      expect(text).toContain("More options");
+      for (const name of [
+        "Completed through",
+        "gold line",
+        "More options",
+        "Place in…",
+        "Counts toward",
+        "Verify on P&C",
+        "Your checks",
+        "Completed",
+        "Planned",
+      ]) {
+        expect(text).toContain(name);
+      }
+      expect(text).toMatch(/colou?r/i);
+      // The chevrons and the card's own "Move to…" button are gone.
+      for (const gone of ["One more semester completed", "One fewer semester completed", "‹", "Move to…"]) {
+        expect(text).not.toContain(gone);
+      }
     } finally {
       await page.close();
     }

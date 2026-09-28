@@ -11,9 +11,22 @@ import Base from "../layouts/Base.astro";
 
   <h2>The basics</h2>
   <p>
-    Courses live in two places: the <strong>requirements list</strong> (what your degree needs) and the <strong>timeline</strong> (the semesters you'll actually take them in). Drag a course from one to the other, or use its "Place
-    in…" button. A <strong>unit</strong> is ANU's measure of course weight — most courses are 6 units, and a normal
-    full-time semester is around 24 units (four courses). To see which of your placed courses lead to which, turn on
+    Courses live in two places: the <strong>requirements list</strong> (what your degree needs) and the <strong>timeline</strong> (the semesters you'll actually take them in). To put a course on the timeline, drag it by its
+    grip (⋮⋮) onto a semester, or use the "Place in…" button on its card in the requirements list. Once it's there,
+    the course's own "More options" (⋯) button moves it to another semester or removes it. Click a course's title to
+    open its Details. A <strong>unit</strong> is ANU's measure of course weight — most courses are 6 units, and a normal
+    full-time semester is around 24 units (four courses).
+  </p>
+  <p>
+    Each family of requirements has its own colour: it's the strip down the side of a timeline card, the dot beside
+    the group's name in the requirements list, and the group's progress bar. Electives, and courses that don't count
+    toward anything, have no strip and show as grey in the bars. The bar under each semester's unit count shows that
+    semester's mix. On a timeline card,
+    "Counts toward …" takes you to that group in the requirements list, and each item under "What's left" takes you
+    to what it names.
+  </p>
+  <p>
+    To see which of your placed courses lead to which, turn on
     "Show prerequisite links" under "More options" (⋯), next to "Completed through …". A solid line is a course
     that's required outright; a dashed line is one of several courses that would do, such as one option of an "or", or
     a course counting toward "6 units of 1000-level MATH". With the links on, hover a course to pick out its own.
@@ -31,11 +44,11 @@ import Base from "../layouts/Base.astro";
     <dt>Check requirements</dt>
     <dd>
       Everything the planner can check is in place, but the course also asks for something it can't see — a
-      permission code, a minimum mark or average, or a project supervisor. The "Verify on P&amp;C" note on the card says
-      what; confirm it with the course's Programs and Courses page or the school. Once you know, mark each item Met, Not
-      met or Not sure under "Your checks" in the course's Details. When what you've marked Met covers what the course
-      needs, it shows as Available and the note goes; marking one Not met flags it as needing prerequisites, with the
-      item as the reason.
+      permission code, a minimum mark or average, or a project supervisor. The card's "Verify on P&amp;C" badge says how
+      many of these there are; click it to open the course's Details at "Your checks", which lists each one. Confirm
+      them with the course's Programs and Courses page or the school, then mark each item Met, Not met or Not sure.
+      When what you've marked Met covers what the course needs, it shows as Available and the badge goes; marking one
+      Not met flags it as needing prerequisites, with the item as the reason.
     </dd>
     <dt>Blocked</dt>
     <dd>
@@ -47,17 +60,19 @@ import Base from "../layouts/Base.astro";
   <h2>Completed semesters</h2>
   <p>
     The planner needs to know which of your placed courses are already done versus still planned, but it doesn't
-    track individual grades or results — instead, you set one boundary. Beside the plan's title, "Completed through …"
-    names the last semester you've finished; its ‹ and › buttons ("One fewer semester completed" and "One more
-    semester completed") move that boundary a semester at a time. The gold line on the timeline marks it: everything
-    before the line counts as completed, and everything from there on is still planned. It's a simplification: it
-    doesn't handle a failed or repeated course, part-time study, or leave of absence.
+    track individual grades or results — instead, you set one boundary. "Completed through …", beside the plan's
+    title, names the last semester you've finished. It's a menu, like "More options": click it and pick that semester,
+    or "Nothing yet", or "All semesters". The gold line on the timeline marks the boundary: semesters before it say
+    "Completed" and count as done, and everything from there on is still planned. In the requirements list, a course
+    you've placed shows as "Completed S1 2027" or "Planned S2 2028" to match — click the semester to find the course
+    on the timeline. It's a simplification: it doesn't handle a failed or repeated course, part-time study, or leave
+    of absence.
   </p>
 
   <h2>P&amp;C and TDP</h2>
   <p>
     <strong>P&amp;C</strong> is Programs &amp; Courses (programsandcourses.anu.edu.au), ANU's official course
-    catalogue — the source this app scrapes its data from. When a badge says "Verify on P&amp;C", it means this app
+    catalogue — the source this app scrapes its data from. When the badge on a course card says "Verify on P&amp;C", it means this app
     couldn't fully confirm that rule automatically (the wording on P&amp;C was ambiguous, or it's data this app
     doesn't track), so check that course's own P&amp;C page before relying on it.
   </p>

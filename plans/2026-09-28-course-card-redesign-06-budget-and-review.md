@@ -183,7 +183,7 @@ The controls Help must name, as built:
 
 ### Task 19: Rewrite Help for the new controls; human review of the whole redesign
 
-- [ ] **Description:**
+- [x] **Description:**
   - Rewrite the affected Help paragraphs.
   - Replace the chevron Help test.
   - Then hand the rendered result to the user for review.
