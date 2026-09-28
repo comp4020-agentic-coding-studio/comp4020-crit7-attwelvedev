@@ -1834,6 +1834,25 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
       await page.close();
     }
   });
+
+  it("explains courses that run over two semesters", async () => {
+    const page = await openPage(browser, new URL("/help/", baseUrl).href, desktop);
+    try {
+      const paragraph = await page.evaluate(() => {
+        const heading = [...document.querySelectorAll("h2")].find(
+          (h2) => h2.textContent?.trim() === "Courses that run over two semesters",
+        );
+        const next = heading?.nextElementSibling;
+        return next?.tagName === "P" ? next.textContent : null;
+      });
+      expect(paragraph).not.toBeNull();
+      for (const phrase of ["Part 1 of 2", "Part 2 of 2", "S1 2028 – S2 2028", "Completed S1 2028 · planned S2 2028"]) {
+        expect(paragraph).toContain(phrase);
+      }
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("prerequisite links", { timeout: 30_000 }, () => {

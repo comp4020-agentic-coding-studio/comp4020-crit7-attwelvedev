@@ -508,7 +508,7 @@ This phase applies the rule to part 1's card and the stub.
 
 ### Task 12: Help section on two-semester courses
 
-- [ ] **Description:** add a Help section on two-semester courses, covering
+- [x] **Description:** add a Help section on two-semester courses, covering
   the behaviour as it stands after Tasks 10–11.
 - **Files touched:** `src/pages/help.astro`, `spec/layout.test.ts`.
 - **Tests first (red):** add `"explains courses that run over two
