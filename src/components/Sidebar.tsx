@@ -40,6 +40,9 @@ interface Props {
   showRequest: ShowRequest | null;
   // Asks Planner to reveal and jump to a group or check row.
   onShowInSidebar: (kind: ShowRequest["kind"], id: string) => void;
+  // The group whose heading is hovered or focused, so the timeline can
+  // recede every card outside it; null when none is.
+  onFocusGroup: (groupId: string | null) => void;
 }
 
 interface GroupProps {
@@ -55,6 +58,7 @@ interface GroupProps {
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   onLocateCourse: (code: string) => void;
+  onFocusGroup: (groupId: string | null) => void;
   // Only top-level groups are compactable; nested ones go with their parent.
   compact?: boolean;
   onToggleCompact?: () => void;
@@ -103,6 +107,7 @@ function Group({
   openMenuCode,
   onMenuOpenChange,
   onLocateCourse,
+  onFocusGroup,
   compact = false,
   onToggleCompact,
 }: GroupProps) {
@@ -209,6 +214,7 @@ function Group({
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
               onLocateCourse={onLocateCourse}
+              onFocusGroup={onFocusGroup}
             />
           ))}
         </ul>
@@ -228,6 +234,7 @@ function Group({
         summary={progress}
         family={group.family}
         groupId={group.id}
+        onHeadingActive={(active) => onFocusGroup(active ? group.id : null)}
       >
         {body}
       </SidebarSection>
@@ -243,7 +250,13 @@ function Group({
   return (
     <li data-group={group.id}>
       {/* Not a tab stop, but focusable so a jump can land focus here. */}
-      <Heading tabIndex={-1}>{group.label}</Heading>
+      <Heading
+        tabIndex={-1}
+        onMouseEnter={() => onFocusGroup(group.id)}
+        onMouseLeave={() => onFocusGroup(null)}
+      >
+        {group.label}
+      </Heading>
       {progress}
       {body}
     </li>
@@ -267,6 +280,7 @@ export default function Sidebar({
   onDropRemove,
   showRequest,
   onShowInSidebar,
+  onFocusGroup,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -497,6 +511,7 @@ export default function Sidebar({
             openMenuCode={openMenuCode}
             onMenuOpenChange={onMenuOpenChange}
             onLocateCourse={onLocateCourse}
+            onFocusGroup={onFocusGroup}
             compact={compact.has(`group-${group.id}`)}
             onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
           />

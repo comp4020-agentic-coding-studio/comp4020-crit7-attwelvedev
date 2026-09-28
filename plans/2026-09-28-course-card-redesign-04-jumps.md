@@ -375,7 +375,7 @@ here calls `focus()` or scrolls.
 
 ### Task 13: Hovering or focusing a group heading recedes other timeline cards
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `groupLeafIds`.
   - Sidebar reports heading enter/leave through `onFocusGroup`.
   - Planner holds `focusGroupId`, and Timeline marks non-matching cards
@@ -413,6 +413,12 @@ here calls `focus()` or scrolls.
        counts).
     6. For a receded card, every button's ancestor opacity product is 1
        (the walk from the "course cards" tests).
+    - *Execution notes (2026-09-28):* Playwright scrolls a hover or focus
+      target into view itself, so tests 2 and 4 call
+      `scrollIntoViewIfNeeded` before taking the scroll baseline. That
+      measures only what the app scrolls. Test 6 also asserts the receded
+      card's code colour changes, because the opacity walk alone passes
+      with no receding CSS at all.
 - **Implementation (green):**
   - `planner-logic.ts`: `export function groupLeafIds(view: PlanView,
     groupId: string): Set<string>`, holding the IDs of the group and all

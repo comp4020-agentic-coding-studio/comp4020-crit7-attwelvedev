@@ -1339,14 +1339,19 @@ fieldset[aria-busy="true"] {
 /* A blocked card recedes through its text and background. Never opacity
    here: a parent's opacity can't be undone by its children, so it faded
    the card's buttons too, making working controls look disabled. */
-.course-card-hard {
+.course-card-hard,
+.course-card-receded {
   background: var(--paper);
   color: var(--muted);
 }
 
+/* A card outside the hovered group recedes the same way, keeping its own
+   border, so only a blocked card is dashed. */
 .course-card-hard strong,
 .course-card-hard .course-card-title,
-.course-card-hard .course-card-offered {
+.course-card-hard .course-card-offered,
+.course-card-receded strong,
+.course-card-receded .course-card-title {
   color: var(--muted);
 }
 

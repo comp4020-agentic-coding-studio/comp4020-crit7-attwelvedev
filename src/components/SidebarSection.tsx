@@ -18,6 +18,8 @@ interface Props {
   family?: Family;
   // The group's id, for anything that needs to find its section.
   groupId?: string;
+  // Hover or focus on the heading's toggle, and leaving it again.
+  onHeadingActive?: (active: boolean) => void;
 }
 
 // The heading's own text is the toggle (the WAI-ARIA disclosure pattern), so
@@ -34,6 +36,7 @@ export default function SidebarSection({
   children,
   family,
   groupId,
+  onHeadingActive,
 }: Props) {
   const bodyId = `sidebar-section-${id}`;
   return (
@@ -42,7 +45,17 @@ export default function SidebarSection({
       data-group={groupId}
     >
       <h2>
-        <button type="button" class="section-toggle" aria-expanded={!compact} aria-controls={bodyId} onClick={onToggle}>
+        <button
+          type="button"
+          class="section-toggle"
+          aria-expanded={!compact}
+          aria-controls={bodyId}
+          onClick={onToggle}
+          onMouseEnter={() => onHeadingActive?.(true)}
+          onMouseLeave={() => onHeadingActive?.(false)}
+          onFocus={() => onHeadingActive?.(true)}
+          onBlur={() => onHeadingActive?.(false)}
+        >
           <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="m6 9 6 6 6-6" />
           </svg>

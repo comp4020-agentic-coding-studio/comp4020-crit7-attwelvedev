@@ -29,6 +29,8 @@ interface Props {
   onMenuOpenChange: (code: string, open: boolean) => void;
   onRemoved: (removed: RemovedPlacement) => void;
   onShowGroup: (groupId: string) => void;
+  // Outside the sidebar group under hover or focus.
+  receded: boolean;
 }
 
 export default function CourseCard({
@@ -43,6 +45,7 @@ export default function CourseCard({
   onMenuOpenChange,
   onRemoved,
   onShowGroup,
+  receded,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
@@ -110,7 +113,7 @@ export default function CourseCard({
 
   return (
     <li
-      class={`course-card course-card-${placement.state}`}
+      class={`course-card course-card-${placement.state}${receded ? " course-card-receded" : ""}`}
       data-placed={placement.code}
       data-family={family ?? undefined}
       aria-busy={pending}

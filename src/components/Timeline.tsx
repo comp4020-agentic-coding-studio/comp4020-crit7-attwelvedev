@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
-import { dropTargets, termBarLabel, termBarWidths, termFamilyUnits } from "./planner-logic";
+import { dropTargets, groupLeafIds, termBarLabel, termBarWidths, termFamilyUnits } from "./planner-logic";
 import PrereqLegend from "./PrereqLegend";
 import PrereqOverlay from "./PrereqOverlay";
 
@@ -27,6 +27,8 @@ interface Props {
   locateRequest: { code: string; token: number } | null;
   // Opens a card's "Counts toward" group in the requirements sidebar.
   onShowGroup: (groupId: string) => void;
+  // A sidebar group under hover or focus: cards outside it recede.
+  focusGroupId: string | null;
 }
 
 export default function Timeline({
@@ -44,6 +46,7 @@ export default function Timeline({
   onRemoved,
   locateRequest,
   onShowGroup,
+  focusGroupId,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   // The term a mouse drag is currently over — the same gold outline
@@ -90,6 +93,8 @@ export default function Timeline({
     list.push(placement);
     placementsByTerm.set(placement.term, list);
   }
+
+  const focusLeafIds = focusGroupId ? groupLeafIds(view, focusGroupId) : null;
 
   const dragTargets = draggingCode ? dropTargets(view, draggingCode, draggingBlocked) : null;
 
@@ -189,6 +194,10 @@ export default function Timeline({
                     onMenuOpenChange={onMenuOpenChange}
                     onRemoved={onRemoved}
                     onShowGroup={onShowGroup}
+                    receded={
+                      focusLeafIds !== null &&
+                      !(placement.countsToward && focusLeafIds.has(placement.countsToward))
+                    }
                   />
                 ))}
               </ul>

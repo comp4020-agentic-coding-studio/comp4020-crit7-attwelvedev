@@ -230,6 +230,19 @@ export function groupPath(view: PlanView, groupId: string): GroupView[] {
   return search(view.groups) ?? [];
 }
 
+// The ids of a group and every group nested under it: what a course's
+// countsToward (always a leaf) has to be in to count toward that group.
+export function groupLeafIds(view: PlanView, groupId: string): Set<string> {
+  const ids = new Set<string>();
+  function collect(group: GroupView) {
+    ids.add(group.id);
+    for (const child of group.children) collect(child);
+  }
+  const target = groupPath(view, groupId).at(-1);
+  if (target) collect(target);
+  return ids;
+}
+
 // Legend order for the per-term bar and anything else that lists families.
 export const FAMILY_ORDER: readonly Family[] = ["foundations", "specialisation", "advanced", "ict", "capstone", "neutral"];
 export const FAMILY_LABELS: Record<Family, string> = {

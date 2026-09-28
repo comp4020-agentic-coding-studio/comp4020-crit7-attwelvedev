@@ -2873,3 +2873,83 @@ describe("show a group in the sidebar", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("group heading highlights its courses", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const receded = (page: Page) =>
+    page
+      .locator(".course-card-receded")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("data-placed")!).sort());
+  const toggle = (page: Page, id: string) => page.locator(`[data-group="${id}"] > h2 .section-toggle`);
+  const scrollState = (page: Page) =>
+    page.evaluate(() => ({
+      timeline: document.querySelector(".timeline-scroll")!.scrollLeft,
+      reqs: document.querySelector("#requirements")!.scrollTop,
+    }));
+
+  it("recedes nothing until a heading is hovered", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await page.locator("[data-placed]").count()).toBeGreaterThan(0);
+      expect(await receded(page)).toEqual([]);
+    });
+  });
+
+  it("recedes other groups' cards on hover, without moving focus or scroll, and restores on leave", async () => {
+    await withPlan(desktop, async (page) => {
+      // Playwright scrolls a hover target into view itself; do that first so
+      // the baseline measures only what the app does.
+      await toggle(page, "prog-a").scrollIntoViewIfNeeded();
+      const before = await scrollState(page);
+      await toggle(page, "prog-a").hover();
+      await expect.poll(() => receded(page)).toContain("COMP2100");
+      expect(await receded(page)).not.toContain("COMP1130");
+      expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
+      expect(await scrollState(page)).toEqual(before);
+      await page.hover("h1");
+      await expect.poll(() => receded(page)).toEqual([]);
+    });
+  });
+
+  it("does the same on keyboard focus, and restores on blur", async () => {
+    await withPlan(desktop, async (page) => {
+      await toggle(page, "prog-a").scrollIntoViewIfNeeded();
+      const before = await scrollState(page);
+      await toggle(page, "prog-a").focus();
+      await expect.poll(() => receded(page)).toContain("COMP2100");
+      expect(await receded(page)).not.toContain("COMP1130");
+      expect(await scrollState(page)).toEqual(before);
+      await toggle(page, "prog-a").blur();
+      await expect.poll(() => receded(page)).toEqual([]);
+    });
+  });
+
+  it("keeps a nested group's cards when its top-level heading is hovered", async () => {
+    await withPlan(desktop, async (page) => {
+      await toggle(page, "spec").hover();
+      await expect.poll(() => receded(page)).toContain("COMP2100");
+      expect(await receded(page)).not.toContain("COMP2620");
+    });
+  });
+
+  it("recedes a card by colour, without fading its buttons", async () => {
+    await withPlan(desktop, async (page) => {
+      const card = page.locator('[data-placed="COMP2100"]');
+      const codeColour = () => card.locator(".course-card-code").evaluate((el) => getComputedStyle(el).color);
+      const atRest = await codeColour();
+      await toggle(page, "prog-a").hover();
+      await expect.poll(() => receded(page)).toContain("COMP2100");
+      expect(await codeColour()).not.toBe(atRest);
+      const opacities = await card.locator("button").evaluateAll((buttons) =>
+        buttons
+          .filter((b) => !b.closest("dialog"))
+          .map((b) => {
+            let product = 1;
+            for (let el: Element | null = b; el; el = el.parentElement) product *= Number(getComputedStyle(el).opacity);
+            return product;
+          }),
+      );
+      expect(opacities.length).toBeGreaterThan(0);
+      expect(opacities.every((o) => o === 1)).toBe(true);
+    });
+  });
+});

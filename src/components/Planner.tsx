@@ -51,6 +51,9 @@ export default function Planner({ view: initialView, title }: Props) {
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const [locateRequest, setLocateRequest] = useState<{ code: string; token: number } | null>(null);
   const [showRequest, setShowRequest] = useState<ShowRequest | null>(null);
+  // The sidebar group whose heading is under hover or focus; the timeline
+  // recedes every card outside it.
+  const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
   const [removed, setRemoved] = useState<RemovedPlacement | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
@@ -281,6 +284,7 @@ export default function Planner({ view: initialView, title }: Props) {
               onRemoved={handleRemoved}
               locateRequest={locateRequest}
               onShowGroup={(id) => showInSidebar("group", id)}
+              focusGroupId={focusGroupId}
             />
           </div>
           <Sidebar
@@ -305,6 +309,7 @@ export default function Planner({ view: initialView, title }: Props) {
             onDropRemove={(code) => void performRemove(code)}
             showRequest={showRequest}
             onShowInSidebar={showInSidebar}
+            onFocusGroup={setFocusGroupId}
           />
           <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>

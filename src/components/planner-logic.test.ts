@@ -11,6 +11,7 @@ import {
   FAMILY_LABELS,
   FAMILY_ORDER,
   familyOf,
+  groupLeafIds,
   groupPath,
   menuTargets,
   outstandingItems,
@@ -499,5 +500,22 @@ describe("outstandingTarget", () => {
     const items = outstandingItems(buildPlanView(cat, AACOM_2027, emptyPlan()));
     expect(items.length).toBeGreaterThan(0);
     for (const item of items) expect(outstandingTarget(item.id), item.id).not.toBeNull();
+  });
+});
+
+describe("groupLeafIds", () => {
+  const view = buildPlanView(cat, AACOM_2027, { ...emptyPlan(), choices: { spec: "arin" } });
+
+  it("holds a group and every group nested under it", () => {
+    const ids = groupLeafIds(view, "spec");
+    for (const id of ["spec", "arin", "arin-a"]) expect(ids.has(id), id).toBe(true);
+  });
+
+  it("holds just the group when it has no children", () => {
+    expect(groupLeafIds(view, "prog-a")).toEqual(new Set(["prog-a"]));
+  });
+
+  it("is empty for an unknown group", () => {
+    expect(groupLeafIds(view, "nope")).toEqual(new Set());
   });
 });
