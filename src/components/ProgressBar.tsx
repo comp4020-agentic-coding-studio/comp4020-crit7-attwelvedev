@@ -1,5 +1,5 @@
 import type { Family } from "../lib/domain/types";
-import { progressSegments } from "./planner-logic";
+import { progressBarNumbers, progressSegments } from "./planner-logic";
 
 interface Props {
   label: string;
@@ -19,22 +19,15 @@ interface Props {
 
 export default function ProgressBar({ label, completed, planned, required, bound = "min", family }: Props) {
   const { completedPct, plannedPct } = progressSegments(completed, planned, required);
-  const over = completed + planned - required;
-  const overNote =
-    required > 0 && over > 0
-      ? bound === "max"
-        ? ` — ${over} unit${over === 1 ? "" : "s"} over the ${required}-unit limit`
-        : ` — ${over} unit${over === 1 ? "" : "s"} more than the ${required}-unit minimum, already covered`
-      : "";
-  const text = `${completed} completed, ${planned} planned of ${required}${overNote}`;
+  const { valueNow, valueMax, text } = progressBarNumbers(completed, planned, required, bound);
   return (
     <div class="progress-bar" data-family={family}>
       <div
         role="progressbar"
         aria-label={label}
         aria-valuemin={0}
-        aria-valuemax={required}
-        aria-valuenow={completed + planned}
+        aria-valuemax={valueMax}
+        aria-valuenow={valueNow}
         aria-valuetext={text}
         class="progress-bar-track"
       >

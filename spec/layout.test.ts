@@ -2953,3 +2953,27 @@ describe("group heading highlights its courses", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("progress bars", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+
+  // Every bar in the requirements sidebar, read from its ARIA attributes.
+  async function bars(page: Page) {
+    return page.locator('#requirements [role="progressbar"]').evaluateAll((els) =>
+      els.map((el) => ({
+        label: el.getAttribute("aria-label"),
+        now: Number(el.getAttribute("aria-valuenow")),
+        max: Number(el.getAttribute("aria-valuemax")),
+        text: el.getAttribute("aria-valuetext") ?? "",
+      })),
+    );
+  }
+
+  it("every bar's value stays within its range", async () => {
+    await withPlan(desktop, async (page) => {
+      const found = await bars(page);
+      expect(found.length).toBeGreaterThan(0);
+      for (const bar of found) expect(bar.now, `${bar.label}: ${bar.now} > ${bar.max}`).toBeLessThanOrEqual(bar.max);
+    });
+  });
+});

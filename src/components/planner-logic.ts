@@ -59,6 +59,34 @@ export function progressSegments(completed: number, planned: number, required: n
   return { completedPct, plannedPct };
 }
 
+export interface ProgressBarNumbers {
+  valueNow: number;
+  valueMax: number;
+  text: string;
+}
+
+export function progressBarNumbers(
+  completed: number,
+  planned: number,
+  required: number,
+  bound: "min" | "max",
+): ProgressBarNumbers {
+  const over = completed + planned - required;
+  const overNote =
+    required > 0 && over > 0
+      ? bound === "max"
+        ? ` — ${over} unit${over === 1 ? "" : "s"} over the ${required}-unit limit`
+        : ` — ${over} unit${over === 1 ? "" : "s"} more than the ${required}-unit minimum, already covered`
+      : "";
+  return {
+    // ARIA requires aria-valuenow to sit within [valuemin, valuemax]; the
+    // true total, and by how much it's over, lives in the text instead.
+    valueNow: Math.min(completed + planned, required),
+    valueMax: required,
+    text: `${completed} completed, ${planned} planned of ${bound === "max" ? "up to " : ""}${required}${overNote}`,
+  };
+}
+
 // "required": a course named outright on an all-AND path — the dependent
 // can't be taken without it. "option": one of several ways through — an OR
 // branch, or a course counting toward an "N units of ..." pool — where

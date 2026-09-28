@@ -18,6 +18,7 @@ import {
   outstandingTarget,
   overlayEdges,
   placedStatus,
+  progressBarNumbers,
   progressSegments,
   termBarLabel,
   termBarWidths,
@@ -100,6 +101,33 @@ describe("progressSegments", () => {
     const result = progressSegments(0, 0, 0);
     expect(result.completedPct).toBe(0);
     expect(result.plannedPct).toBe(0);
+  });
+});
+
+describe("progressBarNumbers", () => {
+  it("reads a met minimum as-is", () => {
+    expect(progressBarNumbers(6, 0, 6, "min")).toEqual({ valueNow: 6, valueMax: 6, text: "6 completed, 0 planned of 6" });
+  });
+
+  it("clamps valueNow over a minimum, keeping the true numbers in the text", () => {
+    const n = progressBarNumbers(0, 60, 48, "min");
+    expect(n.valueNow).toBe(48);
+    expect(n.valueMax).toBe(48);
+    expect(n.text).toBe("0 completed, 60 planned of 48 — 12 units more than the 48-unit minimum, already covered");
+  });
+
+  it("reads a max bound as \"of up to N\"", () => {
+    expect(progressBarNumbers(48, 0, 60, "max")).toEqual({ valueNow: 48, valueMax: 60, text: "48 completed, 0 planned of up to 60" });
+  });
+
+  it("clamps valueNow over a max and notes the overage", () => {
+    const n = progressBarNumbers(0, 66, 60, "max");
+    expect(n.valueNow).toBe(60);
+    expect(n.text).toBe("0 completed, 66 planned of up to 60 — 6 units over the 60-unit limit");
+  });
+
+  it("uses the singular for one unit over", () => {
+    expect(progressBarNumbers(0, 61, 60, "max").text).toMatch(/— 1 unit over the 60-unit limit$/);
   });
 });
 
