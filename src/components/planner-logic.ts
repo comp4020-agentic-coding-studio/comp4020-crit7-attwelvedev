@@ -1,6 +1,6 @@
 import { matchesFilter } from "../lib/domain/filters";
 import { termSpanLabel } from "../lib/domain/terms";
-import type { CourseFilter, Family, ReqExpr } from "../lib/domain/types";
+import type { CheckAnswer, CourseFilter, Family, ReqExpr } from "../lib/domain/types";
 import { NORMAL_TERM_UNITS, type GroupView, type PlacementView, type PlanView } from "../lib/domain/view";
 
 export interface DropTarget {
@@ -182,6 +182,47 @@ export function overlayEdges(view: PlanView, code: string): OverlayEdge[] {
 
 export function unplacedCount(view: PlanView, code: string): number {
   return view.placements.find((p) => p.code === code)?.prereqsToPlace ?? 0;
+}
+
+// A requisite tree as the details sidebar draws it. Like RequisiteStatus,
+// except any node may be unknown: a course that isn't placed hasn't been
+// evaluated, so its tree has no met or not-met anywhere.
+export type TreeStatus =
+  | { kind: "and"; items: TreeStatus[]; ok: boolean | null }
+  | { kind: "or"; items: TreeStatus[]; ok: boolean | null }
+  | { kind: "course"; code: string; concurrent: boolean; ok: boolean | null }
+  | { kind: "units"; units: number; filter: CourseFilter; text: string; ok: boolean | null }
+  | { kind: "program"; code: string | null; name: string; satisfied: boolean; ok: boolean | null }
+  | { kind: "unverifiable"; text: string; ok: boolean | null; answer: CheckAnswer | null };
+
+export function unmarkedStatus(expr: ReqExpr): TreeStatus {
+  if (expr.kind === "and" || expr.kind === "or") return { kind: expr.kind, items: expr.items.map(unmarkedStatus), ok: null };
+  if (expr.kind === "unverifiable") return { ...expr, ok: null, answer: null };
+  return { ...expr, ok: null };
+}
+
+export function prereqCodes(expr: ReqExpr | null): string[] {
+  const codes = new Set<string>();
+  function walk(node: ReqExpr) {
+    if (node.kind === "and" || node.kind === "or") node.items.forEach(walk);
+    else if (node.kind === "course") codes.add(node.code);
+  }
+  if (expr) walk(expr);
+  return [...codes];
+}
+
+// The placed courses that name `code` as a prerequisite, in plan order.
+export function dependentsOf(view: PlanView, code: string): string[] {
+  return view.placements
+    .filter((p) => p.code !== code && prereqCodes(view.courses[p.code]?.prereq ?? null).includes(code))
+    .sort((a, b) => a.term - b.term || a.code.localeCompare(b.code))
+    .map((p) => p.code);
+}
+
+// ANU numbers postgraduate courses 6000 and up (6xxx, 8xxx), which an
+// undergraduate can't take: say so beside the code.
+export function postgradLabel(code: string): string {
+  return /^[A-Z]{4}[68]/.test(code) ? `${code} (postgraduate)` : code;
 }
 
 export interface OutstandingItem {

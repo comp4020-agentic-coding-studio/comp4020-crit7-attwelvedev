@@ -2414,36 +2414,34 @@ describe("manual checks", { timeout: 30_000 }, () => {
     return panel;
   }
 
+  // The answer controls live in the tree, on the node they answer.
+  const checkGroups = (panel: ReturnType<typeof detailsPanel>) => panel.locator(".requisite-tree [role=group]");
+
   const desktop = { width: 1920, height: 1080 };
 
   it.each([
     [1920, 1080],
     [390, 844],
-  ])("at %i×%i Details offers Met / Not met / Not sure per item, labelled with its course", async (width, height) => {
+  ])("at %i×%i each unverifiable node offers Met / Not met / Not sure, labelled with its course", async (width, height) => {
     const id = await planWithMath1116();
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width, height });
     try {
       const panel = await openDetails(page, "MATH1116");
-      const fieldsets = panel.locator("fieldset");
-      expect(await fieldsets.count()).toBe(2);
-      expect(await fieldsets.locator("legend").allTextContents()).toEqual([
+      const groups = checkGroups(panel);
+      expect(await groups.count()).toBe(2);
+      expect(await groups.evaluateAll((els) => els.map((el) => el.getAttribute("aria-label")))).toEqual([
         "MATH1115 with a mark of 60 or above",
         "MATH1113 with a mark of 80 or above",
       ]);
-      for (const fieldset of await fieldsets.all()) {
-        for (const name of ["Met", "Not met", "Not sure"]) {
-          expect(await fieldset.getByRole("radio", { name, exact: true }).count()).toBe(1);
-        }
-        expect(await fieldset.getByRole("radio", { name: "Not sure", exact: true }).isChecked()).toBe(true);
+      for (const group of await groups.all()) {
+        // Inside the tree node it answers, not in a list of its own.
+        expect(await group.evaluate((el) => el.closest(".requisite-tree li")?.textContent)).toContain("with a mark of");
+        const buttons = group.getByRole("button");
+        expect(await buttons.allTextContents()).toEqual(["Met", "Not met", "Not sure"]);
+        expect(await group.getByRole("button", { name: "Not sure", exact: true }).getAttribute("aria-pressed")).toBe("true");
+        expect(await group.getByRole("button", { name: "Met", exact: true }).getAttribute("aria-pressed")).toBe("false");
       }
-      // Each item's radios are their own group: a name shared across items
-      // would merge them.
-      const groupSizes = await panel.locator('input[type="radio"]').evaluateAll((radios) =>
-        [...new Set(radios.map((r) => (r as HTMLInputElement).name))].map(
-          (name) => document.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`).length,
-        ),
-      );
-      expect(groupSizes).toEqual([3, 3]);
+      expect(await panel.locator("fieldset").count()).toBe(0);
       expect(await horizontalOverflow(page)).toBe(0);
       expect(await axeViolations(page)).toEqual([]);
     } finally {
@@ -2477,14 +2475,16 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
       const panel = await openDetails(page, "MATH1116");
-      await panel.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
+      await checkGroups(panel).first().getByRole("button", { name: "Met", exact: true }).click();
       const card = page.locator('[data-placed="MATH1116"]');
       await expect.poll(() => card.locator('[class*="badge-state-"]').textContent()).toBe("Available");
       expect(await card.locator(".badge-verify").count()).toBe(0);
 
       await page.reload({ waitUntil: "networkidle" });
       const reopened = await openDetails(page, "MATH1116");
-      expect(await reopened.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).isChecked()).toBe(true);
+      expect(
+        await checkGroups(reopened).first().getByRole("button", { name: "Met", exact: true }).getAttribute("aria-pressed"),
+      ).toBe("true");
     } finally {
       await page.close();
     }
@@ -2495,7 +2495,7 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
       const panel = await openDetails(page, "MATH1116");
-      await panel.locator("fieldset").first().getByRole("radio", { name: "Not met", exact: true }).check();
+      await checkGroups(panel).first().getByRole("button", { name: "Not met", exact: true }).click();
       const card = page.locator('[data-placed="MATH1116"]');
       await expect.poll(() => card.locator(".badge-state-soft").count()).toBe(1);
       expect(await card.locator(".badge-reason").textContent()).toContain(
@@ -2509,12 +2509,9 @@ describe("manual checks", { timeout: 30_000 }, () => {
   it("the read-only example's check controls are disabled", async () => {
     await withPlan(desktop, async (page) => {
       const panel = await openDetails(page, "COMP4550");
-      // Playwright's isDisabled() only knows form controls, not <fieldset>,
-      // so read the fieldset's own property — and check what it disables.
-      const disabled = await panel.locator("fieldset").evaluateAll((fs) => fs.map((f) => (f as HTMLFieldSetElement).disabled));
-      expect(disabled.length).toBeGreaterThan(0);
-      expect(disabled.every(Boolean)).toBe(true);
-      for (const radio of await panel.locator('input[type="radio"]').all()) expect(await radio.isDisabled()).toBe(true);
+      const buttons = checkGroups(panel).getByRole("button");
+      expect(await buttons.count()).toBeGreaterThan(0);
+      for (const button of await buttons.all()) expect(await button.isDisabled()).toBe(true);
     });
   });
 
@@ -2523,11 +2520,72 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
       const panel = await openDetails(page, "MATH1116");
-      await panel.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
-      await expect.poll(() => panel.textContent()).toContain("✓ met (marked by you)");
+      const group = checkGroups(panel).first();
+      await group.getByRole("button", { name: "Met", exact: true }).click();
+      await expect
+        .poll(() => panel.locator(".requisite-tree li", { has: page.locator("[role=group]") }).first().textContent())
+        .toContain("Marked by you");
     } finally {
       await page.close();
     }
+  });
+});
+
+describe("details requisites", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const example = (code: string) => new URL(`/plan/example?course=${code}`, baseUrl).href;
+  const section = (page: Page, name: string) =>
+    detailsPanel(page).locator(".details-section", { has: page.getByRole("heading", { name, exact: true }) });
+
+  it("shows P&C's own wording", async () => {
+    const page = await openPage(browser, example("COMP2100"), desktop);
+    try {
+      const raw = await (await fetch(new URL("/api/courses/COMP2100", baseUrl))).json();
+      const written = detailsPanel(page).locator(".details-raw");
+      expect(await written.textContent()).toContain("As written on Programs & Courses");
+      expect((await written.textContent())!.replace(/\s+/g, " ")).toContain(raw.course.requisiteRaw.replace(/\s+/g, " ").trim());
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("labels postgraduate codes under Taught with and Can't take with", async () => {
+    const page = await openPage(browser, example("COMP2100"), desktop);
+    try {
+      for (const name of ["Taught with", "Can't take with"]) {
+        const list = detailsPanel(page).locator(".details-related", { has: page.getByRole("heading", { name, exact: true }) });
+        expect(await list.textContent(), name).toContain("COMP6442 (postgraduate)");
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("lists the plan's courses that need it, each opening its own details, with Back returning", async () => {
+    const page = await openPage(browser, example("COMP2100"), desktop);
+    try {
+      const needs = section(page, "Courses in your plan that need it");
+      const link = needs.getByRole("button", { name: /COMP2120/ });
+      expect(await link.count()).toBe(1);
+      await link.click();
+      await expect.poll(() => detailsPanel(page).locator("h2").textContent()).toContain("COMP2120");
+      await detailsPanel(page).getByRole("button", { name: "Previous course" }).click();
+      await expect.poll(() => detailsPanel(page).locator("h2").textContent()).toContain("COMP2100");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("draws an unplaced course's tree without marks", async () => {
+    await withPlan(desktop, async (page) => {
+      await page.locator(".course-card-unplaced").filter({ hasText: "COMP4680" }).locator(".course-card-title").click();
+      await detailsPanel(page).waitFor();
+      const tree = detailsPanel(page).locator(".requisite-tree");
+      expect(await tree.count()).toBe(1);
+      expect(await tree.textContent()).toContain("12 units");
+      expect(await tree.textContent()).not.toMatch(/[✓✗]/);
+      expect(await tree.locator(".mark").count()).toBe(0);
+    });
   });
 });
 

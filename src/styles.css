@@ -1167,33 +1167,122 @@ section[aria-label="program checks"] > h3 {
   min-height: 2.75rem;
 }
 
-.verify-check {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
-  margin: 0.75rem 0 0;
-  padding: 0.6rem 0.85rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  min-width: 0;
+/* The requisite tree: one rule per line, its mark first, and a check the
+   planner can't make answered right on its own node. */
+.requisite-tree,
+.requisite-tree ul {
+  margin: 0;
+  padding-inline-start: 1.1rem;
 }
 
-/* Floated, the legend leaves the border and becomes the box's first row:
-   a long COMP4550 item otherwise wraps as a block straddling the border. */
-.verify-check legend {
-  float: left;
-  width: 100%;
-  padding: 0;
-  margin-block-end: 0.2rem;
-  color: var(--ink);
+.requisite-tree,
+.requisite-tree ul {
+  list-style: none;
+}
+
+.requisite-tree {
+  padding-inline-start: 0;
+}
+
+/* Another degree's rule for the same course: a note beside the tree, not
+   one of its branches. */
+.details-other-programs {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.75rem;
+  list-style: none;
+  font-size: 0.85rem;
+  background: var(--paper);
+  border-radius: var(--radius);
+}
+
+.requisite-tree li {
+  margin-block: 0.3rem;
+}
+
+.requisite-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.4rem;
   overflow-wrap: anywhere;
 }
 
-.verify-check label {
+.mark {
   display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  white-space: nowrap;
+  justify-content: center;
+  width: 1.2rem;
+  font-weight: 700;
+}
+
+.mark-met {
+  color: var(--moss);
+}
+
+.mark-unmet {
+  color: var(--rust);
+}
+
+.mark-unknown {
+  color: var(--amber);
+}
+
+button.requisite-code {
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+}
+
+.requisite-answer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-block: 0.35rem 0.15rem;
+}
+
+.requisite-answer button {
+  min-height: 2.75rem;
+  font-weight: 500;
+}
+
+.requisite-answer button[aria-pressed="true"] {
+  color: var(--gold-ink);
+  background: var(--gold-tint);
+  border-color: var(--gold);
+}
+
+.details-raw,
+.details-related {
+  margin-block-start: 0.85rem;
+}
+
+.details-raw p {
+  font-size: 0.85rem;
+}
+
+.details-related ul {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+}
+
+.details-warning {
+  margin-block: 0.4rem 0;
+  color: var(--rust);
+  font-weight: 600;
+}
+
+.details-dependents {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.details-dependents button {
+  width: 100%;
+  min-height: 2.75rem;
+  text-align: start;
+  font-weight: 500;
 }
 
 .undo-toast {

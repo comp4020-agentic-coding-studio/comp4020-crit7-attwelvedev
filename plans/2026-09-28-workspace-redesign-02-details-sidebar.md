@@ -422,7 +422,7 @@ everywhere (and `answer: null`). The tree is then rendered with
 
 ### Task 6: Requisites section with checks inside the tree; incompatible, co-taught and "needs it"
 
-- **Description:** WR9 §3 and §4.
+- [x] **Description:** WR9 §3 and §4.
   - Rewrite `RequisiteTree` so each unverifiable leaf holds its own Met /
     Not met / Not sure control, and add an unmarked mode for unplaced
     courses.
@@ -500,6 +500,17 @@ everywhere (and `answer: null`). The tree is then rendered with
     below the tree and above "As written on Programs & Courses".
   - This replaces Task 5's interim Requisites block. The "Requisites" h3
     and its focus target stay.
+  - **As built (2026-09-28), two signature corrections:**
+    - `RequisiteStatus` types `ok` as `boolean` on course, units and
+      program leaves, so an all-null tree can't be one. `unmarkedStatus`
+      returns a UI-side `TreeStatus` from `planner-logic.ts`: the same union
+      with `ok: boolean | null` everywhere. `RequisiteTree`'s `node` takes
+      `TreeStatus`, and a `RequisiteStatus` is assignable to it. The domain
+      type is unchanged.
+    - A `(code) => void` callback can't tell the tree whether to draw a
+      code as a button. `RequisiteTree` takes `canOpen: (code: string) =>
+      boolean` alongside `onOpen`, and the panel passes
+      `c => c in view.courses`.
 - **Refactor:** None expected.
 - **Acceptance criteria:**
   - `pnpm check` passes.

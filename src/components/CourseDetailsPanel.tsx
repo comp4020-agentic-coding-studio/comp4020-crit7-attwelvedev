@@ -1,10 +1,18 @@
-import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { CheckAnswer } from "../lib/domain/types";
 import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
 import { isError, setCheck, setPin } from "./api";
 import { CardGrip } from "./CourseCardHeader";
 import type { DetailsState } from "./details-state";
-import { familyOf, groupLabel, placedStatus, unitsLabel } from "./planner-logic";
+import {
+  dependentsOf,
+  familyOf,
+  groupLabel,
+  placedStatus,
+  postgradLabel,
+  unitsLabel,
+  unmarkedStatus,
+} from "./planner-logic";
 import RequisiteTree from "./RequisiteTree";
 
 interface Props {
@@ -49,6 +57,7 @@ export default function CourseDetailsPanel({
   details,
   card,
   fetched,
+  onOpen,
   onBack,
   onForward,
   onClose,
@@ -64,13 +73,12 @@ export default function CourseDetailsPanel({
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const [pinPending, setPinPending] = useState(false);
   // The answer being saved, shown checked until the new view arrives —
-  // otherwise the re-render for `disabled` snaps the radio back first.
+  // otherwise the re-render for `disabled` snaps the pressed button back first.
   const [pendingCheck, setPendingCheck] = useState<{ item: string; value: CheckAnswer | null } | null>(null);
   const [expanded, setExpanded] = useState(false);
   // Only a description the clamp actually cuts gets the toggle, and only
   // the browser can say whether it does.
   const [clamped, setClamped] = useState(false);
-  const radioPrefix = useId();
 
   useEffect(() => {
     if (details.token === 0) return;
@@ -123,11 +131,13 @@ export default function CourseDetailsPanel({
   ) : (
     "Programs & Courses"
   );
-  const answerOptions: [CheckAnswer | null, string][] = [
-    ["met", "Met"],
-    ["not-met", "Not met"],
-    [null, "Not sure"],
-  ];
+  // A placed course's tree is evaluated against the plan; any other course
+  // only has its rule to show.
+  const tree = placement ? placement.requisiteStatus : card?.prereq ? unmarkedStatus(card.prereq) : null;
+  const placedCodes = new Set(view.placements.map((p) => p.code));
+  const clashes = card?.incompatible.filter((c) => placedCodes.has(c)) ?? [];
+  const cotaught = extras?.cotaught ?? [];
+  const dependents = dependentsOf(view, code);
 
   return (
     <aside class="details-panel" aria-label="Course details">
@@ -219,45 +229,74 @@ export default function CourseDetailsPanel({
         <h3 ref={requisitesRef} tabIndex={-1}>
           Requisites
         </h3>
-        {placement?.requisiteStatus ? (
-          <ul>
-            <RequisiteTree node={placement.requisiteStatus} />
-          </ul>
+        {tree ? (
+          <RequisiteTree
+            node={tree}
+            marks={placement !== null}
+            checks={placement?.checks ?? []}
+            disabled={readOnly || pendingCheck !== null}
+            pending={pendingCheck}
+            onAnswer={answer}
+            onOpen={onOpen}
+            canOpen={(c) => c in view.courses}
+          />
         ) : (
-          <p>No prerequisites, or not currently placed.</p>
+          <p>No prerequisites.</p>
         )}
-        {placement && placement.checks.length > 0 && (
-          <>
-            <h4>Your checks</h4>
-            <small>
-              The planner can't check these itself. Mark each one for yourself: your answers decide whether this course
-              shows as Available. Or leave it on Not sure to confirm with P&amp;C later.
-            </small>
-            {placement.checks.map((check, i) => (
-              <fieldset key={check.item} class="verify-check" disabled={readOnly || pendingCheck !== null}>
-                <legend>{check.label}</legend>
-                {answerOptions.map(([value, text]) => (
-                  <label key={text}>
-                    <input
-                      type="radio"
-                      name={`${radioPrefix}-check-${code}-${i}`}
-                      checked={(pendingCheck?.item === check.item ? pendingCheck.value : check.answer) === value}
-                      onChange={() => answer(check.item, value)}
-                    />{" "}
-                    {text}
-                  </label>
-                ))}
-              </fieldset>
-            ))}
-          </>
-        )}
-        {card && card.incompatible.length > 0 && <p>Incompatible with: {card.incompatible.join(", ")}</p>}
         {card && card.otherPrograms.length > 0 && (
-          <ul>
+          <ul class="details-other-programs">
             {card.otherPrograms.map((note, i) => (
               <li key={i}>{note}</li>
             ))}
           </ul>
+        )}
+        {card?.requisiteRaw && (
+          <div class="details-raw">
+            <h4>As written on Programs &amp; Courses</h4>
+            <p>{card.requisiteRaw}</p>
+          </div>
+        )}
+        {card && card.incompatible.length > 0 && (
+          <div class="details-related">
+            <h4>Can't take with</h4>
+            <ul>
+              {card.incompatible.map((c) => (
+                <li key={c}>{postgradLabel(c)}</li>
+              ))}
+            </ul>
+            {clashes.map((c) => (
+              <p key={c} class="details-warning">
+                {c} is also in your plan
+              </p>
+            ))}
+          </div>
+        )}
+        {cotaught.length > 0 && (
+          <div class="details-related">
+            <h4>Taught with</h4>
+            <ul>
+              {cotaught.map((c) => (
+                <li key={c}>{postgradLabel(c)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+
+      <section class="details-section">
+        <h3>Courses in your plan that need it</h3>
+        {dependents.length > 0 ? (
+          <ul class="details-dependents">
+            {dependents.map((c) => (
+              <li key={c}>
+                <button type="button" onClick={() => onOpen(c)}>
+                  <strong>{c}</strong> {view.courses[c]?.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No course in your plan lists it as a prerequisite.</p>
         )}
       </section>
 

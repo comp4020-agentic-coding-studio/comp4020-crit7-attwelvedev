@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { AACOM_2027 } from "../data/aacom-2027";
+import { EXAMPLE_PLAN } from "../data/example-plan";
 import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/from-pandc";
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
@@ -8,6 +9,7 @@ import { buildPlanView, type GroupView } from "../lib/domain/view";
 import {
   completedReadout,
   cutoffOptions,
+  dependentsOf,
   dropTargets,
   FAMILY_LABELS,
   FAMILY_ORDER,
@@ -22,12 +24,15 @@ import {
   partOneMarker,
   partTwoPlacements,
   placedStatus,
+  postgradLabel,
+  prereqCodes,
   progressBarNumbers,
   progressSegments,
   termBarLabel,
   termBarWidths,
   termFamilyUnits,
   unitsLabel,
+  unmarkedStatus,
   unplacedCount,
   verifyBadgeText,
 } from "./planner-logic";
@@ -719,5 +724,84 @@ describe("groupLeafIds", () => {
 
   it("is empty for an unknown group", () => {
     expect(groupLeafIds(view, "nope")).toEqual(new Set());
+  });
+});
+
+describe("unmarkedStatus", () => {
+  it("keeps the tree's shape with every ok null and no answer", () => {
+    expect(
+      unmarkedStatus({
+        kind: "and",
+        items: [
+          { kind: "course", code: "COMP1100", concurrent: false },
+          { kind: "unverifiable", text: "X" },
+        ],
+      }),
+    ).toEqual({
+      kind: "and",
+      ok: null,
+      items: [
+        { kind: "course", code: "COMP1100", concurrent: false, ok: null },
+        { kind: "unverifiable", text: "X", ok: null, answer: null },
+      ],
+    });
+  });
+});
+
+describe("prereqCodes", () => {
+  it("lists every course leaf once", () => {
+    expect(
+      prereqCodes({
+        kind: "and",
+        items: [
+          { kind: "course", code: "COMP1100", concurrent: false },
+          {
+            kind: "or",
+            items: [
+              { kind: "course", code: "COMP1130", concurrent: false },
+              { kind: "course", code: "COMP1100", concurrent: true },
+            ],
+          },
+          { kind: "unverifiable", text: "X" },
+        ],
+      }),
+    ).toEqual(["COMP1100", "COMP1130"]);
+  });
+
+  it("is empty with no prerequisites", () => {
+    expect(prereqCodes(null)).toEqual([]);
+  });
+});
+
+describe("dependentsOf", () => {
+  const view = buildPlanView(cat, AACOM_2027, EXAMPLE_PLAN);
+  const termOf = (code: string) => view.placements.find((p) => p.code === code)!.term;
+
+  it("lists the placed courses that need it, by term then code", () => {
+    const dependents = dependentsOf(view, "COMP2100");
+    expect(dependents).toContain("COMP2120");
+    const sorted = [...dependents].sort((a, b) => termOf(a) - termOf(b) || a.localeCompare(b));
+    expect(dependents).toEqual(sorted);
+  });
+
+  it("leaves out courses that aren't placed", () => {
+    const placed = new Set(view.placements.map((p) => p.code));
+    const unplaced = Object.values(view.courses)
+      .filter((c) => !placed.has(c.code) && prereqCodes(c.prereq).includes("COMP2100"))
+      .map((c) => c.code);
+    expect(unplaced.length).toBeGreaterThan(0);
+    const dependents = dependentsOf(view, "COMP2100");
+    for (const code of unplaced) expect(dependents).not.toContain(code);
+  });
+});
+
+describe("postgradLabel", () => {
+  it("labels 6xxx and 8xxx codes as postgraduate", () => {
+    expect(postgradLabel("COMP6442")).toBe("COMP6442 (postgraduate)");
+    expect(postgradLabel("COMP8650")).toBe("COMP8650 (postgraduate)");
+  });
+
+  it("leaves undergraduate codes alone", () => {
+    expect(postgradLabel("COMP2100")).toBe("COMP2100");
   });
 });
