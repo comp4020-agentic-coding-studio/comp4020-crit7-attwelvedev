@@ -4,7 +4,7 @@ import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import PlacedCourseRow from "./PlacedCourseRow";
-import { groupPath, outstandingItems, progressSegments } from "./planner-logic";
+import { groupPath, outstandingItems, outstandingTarget, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 import SidebarSection from "./SidebarSection";
 
@@ -38,6 +38,8 @@ interface Props {
   // drop, so both offer the undo toast.
   onDropRemove: (code: string) => void;
   showRequest: ShowRequest | null;
+  // Asks Planner to reveal and jump to a group or check row.
+  onShowInSidebar: (kind: ShowRequest["kind"], id: string) => void;
 }
 
 interface GroupProps {
@@ -264,6 +266,7 @@ export default function Sidebar({
   dropReady,
   onDropRemove,
   showRequest,
+  onShowInSidebar,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -409,9 +412,24 @@ export default function Sidebar({
             </p>
           ) : (
             <ul class="outstanding-list">
-              {outstanding.map((item) => (
-                <li key={item.id}>{item.text}</li>
-              ))}
+              {outstanding.map((item) => {
+                const target = outstandingTarget(item.id);
+                return (
+                  <li key={item.id}>
+                    {target ? (
+                      <button
+                        type="button"
+                        class="outstanding-link"
+                        onClick={() => onShowInSidebar(target.kind, target.id)}
+                      >
+                        {item.text}
+                      </button>
+                    ) : (
+                      item.text
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </SidebarSection>
@@ -446,8 +464,8 @@ export default function Sidebar({
             <h3>Checks</h3>
             <ul class="checks-list">
               {view.checks.map((check) => (
-                <li key={check.id}>
-                  <h4>{check.label}</h4>
+                <li key={check.id} data-check={check.id}>
+                  <h4 tabIndex={-1}>{check.label}</h4>
                   {check.ok === null ? (
                     <p>not tracked — verify on P&C</p>
                   ) : (

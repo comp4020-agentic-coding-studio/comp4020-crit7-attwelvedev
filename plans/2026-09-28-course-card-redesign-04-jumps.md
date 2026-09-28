@@ -296,8 +296,13 @@ here calls `focus()` or scrolls.
       `padding: 0`), plus `color: var(--unigrey); font-size: 0.85em;`
       and an underline on hover/focus-visible;
     - `.requirement-highlighted { outline: 3px solid var(--gold);
-      outline-offset: -3px; }` (inset, so the horizontal strip's
-      scroller doesn't clip it).
+      outline-offset: 2px; }`, with `.requirement-group.requirement-highlighted
+      { outline-offset: -3px; }` (inset only on top-level sections, so the
+      horizontal strip's scroller doesn't clip them; nested groups and
+      check rows have no padding, so an inset outline covered their text).
+      *Amended 2026-09-28 during Task 12, after the render showed the
+      overlap; Task 11 shipped the all-inset version and Task 12's commit
+      carries the fix.*
 - **Refactor:** none.
 - **Acceptance criteria:**
   - Tests pass.
@@ -307,7 +312,7 @@ here calls `focus()` or scrolls.
 
 ### Task 12: "What's left" items jump to their group or check
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `outstandingTarget`.
   - Outstanding items with a target become buttons calling a new Sidebar
     prop `onShowInSidebar`.
@@ -339,6 +344,11 @@ here calls `focus()` or scrolls.
     3. On a fresh plan: the first outstanding button (a `group-*` item)
        highlights `[data-group=<that id>]`.
     4. `axeViolations` is `[]`.
+    5. *(Added 2026-09-28 with the offset amendment.)* The highlight never
+       covers its target's content: for the highlighted check row
+       (`tdp-min`), nested group (`arin-a`) and top-level group (`prog-a`),
+       the outline's inward reach, `max(0, -outlineOffset)`, is at most
+       the border plus padding on every side.
 - **Implementation (green):**
   - `planner-logic.ts`: `export function outstandingTarget(id: string): {
     kind: "group" | "check"; id: string } | null`, which strips the

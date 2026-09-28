@@ -304,6 +304,7 @@ export default function Planner({ view: initialView, title }: Props) {
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void performRemove(code)}
             showRequest={showRequest}
+            onShowInSidebar={showInSidebar}
           />
           <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>

@@ -190,6 +190,19 @@ export function outstandingItems(view: PlanView): OutstandingItem[] {
   return out;
 }
 
+// Where a "What's left" item jumps to, read off the id outstandingItems
+// gave it; null for anything without a row to show.
+export function outstandingTarget(id: string): { kind: "group" | "check"; id: string } | null {
+  for (const [prefix, kind] of [
+    ["group-", "group"],
+    ["choice-", "group"],
+    ["check-", "check"],
+  ] as const) {
+    if (id.startsWith(prefix)) return { kind, id: id.slice(prefix.length) };
+  }
+  return null;
+}
+
 export function groupLabel(view: PlanView, groupId: string): string {
   function search(groups: PlanView["groups"]): string | null {
     for (const group of groups) {

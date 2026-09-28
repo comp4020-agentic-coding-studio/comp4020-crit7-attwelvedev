@@ -14,6 +14,7 @@ import {
   groupPath,
   menuTargets,
   outstandingItems,
+  outstandingTarget,
   overlayEdges,
   placedStatus,
   progressSegments,
@@ -474,5 +475,29 @@ describe("groupPath", () => {
 
   it("returns nothing for an unknown group", () => {
     expect(groupPath(view, "nope")).toEqual([]);
+  });
+});
+
+describe("outstandingTarget", () => {
+  it("maps a leaf group item to its group", () => {
+    expect(outstandingTarget("group-prog-a")).toEqual({ kind: "group", id: "prog-a" });
+  });
+
+  it("maps an open choice to its group", () => {
+    expect(outstandingTarget("choice-spec")).toEqual({ kind: "group", id: "spec" });
+  });
+
+  it("maps a check item to its check", () => {
+    expect(outstandingTarget("check-tdp-min")).toEqual({ kind: "check", id: "tdp-min" });
+  });
+
+  it("gives nothing for any other id", () => {
+    expect(outstandingTarget("other")).toBeNull();
+  });
+
+  it("finds a target for every item a fresh plan lists", () => {
+    const items = outstandingItems(buildPlanView(cat, AACOM_2027, emptyPlan()));
+    expect(items.length).toBeGreaterThan(0);
+    for (const item of items) expect(outstandingTarget(item.id), item.id).not.toBeNull();
   });
 });

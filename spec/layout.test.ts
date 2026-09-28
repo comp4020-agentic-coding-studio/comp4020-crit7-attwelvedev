@@ -2785,6 +2785,88 @@ describe("show a group in the sidebar", { timeout: 30_000 }, () => {
     }
   });
 
+  const checksHighlighted = (page: Page) =>
+    page.locator(".requirement-highlighted").evaluateAll((els) => els.map((el) => el.getAttribute("data-check")));
+  const outstandingLink = (page: Page, text: RegExp) => page.locator(".outstanding-list button", { hasText: text });
+
+  it("jumps from a What's left check item to its check row", async () => {
+    await withPlan(desktop, async (page) => {
+      const link = outstandingLink(page, /^At least 12 units of TDP-tagged courses/);
+      expect(await link.count()).toBe(1);
+      await link.click();
+      await expect.poll(() => checksHighlighted(page)).toEqual(["tdp-min"]);
+      expect(
+        await page.evaluate(() => document.activeElement === document.querySelector('[data-check="tdp-min"] > h4')),
+      ).toBe(true);
+    });
+  });
+
+  it("expands a compacted Total before jumping to a check", async () => {
+    const page = await openPage(browser, planUrl(), desktop, { storage: { "sidebar-compact": '["total"]' } });
+    try {
+      const toggle = page.locator('.section-toggle[aria-controls="sidebar-section-total"]');
+      await expect.poll(() => toggle.getAttribute("aria-expanded")).toBe("false");
+      const link = outstandingLink(page, /^At least 12 units of TDP-tagged courses/);
+      expect(await link.count()).toBe(1);
+      await link.click();
+      await expect.poll(() => checksHighlighted(page)).toEqual(["tdp-min"]);
+      expect(await toggle.getAttribute("aria-expanded")).toBe("true");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    ["a check row", "tdp-min", "check"],
+    ["a nested group", "arin-a", "group"],
+    ["a top-level group", "prog-a", "group"],
+  ])("the highlight on %s doesn't cover its text", async (_name, id, kind) => {
+    await withPlan(desktop, async (page) => {
+      const selector = kind === "check" ? `[data-check="${id}"]` : `[data-group="${id}"]`;
+      const el = page.locator(selector);
+      expect(await el.count()).toBe(1);
+      await el.evaluate((node) => node.classList.add("requirement-highlighted"));
+      // An outline drawn inside the box reaches (-offset) px in from the
+      // border edge; past the border and padding it's over the content.
+      const clearance = await el.evaluate((node) => {
+        const s = getComputedStyle(node);
+        const reach = Math.max(0, -parseFloat(s.outlineOffset));
+        const room = Math.min(
+          ...(["Top", "Right", "Bottom", "Left"] as const).map(
+            (side) => parseFloat(s.getPropertyValue(`border-${side.toLowerCase()}-width`)) + parseFloat(s.getPropertyValue(`padding-${side.toLowerCase()}`)),
+          ),
+        );
+        return { reach, room, width: parseFloat(s.outlineWidth) };
+      });
+      expect(clearance.width).toBeGreaterThan(0);
+      expect(clearance.reach).toBeLessThanOrEqual(clearance.room);
+    });
+  });
+
+  it("jumps from a What's left group item to its group", async () => {
+    const created = await fetch(new URL("/api/plans", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      redirect: "manual",
+    });
+    const id = created.headers.get("location")!.split("/").pop()!;
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      expect(await page.locator(".outstanding-list button").count()).toBeGreaterThan(0);
+      const first = page.locator(".outstanding-list button").first();
+      // A fresh plan's first item is a leaf group's shortfall ("<label>: N more units needed").
+      const label = (await first.textContent())!.split(":")[0];
+      await first.click();
+      await expect.poll(() => highlighted(page)).toHaveLength(1);
+      const heading = await page
+        .locator(".requirement-highlighted")
+        .evaluate((el) => el.querySelector(":scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6")?.textContent);
+      expect(heading).toBe(label);
+    } finally {
+      await page.close();
+    }
+  });
+
   it("stays axe-clean", async () => {
     await withPlan(desktop, async (page) => {
       expect(await axeViolations(page)).toEqual([]);

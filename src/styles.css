@@ -731,6 +731,30 @@ nav[aria-label="site"] .nav-hide:hover {
   position: relative;
 }
 
+/* A text-button reset, as button.course-card-allocation: the item still
+   reads as a line of the list, and the underline says it jumps. The gold
+   bullet stays on the li. */
+.outstanding-link,
+.outstanding-link:hover {
+  border: 0;
+}
+
+.outstanding-link {
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.outstanding-link:hover,
+.outstanding-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .outstanding-list li::before {
   content: "";
   position: absolute;
@@ -1415,10 +1439,17 @@ fieldset[aria-busy="true"] {
   outline-offset: 2px;
 }
 
-/* Inset, unlike the card highlight: the phone's horizontal strip is a
-   scroller, which would clip an outline drawn outside the group's box. */
+/* Outside the box, like the card highlight: nested groups and check rows
+   have no padding, so an inset outline would sit over their text. */
 .requirement-highlighted {
   outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Top-level sections are the phone strip's items, and the strip is a
+   scroller that would clip an outline outside them; their padding leaves
+   room for it inside. */
+.requirement-group.requirement-highlighted {
   outline-offset: -3px;
 }
 
