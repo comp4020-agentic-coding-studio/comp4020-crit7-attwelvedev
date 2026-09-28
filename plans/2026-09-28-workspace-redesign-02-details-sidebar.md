@@ -221,7 +221,7 @@ everywhere (and `answer: null`). The tree is then rendered with
 
 ### Task 4: Details selection state and the `?course=` round trip
 
-- **Description:** Add the pure selection model and the URL helpers. Plumb
+- [x] **Description:** Add the pure selection model and the URL helpers. Plumb
   server-rendered details from the page into `Planner`.
 - **Files touched:**
   - new `src/components/details-state.ts`
@@ -312,6 +312,13 @@ everywhere (and `answer: null`). The tree is then rendered with
       Remove button, and the pin select is disabled.
     - "axe with details open": `axeViolations` is empty at 1920×1080 and
       390×844 with `?course=COMP2100`.
+    - "details fetch failure" checks only the sections that exist by then
+      (§1, and the interim Requisites block). Tasks 6 and 7 extend it to §2–§4.
+    - **Interim (ruled 2026-09-28, keeps each task's commit green):** point
+      the "manual checks" suite (:2380-2518) at
+      `aside[aria-label="Course details"]` in place of `dialog[open]`, with the
+      same assertions. The one exception is the verify-badge case, which now
+      expects focus on the "Requisites" h3 (Task 6's wording).
   - `spec/routes.ts`: add `/plan/example?course=COMP2100` to `ROUTES` so
     `invariants.test.ts` covers it.
 - **Implementation (green):**
@@ -375,6 +382,14 @@ everywhere (and `answer: null`). The tree is then rendered with
       & Courses." with a link.
     - Stub (`extras === null`): "Only basic details are available for this
       course. See Programs & Courses for outcomes and assessment."
+    - **Interim Requisites block (ruled 2026-09-28):** the dialog's
+      requisites content moves over unchanged, under an h3 "Requisites"
+      (`tabIndex={-1}`): the `RequisiteTree` for placed courses, the "Your
+      checks" fieldsets with `pendingCheck`, and the `otherPrograms` list.
+      Task 6 replaces the tree and the fieldsets.
+    - **Focus effect, brought forward from Task 7:** an effect on
+      `details.token` focuses the h2, or the "Requisites" h3 when
+      `details.focus === "requisites"`.
   - `Planner`:
     - Adds the `knownCards` state, merged from `onSearchResults` and from
       `fetched.data.course`.
@@ -475,6 +490,10 @@ everywhere (and `answer: null`). The tree is then rendered with
     `card.incompatible` and `fetched.data?.extras?.cotaught`. When an
     incompatible course is placed, show the warning "<CODE> is also in your
     plan".
+  - `card.otherPrograms` (ruled 2026-09-28) stays as a small list in §3,
+    below the tree and above "As written on Programs & Courses".
+  - This replaces Task 5's interim Requisites block. The "Requisites" h3
+    and its focus target stay.
 - **Refactor:** None expected.
 - **Acceptance criteria:**
   - `pnpm check` passes.
@@ -557,7 +576,8 @@ everywhere (and `answer: null`). The tree is then rendered with
     updated <d Mon yyyy>", formatted from `scrapedAt`.
   - Focus (WR14):
     - An effect on `details.token` focuses `h2` or the Requisites h3,
-      depending on `details.focus`.
+      depending on `details.focus`. Task 5 already built this; Task 7 adds
+      its tests.
     - Planner stores `document.activeElement` when opening and restores it
       on close.
     - `onKeyDown` on the aside closes on Escape.

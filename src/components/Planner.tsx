@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { PlanView } from "../lib/domain/view";
+import type { CourseDetailsView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
 import CompletedMenu from "./CompletedMenu";
+import { type DetailsState, EMPTY_DETAILS, openCourse, withCourseParam } from "./details-state";
 import MoreOptions from "./MoreOptions";
 import {
   applyReqsState,
@@ -38,10 +39,21 @@ const COMPLETED_MENU = "completed-menu";
 interface Props {
   view: PlanView;
   title: string;
+  // The ?course= course, rendered on the server so the sidebar is there
+  // from the first paint.
+  initialDetails?: CourseDetailsView | null;
 }
 
-export default function Planner({ view: initialView, title }: Props) {
+export default function Planner({ view: initialView, title, initialDetails = null }: Props) {
   const [view, setView] = useState(initialView);
+  const [details, setDetails] = useState<DetailsState>(() =>
+    initialDetails ? openCourse(EMPTY_DETAILS, initialDetails.course.code) : EMPTY_DETAILS,
+  );
+  // replaceState, not pushState: stepping through courses shouldn't fill
+  // the browser's own history, and the URL only has to be shareable.
+  useEffect(() => {
+    history.replaceState(null, "", withCourseParam(location.href, details.code));
+  }, [details.code]);
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
   // Hard-blocked terms of every course search has returned, by code: a
