@@ -791,6 +791,37 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       await expect.poll(() => page.locator('[data-part-two="COMP4550"].part-two-stub-receded').count()).toBe(1);
     });
   });
+
+  it("draws COMP4550's arrow to COMP4620 from its part 2 stub", async () => {
+    const id = await planWithPlacement("COMP4550", 4);
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP4620", term: 7 }),
+    });
+    expect(placed.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.getByRole("button", { name: "More options", exact: true }).click();
+      await page.getByLabel("Show prerequisite links").check();
+      await page.keyboard.press("Escape");
+      const line = page.locator('line[data-from="COMP4550"][data-to="COMP4620"]');
+      await line.waitFor({ state: "attached" });
+      const { point, stub } = await line.evaluate((el) => {
+        const svg = el.closest("svg")!.getBoundingClientRect();
+        const stub = document.querySelector('[data-part-two="COMP4550"]')!.getBoundingClientRect();
+        const x = svg.left + Number(el.getAttribute("x1"));
+        const y = svg.top + Number(el.getAttribute("y1"));
+        return { point: { x, y }, stub: { left: stub.left, right: stub.right, top: stub.top, bottom: stub.bottom } };
+      });
+      expect(point.x).toBeGreaterThanOrEqual(stub.left);
+      expect(point.x).toBeLessThanOrEqual(stub.right);
+      expect(point.y).toBeGreaterThanOrEqual(stub.top);
+      expect(point.y).toBeLessThanOrEqual(stub.bottom);
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("requirements rail as a drop target", { timeout: 30_000 }, () => {

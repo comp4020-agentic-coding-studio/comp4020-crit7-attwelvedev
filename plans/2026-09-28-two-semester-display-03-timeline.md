@@ -539,7 +539,7 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 ### Task 9: Overlay arrows to dependents leave from part 2
 
-- [ ] **Description:** an overlay edge whose prerequisite (`from`) is a
+- [x] **Description:** an overlay edge whose prerequisite (`from`) is a
   two-semester course starts at its part 2 stub when there is one. Lines
   carry `data-from`/`data-to`.
 - **Files touched:** `src/components/PrereqOverlay.tsx`, `spec/layout.test.ts`.

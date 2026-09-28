@@ -61,8 +61,8 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
     svg.setAttribute("width", String(scroll.scrollWidth));
     svg.setAttribute("height", String(scroll.scrollHeight));
 
-    function centreOf(code: string): { x: number; y: number } | null {
-      const el = scroll!.querySelector(`[data-placed="${code}"]`);
+    function centreOf(selector: string): { x: number; y: number } | null {
+      const el = scroll!.querySelector(selector);
       if (!el) return null;
       const elRect = el.getBoundingClientRect();
       const scrollRect = scroll!.getBoundingClientRect();
@@ -75,8 +75,10 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
     const edges = show ? view.placements.flatMap((p) => overlayEdges(view, p.code)) : [];
     const next: Line[] = [];
     for (const edge of edges) {
-      const from = centreOf(edge.from);
-      const to = centreOf(edge.to);
+      // A dependent waits for a two-semester prereq's last term
+      // (overlayEdges), so its line leaves from part 2 when that's drawn.
+      const from = centreOf(`[data-part-two="${edge.from}"]`) ?? centreOf(`[data-placed="${edge.from}"]`);
+      const to = centreOf(`[data-placed="${edge.to}"]`);
       if (from && to) next.push({ key: `${edge.from}-${edge.to}`, from: edge.from, to: edge.to, kind: edge.kind, x1: from.x, y1: from.y, x2: to.x, y2: to.y });
     }
     setLines(next);
@@ -104,6 +106,8 @@ export default function PrereqOverlay({ view, show, hoveredCode }: Props) {
         <line
           key={line.key}
           class={`prereq-${line.kind}${focused && touches(line) ? " prereq-hovered" : ""}`}
+          data-from={line.from}
+          data-to={line.to}
           x1={line.x1}
           y1={line.y1}
           x2={line.x2}
