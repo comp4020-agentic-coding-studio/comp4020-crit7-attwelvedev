@@ -666,3 +666,31 @@ don't re-litigate it.
 The evidence it was right: the round-trip test passes unmodified, so it
 still proves nothing is lost between data and view, and `pnpm check` is
 green with 574 tests.
+
+## 2026-09-28 — Paying for the term bar by removing a line, not shaving margins
+
+Resolved by b29353a.
+
+Task 10 added a family bar under each term's "N/24 units" line, with a
+hard limit: the timeline may move down at most 10px at 390×844, because
+every pixel there comes out of E10's phone budget (first card fully in
+the pane). I measured before and after on the built app rather than
+trusting the CSS arithmetic: term 0's first card went from 330.5px to
+341.3px, a 10.8px shift. The plan's own numbers (6px bar + 8px margin −
+3.2px trimmed) could never meet its own limit.
+
+The obvious fix was to shave the bar's bottom margin to 0.4rem, which
+lands at 9.2px — inside the limit, but still spending 9px of the tightest
+budget in the app and leaving the header a line taller than it needs to
+be. Instead I moved "N/24 units" onto the heading's line, right-aligned
+the way a course card already shows "6u", so the header loses a whole
+line. The bar then costs nothing: the same measurement now reads 320.7px,
+9.8px *higher* than before the bar existed, which also hands slack back
+to E10 for Phase 06.
+
+Because a header change ripples, I checked who else builds on it before
+editing: Phase 05's Task 15 puts a "Completed" label inside that same
+count, so I updated its plan to say it now shares the heading row, and
+its existing "header height unchanged within 2px" check is what will
+catch it wrapping in a narrow column. Verified with `pnpm check` (591
+tests) and renders at both marking viewports.

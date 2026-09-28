@@ -494,11 +494,11 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 7–10 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Screenshots at 1920×1080 and 390×844: strips, dots, family bars, term bars
-- [ ] Tick Phase 03 in overview §5 and commit
+- [x] Tasks 7–10 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Screenshots at 1920×1080 and 390×844: strips, dots, family bars, term bars
+- [x] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
