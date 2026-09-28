@@ -825,3 +825,35 @@ green at 149.0px, keeping only the three levers that were needed. On
 failure, the spec prints the sorted heights and the pane geometry, so a
 regression shows its numbers. One number in Claude's report ("149.9")
 came from a run nobody had seen. It was re-measured before the commit.
+
+## 2026-09-28 — A green menu test that the render contradicted
+
+Resolved by 217be2a.
+
+Phase 02 Task 3 made Place in… and Move to label each option for a
+two-semester course as a range ("S1 2028 – S2 2028"). The plan's tests
+checked the menu *text* against a range regex, and they went green. The
+obvious next step was to commit.
+
+The CLAUDE.md rule that the render is the truth caught what the text
+check couldn't. Screenshots at 1920×1080 and 390×844 showed every Place
+in… option broken over two lines ("S1 2028 – S2 / 2028"). The list is
+absolutely positioned inside an inline-block only as wide as its toggle,
+so it shrinks to `min-width: 9rem` (144px). The ranges don't fit, and each
+item measured 59px against about 38px for a single line. Move to sits in a
+wider panel and was fine, which is why it didn't show up in the source.
+
+The fix touched a file the task didn't name, so Claude stopped and asked
+rather than widening scope. I ruled to fix it inside Task 3, and the
+change went into the plan before the commit. Instead of a one-off CSS
+tweak, the spec now counts each option's line boxes with a DOM Range and
+requires exactly one. A future label that is longer, or a narrower
+toggle, fails the test rather than a screenshot.
+
+How I knew it was right: with the `nowrap` rule stashed, the new
+assertion failed with `[2,2,2,2,2]`, and with it in place the test
+passed. Re-rendering at both viewports showed single-line items (37.6px)
+and no horizontal overflow. The same run surfaced a flaky test (MoreOptions
+closes on scroll, and a click on the off-screen term 4 card scrolled). It
+was fixed by scrolling first, and the test was then red twice for the
+right reason before going green three times.
