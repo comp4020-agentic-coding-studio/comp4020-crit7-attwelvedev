@@ -758,3 +758,37 @@ top edges move ≤ 1px when the cutoff changes, at both marking viewports.
 The Escape, one-open-menu and axe-when-open checks were red first and
 are now green, `pnpm check` passes 647 tests, and I checked the render
 closed and open at both viewports.
+
+## 2026-09-28 — Moving "Hide requirements" out of the scroller instead of patching its bar
+
+Resolved by 0e5c9ce..6e0a169.
+
+E2's plan put the sidebar's hide button in an opaque sticky bar, so
+cards would scroll under it instead of showing through beside it. Built
+as written, it passed its own test, but the full suite caught an
+existing one failing: on a phone, the resize handle's hit area reaches
+14px into the requirements, and the new full-width bar swallowed it.
+The obvious move was to fiddle with z-indexes. I found there's no
+setting that works: a sticky element is its own stacking context, so
+the handle can't sit above the bar while the button sits above the
+handle. Each patch meant a trade-off (a smaller handle target, a button
+that starts a resize, or a taller bar).
+
+Offered those trade-offs, I asked instead whether the button needed to
+be there at all. The real cause was a sticky control inside a
+scrolling pane, and every trade-off only managed that. I chose to move
+the button out of the aside onto the handle itself, as a small chevron
+chip. It sits in a zero-size flex item whose negative margins centre
+its 44px target on the handle's line, so it takes no row. That gave
+back the 52px the old button's row took, and the handle and the button
+no longer fight. The plan (E2, Task 16, and the Help list Phase 06
+relies on) was revised and committed before any code.
+
+How I knew it was right: the new spec asserts the button is outside the
+aside, centred on the handle within 2px, 44px square and axe-clean, and
+that the sidebar content starts at the top (≤ 8px, red at 52px). The
+phone hit-area probe that failed under the bar passes unchanged. The
+render then showed something the tests didn't: on a short page the chip
+floated over the sticky timeline. I added a check for that
+(`elementFromPoint` at the chip's centre must belong to the timeline),
+watched it fail, then fixed the z-index.

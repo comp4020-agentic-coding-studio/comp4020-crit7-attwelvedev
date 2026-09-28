@@ -357,7 +357,7 @@ export interface ShowRequest { kind: "group" | "check"; id: string; token: numbe
 | 02 | `…-02-placed-rows.md` | 5–6 | 01 | Placed courses are compact Completed/Planned rows in groups and search | [x] |
 | 03 | `…-03-family-colours.md` | 7–10 | 01, 02 | Palette + checks test; strips, dots, family progress bars, per-term bar | [x] |
 | 04 | `…-04-jumps.md` | 11–13 | 01, 02, 03 | "Counts toward" and "What's left" jump to requirements; heading hover recedes other cards | [x] |
-| 05 | `…-05-plan-chrome.md` | 14–17 | — | Completed-through menu, "Completed" term labels, hide chevron on the handle, Checks spacing | [ ] |
+| 05 | `…-05-plan-chrome.md` | 14–17 | — | Completed-through menu, "Completed" term labels, hide chevron on the handle, Checks spacing | [x] |
 | 06 | `…-06-budget-and-review.md` | 18–19 | 01–05 | Height budget spec; Help rewrite; **human review** of the render and the Help copy | [ ] |
 
 Phase 05 depends on no other phase and can run any time. Phase 06 is last.

@@ -448,12 +448,12 @@ Task 15's placement depends on it (see above).
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 14–17 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Screenshots at 1920×1080 and 390×844: title row, a completed term
+- [x] Tasks 14–17 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Screenshots at 1920×1080 and 390×844: title row, a completed term
       header, the hide chevron on the handle, and the Total section
-- [ ] Tick Phase 05 in overview §5 and commit
+- [x] Tick Phase 05 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
