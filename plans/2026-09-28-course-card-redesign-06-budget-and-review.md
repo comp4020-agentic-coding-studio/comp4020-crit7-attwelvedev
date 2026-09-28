@@ -112,7 +112,10 @@ The controls Help must name, as built:
 - family colours (strip, dots, bars) and "Counts toward <group>" (jumps
   to the group);
 - "What's left" items (jump);
-- the "Completed through" picker;
+- the "Completed through …" menu (`button.completed-toggle` beside the
+  title, reading e.g. "Completed through S2 2027", opening a list of
+  "Nothing yet", each semester and "All semesters"; plain text on the
+  read-only example). Revised from a native picker in Phase 05;
 - "Completed" term labels;
 - "Hide requirements".
 
@@ -209,7 +212,8 @@ The controls Help must name, as built:
   - **What a course card is telling you, "Check requirements":** the
     card's "Verify on P&C" badge opens Details at "Your checks".
   - **Completed semesters:** "Completed through" beside the plan's title
-    is a list you pick the last finished semester from. Semesters before
+    is a menu, like More options, that you pick the last finished
+    semester from. Semesters before
     the gold line say "Completed". In the requirements list, placed
     courses show as "Completed <semester>" or "Planned <semester>".
   - **P&C and TDP:** keep "Verify on P&C" wording, and say "badge on the
@@ -229,7 +233,7 @@ The controls Help must name, as built:
      - strips, dots, progress bars and term bars;
      - a "Counts toward" highlight;
      - heading-hover receding;
-     - the picker;
+     - the Completed menu, open;
      - the hide bar.
 
      A pass means: the cards read as scannable; the colours feel part of

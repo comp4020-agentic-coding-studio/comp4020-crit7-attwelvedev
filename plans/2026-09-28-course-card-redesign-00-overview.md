@@ -151,12 +151,15 @@ search results, unless stated)
      horizontally;
   4. highlights it in gold, clearing any earlier highlight;
   5. moves focus to its heading.
-- **E6:** the completed-semesters control becomes one native picker,
-  "Completed through [▾]", replacing the readout and the two chevrons (it
+- **E6:** the completed-semesters control becomes one disclosure menu in
+  the More options / Place in… design, its toggle reading "Completed
+  through S2 2027 ▾", replacing the readout and the two chevrons (it
   supersedes CW1/CW2). The options are "Nothing yet" (0), terms 1–7 by
   label, and "All semesters" (8). CW3's full sentence becomes its
-  accessible description. It is visible but disabled on read-only plans,
-  and still fits on the title row (CW4).
+  accessible description. On read-only plans it is plain text with no
+  button, and it still fits on the title row (CW4). *(Revised 2026-09-28
+  from a native `<select>`, which looked out of place beside More
+  options.)*
 - **E7:** completed terms' headers say "Completed" beside the unit count.
   The gold line stays.
 - **E8:** "What's left" items jump to their group (`group-*`, `choice-*`)
@@ -304,7 +307,8 @@ search results, unless stated)
 | Family lookups | `familyOf`, `FAMILY_LABELS`, `termFamilyUnits` in `planner-logic.ts` | Tasks 7, 10 |
 | Group tree lookups | `groupPath`, `groupLeafIds`, `outstandingTarget` in `planner-logic.ts` | Tasks 11–13 |
 | Show-in-sidebar requests | `ShowRequest` in `Sidebar.tsx`, state in `Planner.tsx` | Task 11 |
-| Cutoff picker options | `cutoffOptions` in `planner-logic.ts` | Task 14 |
+| Cutoff menu options | `cutoffOptions` in `planner-logic.ts` | Task 14 |
+| Completed-semesters menu | `src/components/CompletedMenu.tsx` | Task 14 |
 
 ### 4.2 Family palette (tokens, Task 7)
 
@@ -361,7 +365,7 @@ Phase 05 depends on no other phase and can run any time. Phase 06 is last.
         highlighted, with the sidebar hidden beforehand;
   - [ ] click a "What's left" item;
   - [ ] hover a group heading and see the other cards recede;
-  - [ ] change "Completed through" and see rows switch between
+  - [ ] change the Completed menu and see rows switch between
         Completed and Planned.
 - [ ] Every requirement in §2 is covered (see §7)
 - [ ] Every `Human review:` task explicitly accepted by the user (Task 19)
