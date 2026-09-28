@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
-import { dropTargets } from "./planner-logic";
+import { dropTargets, termBarLabel, termBarWidths, termFamilyUnits } from "./planner-logic";
 import PrereqLegend from "./PrereqLegend";
 import PrereqOverlay from "./PrereqOverlay";
 
@@ -124,6 +124,8 @@ export default function Timeline({
           const target = dragTargets?.find((t) => t.term === term.index) ?? null;
           const greyed = draggingCode !== null && target !== null && !target.allowed;
           const dragOver = draggingCode !== null && dragOverTerm === term.index;
+          const segments = termFamilyUnits(view, term.index);
+          const widths = termBarWidths(segments, term.units);
           return (
             <section
               key={term.index}
@@ -140,10 +142,22 @@ export default function Timeline({
                 if (code) void handleDrop(term.index, code);
               }}
             >
-              <h2>{term.label}</h2>
-              <p class="term-units">
-                {term.units}/{NORMAL_TERM_UNITS} units
-              </p>
+              <div class="term-head">
+                <h2>{term.label}</h2>
+                <p class="term-units">
+                  {term.units}/{NORMAL_TERM_UNITS} units
+                </p>
+              </div>
+              <div class="term-bar" role="img" aria-label={termBarLabel(segments)}>
+                {segments.map((s, i) => (
+                  <span
+                    key={s.key}
+                    class="term-bar-segment"
+                    data-family={s.key === "none" ? "neutral" : s.key}
+                    style={{ width: `${widths[i]}%` }}
+                  />
+                ))}
+              </div>
               {term.overload && (
                 <p role="status" class="badge badge-overload">
                   Heavier load than usual for one semester

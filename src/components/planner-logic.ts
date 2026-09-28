@@ -1,6 +1,6 @@
 import { matchesFilter } from "../lib/domain/filters";
 import type { CourseFilter, Family, ReqExpr } from "../lib/domain/types";
-import type { GroupView, PlacementView, PlanView } from "../lib/domain/view";
+import { NORMAL_TERM_UNITS, type GroupView, type PlacementView, type PlanView } from "../lib/domain/view";
 
 export interface DropTarget {
   term: number;
@@ -225,6 +225,42 @@ export function familyOf(view: PlanView, groupId: string | null): Family {
     return null;
   }
   return (groupId !== null && search(view.groups)) || "neutral";
+}
+
+// "none" is a course counting toward nothing (e.g. an incompatibility's
+// loser) — kept apart from neutral so the bar's text can say so.
+export type TermSegmentKey = Family | "none";
+export interface TermSegment {
+  key: TermSegmentKey;
+  units: number;
+}
+
+// A term's units by family, counting each course once per term it occupies
+// so the segments always sum to TermView.units.
+export function termFamilyUnits(view: PlanView, term: number): TermSegment[] {
+  const units = new Map<TermSegmentKey, number>();
+  for (const p of view.placements) {
+    if (p.term > term || term > p.lastTerm) continue;
+    const key: TermSegmentKey = p.countsToward ? familyOf(view, p.countsToward) : "none";
+    units.set(key, (units.get(key) ?? 0) + (view.courses[p.code]?.units ?? 0));
+  }
+  return [...FAMILY_ORDER, "none" as const]
+    .map((key) => ({ key, units: units.get(key) ?? 0 }))
+    .filter((s) => s.units > 0);
+}
+
+// Percent widths against a normal term, so unused capacity shows as empty
+// track; an overloaded term scales to its own total instead of spilling.
+export function termBarWidths(segments: readonly { units: number }[], termUnits: number): number[] {
+  const scale = Math.max(NORMAL_TERM_UNITS, termUnits);
+  return segments.map((s) => (s.units / scale) * 100);
+}
+
+export function termBarLabel(segments: readonly TermSegment[]): string {
+  if (segments.length === 0) return "No units planned";
+  return segments
+    .map((s) => `${s.units} units ${s.key === "none" ? "not counting" : FAMILY_LABELS[s.key]}`)
+    .join(", ");
 }
 
 export interface UnitsLabel {

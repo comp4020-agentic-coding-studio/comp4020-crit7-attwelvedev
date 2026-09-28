@@ -16,6 +16,9 @@ import {
   overlayEdges,
   placedStatus,
   progressSegments,
+  termBarLabel,
+  termBarWidths,
+  termFamilyUnits,
   unitsLabel,
   unplacedCount,
   verifyBadgeText,
@@ -376,5 +379,83 @@ describe("familyOf", () => {
   it("orders and labels every family", () => {
     expect(FAMILY_ORDER).toEqual(["foundations", "specialisation", "advanced", "ict", "capstone", "neutral"]);
     expect(new Set(Object.keys(FAMILY_LABELS))).toEqual(new Set(FAMILY_ORDER));
+  });
+});
+
+describe("termFamilyUnits", () => {
+  const view = buildPlanView(cat, AACOM_2027, {
+    ...emptyPlan(),
+    choices: { spec: "arin" },
+    placements: [
+      { code: "COMP1100", term: 0, pinnedGroupId: null },
+      // Incompatible with COMP1100, so the loser counts toward nothing.
+      { code: "COMP1130", term: 0, pinnedGroupId: null },
+      { code: "INFS1001", term: 0, pinnedGroupId: null },
+      // Two semesters: occupies terms 5 and 6.
+      { code: "COMP4550", term: 5, pinnedGroupId: null },
+    ],
+  });
+
+  it("accounts for every unit a term holds", () => {
+    expect(view.terms).toHaveLength(8);
+    for (const term of view.terms) {
+      const sum = termFamilyUnits(view, term.index).reduce((total, s) => total + s.units, 0);
+      expect(sum, term.label).toBe(term.units);
+    }
+  });
+
+  it("splits a term by family, with a loser under none", () => {
+    const segments = termFamilyUnits(view, 0);
+    expect(segments).toContainEqual({ key: "foundations", units: 6 });
+    expect(segments).toContainEqual({ key: "none", units: 6 });
+  });
+
+  it("counts a two-semester course in both of its terms", () => {
+    const placement = view.placements.find((p) => p.code === "COMP4550")!;
+    const key = familyOf(view, placement.countsToward);
+    const units = view.courses.COMP4550!.units;
+    expect(termFamilyUnits(view, 5)).toContainEqual({ key, units });
+    expect(termFamilyUnits(view, 6)).toContainEqual({ key, units });
+  });
+
+  it("orders keys by family, then none, and omits empty ones", () => {
+    const order = [...FAMILY_ORDER, "none"];
+    for (const term of view.terms) {
+      const segments = termFamilyUnits(view, term.index);
+      const positions = segments.map((s) => order.indexOf(s.key));
+      expect(positions).toEqual([...positions].sort((a, b) => a - b));
+      expect(segments.filter((s) => s.units === 0)).toEqual([]);
+    }
+    expect(termFamilyUnits(view, 1)).toEqual([]);
+  });
+});
+
+describe("termBarWidths", () => {
+  it("measures against a normal 24-unit term", () => {
+    expect(termBarWidths([{ units: 12 }, { units: 6 }], 18)).toEqual([50, 25]);
+  });
+
+  it("scales an overloaded term to its own total", () => {
+    expect(termBarWidths([{ units: 18 }, { units: 12 }], 30)).toEqual([60, 40]);
+  });
+});
+
+describe("termBarLabel", () => {
+  it("reads out each segment, with none as not counting", () => {
+    expect(
+      termBarLabel([
+        { key: "foundations", units: 12 },
+        { key: "ict", units: 6 },
+        { key: "none", units: 6 },
+      ]),
+    ).toBe("12 units Foundations, 6 units ICT, 6 units not counting");
+  });
+
+  it("says an empty term has nothing planned", () => {
+    expect(termBarLabel([])).toBe("No units planned");
+  });
+
+  it("labels neutral as Electives", () => {
+    expect(termBarLabel([{ key: "neutral", units: 6 }])).toBe("6 units Electives");
   });
 });

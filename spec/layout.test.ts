@@ -2578,6 +2578,36 @@ describe("family colours", { timeout: 30_000 }, () => {
     });
   });
 
+  it("draws a per-term family bar with a text equivalent", async () => {
+    await withPlan(desktop, async (page) => {
+      const bars = page.locator("[data-term] .term-bar");
+      expect(await bars.count()).toBe(8);
+      for (const bar of await bars.all()) {
+        expect(await bar.getAttribute("role")).toBe("img");
+        expect(await bar.getAttribute("aria-label")).toMatch(/^(\d|No units planned$)/);
+      }
+      const first = page.locator('[data-term="0"] .term-bar');
+      const segments = first.locator(".term-bar-segment");
+      expect(await segments.count()).toBeGreaterThan(0);
+      const { sum, width } = await first.evaluate((el) => ({
+        sum: [...el.querySelectorAll(".term-bar-segment")].reduce((t, s) => t + s.getBoundingClientRect().width, 0),
+        width: el.clientWidth,
+      }));
+      expect(Math.abs(sum - width)).toBeLessThanOrEqual(1);
+      const familyColours = [
+        FOUNDATIONS,
+        "rgb(140, 95, 201)",
+        "rgb(58, 143, 194)",
+        "rgb(176, 64, 125)",
+        "rgb(61, 70, 80)",
+        NEUTRAL,
+      ];
+      expect(familyColours).toContain(
+        await segments.first().evaluate((el) => getComputedStyle(el).backgroundColor),
+      );
+    });
+  });
+
   it("stays axe-clean", async () => {
     await withPlan(desktop, async (page) => {
       expect(await axeViolations(page)).toEqual([]);

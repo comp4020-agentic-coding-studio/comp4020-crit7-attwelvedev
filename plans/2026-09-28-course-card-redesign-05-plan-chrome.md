@@ -94,7 +94,11 @@ Promise<ApiResult>`.
 **`src/components/Timeline.tsx`**, term header: `<h2>{term.label}</h2><p
 class="term-units">{term.units}/{NORMAL_TERM_UNITS} units</p>`. Phase 03
 (Task 10) may already have added `div.term-bar` after it. Either order
-works, because this phase only adds inside `p.term-units`.
+works, because this phase only adds inside `p.term-units`. **If Phase 03
+has run,** the h2 and `p.term-units` sit together in `div.term-head`, a
+flex row with the count right-aligned on the heading's line, so
+"Completed" shares that line. Task 15's header-height check is what
+catches it wrapping in a 15rem column.
 
 **`src/components/Sidebar.tsx`:**
 - `<aside id="requirements" …>` holds `<button type="button"
@@ -146,8 +150,9 @@ works, because this phase only adds inside `p.term-units`.
 
 ### Interfaces from earlier phases (exact)
 
-None required. If Phase 03 has run, `div.term-bar` follows `p.term-units`.
-Nothing here depends on it.
+None required. If Phase 03 has run, `div.term-head` (h2 +
+`p.term-units`, one flex row) is followed by `div.term-bar`. Only
+Task 15's placement depends on it (see above).
 
 ## 4. Approach
 

@@ -388,10 +388,14 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
 
 ### Task 10: Per-term family bar under each term's unit count
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `termFamilyUnits`, `termBarWidths` and `termBarLabel`.
   - Render `div.term-bar[role=img]` with one segment per family in each
     term header.
+  - Move "N/24 units" onto the heading's line, right-aligned like a
+    card's units (user ruling, 2026-09-28: the bar as first specified
+    moved the timeline down 10.8px, over this task's 10px limit; putting
+    the count beside the heading saves a whole line instead).
 - **Files touched:**
   - `src/components/planner-logic.ts`
   - `src/components/planner-logic.test.ts`
@@ -453,7 +457,9 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
       `../lib/domain/view`).
     - `termBarLabel` joins `${units} units ${key === "none" ? "not
       counting" : FAMILY_LABELS[key]}` with ", ".
-  - `Timeline.tsx`: after `p.term-units`:
+  - `Timeline.tsx`: wrap the existing `<h2>` and `p.term-units` in
+    `<div class="term-head">` (the h2 and its text are unchanged). Then,
+    after that div:
     ```tsx
     const segments = termFamilyUnits(view, term.index);
     const widths = termBarWidths(segments, term.units);
@@ -471,14 +477,19 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
     - `.term-bar-segment { background: var(--family); }`
     - `.term-bar-segment + .term-bar-segment { border-inline-start: 1px
       solid var(--surface); }`
-    - `.term-units` margin becomes `0 0 0.3rem`.
+    - `.term-head { display: flex; align-items: baseline; gap: 0.5rem;
+      margin-block-end: 0.3rem; }`, with `.term-head h2` margin 0;
+    - `.term-units` margin becomes `0 0 0 auto`, plus
+      `font-variant-numeric: tabular-nums` (as `.course-card-unit-count`).
 - **Refactor:** none.
 - **Acceptance criteria:**
   - Tests pass.
   - `pnpm check` is green.
   - The timeline top at 390×844 moves down by at most 10px versus Task 9
-    (bar plus margin). Record it in the commit message: it counts against
-    E10's budget.
+    (bar plus margin, less the line the count no longer takes; expected
+    to move up). Record the measured change in the commit message: it
+    counts against E10's budget. Task 9 baseline: term 0's first card
+    top at 330.5px.
 - **Depends on:** Task 7.
 
 ## 6. Phase Definition of Done
