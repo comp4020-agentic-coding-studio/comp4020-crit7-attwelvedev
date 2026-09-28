@@ -1,4 +1,5 @@
 import { matchesFilter } from "../lib/domain/filters";
+import { termSpanLabel } from "../lib/domain/terms";
 import type { CourseFilter, Family, ReqExpr } from "../lib/domain/types";
 import { NORMAL_TERM_UNITS, type GroupView, type PlacementView, type PlanView } from "../lib/domain/view";
 
@@ -23,8 +24,12 @@ export function dropTargets(view: PlanView, code: string, hardBlockedOverride?: 
   });
 }
 
+export interface MenuTarget extends DropTarget {
+  label: string;
+}
+
 export interface MenuTargets {
-  targets: DropTarget[];
+  targets: MenuTarget[];
   blockedReasons: string[];
 }
 
@@ -35,12 +40,17 @@ export interface MenuTargets {
 export function menuTargets(
   view: PlanView,
   code: string,
-  options: { currentTerm?: number; hardBlockedOverride?: Record<number, string> } = {},
+  options: { currentTerm?: number; hardBlockedOverride?: Record<number, string>; twoSemester?: boolean } = {},
 ): MenuTargets {
   const allTargets = dropTargets(view, code, options.hardBlockedOverride).filter(
     (target) => target.term !== options.currentTerm,
   );
-  const targets = allTargets.filter((target) => target.allowed);
+  // A two-semester course's option names both semesters it will take up,
+  // so choosing S1 2028 doesn't hide that S2 2028 goes with it.
+  const span = (options.twoSemester ?? view.courses[code]?.twoSemester ?? false) ? 2 : 1;
+  const targets = allTargets
+    .filter((target) => target.allowed)
+    .map((target) => ({ ...target, label: termSpanLabel(target.term, span) }));
   const blockedReasons = Array.from(
     new Set(allTargets.filter((target) => !target.allowed && target.reason).map((target) => target.reason as string)),
   );

@@ -410,6 +410,27 @@ describe("menuTargets", () => {
     const { blockedReasons } = menuTargets(view, "PSYC1004", { hardBlockedOverride: { 0: "x", 1: "x" } });
     expect(blockedReasons).toEqual(["x"]);
   });
+
+  it("labels a one-semester course's targets with the term", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const { targets } = menuTargets(view, "COMP3630");
+    expect(targets.length).toBeGreaterThan(0);
+    expect(targets.every((t) => t.label === view.terms[t.term].label)).toBe(true);
+  });
+
+  it("labels a two-semester course's targets with the range it occupies", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const { targets } = menuTargets(view, "COMP4550");
+    expect(targets.length).toBeGreaterThan(0);
+    expect(targets.every((t) => /^S[12] \d{4} – S[12] \d{4}$/.test(t.label))).toBe(true);
+    expect(targets.find((t) => t.term === 6)?.label).toBe("S1 2030 – S2 2030");
+  });
+
+  it("takes twoSemester from the caller for a course outside the plan", () => {
+    const view = buildPlanView(cat, AACOM_2027, emptyPlan());
+    const { targets } = menuTargets(view, "PSYC1004", { hardBlockedOverride: {}, twoSemester: true });
+    expect(targets[0].label).toBe("S1 2027 – S2 2027");
+  });
 });
 
 describe("verifyBadgeText", () => {

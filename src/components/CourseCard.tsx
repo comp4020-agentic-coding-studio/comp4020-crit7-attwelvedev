@@ -102,7 +102,10 @@ export default function CourseCard({
 
   const family = placement.countsToward ? familyOf(view, placement.countsToward) : null;
 
-  const { targets, blockedReasons } = menuTargets(view, placement.code, { currentTerm: placement.term });
+  const { targets, blockedReasons } = menuTargets(view, placement.code, {
+    currentTerm: placement.term,
+    twoSemester: course?.twoSemester,
+  });
 
   const stateText = {
     hard: "Blocked",
@@ -252,7 +255,7 @@ export default function CourseCard({
                         void move(target.term);
                       }}
                     >
-                      {view.terms[target.term].label}
+                      {target.label}
                     </button>
                   </li>
                 ))}

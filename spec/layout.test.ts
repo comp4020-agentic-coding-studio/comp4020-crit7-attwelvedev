@@ -23,8 +23,9 @@ async function withPlan<T>(viewport: Viewport, check: (page: Page) => Promise<T>
   }
 }
 
-// Creates an editable plan with `code` placed in term 0 and returns its id.
-async function planWithPlacement(code: string): Promise<string> {
+// Creates an editable plan with `code` placed in `term` (default 0) and
+// returns its id.
+async function planWithPlacement(code: string, term = 0): Promise<string> {
   const created = await fetch(new URL("/api/plans", baseUrl), {
     method: "POST",
     headers: { origin: baseUrl },
@@ -34,7 +35,7 @@ async function planWithPlacement(code: string): Promise<string> {
   const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
     method: "POST",
     headers: { origin: baseUrl, "content-type": "application/json" },
-    body: JSON.stringify({ code, term: 0 }),
+    body: JSON.stringify({ code, term }),
   });
   expect(placed.status).toBe(200);
   return id;
@@ -631,6 +632,62 @@ describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
     const page = await openPage(browser, planUrl(), desktop, reqsCollapsed);
     try {
       expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("two-semester labels", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const range = /^S[12] \d{4} – S[12] \d{4}$/;
+
+  it("search's Place in… lists ranges for a two-semester course", async () => {
+    const created = await fetch(new URL("/api/plans", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      redirect: "manual",
+    });
+    const id = created.headers.get("location")!.split("/").pop()!;
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.fill(".course-search input", "COMP4550");
+      await page.click(".course-search button[type=submit]");
+      const card = page.locator(".course-search .course-card").filter({ hasText: "COMP4550" });
+      await card.getByRole("button", { name: "Place in…" }).click();
+      const items = page.getByRole("menu", { name: "Place COMP4550 in" }).getByRole("menuitem");
+      await items.first().waitFor();
+      const texts = await items.allInnerTexts();
+      expect(texts.length).toBeGreaterThan(0);
+      for (const text of texts) expect(text).toMatch(range);
+      // The list is as narrow as its toggle, so a range must not wrap.
+      const lines = await items.evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const text = document.createRange();
+          text.selectNodeContents(button);
+          return new Set([...text.getClientRects()].map((rect) => Math.round(rect.top))).size;
+        }),
+      );
+      expect(lines, JSON.stringify(lines)).toEqual(lines.map(() => 1));
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("Move to lists ranges for a placed two-semester course", async () => {
+    const id = await planWithPlacement("COMP4550", 4);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      // Term 4 starts off-screen, and any scroll closes the menu, so bring
+      // the card into view before opening it rather than letting click scroll.
+      const card = page.locator('[data-placed="COMP4550"]');
+      await card.scrollIntoViewIfNeeded();
+      await card.getByRole("button", { name: "More options for COMP4550" }).click();
+      const buttons = page.getByRole("list", { name: "Move COMP4550 to" }).getByRole("button");
+      await buttons.first().waitFor();
+      const texts = await buttons.allInnerTexts();
+      expect(texts.length).toBeGreaterThan(0);
+      for (const text of texts) expect(text).toMatch(range);
     } finally {
       await page.close();
     }

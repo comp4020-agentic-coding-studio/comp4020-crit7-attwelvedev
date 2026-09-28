@@ -1716,11 +1716,14 @@ button.course-card-allocation:focus-visible {
   min-width: 9rem;
 }
 
+/* No wrapping: the list is only as wide as the toggle, so without this a
+   two-semester range ("S2 2029 – S1 2030") breaks mid-label. */
 .place-in-menu ul button {
   width: 100%;
   border: none;
   text-align: start;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .place-in-menu ul button:hover:not(:disabled) {

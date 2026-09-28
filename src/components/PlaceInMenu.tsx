@@ -11,6 +11,9 @@ interface Props {
   // the plan's tree — dropTargets can't look up its hardBlocked map from
   // the plan view, so the caller supplies it directly.
   hardBlockedOverride?: Record<number, string>;
+  // Likewise for a search result: whether each option should name the two
+  // semesters the course would take up.
+  twoSemester?: boolean;
   // Controlled from Planner.tsx, keyed by course code, so opening one
   // menu anywhere on the page closes whichever other one was open.
   open: boolean;
@@ -23,13 +26,14 @@ export default function PlaceInMenu({
   onPlace,
   disabled = false,
   hardBlockedOverride,
+  twoSemester,
   open,
   onOpenChange,
 }: Props) {
   // Only offer terms that are actually reachable — the same rule a drag
   // enforces (a disallowed drop is refused) — rather than listing every
   // term with the blocked ones merely marked unusable.
-  const { targets, blockedReasons } = menuTargets(view, code, { hardBlockedOverride });
+  const { targets, blockedReasons } = menuTargets(view, code, { hardBlockedOverride, twoSemester });
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Same as MoreOptions: any press outside closes it — including one on
@@ -74,7 +78,7 @@ export default function PlaceInMenu({
                 onOpenChange(false);
               }}
             >
-              {view.terms[target.term].label}
+              {target.label}
             </button>
           </li>
         ))}

@@ -102,6 +102,7 @@ export default function AvailableCourseCard({
             onPlace={place}
             disabled={pending}
             hardBlockedOverride={courseOverride?.hardBlocked}
+            twoSemester={course.twoSemester}
             open={openMenuCode === code}
             onOpenChange={(open) => onMenuOpenChange(code, open)}
           />

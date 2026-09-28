@@ -170,14 +170,14 @@ lastTerm: number;        // existing: term + span - 1 (8 for a final-term two-se
 
 ### Task 3: Range labels in "Place in…" and "Move to"
 
-- [ ] **Description:** `menuTargets` returns a `label` per target, which is
+- [x] **Description:** `menuTargets` returns a `label` per target, which is
   the range for a two-semester course. `PlaceInMenu` and `CourseCard`
   render `target.label`. `AvailableCourseCard` passes the course's
   `twoSemester` so search results get ranges too.
 - **Files touched:** `src/components/planner-logic.ts`,
   `src/components/planner-logic.test.ts`, `src/components/PlaceInMenu.tsx`,
   `src/components/AvailableCourseCard.tsx`, `src/components/CourseCard.tsx`,
-  `spec/layout.test.ts`.
+  `src/styles.css`, `spec/layout.test.ts`.
 - **Tests first (red):**
   - `planner-logic.test.ts` `describe("menuTargets")`:
     - `"labels a one-semester course's targets with the term"`: COMP3630,
@@ -195,10 +195,15 @@ lastTerm: number;        // existing: term + span - 1 (8 for a final-term two-se
         without placing), open it at 1920×1080, search "COMP4550";
       - click the result card's "Place in…" button;
       - the `menu` named "Place COMP4550 in" has `menuitem`s whose texts
-        all match `/^S[12] \d{4} – S[12] \d{4}$/`, with count > 0.
+        all match `/^S[12] \d{4} – S[12] \d{4}$/`, with count > 0;
+      - each menuitem's text sits on one line (added in execution, see
+        below).
     - `"Move to lists ranges for a placed two-semester course"`:
-      - place COMP4550 at term 4 in a fresh plan;
-      - open its More options;
+      - place COMP4550 at term 4 in a fresh plan (`planWithPlacement`
+        gains an optional `term = 0` argument);
+      - scroll the card into view, then open its More options (term 4 starts
+        off-screen at 1920, and MoreOptions closes on any scroll, so letting
+        `click` scroll would close the menu it just opened);
       - every button in the list named "Move COMP4550 to" matches the same
         regex.
 - **Implementation (green):**
@@ -220,6 +225,10 @@ lastTerm: number;        // existing: term + span - 1 (8 for a final-term two-se
   - `AvailableCourseCard`: pass `twoSemester={course.twoSemester}`.
   - `CourseCard`: pass `twoSemester: course?.twoSemester` to `menuTargets`
     and render `{target.label}`.
+  - `src/styles.css`: `white-space: nowrap` on `.place-in-menu ul button`.
+    *Added in execution (ruled 2026-09-28):* the Place in… list is only as
+    wide as its toggle (`min-width: 9rem`, 144px), so every range wrapped
+    to two lines (59px items) at both 1920 and 390.
 - **Refactor:** none.
 - **Acceptance criteria:**
   - The new unit and spec tests pass.
