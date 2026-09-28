@@ -300,11 +300,11 @@ lastTerm: number;        // existing: term + span - 1 (8 for a final-term two-se
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 3–4 complete, their tests pass, and each is committed
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Menus and placed rows show ranges and the straddle wording in the spec tests above
-- [ ] Tick Phase 02 in overview §5 and commit
+- [x] Tasks 3–4 complete, their tests pass, and each is committed
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Menus and placed rows show ranges and the straddle wording in the spec tests above
+- [x] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
