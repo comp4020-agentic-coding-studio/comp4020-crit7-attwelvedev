@@ -28,6 +28,7 @@ import {
   prereqCodes,
   progressBarNumbers,
   progressSegments,
+  stripCells,
   termBarLabel,
   termBarWidths,
   termFamilyUnits,
@@ -35,6 +36,7 @@ import {
   unmarkedStatus,
   unplacedCount,
   verifyBadgeText,
+  weightLabel,
 } from "./planner-logic";
 
 function loadRealCatalogue(): Catalogue {
@@ -803,5 +805,98 @@ describe("postgradLabel", () => {
 
   it("leaves undergraduate codes alone", () => {
     expect(postgradLabel("COMP2100")).toBe("COMP2100");
+  });
+});
+
+describe("stripCells", () => {
+  const example = buildPlanView(cat, AACOM_2027, EXAMPLE_PLAN);
+  const fresh = buildPlanView(cat, AACOM_2027, emptyPlan());
+  const cells = stripCells(example, "COMP2100", example.courses.COMP2100);
+
+  it("gives one cell per term, in term order, with that term's units", () => {
+    expect(cells.map((c) => c.term)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(cells.map((c) => c.units)).toEqual(example.terms.map((t) => t.units));
+    expect(cells[0]).toMatchObject({ label: "S1 2027", year: 2027, session: "S1" });
+    expect(cells[3]).toMatchObject({ label: "S2 2028", year: 2028, session: "S2" });
+  });
+
+  it("marks the course's own term", () => {
+    expect(cells[2].state).toBe("here");
+    expect(cells[2].allowed).toBe(false);
+  });
+
+  it("takes allowed and reason from dropTargets", () => {
+    const targets = dropTargets(example, "COMP2100");
+    for (const cell of cells.filter((c) => c.state !== "here")) {
+      expect(cell.allowed).toBe(targets[cell.term].allowed);
+      expect(cell.reason).toBe(targets[cell.term].reason);
+    }
+  });
+
+  it("says a term its prerequisites rule out needs prerequisites, not that it isn't offered", () => {
+    // COMP2100 can't go before S1 2028, but it runs in S1 2027.
+    expect(example.courses.COMP2100.hardBlocked[0]).toBeTruthy();
+    expect(cells[0].state).toBe("needs-prereqs");
+  });
+
+  it("keeps each cell's own state on a read-only plan", () => {
+    // Every term is refused there ("This plan is read-only"); the state
+    // still says whether the course runs.
+    expect(cells[3].allowed).toBe(false);
+    expect(cells[3].state).toBe("offered");
+  });
+
+  it("says a two-semester course can't start in the last term", () => {
+    const card = fresh.courses.COMP4550;
+    expect(stripCells(fresh, "COMP4550", card)[7].state).toBe("cant-start");
+  });
+
+  it("allows completed terms", () => {
+    const view = buildPlanView(cat, AACOM_2027, { ...emptyPlan(), cutoff: 4 });
+    const cell = stripCells(view, "COMP1100", view.courses.COMP1100)[0];
+    expect(cell.state).toBe("offered");
+    expect(cell.allowed).toBe(true);
+  });
+
+  it("says a term the course doesn't run in is not offered, with the reason", () => {
+    const cell = stripCells(fresh, "COMP1130", fresh.courses.COMP1130)[1];
+    expect(cell.state).toBe("not-offered");
+    expect(cell.allowed).toBe(false);
+    expect(cell.reason).toContain("isn't offered in S2 2027");
+  });
+
+  it("marks projected terms", () => {
+    const card = fresh.courses.COMP1100;
+    expect(card.projectedTerms.length).toBeGreaterThan(0);
+    const term = card.projectedTerms[0];
+    expect(stripCells(fresh, "COMP1100", card)[term].state).toBe("projected");
+  });
+
+  it("says unknown when the course has no published offering", () => {
+    const card = { ...fresh.courses.COMP1100, offeringUnknown: true, projectedTerms: [] };
+    expect(stripCells(fresh, "COMP1100", card).every((c) => c.state === "unknown")).toBe(true);
+  });
+
+  it("names the action Move for a placed course and Place for one that isn't", () => {
+    expect(cells[0].actionLabel).toBe("Move to S1 2027");
+    expect(stripCells(fresh, "COMP1100", fresh.courses.COMP1100)[0].actionLabel).toBe("Place in S1 2027");
+  });
+
+  it("marks a two-semester course's second term as part 2", () => {
+    const comp4550 = stripCells(example, "COMP4550", example.courses.COMP4550);
+    expect(comp4550[6].state).toBe("here");
+    expect(comp4550[7].state).toBe("part2");
+    expect(comp4550[7].allowed).toBe(false);
+  });
+});
+
+describe("weightLabel", () => {
+  it("adds % to a bare number", () => {
+    expect(weightLabel("30")).toBe("30%");
+    expect(weightLabel("12.5")).toBe("12.5%");
+  });
+
+  it("shows anything else as written", () => {
+    expect(weightLabel("Hurdle")).toBe("Hurdle");
   });
 });

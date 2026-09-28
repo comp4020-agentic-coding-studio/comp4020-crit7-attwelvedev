@@ -11,6 +11,8 @@ interface Props {
   onLocateCourse: (code: string, part?: 2) => void;
   // Opens this course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // This course is the one open in the details sidebar.
+  current: boolean;
 }
 
 // A course already on the timeline, in one or two lines instead of a full
@@ -24,6 +26,7 @@ export default function PlacedCourseRow({
   placement,
   onLocateCourse,
   onOpenDetails,
+  current,
 }: Props) {
   const course = courseOverride ?? view.courses[code];
   if (!course) return null;
@@ -51,6 +54,7 @@ export default function PlacedCourseRow({
         class="placed-row-title"
         title={course.title}
         aria-label={`${course.title}, details`}
+        aria-current={current ? "true" : undefined}
         onClick={() => onOpenDetails(code)}
       >
         {course.title}

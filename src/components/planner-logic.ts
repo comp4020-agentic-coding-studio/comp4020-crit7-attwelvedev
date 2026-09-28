@@ -1,7 +1,14 @@
+import { hardBlockKind } from "../lib/domain/feasibility";
 import { matchesFilter } from "../lib/domain/filters";
-import { termSpanLabel } from "../lib/domain/terms";
+import { TERMS, termSpanLabel } from "../lib/domain/terms";
 import type { CheckAnswer, CourseFilter, Family, ReqExpr } from "../lib/domain/types";
-import { NORMAL_TERM_UNITS, type GroupView, type PlacementView, type PlanView } from "../lib/domain/view";
+import {
+  type CourseCard,
+  NORMAL_TERM_UNITS,
+  type GroupView,
+  type PlacementView,
+  type PlanView,
+} from "../lib/domain/view";
 
 export interface DropTarget {
   term: number;
@@ -507,4 +514,65 @@ export function completedReadout(cutoff: number, terms: readonly { label: string
     short: `Completed through ${last}`,
     full: `Completed through ${last} — planned from ${terms[cutoff].label} onward.${boundary}`,
   };
+}
+
+export interface StripCell {
+  term: number;
+  label: string;
+  year: number;
+  session: "S1" | "S2";
+  state: "here" | "part2" | "offered" | "projected" | "not-offered" | "needs-prereqs" | "cant-start" | "unknown";
+  units: number;
+  allowed: boolean;
+  reason: string | null;
+  actionLabel: string;
+}
+
+// The details sidebar's "When it runs" strip: one cell per term. The state
+// says what's true of the course then, from the catalogue alone, so a
+// read-only plan shows the same states; whether it may go there, and why
+// not, comes from dropTargets, the same rule as dragging. A term that runs
+// the course but is ruled out by its prerequisites says so, rather than
+// reading as "not offered".
+export function stripCells(view: PlanView, code: string, card: CourseCard): StripCell[] {
+  const placement = view.placements.find((p) => p.code === code) ?? null;
+  const targets = dropTargets(view, code, card.hardBlocked);
+  return view.terms.map((term, i) => {
+    const { year, session } = TERMS[i]!;
+    const own = placement !== null && (i === placement.term || (placement.span === 2 && i === placement.lastTerm));
+    const blocked = card.hardBlocked[i];
+    const kind = blocked ? hardBlockKind(blocked) : null;
+    const state: StripCell["state"] = own
+      ? i === placement!.term
+        ? "here"
+        : "part2"
+      : kind === "not-offered"
+        ? "not-offered"
+        : kind === "two-semester"
+          ? "cant-start"
+          : kind === "requisites"
+            ? "needs-prereqs"
+            : card.offeringUnknown
+              ? "unknown"
+              : card.projectedTerms.includes(i)
+                ? "projected"
+                : "offered";
+    return {
+      term: i,
+      label: term.label,
+      year,
+      session,
+      state,
+      units: term.units,
+      allowed: own ? false : targets[i].allowed,
+      reason: own ? null : targets[i].reason,
+      actionLabel: `${placement ? "Move to" : "Place in"} ${term.label}`,
+    };
+  });
+}
+
+// P&C gives weights as bare numbers ("30"); anything else ("Hurdle") is
+// shown as written.
+export function weightLabel(weight: string): string {
+  return /^\d+(\.\d+)?$/.test(weight) ? `${weight}%` : weight;
 }

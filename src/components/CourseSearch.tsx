@@ -24,6 +24,8 @@ interface Props {
   onExpand: () => void;
   // Opens this course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // The course open in the details sidebar, whose titles say so.
+  openCode: string | null;
 }
 
 // Same shape the search endpoint uses to decide whether to fetch from P&C.
@@ -65,6 +67,7 @@ export default function CourseSearch({
   onToggleCompact,
   onExpand,
   onOpenDetails,
+  openCode,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CourseCardData[]>([]);
@@ -153,6 +156,7 @@ export default function CourseSearch({
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
               onOpenDetails={onOpenDetails}
+              current={openCode === course.code}
             />
           ))}
         </ul>
@@ -168,6 +172,7 @@ export default function CourseSearch({
               placement={placedOf(course.code)!}
               onLocateCourse={onLocateCourse}
               onOpenDetails={onOpenDetails}
+              current={openCode === course.code}
             />
           ))}
         </ul>

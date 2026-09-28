@@ -3697,7 +3697,9 @@ describe("details sidebar", { timeout: 30_000 }, () => {
       await detailsPanel(page).getByRole("button", { name: "Remove from plan" }).click();
       await expect.poll(() => page.locator('[data-placed="COMP2100"]').count()).toBe(0);
       expect(await detailsPanel(page).isVisible()).toBe(true);
-      expect(await detailsPanel(page).textContent()).toContain("Not planned");
+      await expect.poll(() => detailsPanel(page).locator(".details-pills").textContent()).toContain("Not in your plan");
+      // Nothing left to pin or remove, so the section goes.
+      expect(await heading(page, "In your plan").count()).toBe(0);
     } finally {
       await page.close();
     }
@@ -3710,24 +3712,26 @@ describe("details sidebar", { timeout: 30_000 }, () => {
       await openFromCard(page, "COMP2100");
       const panel = detailsPanel(page);
       expect(await panel.locator(".details-pills").textContent()).toContain("Planned S1 2028");
-      // The drawer sits over the timeline's end, so bring the card out from
-      // under it first, as a student would: a scroll closes an open menu.
-      await page.evaluate(
-        () =>
-          new Promise<void>((resolve) => {
-            const card = document.querySelector('[data-placed="COMP2100"]')!.getBoundingClientRect();
-            const drawer = document.querySelector('aside[aria-label="Course details"]')!.getBoundingClientRect();
-            const scroller = document.querySelector(".timeline-scroll")!;
-            // Its scroll event has to land before the menu opens.
-            scroller.addEventListener("scroll", () => resolve(), { once: true });
-            scroller.scrollLeft += card.right - drawer.left + 16;
-          }),
-      );
+      // Opening Details scrolls the card out from under the drawer. Let that
+      // scroll finish first: any scroll closes an open card menu.
+      const settled = () =>
+        page.evaluate(
+          () =>
+            new Promise<boolean>((resolve) => {
+              const scroller = document.querySelector(".timeline-scroll")!;
+              const before = scroller.scrollLeft;
+              setTimeout(() => {
+                const card = document.querySelector('[data-placed="COMP2100"]')!.getBoundingClientRect();
+                const drawer = document.querySelector('aside[aria-label="Course details"]')!.getBoundingClientRect();
+                resolve(scroller.scrollLeft === before && card.right <= drawer.left);
+              }, 150);
+            }),
+        );
+      await expect.poll(settled).toBe(true);
       await page.getByRole("button", { name: "More options for COMP2100" }).click();
       await page.locator('[data-placed="COMP2100"] .card-menu-terms').getByRole("button", { name: "S2 2028" }).click();
       await expect.poll(() => page.locator('[data-term="3"] [data-placed="COMP2100"]').count()).toBe(1);
       await expect.poll(() => panel.locator(".details-pills").textContent()).toContain("Planned S2 2028");
-      expect(await panel.locator(".details-semester").textContent()).toContain("S2 2028");
     } finally {
       await page.close();
     }
@@ -3739,7 +3743,331 @@ describe("details sidebar", { timeout: 30_000 }, () => {
       const panel = detailsPanel(page);
       expect(await panel.isVisible()).toBe(true);
       expect(await panel.getByRole("button", { name: "Remove from plan" }).count()).toBe(0);
-      expect(await panel.getByRole("combobox", { name: "Counts toward" }).isDisabled()).toBe(true);
+      expect(await panel.locator(".pin-toggle").isDisabled()).toBe(true);
+      // Every cell is refused on a read-only plan, but each keeps its own
+      // state and reads at full strength.
+      const offered = panel.locator('.strip-cell[data-state="offered"]');
+      expect(await offered.count()).toBeGreaterThan(0);
+      expect(await offered.first().isDisabled()).toBe(true);
+      expect(await offered.first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the strip moves a course", async (width, height) => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP2100`, baseUrl).href, { width, height });
+    try {
+      const cell = detailsPanel(page).getByRole("button", { name: "Move to S2 2028", exact: true });
+      expect(await cell.isEnabled()).toBe(true);
+      await cell.click();
+      await expect.poll(() => page.locator('section[data-term="3"] [data-placed="COMP2100"]').count()).toBe(1);
+      expect(await detailsPanel(page).locator("h2").textContent()).toContain("COMP2100");
+      expect(await horizontalOverflow(page)).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i the strip refuses a non-offered term, saying why", async (width, height) => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP1130`, baseUrl).href, { width, height });
+    try {
+      const cell = detailsPanel(page).getByRole("button", { name: "Move to S2 2027", exact: true });
+      expect(await cell.isDisabled()).toBe(true);
+      expect(await cell.textContent()).toContain("Not offered");
+      const described = await cell.getAttribute("aria-describedby");
+      expect(described).toBeTruthy();
+      expect(await page.locator(`[id="${described}"]`).textContent()).toContain("isn't offered in S2 2027");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("lists the offerings under the strip", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, desktop);
+    try {
+      const table = detailsPanel(page).locator("table");
+      expect(await table.locator("th").allTextContents()).toEqual(["Semester", "Delivery", "Class number"]);
+      const row = table.locator("tr", { hasText: "5103" });
+      expect(await row.count()).toBe(1);
+      expect(await row.locator("td").allTextContents()).toEqual(["S1 2027", "In Person", "5103"]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("says in its footer where and when the details came from", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, desktop);
+    try {
+      const footer = detailsPanel(page).locator("footer");
+      const link = footer.getByRole("link", { name: "Open COMP2100 on Programs & Courses" });
+      expect(await link.getAttribute("href")).toBe("https://programsandcourses.anu.edu.au/2027/course/COMP2100");
+      expect(await footer.textContent()).toMatch(/Details from Programs & Courses 2027, updated \d{1,2} [A-Z][a-z]{2} \d{4}/);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i focus moves into the panel and back to what opened it", async (width, height) => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width, height });
+    try {
+      const title = page.locator('[data-placed="COMP1130"] .course-card-title');
+      await title.click();
+      await detailsPanel(page).waitFor();
+      await expect.poll(() => page.evaluate(() => document.activeElement?.tagName)).toBe("H2");
+      await detailsPanel(page).getByRole("button", { name: "Close details" }).click();
+      await expect.poll(() => detailsPanel(page).count()).toBe(0);
+      await expect.poll(() => title.evaluate((el) => el === document.activeElement)).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("Escape closes the panel when focus is inside it", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await openFromCard(page, "COMP1130");
+      await expect.poll(() => page.evaluate(() => document.activeElement?.tagName)).toBe("H2");
+      // From a control deeper in the panel, not just its heading.
+      await detailsPanel(page).getByRole("button", { name: "Remove from plan" }).focus();
+      await page.keyboard.press("Escape");
+      await expect.poll(() => detailsPanel(page).count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("opening a placed course from its row scrolls its card into view, leaving focus in the panel", async () => {
+    await withPlan(desktop, async (page) => {
+      const card = page.locator('[data-placed="COMP4550"]');
+      const scroller = page.locator(".timeline-scroll");
+      const inView = () =>
+        page.evaluate(() => {
+          const c = document.querySelector('[data-placed="COMP4550"]')!.getBoundingClientRect();
+          const s = document.querySelector(".timeline-scroll")!.getBoundingClientRect();
+          const d = document.querySelector('aside[aria-label="Course details"]')?.getBoundingClientRect();
+          return c.left >= s.left && c.right <= Math.min(s.right, d?.left ?? Infinity);
+        });
+      expect(await inView()).toBe(false);
+      const row = page.locator(".placed-row", { hasText: "COMP4550" }).first();
+      await row.locator(".placed-row-title").click();
+      await detailsPanel(page).waitFor();
+      await expect.poll(inView).toBe(true);
+      expect(await scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+      expect(await card.evaluate((el) => el.contains(document.activeElement))).toBe(false);
+      await expect.poll(() => page.evaluate(() => document.activeElement?.tagName)).toBe("H2");
+    });
+  });
+
+  it("marks the open course's card and row titles as current, and no other", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP1130", baseUrl).href, desktop);
+    try {
+      // Every course title is a button named "<title>, details"; menu options
+      // use aria-current for their own choice, which isn't this.
+      const current = page.locator('button[aria-current="true"][aria-label$=", details"]');
+      expect(
+        await current.evaluateAll((els) =>
+          els.map((el) => `${el.className}|${el.closest("[data-placed]")?.getAttribute("data-placed") ?? el.closest(".placed-row")?.querySelector(".placed-row-code")?.textContent}`),
+        ),
+      ).toEqual(["course-card-title|COMP1130", "placed-row-title|COMP1130"]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("offers Remove for a completed course too, as its card menu does", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const cutoff = await fetch(new URL(`/api/plans/${id}/cutoff`, baseUrl), {
+      method: "PUT",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ cutoff: 1 }),
+    });
+    expect(cutoff.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP1130`, baseUrl).href, desktop);
+    try {
+      const panel = detailsPanel(page);
+      expect(await panel.locator(".details-pills").textContent()).toContain("Completed S1 2027");
+      await panel.getByRole("button", { name: "Remove from plan" }).click();
+      await expect.poll(() => page.locator('[data-placed="COMP1130"]').count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i every strip cell keeps each label on one line", async (width, height) => {
+    // COMP4550 (two-semester, late) shows the longest words: In your plan,
+    // Part 2, Needs prereqs and Can't start.
+    const id = await planWithPlacement("COMP4550", 6);
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP4550`, baseUrl).href, { width, height });
+    try {
+      const cells = detailsPanel(page).locator(".strip-cell");
+      expect(await cells.count()).toBe(8);
+      const broken = await cells.evaluateAll((els) =>
+        els
+          .filter(
+            (cell) =>
+              cell.scrollWidth > cell.clientWidth ||
+              [...cell.querySelectorAll(".strip-state, .strip-units")].some((line) => {
+                // The text's own line boxes: a flex item reports one box
+                // however many lines its text takes.
+                const range = document.createRange();
+                range.selectNodeContents(line);
+                return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size > 1;
+              }),
+          )
+          .map((cell) => cell.textContent),
+      );
+      expect(broken).toEqual([]);
+      expect(await horizontalOverflow(page)).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("has no drag grip in its header", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP2100`, baseUrl).href, desktop);
+    try {
+      expect(await detailsPanel(page).locator(".course-card-grip").count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("picks Counts toward from the same popup as Completed through", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP2100`, baseUrl).href, desktop);
+    try {
+      const panel = detailsPanel(page);
+      expect(await panel.locator("select").count()).toBe(0);
+      const toggle = panel.locator(".pin-toggle");
+      expect(await toggle.textContent()).toContain("Counts toward: Automatic");
+      await toggle.click();
+      const options = panel.locator(".pin-panel button");
+      expect(await options.first().textContent()).toContain("Automatic");
+      expect(await options.first().getAttribute("aria-current")).toBe("true");
+      const group = (await options.nth(1).textContent())!.trim();
+      await options.nth(1).click();
+      await expect.poll(() => toggle.textContent()).toContain(`Counts toward: ${group}`);
+      expect(await toggle.getAttribute("aria-expanded")).toBe("false");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("tells a term its prerequisites rule out from one that doesn't run the course, with a legend", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP1130", baseUrl).href, desktop);
+    try {
+      const panel = detailsPanel(page);
+      expect(await panel.getByRole("button", { name: "Move to S2 2027", exact: true }).textContent()).toContain("Not offered");
+      const legend = panel.locator(".strip-legend");
+      for (const state of await panel.locator(".strip-cell").evaluateAll((els) => [...new Set(els.map((el) => el.getAttribute("data-state")))])) {
+        // Part 2 looks like, and is keyed as, "In your plan".
+        const keyed = state === "part2" ? "here" : state;
+        expect(await legend.locator(`[data-state="${keyed}"]`).count(), state!).toBe(1);
+      }
+    } finally {
+      await page.close();
+    }
+    const fresh = await openPage(browser, new URL(`/plan/${await planWithPlacement("COMP1130")}?course=COMP2100`, baseUrl).href, desktop);
+    try {
+      const cell = detailsPanel(fresh).getByRole("button", { name: "Place in S1 2027", exact: true });
+      expect(await cell.textContent()).toContain("Needs prereqs");
+      expect(await cell.isDisabled()).toBe(true);
+    } finally {
+      await fresh.close();
+    }
+  });
+
+  it("draws the tree with guide lines, and says where each course leaf sits in the plan", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, desktop);
+    try {
+      const tree = detailsPanel(page).locator(".requisite-tree");
+      const nested = tree.locator("ul").first();
+      expect(await nested.evaluate((el) => getComputedStyle(el).borderInlineStartWidth)).not.toBe("0px");
+      // The innermost li holding the code: its and/or ancestors hold it too.
+      const leaf = (code: string) => tree.locator("li", { has: page.locator(".requisite-code", { hasText: code }) }).last();
+      expect(await leaf("COMP1140").textContent()).toContain("Structured Programming (Advanced)");
+      expect(await leaf("COMP1140").locator(".requisite-where").textContent()).toBe("Completed S2 2027");
+      expect(await leaf("COMP1110").locator(".requisite-where").textContent()).toBe("Not in your plan");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("gives an unplaced course's tree plain dots, not marks", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP4680", baseUrl).href, desktop);
+    try {
+      const tree = detailsPanel(page).locator(".requisite-tree");
+      expect(await tree.locator(".mark-dot").count()).toBeGreaterThan(0);
+      expect(await tree.locator(".mark").count()).toBe(0);
+      expect(await tree.textContent()).not.toMatch(/[✓✗?]/);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("keys each assessment item to its bar segment by colour", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, desktop);
+    try {
+      const assessment = detailsPanel(page).locator(".details-assessment");
+      const colours = (selector: string) =>
+        assessment.locator(selector).evaluateAll((els) => els.map((el) => getComputedStyle(el).backgroundColor));
+      const bar = await colours(".assess-bar span");
+      const dots = await colours(".assess-dot");
+      expect(dots).toHaveLength(3);
+      expect(dots).toEqual(bar);
+      expect(new Set(dots).size).toBe(3);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("marks every P&C link as opening a new tab", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, desktop);
+    try {
+      const links = detailsPanel(page).locator('a[target="_blank"]');
+      expect(await links.count()).toBeGreaterThan(0);
+      for (const link of await links.all()) {
+        expect(await link.locator("svg.external-icon").count()).toBe(1);
+        expect(await link.locator(".visually-hidden").textContent()).toBe(" (opens in a new tab)");
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("shows Remove as destructive, in the panel and in the card menu", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP2100`, baseUrl).href, desktop);
+    try {
+      const rust = await page.evaluate(() => {
+        const probe = document.createElement("span");
+        probe.style.color = "var(--rust)";
+        document.body.append(probe);
+        const colour = getComputedStyle(probe).color;
+        probe.remove();
+        return colour;
+      });
+      const colour = (locator: ReturnType<Page["locator"]>) => locator.evaluate((el) => getComputedStyle(el).color);
+      expect(await colour(detailsPanel(page).getByRole("button", { name: "Remove from plan" }))).toBe(rust);
+      expect(await colour(page.locator('[data-placed="COMP2100"] .card-menu-remove'))).toBe(rust);
     } finally {
       await page.close();
     }

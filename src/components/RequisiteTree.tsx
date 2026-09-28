@@ -15,6 +15,9 @@ interface Props {
   // Whether a leaf's course has details to open; one that doesn't stays text
   // rather than a button that does nothing.
   canOpen: (code: string) => boolean;
+  // A course leaf's title (when known) and where it sits in this plan:
+  // "Completed S1 2027", "Planned S2 2028", "Not in your plan".
+  courseInfo: (code: string) => { title: string | null; where: string };
 }
 
 const ANSWERS: [CheckAnswer | null, string][] = [
@@ -45,7 +48,8 @@ export default function RequisiteTree(props: Props) {
 
 function Node(props: Props) {
   const { node, marks, checks, disabled, pending, onAnswer } = props;
-  const mark = marks && <Mark ok={node.ok} />;
+  // Unmarked, a plain dot keeps each rule's place on the guide line.
+  const mark = marks ? <Mark ok={node.ok} /> : <span class="mark-dot" aria-hidden="true" />;
 
   if (node.kind === "and" || node.kind === "or") {
     return (
@@ -63,18 +67,23 @@ function Node(props: Props) {
     );
   }
   if (node.kind === "course") {
+    const info = props.courseInfo(node.code);
     return (
       <li>
         <span class="requisite-line">
           {mark}
-          {props.canOpen(node.code) ? (
-            <button type="button" class="requisite-code" onClick={() => props.onOpen(node.code)}>
-              {node.code}
-            </button>
-          ) : (
-            node.code
-          )}
-          {node.concurrent ? " (may be taken concurrently)" : ""}
+          <span>
+            {props.canOpen(node.code) ? (
+              <button type="button" class="requisite-code" onClick={() => props.onOpen(node.code)}>
+                {node.code}
+              </button>
+            ) : (
+              <strong>{node.code}</strong>
+            )}
+            {info.title && ` ${info.title}`}
+            {node.concurrent ? " (may be taken concurrently)" : ""}
+            <span class="requisite-where">{info.where}</span>
+          </span>
         </span>
       </li>
     );

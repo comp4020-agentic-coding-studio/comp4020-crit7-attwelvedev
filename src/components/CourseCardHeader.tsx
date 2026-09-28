@@ -7,6 +7,8 @@ interface Props {
   // Only a card that can actually be dragged shows where to grab it.
   grip: boolean;
   onOpenDetails: () => void;
+  // This course is the one open in the details sidebar.
+  current: boolean;
 }
 
 // Where to grab a draggable course: on its cards, and on the details
@@ -29,7 +31,7 @@ export function CardGrip() {
 // A card's first line (code and units) and its title. Shared by timeline
 // and sidebar cards so both read the same way. The title is the way into
 // Details, so no separate button is needed for it.
-export default function CourseCardHeader({ code, title, units, grip, onOpenDetails }: Props) {
+export default function CourseCardHeader({ code, title, units, grip, onOpenDetails, current }: Props) {
   const label = unitsLabel(units);
   return (
     <>
@@ -49,7 +51,13 @@ export default function CourseCardHeader({ code, title, units, grip, onOpenDetai
       {/* Named with aria-label, not a visually-hidden span: that span is
           absolutely positioned, and Chromium then puts a space before its
           comma in the computed name. */}
-      <button type="button" class="course-card-title" aria-label={`${title}, details`} onClick={onOpenDetails}>
+      <button
+        type="button"
+        class="course-card-title"
+        aria-label={`${title}, details`}
+        aria-current={current ? "true" : undefined}
+        onClick={onOpenDetails}
+      >
         {title}
       </button>
     </>

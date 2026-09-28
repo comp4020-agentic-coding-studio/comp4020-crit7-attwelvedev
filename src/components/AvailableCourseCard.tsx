@@ -21,6 +21,8 @@ interface Props {
   onMenuOpenChange: (code: string, open: boolean) => void;
   // Opens this course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // This course is the one open in the details sidebar.
+  current: boolean;
 }
 
 export default function AvailableCourseCard({
@@ -35,6 +37,7 @@ export default function AvailableCourseCard({
   openMenuCode,
   onMenuOpenChange,
   onOpenDetails,
+  current,
 }: Props) {
   const course = courseOverride ?? view.courses[code];
   const readOnly = view.plan.readOnly;
@@ -92,6 +95,7 @@ export default function AvailableCourseCard({
         units={course}
         grip={draggable}
         onOpenDetails={() => onOpenDetails(code)}
+        current={current}
       />
       <p class="course-card-offered">{course.offeredLabel}</p>
       {allBlocked && <p class="badge badge-state-hard">Blocked</p>}

@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useId, useRef, useState } from "preact/hooks";
+import type { ComponentChildren } from "preact";
 import type { CheckAnswer } from "../lib/domain/types";
-import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
+import { type CourseCard, type CourseDetailsView, NORMAL_TERM_UNITS, type PlanView } from "../lib/domain/view";
 import { isError, setCheck, setPin } from "./api";
-import { CardGrip } from "./CourseCardHeader";
+import ChoiceMenu from "./ChoiceMenu";
 import type { DetailsState } from "./details-state";
 import {
   dependentsOf,
@@ -10,8 +11,11 @@ import {
   groupLabel,
   placedStatus,
   postgradLabel,
+  type StripCell,
+  stripCells,
   unitsLabel,
   unmarkedStatus,
+  weightLabel,
 } from "./planner-logic";
 import RequisiteTree from "./RequisiteTree";
 
@@ -30,6 +34,55 @@ interface Props {
   onAnnounce: (message: string) => void;
 }
 
+const STATE_WORD: Record<StripCell["state"], string> = {
+  here: "In your plan",
+  part2: "Part 2",
+  offered: "Offered",
+  projected: "Projected",
+  "not-offered": "Not offered",
+  // Short enough to stay on one line in a cell; the legend spells it out.
+  "needs-prereqs": "Needs prereqs",
+  "cant-start": "Can't start",
+  unknown: "Unknown",
+};
+
+// The legend's order, and its longer wording where a cell's word is terse.
+// Part 2 has no entry: it looks like "In your plan" and says "Part 2" itself.
+const LEGEND: [StripCell["state"], string][] = [
+  ["here", "In your plan"],
+  ["offered", "Offered"],
+  ["projected", "Projected from past years"],
+  ["needs-prereqs", "Offered, but its prerequisites can't be met by then"],
+  ["cant-start", "Can't start here (runs over two semesters)"],
+  ["not-offered", "Not offered"],
+  ["unknown", "No published offering"],
+];
+
+// P&C names semesters in full; everywhere else in the planner they're "S1".
+const SESSION_SHORT: Record<string, string> = { "First Semester": "S1", "Second Semester": "S2" };
+
+// Every P&C link opens a new tab, and says so.
+function ExternalLink({ href, children }: { href: string; children: ComponentChildren }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+      <svg class="external-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 17 17 7M9 7h8v8" />
+      </svg>
+      <span class="visually-hidden"> (opens in a new tab)</span>
+    </a>
+  );
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// "28 Sep 2026", in UTC so the server render and the browser agree.
+function dateLabel(iso: string): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+}
+
 const REQUISITE_STATE = {
   available: "Requisites met",
   check: "Requisites need your check",
@@ -37,9 +90,13 @@ const REQUISITE_STATE = {
   hard: "Blocked",
 } as const;
 
-// P&C gives weights as bare numbers ("30"); anything else ("Hurdle") is
-// shown as written.
-const weightLabel = (weight: string) => (/^\d+(\.\d+)?$/.test(weight) ? `${weight}%` : weight);
+// Which bar segment (and so which colour) an assessment item gets: only
+// items with a positive numeric weight have one, numbered in order.
+function segmentIndex(items: { weight: string }[], i: number): number | null {
+  const hasSegment = (w: string) => Number(w) > 0;
+  if (!hasSegment(items[i].weight)) return null;
+  return items.slice(0, i).filter((item) => hasSegment(item.weight)).length % 5;
+}
 
 function Icon({ path }: { path: string }) {
   return (
@@ -61,6 +118,7 @@ export default function CourseDetailsPanel({
   onBack,
   onForward,
   onClose,
+  onPlace,
   onRemove,
   onChanged,
   onAnnounce,
@@ -72,6 +130,7 @@ export default function CourseDetailsPanel({
   const requisitesRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const [pinPending, setPinPending] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
   // The answer being saved, shown checked until the new view arrives —
   // otherwise the re-render for `disabled` snaps the pressed button back first.
   const [pendingCheck, setPendingCheck] = useState<{ item: string; value: CheckAnswer | null } | null>(null);
@@ -79,6 +138,7 @@ export default function CourseDetailsPanel({
   // Only a description the clamp actually cuts gets the toggle, and only
   // the browser can say whether it does.
   const [clamped, setClamped] = useState(false);
+  const idPrefix = useId();
 
   useEffect(() => {
     if (details.token === 0) return;
@@ -115,19 +175,16 @@ export default function CourseDetailsPanel({
   }
 
   const status = placement ? placedStatus(view, placement) : null;
-  const semester = status
-    ? [status.parts[0].termLabel, status.parts[1] && `${status.joiner} ${status.parts[1].termLabel}`]
-        .filter(Boolean)
-        .join(" ")
-    : null;
   const family = placement?.countsToward ? familyOf(view, placement.countsToward) : null;
   const pinnedValue = placement?.pinned ? (placement.countsToward ?? "") : "";
+  const pinOptions = [
+    { value: "", label: "Automatic" },
+    ...(card?.eligibleGroups ?? []).map((groupId) => ({ value: groupId, label: groupLabel(view, groupId) })),
+  ];
   const extras = fetched.data?.extras ?? null;
   const url = card?.url ?? null;
   const pandc = url ? (
-    <a href={url} target="_blank" rel="noreferrer">
-      Programs &amp; Courses
-    </a>
+    <ExternalLink href={url}>Programs &amp; Courses</ExternalLink>
   ) : (
     "Programs & Courses"
   );
@@ -138,9 +195,21 @@ export default function CourseDetailsPanel({
   const clashes = card?.incompatible.filter((c) => placedCodes.has(c)) ?? [];
   const cotaught = extras?.cotaught ?? [];
   const dependents = dependentsOf(view, code);
+  const cells = card ? stripCells(view, code, card) : [];
+  const years = [...new Set(cells.map((c) => c.year))];
+  const shownStates = new Set(cells.map((c) => c.state));
+  const classes = extras?.classes ?? [];
+  const edition = url?.match(/\/(\d{4})\/course\//)?.[1] ?? null;
+  const updated = fetched.data ? dateLabel(fetched.data.scrapedAt) : null;
 
   return (
-    <aside class="details-panel" aria-label="Course details">
+    <aside
+      class="details-panel"
+      aria-label="Course details"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") onClose();
+      }}
+    >
       <div class="details-head">
         <div class="details-nav">
           <button
@@ -161,9 +230,6 @@ export default function CourseDetailsPanel({
           >
             <Icon path="M9 5l7 7-7 7" />
           </button>
-          {/* Shows where the course can be dragged from; like a card's, it's
-              decorative. */}
-          {!readOnly && !placement?.completed && <CardGrip />}
           <button type="button" class="details-icon-button details-close" aria-label="Close details" onClick={onClose}>
             <Icon path="M6 6l12 12M18 6L6 18" />
           </button>
@@ -192,38 +258,118 @@ export default function CourseDetailsPanel({
         </ul>
       </div>
 
-      <section class="details-section">
-        <h3>In your plan</h3>
-        <p class="details-semester">{status ? `${status.word} ${semester}` : "Not planned"}</p>
-        {placement && card && (
-          <div class="details-pin">
-            <label>
-              Counts toward
-              <select
-                disabled={readOnly || pinPending}
+      {/* Only a placed course has anything to pin or remove; the pills
+          above already say when it's planned. */}
+      {placement && (
+        <section class="details-section">
+          <h3>In your plan</h3>
+          {card && (
+            <div class="details-pin">
+              <ChoiceMenu
+                name="pin"
+                options={pinOptions}
                 value={pinnedValue}
-                onChange={(event) => pin((event.target as HTMLSelectElement).value)}
-              >
-                <option value="">Automatic</option>
-                {card.eligibleGroups.map((groupId) => (
-                  <option key={groupId} value={groupId}>
-                    {groupLabel(view, groupId)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <small>
-              This course can count toward more than one requirement. "Automatic" lets the plan choose whichever fits
-              best overall; pin it here only if you want it to count toward a specific one instead.
-            </small>
+                open={pinOpen}
+                onOpenChange={setPinOpen}
+                onChoose={(groupId) => void pin(groupId)}
+                disabled={readOnly || pinPending}
+                pending={pinPending}
+                toggle={
+                  <span>
+                    Counts toward: {pinOptions.find((o) => o.value === pinnedValue)?.label ?? "Automatic"}
+                  </span>
+                }
+              />
+              <small>
+                This course can count toward more than one requirement. "Automatic" lets the plan choose whichever
+                fits best overall; pin it here only if you want it to count toward a specific one instead.
+              </small>
+            </div>
+          )}
+          {/* Completed courses too, as the card menu and dragging allow. */}
+          {!readOnly && (
+            <button type="button" class="details-remove" onClick={onRemove}>
+              Remove from plan
+            </button>
+          )}
+        </section>
+      )}
+
+      {card && (
+        <section class="details-section">
+          <h3>When it runs</h3>
+          {/* One column per year, so a year's two semesters sit together. */}
+          <div class="details-strip">
+            {years.map((year) => (
+              <div key={year} class="strip-year">
+                <p class="strip-year-label">{year}</p>
+                {cells
+                  .filter((cell) => cell.year === year)
+                  .map((cell) => {
+                    const noteId = `${idPrefix}-strip-${cell.term}`;
+                    return (
+                      <button
+                        key={cell.term}
+                        type="button"
+                        class="strip-cell"
+                        data-state={cell.state}
+                        disabled={readOnly || !cell.allowed}
+                        aria-label={cell.actionLabel}
+                        aria-describedby={noteId}
+                        onClick={() => onPlace(cell.term)}
+                      >
+                        <span class="strip-session">{cell.session}</span>
+                        <span class="strip-state">{STATE_WORD[cell.state]}</span>
+                        <span class="strip-units">
+                          {cell.units} of {NORMAL_TERM_UNITS}u
+                        </span>
+                        {/* The refusal's reason when there is one, else what the cell shows. */}
+                        <span id={noteId} class="visually-hidden">
+                          {cell.reason ?? `${STATE_WORD[cell.state]}, ${cell.units} of ${NORMAL_TERM_UNITS} units`}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            ))}
           </div>
-        )}
-        {placement && !readOnly && !placement.completed && (
-          <button type="button" class="details-remove" onClick={onRemove}>
-            Remove from plan
-          </button>
-        )}
-      </section>
+          <ul class="strip-legend">
+            {LEGEND.filter(([state]) => shownStates.has(state)).map(([state, text]) => (
+              <li key={state}>
+                <span class="strip-swatch" data-state={state} aria-hidden="true" />
+                {text}
+              </li>
+            ))}
+          </ul>
+          {card.twoSemester && (
+            <p class="details-note">
+              Runs over two semesters in a row: {card.units} units in each, {card.units * 2} in total.
+            </p>
+          )}
+          {classes.length > 0 && (
+            <table class="details-offerings">
+              <thead>
+                <tr>
+                  <th scope="col">Semester</th>
+                  <th scope="col">Delivery</th>
+                  <th scope="col">Class number</th>
+                </tr>
+              </thead>
+              <tbody>
+                {classes.map((c, i) => (
+                  <tr key={i}>
+                    <td>
+                      {SESSION_SHORT[c.session] ?? c.session} {c.year}
+                    </td>
+                    <td>{c.mode}</td>
+                    <td>{c.classNumber ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      )}
 
       <section class="details-section">
         <h3 ref={requisitesRef} tabIndex={-1}>
@@ -239,6 +385,14 @@ export default function CourseDetailsPanel({
             onAnswer={answer}
             onOpen={onOpen}
             canOpen={(c) => c in view.courses}
+            courseInfo={(c) => {
+              const at = view.placements.find((p) => p.code === c);
+              const where = at ? placedStatus(view, at) : null;
+              return {
+                title: view.courses[c]?.title ?? null,
+                where: where ? `${where.word} ${where.parts[0].termLabel}` : "Not in your plan",
+              };
+            }}
           />
         ) : (
           <p>No prerequisites.</p>
@@ -337,14 +491,24 @@ export default function CourseDetailsPanel({
             <p class="details-note">Indicative, may change</p>
             <div class="assess-bar" aria-hidden="true">
               {extras.assessment.map((item, i) => {
-                const weight = Number(item.weight);
-                return Number.isFinite(weight) && weight > 0 ? <span key={i} style={{ flexGrow: weight }} /> : null;
+                const segment = segmentIndex(extras.assessment, i);
+                return segment === null ? null : (
+                  <span key={i} data-segment={segment} style={{ flexGrow: Number(item.weight) }} />
+                );
               })}
             </div>
             <ul class="details-assessment-list">
               {extras.assessment.map((item, i) => (
                 <li key={i}>
-                  <span>{item.task}</span> <span>{weightLabel(item.weight)}</span>
+                  {/* Keyed to its bar segment by colour; an item with no
+                      numeric weight has no segment, so no dot. */}
+                  <span class="assess-task">
+                    {segmentIndex(extras.assessment, i) !== null && (
+                      <span class="assess-dot" data-segment={segmentIndex(extras.assessment, i)} aria-hidden="true" />
+                    )}
+                    {item.task}
+                  </span>{" "}
+                  <span>{weightLabel(item.weight)}</span>
                 </li>
               ))}
             </ul>
@@ -354,9 +518,13 @@ export default function CourseDetailsPanel({
 
       {url && (
         <footer class="details-footer">
-          <a href={url} target="_blank" rel="noreferrer">
-            Open {code} on Programs &amp; Courses
-          </a>
+          <ExternalLink href={url}>Open {code} on Programs &amp; Courses</ExternalLink>
+          {edition && (
+            <p class="details-note">
+              Details from Programs &amp; Courses {edition}
+              {updated && `, updated ${updated}`}
+            </p>
+          )}
         </footer>
       )}
     </aside>

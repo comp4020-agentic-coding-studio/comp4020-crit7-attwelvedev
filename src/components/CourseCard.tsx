@@ -44,6 +44,8 @@ interface Props {
   receded: boolean;
   // Opens this course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // This course is the one open in the details sidebar.
+  current: boolean;
 }
 
 export default function CourseCard({
@@ -61,6 +63,7 @@ export default function CourseCard({
   onLocateCourse,
   receded,
   onOpenDetails,
+  current,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
@@ -165,6 +168,7 @@ export default function CourseCard({
         units={{ units: course?.units ?? 0, twoSemester: false }}
         grip={!readOnly}
         onOpenDetails={() => onOpenDetails(placement.code)}
+        current={current}
       />
       {marker && (
         <p class="course-card-part">

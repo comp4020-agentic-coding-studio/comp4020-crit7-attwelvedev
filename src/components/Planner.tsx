@@ -31,7 +31,7 @@ import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
 import Sidebar, { type ShowRequest } from "./Sidebar";
 import type { Panels } from "./split-resize";
-import Timeline from "./Timeline";
+import Timeline, { type LocateRequest } from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
 import { useCourseDetails } from "./use-course-details";
 
@@ -77,9 +77,21 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     const course = fetched.data?.course;
     if (course) setKnownCards((prev) => (prev[course.code] ? prev : { ...prev, [course.code]: course }));
   }, [fetched.data]);
+  // What had focus before the sidebar opened, so Close can hand it back.
+  const openerRef = useRef<HTMLElement | null>(null);
   function openDetails(code: string, focus: DetailsFocus = "top") {
+    if (details.code === null && document.activeElement instanceof HTMLElement) {
+      openerRef.current = document.activeElement;
+    }
     setDetails((s) => openCourse(s, code, focus));
+    // Show where a placed course sits, without taking focus from the panel.
+    if (view.placements.some((p) => p.code === code)) setLocateRequest({ code, token: Date.now(), focus: false });
   }
+  useEffect(() => {
+    if (details.code !== null || !openerRef.current) return;
+    if (openerRef.current.isConnected) openerRef.current.focus();
+    openerRef.current = null;
+  }, [details.code]);
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
   // Hard-blocked terms of every course search has returned, by code: a
@@ -92,7 +104,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const [searchTwoSemester, setSearchTwoSemester] = useState<Record<string, boolean>>({});
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
-  const [locateRequest, setLocateRequest] = useState<{ code: string; token: number; part?: 2 } | null>(null);
+  const [locateRequest, setLocateRequest] = useState<LocateRequest | null>(null);
   const [showRequest, setShowRequest] = useState<ShowRequest | null>(null);
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
@@ -324,6 +336,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               onShowGroup={(id) => showInSidebar("group", id)}
               focusGroupId={focusGroupId}
               onOpenDetails={openDetails}
+              openCode={details.code}
             />
           </div>
           <Sidebar
@@ -355,6 +368,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onShowInSidebar={showInSidebar}
             onFocusGroup={setFocusGroupId}
             onOpenDetails={openDetails}
+            openCode={details.code}
           />
           <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>

@@ -31,6 +31,13 @@
   --family-ict: #b0407d;           /* plum */
   --family-capstone: #3d4650;      /* slate */
   --family-neutral: #8d9299;       /* grey: Electives, not counting */
+  /* Assessment tasks in the details sidebar: teal to ochre, apart from
+     every family hue. */
+  --assess-1: #1f6f78;
+  --assess-2: #5fa8a0;
+  --assess-3: #c08a3e;
+  --assess-4: #7a6a58;
+  --assess-5: #b8b0a2;
 
   --font: "Public Sans", system-ui, sans-serif;
   --radius: 0.6rem;
@@ -599,12 +606,15 @@ nav[aria-label="site"] .nav-hide:hover {
 
 /* Positioned like .more-options, so its panel hangs off the toggle's end
    edge and opens toward the row's start. */
-.completed-menu {
+/* ChoiceMenu's two instances, the header's and the details pin menu. */
+.completed-menu,
+.pin-menu {
   position: relative;
   display: inline-flex;
 }
 
-.completed-toggle {
+.completed-toggle,
+.pin-toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -626,8 +636,9 @@ nav[aria-label="site"] .nav-hide:hover {
 }
 
 /* Like the Place in… options. The start padding holds the current
-   semester's check, so every label lines up. */
-.completed-panel button {
+   choice's check, so every label lines up. */
+.completed-panel button,
+.pin-panel button {
   display: flex;
   align-items: center;
   border: none;
@@ -636,11 +647,12 @@ nav[aria-label="site"] .nav-hide:hover {
   padding-inline-start: 1.75rem;
 }
 
-.completed-panel button:hover:not(:disabled) {
+.completed-panel button:hover:not(:disabled),
+.pin-panel button:hover:not(:disabled) {
   background: var(--paper);
 }
 
-.completed-check {
+.choice-check {
   margin-inline-start: -1.25rem;
   width: 1.25rem;
 }
@@ -682,7 +694,8 @@ nav[aria-label="site"] .nav-hide:hover {
 }
 
 .more-options-panel,
-.completed-panel {
+.completed-panel,
+.pin-panel {
   position: absolute;
   top: 100%;
   inset-inline-end: 0;
@@ -701,12 +714,14 @@ nav[aria-label="site"] .nav-hide:hover {
 }
 
 .more-options-panel[hidden],
-.completed-panel[hidden] {
+.completed-panel[hidden],
+.pin-panel[hidden] {
   display: none;
 }
 
 .more-options-panel > *,
-.completed-panel > * {
+.completed-panel > *,
+.pin-panel > * {
   min-height: 2.75rem;
 }
 
@@ -1010,6 +1025,14 @@ section[aria-label="program checks"] > h3 {
   box-shadow: -12px 0 40px -24px rgb(23 24 26 / 0.35);
 }
 
+/* The drawer covers the timeline's end. Room past the last semester keeps
+   every card scrollable out from under it, and locating a card from Details
+   aims at the part still showing. */
+.planner:has(.details-panel) .timeline-scroll {
+  padding-inline-end: min(440px, 100vw);
+  scroll-padding-inline-end: min(440px, 100vw);
+}
+
 .details-panel small {
   display: block;
   max-width: 45ch;
@@ -1098,15 +1121,42 @@ section[aria-label="program checks"] > h3 {
   margin-block-start: 0;
 }
 
-.details-pin label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+
+/* Destructive: the one red button, here and in a card's menu. */
+.details-remove,
+.card-menu-remove {
+  color: var(--rust);
 }
 
-.details-pin select {
-  min-height: 2.75rem;
-  font: inherit;
+.details-remove:hover:not(:disabled),
+.card-menu-remove:hover:not(:disabled) {
+  border-color: var(--rust);
+}
+
+.details-pin .pin-menu {
+  display: flex;
+}
+
+.pin-toggle {
+  flex: 1;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.pin-panel {
+  inset-inline: 0;
+}
+
+.external-icon {
+  width: 0.85em;
+  height: 0.85em;
+  margin-inline-start: 0.2em;
+  vertical-align: -0.05em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .details-remove {
@@ -1140,12 +1190,30 @@ section[aria-label="program checks"] > h3 {
   overflow: hidden;
 }
 
-.assess-bar span {
-  background: var(--family-advanced);
+/* Its own palette: the family colours mean "counts toward this group"
+   everywhere else, so assessment never borrows them. */
+[data-segment="0"] { --assess: var(--assess-1); }
+[data-segment="1"] { --assess: var(--assess-2); }
+[data-segment="2"] { --assess: var(--assess-3); }
+[data-segment="3"] { --assess: var(--assess-4); }
+[data-segment="4"] { --assess: var(--assess-5); }
+
+.assess-bar span,
+.assess-dot {
+  background: var(--assess);
 }
 
-.assess-bar span:nth-child(2n) {
-  background: var(--family-foundations);
+.assess-task {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.assess-dot {
+  flex: none;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.2rem;
 }
 
 .details-assessment-list {
@@ -1161,6 +1229,160 @@ section[aria-label="program checks"] > h3 {
   padding-block: 0.2rem;
 }
 
+/* "When it runs": a column per year, its two semesters stacked. A column
+   is never narrower than its longest one-line label, so on a narrow
+   screen the years wrap to a second row rather than the labels wrapping. */
+.details-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.9rem, 1fr));
+  gap: 0.4rem;
+  margin-block-end: 0.75rem;
+}
+
+.strip-year {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.strip-year-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.strip-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  font-weight: 500;
+  text-align: start;
+}
+
+.strip-session {
+  font-weight: 700;
+}
+
+.strip-units {
+  color: var(--muted);
+}
+
+.strip-cell[data-state="here"],
+.strip-cell[data-state="part2"] {
+  color: var(--gold-ink);
+  background: var(--gold-tint);
+  border-color: var(--gold);
+}
+
+.strip-cell[data-state="here"]:disabled,
+.strip-cell[data-state="part2"]:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.strip-cell[data-state="projected"],
+.strip-cell[data-state="unknown"] {
+  border-style: dashed;
+}
+
+.strip-cell[data-state="not-offered"],
+.strip-swatch[data-state="not-offered"] {
+  background: var(--paper);
+  border-color: var(--paper);
+}
+
+/* Runs then, but can't go there: the offered outline, hatched. */
+.strip-cell[data-state="needs-prereqs"],
+.strip-cell[data-state="cant-start"],
+.strip-swatch[data-state="needs-prereqs"],
+.strip-swatch[data-state="cant-start"] {
+  background: repeating-linear-gradient(135deg, var(--surface) 0 7px, var(--line) 7px 10px);
+}
+
+.strip-cell[data-state="cant-start"],
+.strip-swatch[data-state="cant-start"] {
+  border-style: dotted;
+}
+
+/* A refused cell says why in its own state, so it isn't faded as well: a
+   read-only plan's cells read at full strength. */
+.strip-cell:disabled {
+  opacity: 1;
+}
+
+.strip-cell[data-state="not-offered"],
+.strip-cell[data-state="needs-prereqs"],
+.strip-cell[data-state="cant-start"] {
+  color: var(--muted);
+}
+
+.strip-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.strip-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.strip-swatch {
+  flex: none;
+  width: 1rem;
+  height: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.2rem;
+  background: var(--surface);
+}
+
+.strip-swatch[data-state="here"],
+.strip-swatch[data-state="part2"] {
+  background: var(--gold-tint);
+  border-color: var(--gold);
+}
+
+.strip-swatch[data-state="projected"],
+.strip-swatch[data-state="unknown"] {
+  border-style: dashed;
+}
+
+.details-offerings {
+  width: 100%;
+  font-size: 0.85rem;
+  border-collapse: collapse;
+}
+
+.details-offerings th,
+.details-offerings td {
+  padding: 0.3rem 0.4rem;
+  text-align: start;
+  border-block-end: 1px solid var(--line);
+}
+
+.details-offerings th {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.details-footer {
+  padding-block-start: 0.85rem;
+  border-block-start: 1px solid var(--line);
+}
+
 .details-footer a {
   display: inline-flex;
   align-items: center;
@@ -1168,20 +1390,101 @@ section[aria-label="program checks"] > h3 {
 }
 
 /* The requisite tree: one rule per line, its mark first, and a check the
-   planner can't make answered right on its own node. */
+   planner can't make answered right on its own node. A guide line runs
+   from each "All of" / "One of" down the items it governs, through the
+   centre of its mark. */
 .requisite-tree,
 .requisite-tree ul {
   margin: 0;
-  padding-inline-start: 1.1rem;
-}
-
-.requisite-tree,
-.requisite-tree ul {
+  padding: 0;
   list-style: none;
 }
 
-.requisite-tree {
-  padding-inline-start: 0;
+.requisite-tree ul {
+  margin-inline-start: 0.7rem;
+  padding-inline-start: 0.9rem;
+  border-inline-start: 1px solid var(--line);
+}
+
+.requisite-tree li {
+  margin-block: 0.35rem;
+}
+
+/* The mark keeps its place at the start; a long rule wraps beside it
+   rather than dropping below it as a block. */
+.requisite-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.mark,
+.mark-dot {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* Sits on the text's first line rather than its baseline. */
+  align-self: flex-start;
+}
+
+.mark-met {
+  color: var(--moss);
+  background: var(--moss-tint);
+}
+
+.mark-unmet {
+  color: var(--rust);
+  background: var(--rust-tint);
+}
+
+.mark-unknown {
+  color: var(--amber);
+  background: var(--amber-tint);
+}
+
+/* An unplaced course's tree: no verdict, just a place on the line. */
+.mark-dot::after {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+/* Reads as a link to the course. The negative margin keeps the 44px
+   target without spacing the tree's lines apart. */
+button.requisite-code,
+button.requisite-code:hover {
+  border: none;
+}
+
+button.requisite-code {
+  min-height: 2.75rem;
+  margin-block: -0.75rem;
+  padding: 0;
+  font-weight: 700;
+  background: none;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+button.requisite-code:hover {
+  text-decoration-color: var(--ink);
+}
+
+.requisite-where {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
 /* Another degree's rule for the same course: a note beside the tree, not
@@ -1193,42 +1496,6 @@ section[aria-label="program checks"] > h3 {
   font-size: 0.85rem;
   background: var(--paper);
   border-radius: var(--radius);
-}
-
-.requisite-tree li {
-  margin-block: 0.3rem;
-}
-
-.requisite-line {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.2rem 0.4rem;
-  overflow-wrap: anywhere;
-}
-
-.mark {
-  display: inline-flex;
-  justify-content: center;
-  width: 1.2rem;
-  font-weight: 700;
-}
-
-.mark-met {
-  color: var(--moss);
-}
-
-.mark-unmet {
-  color: var(--rust);
-}
-
-.mark-unknown {
-  color: var(--amber);
-}
-
-button.requisite-code {
-  min-height: 2.75rem;
-  padding: 0 0.5rem;
 }
 
 .requisite-answer {

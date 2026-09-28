@@ -4,7 +4,7 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../catalogue/from-
 import { parseRequisites } from "./requisites";
 import type { Catalogue, CatalogueCourse, ReqExpr } from "./types";
 import { horizonYear } from "./terms";
-import { createFeasibility } from "./feasibility";
+import { createFeasibility, hardBlockKind } from "./feasibility";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -118,5 +118,19 @@ describe("createFeasibility (synthetic catalogues)", () => {
     ]);
     const feas = createFeasibility(cat);
     expect(feas.hardBlock("ZZAA1002", 1)).toBeNull();
+  });
+});
+
+describe("hardBlockKind", () => {
+  const feas = createFeasibility(loadRealCatalogue());
+
+  it("tells a term that doesn't run the course from one its prerequisites rule out", () => {
+    // COMP1130 runs in S1 only; COMP2100 runs in S1 2027 but needs COMP1110 first.
+    expect(hardBlockKind(feas.hardBlock("COMP1130", 1)!)).toBe("not-offered");
+    expect(hardBlockKind(feas.hardBlock("COMP2100", 0)!)).toBe("requisites");
+  });
+
+  it("recognises a two-semester course that can't start in the last term", () => {
+    expect(hardBlockKind(feas.hardBlock("COMP4550", 7)!)).toBe("two-semester");
   });
 });

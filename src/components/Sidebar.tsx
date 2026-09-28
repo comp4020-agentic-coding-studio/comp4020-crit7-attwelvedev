@@ -46,6 +46,8 @@ interface Props {
   onFocusGroup: (groupId: string | null) => void;
   // Opens a course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // The course open in the details sidebar, whose titles say so.
+  openCode: string | null;
 }
 
 interface GroupProps {
@@ -64,6 +66,8 @@ interface GroupProps {
   onFocusGroup: (groupId: string | null) => void;
   // Opens a course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // The course open in the details sidebar, whose titles say so.
+  openCode: string | null;
   // Only top-level groups are compactable; nested ones go with their parent.
   compact?: boolean;
   onToggleCompact?: () => void;
@@ -114,6 +118,7 @@ function Group({
   onLocateCourse,
   onFocusGroup,
   onOpenDetails,
+  openCode,
   compact = false,
   onToggleCompact,
 }: GroupProps) {
@@ -186,6 +191,7 @@ function Group({
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
               onOpenDetails={onOpenDetails}
+              current={openCode === code}
             />
           ))}
         </ul>
@@ -200,6 +206,7 @@ function Group({
               placement={placedByCode.get(code)!}
               onLocateCourse={onLocateCourse}
               onOpenDetails={onOpenDetails}
+              current={openCode === code}
             />
           ))}
         </ul>
@@ -223,6 +230,7 @@ function Group({
               onLocateCourse={onLocateCourse}
               onFocusGroup={onFocusGroup}
               onOpenDetails={onOpenDetails}
+              openCode={openCode}
             />
           ))}
         </ul>
@@ -290,6 +298,7 @@ export default function Sidebar({
   onShowInSidebar,
   onFocusGroup,
   onOpenDetails,
+  openCode,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -476,6 +485,7 @@ export default function Sidebar({
             onToggleCompact={() => setSectionCompact("search", !compact.has("search"))}
             onExpand={() => setSectionCompact("search", false)}
             onOpenDetails={onOpenDetails}
+            openCode={openCode}
           />
           <SidebarSection
             {...sectionProps("total")}
@@ -528,6 +538,7 @@ export default function Sidebar({
               onLocateCourse={onLocateCourse}
               onFocusGroup={onFocusGroup}
               onOpenDetails={onOpenDetails}
+              openCode={openCode}
               compact={compact.has(`group-${group.id}`)}
               onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
             />

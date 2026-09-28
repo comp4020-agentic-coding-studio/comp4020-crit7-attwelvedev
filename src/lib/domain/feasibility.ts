@@ -2,6 +2,22 @@ import { filterLabel, matchesFilter } from "./filters";
 import { offeringStatus, TERMS, termLabel } from "./terms";
 import type { Catalogue, CatalogueCourse, ReqExpr, Session } from "./types";
 
+// A hard-block reason is just text by the time it reaches the client, so the
+// offering reasons are built from, and recognised by, these phrases. The
+// details strip uses them to tell "not offered" and "can't start here"
+// apart from "offered, but its prerequisites can't be met by then".
+const NOT_OFFERED_IN = " isn't offered in ";
+const TWO_SEMESTER = " runs over two consecutive semesters; ";
+
+export type HardBlockKind = "not-offered" | "two-semester" | "requisites";
+
+export function hardBlockKind(reason: string): HardBlockKind {
+  // The offering reasons start with the (eight-character) course code.
+  if (reason.startsWith(NOT_OFFERED_IN, 8)) return "not-offered";
+  if (reason.startsWith(TWO_SEMESTER, 8)) return "two-semester";
+  return "requisites";
+}
+
 // Hard-blocking is plan-independent (overview §4.1): it depends only on the
 // course, the term and the catalogue, so it's safe to memoise per catalogue
 // instance and share across every plan that uses it.
@@ -30,16 +46,16 @@ export function createFeasibility(cat: Catalogue): {
     const term = TERMS[t]!;
     const status = offeringStatus(course, term, cat.horizonYear);
     if (status === "not-offered") {
-      return `${code} isn't offered in ${term.label} (offered that year: ${offeredThatYear(course, term.year)})`;
+      return `${code}${NOT_OFFERED_IN}${term.label} (offered that year: ${offeredThatYear(course, term.year)})`;
     }
     if (course.twoSemester) {
       const next = TERMS[t + 1];
       if (!next) {
-        return `${code} runs over two consecutive semesters; there is no semester after ${term.label}`;
+        return `${code}${TWO_SEMESTER}there is no semester after ${term.label}`;
       }
       const nextStatus = offeringStatus(course, next, cat.horizonYear);
       if (nextStatus === "not-offered") {
-        return `${code} runs over two consecutive semesters; part 2 isn't offered in ${next.label}`;
+        return `${code}${TWO_SEMESTER}part 2 isn't offered in ${next.label}`;
       }
     }
     return null;

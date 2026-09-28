@@ -17,6 +17,19 @@ import {
 import PrereqLegend from "./PrereqLegend";
 import PrereqOverlay from "./PrereqOverlay";
 
+// Set from the sidebar's "Placed in <term>" badge, to scroll to and flash
+// the matching card; a token so clicking the same badge twice in a row
+// re-triggers the effect even though the code didn't change. A row's part 2
+// button asks for the stub with `part: 2`. Opening a course's details asks
+// with `focus: false`: it shows where the card is while focus stays in the
+// details sidebar.
+export interface LocateRequest {
+  code: string;
+  token: number;
+  part?: 2;
+  focus?: boolean;
+}
+
 interface Props {
   view: PlanView;
   planId: string;
@@ -35,11 +48,7 @@ interface Props {
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   onRemoved: (removed: RemovedPlacement) => void;
-  // Set from the sidebar's "Placed in <term>" badge, to scroll to and
-  // flash the matching card; a token so clicking the same badge twice in a
-  // row re-triggers the effect even though the code didn't change. A row's
-  // part 2 button asks for the stub with `part: 2`.
-  locateRequest: { code: string; token: number; part?: 2 } | null;
+  locateRequest: LocateRequest | null;
   // A part 2 stub's button asks for its part 1 through this, the same way
   // the sidebar's badge does; part 1's marker asks for the stub with
   // `part` 2.
@@ -50,6 +59,8 @@ interface Props {
   focusGroupId: string | null;
   // Opens this course in the details sidebar.
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
+  // The course open in the details sidebar, whose titles say so.
+  openCode: string | null;
 }
 
 export default function Timeline({
@@ -71,6 +82,7 @@ export default function Timeline({
   onShowGroup,
   focusGroupId,
   onOpenDetails,
+  openCode,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   // The term a mouse drag is currently over — the same gold outline
@@ -106,7 +118,7 @@ export default function Timeline({
     target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     // preventScroll: the smooth scrollIntoView above is already under way;
     // focus()'s own default jump-to-element would fight it.
-    target.focus({ preventScroll: true });
+    if (locateRequest.focus !== false) target.focus({ preventScroll: true });
     el.classList.add("course-card-highlighted");
     part2?.classList.add("course-card-highlighted");
     const timer = setTimeout(() => {
@@ -242,6 +254,7 @@ export default function Timeline({
                     onLocateCourse={onLocateCourse}
                     receded={recededFor(placement)}
                     onOpenDetails={onOpenDetails}
+                    current={openCode === placement.code}
                   />
                 ))}
                 {partTwoPlacements(view, term.index).map((p) => (
