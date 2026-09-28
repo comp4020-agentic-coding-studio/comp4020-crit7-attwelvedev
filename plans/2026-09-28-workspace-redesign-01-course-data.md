@@ -277,12 +277,12 @@ None.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 1–3 complete, with tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] `curl localhost:4321/api/courses/COMP2100` (with `pnpm dev` running)
+- [x] Tasks 1–3 complete, with tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] `curl localhost:4321/api/courses/COMP2100` (with `pnpm dev` running)
   shows outcomes, assessment, classes and co-taught
-- [ ] Tick Phase 01 in overview §5 and commit
+- [x] Tick Phase 01 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
