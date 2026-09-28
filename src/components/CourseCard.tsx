@@ -4,7 +4,15 @@ import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
 import CourseDetail from "./CourseDetail";
 import MoreOptions from "./MoreOptions";
-import { familyOf, groupLabel, menuTargets, partOneMarker, unplacedCount, verifyBadgeText } from "./planner-logic";
+import {
+  familyOf,
+  groupLabel,
+  menuTargets,
+  partOneMarker,
+  placedStatus,
+  unplacedCount,
+  verifyBadgeText,
+} from "./planner-logic";
 
 // What removing this exact placement needs to undo it: not just the code
 // and term, but whether it was pinned — placeCourse always inserts a fresh,
@@ -29,6 +37,9 @@ interface Props {
   onMenuOpenChange: (code: string, open: boolean) => void;
   onRemoved: (removed: RemovedPlacement) => void;
   onShowGroup: (groupId: string) => void;
+  // A two-semester card's marker term asks for its part 2 stub through
+  // this, as the sidebar row's part 2 button does.
+  onLocateCourse: (code: string, part?: 2) => void;
   // Outside the sidebar group under hover or focus.
   receded: boolean;
 }
@@ -45,6 +56,7 @@ export default function CourseCard({
   onMenuOpenChange,
   onRemoved,
   onShowGroup,
+  onLocateCourse,
   receded,
 }: Props) {
   const course = view.courses[placement.code];
@@ -102,6 +114,7 @@ export default function CourseCard({
 
   const family = placement.countsToward ? familyOf(view, placement.countsToward) : null;
   const marker = partOneMarker(view, placement);
+  const part2 = placedStatus(view, placement).parts[1];
 
   const { targets, blockedReasons } = menuTargets(view, placement.code, {
     currentTerm: placement.term,
@@ -159,10 +172,17 @@ export default function CourseCard({
       {marker && (
         <p class="course-card-part">
           {marker.text}
-          {marker.termLabel && (
+          {marker.termLabel && part2 && (
             <>
               {" "}
-              <span class="course-card-part-term">{marker.termLabel}</span>
+              <button
+                type="button"
+                class="course-card-term-link course-card-part-term"
+                onClick={() => onLocateCourse(placement.code, 2)}
+                aria-label={`${placement.code} ${part2.spoken} — locate it on the timeline`}
+              >
+                {marker.termLabel}
+              </button>
             </>
           )}
         </p>

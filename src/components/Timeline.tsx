@@ -40,8 +40,9 @@ interface Props {
   // part 2 button asks for the stub with `part: 2`.
   locateRequest: { code: string; token: number; part?: 2 } | null;
   // A part 2 stub's button asks for its part 1 through this, the same way
-  // the sidebar's badge does.
-  onLocateCourse: (code: string) => void;
+  // the sidebar's badge does; part 1's marker asks for the stub with
+  // `part` 2.
+  onLocateCourse: (code: string, part?: 2) => void;
   // Opens a card's "Counts toward" group in the requirements sidebar.
   onShowGroup: (groupId: string) => void;
   // A sidebar group under hover or focus: cards outside it recede.
@@ -234,6 +235,7 @@ export default function Timeline({
                     onMenuOpenChange={onMenuOpenChange}
                     onRemoved={onRemoved}
                     onShowGroup={onShowGroup}
+                    onLocateCourse={onLocateCourse}
                     receded={recededFor(placement)}
                   />
                 ))}

@@ -851,6 +851,24 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
     });
   });
 
+  it.each([
+    { width: 1920, height: 1080 },
+    { width: 390, height: 844 },
+  ])("part 1's marker term locates the part 2 stub at $width×$height", async (viewport) => {
+    await withPlan(viewport, async (page) => {
+      await page
+        .locator('[data-placed="COMP4550"]')
+        .getByRole("button", { name: /^COMP4550 part 2 is planned for S2 2030 — locate it on the timeline$/ })
+        .click();
+      await expect
+        .poll(() =>
+          page.evaluate(() => document.activeElement?.closest("[data-part-two]")?.getAttribute("data-part-two")),
+        )
+        .toBe("COMP4550");
+      await expect.poll(() => highlighted(page)).toEqual(["COMP4550", "COMP4550"]);
+    });
+  });
+
   it("part 2 recedes with part 1", async () => {
     await withPlan(desktop, async (page) => {
       // On the example plan COMP4550 counts toward cap-research, not compulsory.

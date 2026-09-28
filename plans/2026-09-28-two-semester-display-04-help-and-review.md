@@ -448,7 +448,7 @@ This phase applies the rule to part 1's card and the stub.
 
 ### Task 11: Part 1's marker term locates part 2
 
-- [ ] **Description:** the "S2 2030" in part 1's marker becomes the same
+- [x] **Description:** the "S2 2030" in part 1's marker becomes the same
   term-link button, named like the placed row's part 2 button. It scrolls
   to and focuses the stub's button, and both parts flash. With no part 2
   term there's no button. Added 2026-09-28 by user ruling (part 1's half of

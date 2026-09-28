@@ -282,7 +282,7 @@ export default function Planner({ view: initialView, title }: Props) {
               onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
               onRemoved={handleRemoved}
               locateRequest={locateRequest}
-              onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}
+              onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
               onShowGroup={(id) => showInSidebar("group", id)}
               focusGroupId={focusGroupId}
             />
