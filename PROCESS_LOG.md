@@ -891,3 +891,35 @@ budget was unchanged.
 This kind of label wrap has now come up twice, both times caught only by
 a screenshot. One check over every rendered term label would catch the
 next one without it.
+
+## 2026-09-28 — Giving server-rendered states their own route list instead of bending a test
+
+Resolved by 5e0ee92.
+
+Phase 02 asked for `/plan/example?course=COMP2100` to be added to
+`spec/routes.ts` `ROUTES`, so the jsdom invariants would cover the
+server-rendered details sidebar. Doing exactly that turned `pnpm check`
+red in a test the plan never mentioned. The layout suite's "the tab shares
+the title's row and covers nothing" check also loops over `ROUTES`, and at
+390px the plan's interim drawer (`width: min(440px, 100vw)`) covers the
+whole screen, nav tab included.
+
+There were two obvious moves, and each quietly lost something. Filtering
+`.details-panel` out of that test's "covered" list would weaken a
+geometry check to fit one state. Leaving the route out would drop the
+invariants coverage the plan wanted. The conflict was really about what
+`ROUTES` means: it had silently become two contracts, "every page, for the
+invariants" and "every page's default chrome, for layout geometry". A
+`?course=` URL is a state of a page, not a page.
+
+So the harness now says so. `STATE_ROUTES` is a separate list that only
+`invariants.test.ts` reads, and a comment explains why it stays out of the
+geometry test. That keeps both contracts intact. The next server-rendered
+state (a phone sheet, a palette opened from the URL) has a named home, and
+nobody has to rediscover why it can't just join `ROUTES`.
+
+I checked it from the other side. The full suite went green with
+invariants and jsdom axe running on the new route (737 tests). The one
+real product gap left, the phone drawer covering the nav tab, is recorded
+in the phase file as interim, for Phase 07's bottom sheet to close. It
+isn't hidden by a test exception.
