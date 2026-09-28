@@ -2575,6 +2575,42 @@ describe("family colours", { timeout: 30_000 }, () => {
       expect(await style(page, '[data-group="arin-a"] .progress-bar-completed', "background-color")).toBe(
         "rgb(140, 95, 201)",
       );
+      // Its completed segment is 0% wide (COMP2620 is planned), so check the
+      // planned segment actually shows, in violet.
+      const planned = page.locator('[data-group="arin-a"] .progress-bar-planned').first();
+      expect(await planned.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(0);
+      expect(await planned.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain("rgb(140, 95, 201)");
+    });
+  });
+
+  it("hatches every family bar's planned segment, and leaves Total and the checks plain", async () => {
+    await withPlan(desktop, async (page) => {
+      const rgb: Record<string, string> = {
+        foundations: FOUNDATIONS,
+        specialisation: "rgb(140, 95, 201)",
+        advanced: "rgb(58, 143, 194)",
+        ict: "rgb(176, 64, 125)",
+        capstone: "rgb(61, 70, 80)",
+        neutral: NEUTRAL,
+      };
+      const bars = await page
+        .locator("[data-group] > .progress-bar[data-family]")
+        .evaluateAll((els) =>
+          els.map((el) => ({
+            family: el.getAttribute("data-family")!,
+            image: getComputedStyle(el.querySelector(".progress-bar-planned")!).backgroundImage,
+          })),
+        );
+      expect(bars.length).toBeGreaterThan(0);
+      for (const { family, image } of bars) {
+        expect(image, family).toContain("repeating-linear-gradient");
+        expect(image, family).toContain(rgb[family]);
+      }
+      const total = page.locator(".requirement-group").filter({ has: page.locator("h2", { hasText: /^Total$/ }) });
+      expect(
+        await total.locator(".progress-bar-planned").first().evaluate((el) => getComputedStyle(el).backgroundImage),
+      ).toBe("none");
+      expect(await style(page, ".checks-list .progress-bar-planned", "background-image")).toBe("none");
     });
   });
 

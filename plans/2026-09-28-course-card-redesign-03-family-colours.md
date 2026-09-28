@@ -386,6 +386,46 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
     still passes.
 - **Depends on:** Task 7.
 
+### Task 9a: Hatch planned segments so they never vanish into the track
+
+Added 2026-09-28, after Phase 03 closed, on the user's go-ahead. Task 9's
+25% tint is nearly identical to the empty track (`--line #e0e2e7`) for
+some families: contrast 1.02 for advanced and neutral, 1.06
+specialisation, 1.11 ict, 1.18 capstone, 1.24 foundations. Raising the
+tint doesn't rescue it (at 50% advanced reaches only 1.39). Task 9's
+arin-a check also asserted the colour of a 0%-wide completed segment.
+
+- [x] **Description:** family progress bars draw the planned segment as
+  a diagonal hatch of the family colour over its tint, so solid =
+  completed, hatched = planned and plain track = nothing yet,
+  independent of hue. The Total and check bars are unchanged (overview
+  §2.3).
+- **Files touched:**
+  - `src/styles.css`
+  - `spec/layout.test.ts`
+- **Tests first (red),** in `describe("family colours")`:
+  - "hatches every family bar's planned segment": for every
+    `[data-group] > .progress-bar[data-family]` (count > 0), the planned
+    segment's computed `background-image` contains
+    `repeating-linear-gradient` and the rgb of its `data-family`'s
+    token.
+  - Task 9's test additionally asserts that
+    `[data-group="arin-a"] .progress-bar-planned` has a width > 0 and a
+    `background-image` containing `rgb(140, 95, 201)`. It keeps its
+    existing assertions.
+  - The Total and first check bars' planned segments have
+    `background-image` "none" (still the plain gold tint).
+- **Implementation (green):** replace Task 9's planned rule with
+  `.progress-bar[data-family] .progress-bar-planned { background:
+  repeating-linear-gradient(135deg, var(--family) 0 2px, color-mix(in
+  srgb, var(--family) 25%, #fff) 2px 5px); }`, and update its comment.
+- **Acceptance criteria:**
+  - Tests pass, and fail on the Task 10 build.
+  - `pnpm check` is green.
+  - Renders at both viewports show the hatch on Specialisation (planned
+    only) and Electives (completed + planned).
+- **Depends on:** Task 9.
+
 ### Task 10: Per-term family bar under each term's unit count
 
 - [x] **Description:**
@@ -494,7 +534,7 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
 
 ## 6. Phase Definition of Done
 
-- [x] Tasks 7–10 complete, their tests passing
+- [x] Tasks 7–10 complete, their tests passing (Task 9a, a later follow-up, tracks its own box)
 - [x] `pnpm exec vitest run --project unit` passes
 - [x] `pnpm check` passes
 - [x] Screenshots at 1920×1080 and 390×844: strips, dots, family bars, term bars
@@ -512,7 +552,7 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
 | CR23 | Task 8 (test 3) |
 | CR4 (dot) | Task 8 (test 3) |
 | E1 | Task 10 |
-| E3 | Task 9 |
+| E3 | Task 9, Task 9a (planned segments legible) |
 | NFR colour | Task 7 |
 
 ## 8. Risks / open questions

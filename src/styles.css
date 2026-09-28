@@ -1658,13 +1658,20 @@ button.badge-verify:focus-visible {
 }
 
 /* A requirement group's bar takes its family colour (Electives grey); the
-   Total bar and the checks pass no family and stay gold. */
+   Total bar and the checks pass no family and stay gold. Planned units are
+   hatched rather than just tinted: a light tint of some hues (steel blue,
+   grey) is all but identical to the empty track, whereas solid, hatched
+   and plain read apart for every family and in any colour vision. */
 .progress-bar[data-family] .progress-bar-completed {
   background: var(--family);
 }
 
 .progress-bar[data-family] .progress-bar-planned {
-  background: color-mix(in srgb, var(--family) 25%, #fff);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--family) 0 2px,
+    color-mix(in srgb, var(--family) 25%, #fff) 2px 5px
+  );
 }
 
 .progress-bar-text {
