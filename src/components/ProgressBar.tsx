@@ -1,3 +1,4 @@
+import type { Family } from "../lib/domain/types";
 import { progressSegments } from "./planner-logic";
 
 interface Props {
@@ -11,9 +12,12 @@ interface Props {
   // The bar itself clamps at 100% either way, so once it's full this text
   // is the only place that distinction — and by how much — is visible.
   bound?: "min" | "max";
+  // A requirement group's colour family. Without one (Total, the checks)
+  // the bar stays gold.
+  family?: Family;
 }
 
-export default function ProgressBar({ label, completed, planned, required, bound = "min" }: Props) {
+export default function ProgressBar({ label, completed, planned, required, bound = "min", family }: Props) {
   const { completedPct, plannedPct } = progressSegments(completed, planned, required);
   const over = completed + planned - required;
   const overNote =
@@ -24,7 +28,7 @@ export default function ProgressBar({ label, completed, planned, required, bound
       : "";
   const text = `${completed} completed, ${planned} planned of ${required}${overNote}`;
   return (
-    <div class="progress-bar">
+    <div class="progress-bar" data-family={family}>
       <div
         role="progressbar"
         aria-label={label}

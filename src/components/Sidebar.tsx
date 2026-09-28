@@ -124,6 +124,7 @@ function Group({
       completed={group.completed}
       planned={group.planned}
       required={group.unitsRequired}
+      family={group.family}
     />
   );
 

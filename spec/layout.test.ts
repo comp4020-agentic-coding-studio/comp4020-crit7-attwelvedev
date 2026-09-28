@@ -2503,6 +2503,8 @@ describe("course card menu", { timeout: 30_000 }, () => {
 describe("family colours", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const FOUNDATIONS = "rgb(31, 47, 134)";
+  const NEUTRAL = "rgb(141, 146, 153)";
+  const GOLD = "rgb(190, 131, 14)";
 
   const style = (page: Page, selector: string, prop: string) =>
     page.locator(selector).first().evaluate((el, p) => getComputedStyle(el).getPropertyValue(p), prop);
@@ -2553,6 +2555,26 @@ describe("family colours", { timeout: 30_000 }, () => {
       expect(await page.locator(".available-courses .course-card").count()).toBeGreaterThan(0);
       expect(await page.locator(".placed-row").count()).toBeGreaterThan(0);
       expect(shadows.filter((s) => s !== "none")).toEqual([]);
+    });
+  });
+
+  it("colours each group's progress bar by family, and leaves Total and the checks gold", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await style(page, '[data-group="prog-a"] .progress-bar-completed', "background-color")).toBe(FOUNDATIONS);
+      expect(await style(page, '[data-group="prog-a"] .progress-bar-planned', "background-color")).not.toBe(
+        "rgb(245, 237, 222)",
+      );
+      expect(await style(page, '[data-group="electives"] .progress-bar-completed', "background-color")).toBe(NEUTRAL);
+      const total = page.locator(".requirement-group").filter({ has: page.locator("h2", { hasText: /^Total$/ }) });
+      expect(await total.count()).toBe(1);
+      expect(
+        await total.locator(".progress-bar-completed").first().evaluate((el) => getComputedStyle(el).backgroundColor),
+      ).toBe(GOLD);
+      expect(await style(page, ".checks-list .progress-bar-completed", "background-color")).toBe(GOLD);
+      // The example's COMP2620 counts toward the AI specialisation's foundations.
+      expect(await style(page, '[data-group="arin-a"] .progress-bar-completed', "background-color")).toBe(
+        "rgb(140, 95, 201)",
+      );
     });
   });
 

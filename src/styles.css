@@ -706,9 +706,10 @@ nav[aria-label="site"] .nav-hide:hover {
 }
 
 /* The one requirement-group styled to stand out from the rest — everything
-   else in the sidebar is "one requirement, scan its own bar"; this is the
-   dashboard-style rollup answering "what's actually left" across all of
-   them at once, so it gets the gold accent normally reserved for actions. */
+   else in the sidebar is "one requirement, scan its own bar" in that
+   requirement's family colour; this is the dashboard-style rollup answering
+   "what's actually left" across all of them at once, so it gets the gold
+   that is otherwise kept for actions, the Total bar and the checks. */
 .outstanding-panel {
   border-color: var(--gold);
   border-width: 1px;
@@ -1620,6 +1621,16 @@ button.badge-verify:focus-visible {
 .progress-bar-planned {
   background: var(--gold-tint);
   border-inline-start: 1px solid var(--surface);
+}
+
+/* A requirement group's bar takes its family colour (Electives grey); the
+   Total bar and the checks pass no family and stay gold. */
+.progress-bar[data-family] .progress-bar-completed {
+  background: var(--family);
+}
+
+.progress-bar[data-family] .progress-bar-planned {
+  background: color-mix(in srgb, var(--family) 25%, #fff);
 }
 
 .progress-bar-text {

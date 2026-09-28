@@ -347,7 +347,7 @@ available (`planner-logic.test.ts` already reads `data/2027/courses`).
 
 ### Task 9: Group progress bars in their family colour
 
-- [ ] **Description:** `ProgressBar` accepts `family`, and requirement
+- [x] **Description:** `ProgressBar` accepts `family`, and requirement
   groups (every depth) pass theirs. The Total bar and the check bars pass
   none and stay gold.
 - **Files touched:**
