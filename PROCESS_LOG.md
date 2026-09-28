@@ -726,3 +726,35 @@ side. It failed red on exactly the two cases the screenshot showed (a
 3px reach into 0px of room) and passed on the top-level group. After the
 fix it's green, as is `pnpm check` (615 tests), and re-rendered at both
 marking viewports.
+
+## 2026-09-28 — Matching the completed-semesters menu to its neighbour, not the platform
+
+Resolved by 0439dbc..6ff5939.
+
+The plan replaced the ‹ › chevrons, which read as carousel arrows, with
+a native `<select>`. That's the obvious accessible choice: the platform
+gives you keyboard handling, the name and the value for free. It passed
+every test it was given. Seeing it rendered, I stopped the task: a
+browser-styled select sat right next to the More options disclosure and
+looked like it came from another app. The row now had two different
+kinds of dropdown for what users see as the same kind of thing.
+
+I ruled that it should be a disclosure in More options' design, and that
+read-only plans show plain text instead of a greyed control, as CR11
+already does for Place in…. The plan was updated in place (E6, Task 14,
+and the Help references Phase 06 depends on) before any code changed.
+
+Two things made the new version more than a restyle. Reusing
+`MoreOptions` was the obvious route, but the spec finds the page's More
+options by `querySelector(".more-options-panel")`. A second instance
+earlier in the row would have quietly retargeted three existing tests,
+and they would have passed while measuring the wrong control. So
+`CompletedMenu` has its own classes and shares only the look. Second, a
+text toggle changes width with its label ("Nothing completed yet" vs
+"Completed through S2 2027"), which would shift More options on every
+change. All the labels share one grid cell, so the toggle is always the
+widest label's width. The spec asserts both controls' left, right and
+top edges move ≤ 1px when the cutoff changes, at both marking viewports.
+The Escape, one-open-menu and axe-when-open checks were red first and
+are now green, `pnpm check` passes 647 tests, and I checked the render
+closed and open at both viewports.
