@@ -256,12 +256,12 @@ The controls Help must name, as built:
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 18–19 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Task 19's two human reviews explicitly accepted by the user
-- [ ] Overview §6 feature DoD fully ticked
-- [ ] Tick Phase 06 in overview §5 and commit
+- [x] Tasks 18–19 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Task 19's two human reviews explicitly accepted by the user
+- [x] Overview §6 feature DoD fully ticked
+- [x] Tick Phase 06 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

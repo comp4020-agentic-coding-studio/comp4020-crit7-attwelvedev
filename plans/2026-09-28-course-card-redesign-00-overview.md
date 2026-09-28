@@ -368,28 +368,29 @@ export interface ShowRequest { kind: "group" | "check"; id: string; token: numbe
 | 03 | `…-03-family-colours.md` | 7–10 | 01, 02 | Palette + checks test; strips, dots, family progress bars, per-term bar | [x] |
 | 04 | `…-04-jumps.md` | 11–13 | 01, 02, 03 | "Counts toward" and "What's left" jump to requirements; heading hover recedes other cards | [x] |
 | 05 | `…-05-plan-chrome.md` | 14–17 | — | Completed-through menu, "Completed" term labels, hide chevron on the handle, Checks spacing | [x] |
-| 06 | `…-06-budget-and-review.md` | 18–19 | 01–05 | Height budget spec; Help rewrite; **human review** of the render and the Help copy | [ ] |
+| 06 | `…-06-budget-and-review.md` | 18–19 | 01–05 | Height budget spec; Help rewrite; **human review** of the render and the Help copy | [x] |
 
 Phase 05 depends on no other phase and can run any time. Phase 06 is last.
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and every task is complete with tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Manually verified at 1920×1080 and 390×844 on `/plan/example` and a
-      fresh plan:
-  - [ ] drag a sidebar card to a term by its grip;
-  - [ ] move and remove a course via its three-dot menu, then Undo;
-  - [ ] click a timeline card's "Counts toward" and see its group
+- [x] Every phase in §5 is ticked, and every task is complete with tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Manually verified at 1920×1080 and 390×844 on `/plan/example` and a
+      fresh plan (2026-09-28: each step scripted in Playwright Chromium at both
+      viewports, and the render reviewed live by the user):
+  - [x] drag a sidebar card to a term by its grip;
+  - [x] move and remove a course via its three-dot menu, then Undo;
+  - [x] click a timeline card's "Counts toward" and see its group
         highlighted, with the sidebar hidden beforehand;
-  - [ ] click a "What's left" item;
-  - [ ] hover a group heading and see the other cards recede;
-  - [ ] change the Completed menu and see rows switch between
+  - [x] click a "What's left" item;
+  - [x] hover a group heading and see the other cards recede;
+  - [x] change the Completed menu and see rows switch between
         Completed and Planned.
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Every `Human review:` task explicitly accepted by the user (Task 19)
-- [ ] No item remains in §8
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Every `Human review:` task explicitly accepted by the user (Task 19)
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 
