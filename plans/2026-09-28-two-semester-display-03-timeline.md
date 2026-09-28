@@ -227,13 +227,25 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 - [x] **Description:** add `partOneMarker` and render it as a line under
   the title of two-semester timeline cards.
+- **Amended 2026-09-28 (user ruling, after the render check):** the first
+  version (`e38cee9`) returned one string. At both marking viewports the
+  13rem card broke that line inside the term label ("continues in S2 /
+  2030"), and overview §2.4 says a term label never breaks inside itself.
+  `partOneMarker` now returns the text and the term label separately, and
+  the card holds the label in a no-wrap span, so any break falls before
+  it. The visible text is unchanged. The steps below are the amended ones:
+  the original spec and CSS steps still stand, alongside the added
+  "Amendment" bullets.
 - **Files touched:** `src/components/planner-logic.ts`,
   `src/components/planner-logic.test.ts`, `src/components/CourseCard.tsx`,
   `src/styles.css`, `spec/layout.test.ts`.
 - **Tests first (red):**
-  - `planner-logic.test.ts` `describe("partOneMarker")`:
-    - COMP4550 at 4 → `"Part 1 of 2 · continues in S2 2029"`;
-    - COMP4550 at 7 (hard-blocked, `lastTerm` 8) → `"Part 1 of 2"`;
+  - `planner-logic.test.ts` `describe("partOneMarker")` (amended to the
+    object shape, every value still pinned):
+    - COMP4550 at 4 →
+      `{ text: "Part 1 of 2 · continues in", termLabel: "S2 2029" }`;
+    - COMP4550 at 7 (hard-blocked, `lastTerm` 8) →
+      `{ text: "Part 1 of 2", termLabel: null }`;
     - COMP1100 at 0 → `null`.
     Build the views with `buildPlanView(cat, AACOM_2027, { ...emptyPlan(), placements: [...] })`.
   - `spec/layout.test.ts` `describe("two-semester labels")`,
@@ -242,27 +254,43 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
     - `[data-placed="COMP4550"] .course-card-part` innerText is
       `"Part 1 of 2 · continues in S2 2030"`;
     - no `[data-placed="COMP1130"] .course-card-part` exists.
+  - **Amendment:** new
+    `"keeps the marker's term label on one line"`, as an `it.each` at
+    1920×1080 and 390×844 with `withPlan`:
+    `[data-placed="COMP4550"] .course-card-part-term` exists, its innerText
+    is `"S2 2030"`, and its text's client rects share one `top`. Measure it
+    the way the Place in… range test does.
 - **Implementation (green):**
   - `planner-logic.ts`:
 
     ```ts
+    export interface PartOneMarker {
+      text: string; // "Part 1 of 2 · continues in" / "Part 1 of 2"
+      termLabel: string | null; // part 2's term, kept whole on the card; null in the final term
+    }
+
     // The line under a two-semester card's title naming where part 2 is; a
-    // course left in the final term (hard-blocked) has no part 2 term.
-    export function partOneMarker(view: PlanView, placement: PlacementView): string | null {
+    // course left in the final term (hard-blocked) has no part 2 term. The
+    // term comes apart from the text so the card can keep it on one line.
+    export function partOneMarker(view: PlanView, placement: PlacementView): PartOneMarker | null {
       if (placement.span !== 2) return null;
       const next = view.terms[placement.lastTerm];
-      return next ? `Part 1 of 2 · continues in ${next.label}` : "Part 1 of 2";
+      return next
+        ? { text: "Part 1 of 2 · continues in", termLabel: next.label }
+        : { text: "Part 1 of 2", termLabel: null };
     }
     ```
 
   - `CourseCard.tsx`: after `<CourseCardHeader …/>`, render
-    `{marker && <p class="course-card-part">{marker}</p>}` with
-    `const marker = partOneMarker(view, placement);`.
+    `{marker && <p class="course-card-part">{marker.text}{marker.termLabel && <> <span class="course-card-part-term">{marker.termLabel}</span></>}</p>}`
+    with `const marker = partOneMarker(view, placement);`.
   - `styles.css`: add `.course-card-part` to the
-    `.course-card-offered, .course-card-allocation` rule.
+    `.course-card-offered, .course-card-allocation` rule. **Amendment:**
+    add `.course-card-part-term { white-space: nowrap; }` after it, with a
+    comment that a term label never breaks inside itself.
 - **Refactor:** none.
 - **Acceptance criteria:**
-  - The tests pass.
+  - The tests pass, including the amendment's at both viewports.
   - `describe("card height budget")` passes unchanged.
   - `pnpm check` is green.
 - **Depends on:** none in this phase (it uses the existing `span`/`lastTerm`).

@@ -760,6 +760,24 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
     });
   });
 
+  // The 13rem card leaves the marker just short of room, and a term label
+  // must never break inside itself ("S2 / 2030").
+  it.each([
+    { width: 1920, height: 1080 },
+    { width: 390, height: 844 },
+  ])("keeps the marker's term label on one line at $width×$height", async (viewport) => {
+    await withPlan(viewport, async (page) => {
+      const term = page.locator('[data-placed="COMP4550"] .course-card-part-term');
+      expect(await term.innerText()).toBe("S2 2030");
+      const lines = await term.evaluate((el) => {
+        const text = document.createRange();
+        text.selectNodeContents(el);
+        return new Set([...text.getClientRects()].map((rect) => Math.round(rect.top))).size;
+      });
+      expect(lines).toBe(1);
+    });
+  });
+
   it.each([
     { width: 1920, height: 1080 },
     { width: 390, height: 844 },

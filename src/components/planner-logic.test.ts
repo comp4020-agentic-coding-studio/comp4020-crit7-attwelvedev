@@ -530,11 +530,11 @@ describe("partOneMarker", () => {
   };
 
   it("names the term part 2 continues in", () => {
-    expect(markerAt("COMP4550", 4)).toBe("Part 1 of 2 · continues in S2 2029");
+    expect(markerAt("COMP4550", 4)).toEqual({ text: "Part 1 of 2 · continues in", termLabel: "S2 2029" });
   });
 
   it("drops the continuation in the final term, where part 2 has no term", () => {
-    expect(markerAt("COMP4550", 7)).toBe("Part 1 of 2");
+    expect(markerAt("COMP4550", 7)).toEqual({ text: "Part 1 of 2", termLabel: null });
   });
 
   it("gives a one-semester course no marker", () => {

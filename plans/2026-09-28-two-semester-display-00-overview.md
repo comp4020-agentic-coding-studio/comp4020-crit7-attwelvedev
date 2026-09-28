@@ -233,8 +233,13 @@ locateRequest: { code: string; token: number; part?: 2 } | null;
 // src/components/Sidebar.tsx (both prop lists), CourseSearch.tsx, PlacedCourseRow.tsx:
 onLocateCourse: (code: string, part?: 2) => void;
 
-// src/components/planner-logic.ts (Task 5)
-export function partOneMarker(view: PlanView, placement: PlacementView): string | null;
+// src/components/planner-logic.ts (Task 5, amended 2026-09-28 so the card
+// can keep the term label on one line)
+export interface PartOneMarker {
+  text: string; // "Part 1 of 2 · continues in" / "Part 1 of 2"
+  termLabel: string | null; // part 2's term; null in the final term
+}
+export function partOneMarker(view: PlanView, placement: PlacementView): PartOneMarker | null;
 
 // src/components/planner-logic.ts (Task 6)
 export function partTwoPlacements(view: PlanView, term: number): PlacementView[];

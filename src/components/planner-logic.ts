@@ -414,12 +414,20 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
   };
 }
 
+export interface PartOneMarker {
+  text: string; // "Part 1 of 2 · continues in" / "Part 1 of 2"
+  termLabel: string | null; // part 2's term, kept whole on the card; null in the final term
+}
+
 // The line under a two-semester card's title naming where part 2 is; a
-// course left in the final term (hard-blocked) has no part 2 term.
-export function partOneMarker(view: PlanView, placement: PlacementView): string | null {
+// course left in the final term (hard-blocked) has no part 2 term. The
+// term comes apart from the text so the card can keep it on one line.
+export function partOneMarker(view: PlanView, placement: PlacementView): PartOneMarker | null {
   if (placement.span !== 2) return null;
   const next = view.terms[placement.lastTerm];
-  return next ? `Part 1 of 2 · continues in ${next.label}` : "Part 1 of 2";
+  return next
+    ? { text: "Part 1 of 2 · continues in", termLabel: next.label }
+    : { text: "Part 1 of 2", termLabel: null };
 }
 
 // The two-semester placements whose second part falls in `term`, drawn

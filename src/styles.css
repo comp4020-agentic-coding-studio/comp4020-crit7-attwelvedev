@@ -1633,6 +1633,12 @@ button.badge-verify:focus-visible {
   margin: 0.35rem 0 0;
 }
 
+/* A term label never breaks inside itself ("S2 / 2030"): the marker wraps
+   before it instead. */
+.course-card-part-term {
+  white-space: nowrap;
+}
+
 .course-card-allocation {
   font-size: 0.8rem;
 }

@@ -153,7 +153,17 @@ export default function CourseCard({
           setDetailsOpen(true);
         }}
       />
-      {marker && <p class="course-card-part">{marker}</p>}
+      {marker && (
+        <p class="course-card-part">
+          {marker.text}
+          {marker.termLabel && (
+            <>
+              {" "}
+              <span class="course-card-part-term">{marker.termLabel}</span>
+            </>
+          )}
+        </p>
+      )}
       <p
         class={`badge badge-state-${placement.state}${placement.state === "available" ? " visually-hidden" : ""}`}
       >
