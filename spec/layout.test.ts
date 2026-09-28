@@ -1797,6 +1797,68 @@ describe("completed terms", { timeout: 30_000 }, () => {
   });
 });
 
+describe("hide requirements on the handle", { timeout: 30_000 }, () => {
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i rides the resize handle, not the requirements", async (width, height) => {
+    await withPlan({ width, height }, async (page) => {
+      const named = page.getByRole("button", { name: "Hide requirements", exact: true });
+      expect(await named.evaluate((el) => el.classList.contains("reqs-hide"))).toBe(true);
+      const r = await page.evaluate(() => {
+        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const button = document.querySelector("button.reqs-hide")!;
+        return {
+          insideAside: Boolean(button.closest("#requirements")),
+          stacked: document.querySelector(".reqs-resize")!.getAttribute("aria-orientation") === "horizontal",
+          button: rect("button.reqs-hide").toJSON() as DOMRect,
+          handle: rect(".reqs-resize").toJSON() as DOMRect,
+          panes: rect(".planner-panes").toJSON() as DOMRect,
+          groupGap: rect(".requirement-group").top - rect("#requirements").top,
+        };
+      });
+      expect(r.insideAside).toBe(false);
+      expect(r.button.width).toBeGreaterThanOrEqual(44);
+      expect(r.button.height).toBeGreaterThanOrEqual(44);
+      const centre = (b: DOMRect, axis: "x" | "y") => (axis === "x" ? b.left + b.width / 2 : b.top + b.height / 2);
+      const axis = r.stacked ? "y" : "x";
+      expect(Math.abs(centre(r.button, axis) - centre(r.handle, axis))).toBeLessThanOrEqual(2);
+      if (r.stacked) expect(r.panes.right - r.button.right).toBeLessThanOrEqual(16);
+      else expect(r.button.top - r.handle.top).toBeLessThanOrEqual(16);
+      expect(r.groupGap).toBeLessThanOrEqual(8);
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
+  it("sits in a row above the requirements where there's no handle", async () => {
+    const page = await openPage(browser, planUrl(), { width: 700, height: 400 });
+    try {
+      const hide = page.locator("button.reqs-hide");
+      expect(await hide.isVisible()).toBe(true);
+      const box = (await hide.boundingBox())!;
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      const asideTop = (await page.locator("#requirements").boundingBox())!.y;
+      expect(box.y + box.height).toBeLessThanOrEqual(asideTop + 1);
+
+      // Scrolled up under the sticky timeline, it goes under like the
+      // requirements do instead of floating over the timeline's cards.
+      const covered = await page.evaluate(async () => {
+        const button = document.querySelector("button.reqs-hide")!;
+        window.scrollBy(0, button.getBoundingClientRect().top - 100);
+        await new Promise(requestAnimationFrame);
+        const b = button.getBoundingClientRect();
+        const t = document.querySelector(".planner-timeline-area")!.getBoundingClientRect();
+        const el = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        return { overlaps: b.top < t.bottom && b.bottom > t.top, underTimeline: Boolean(el?.closest(".planner-timeline-area")) };
+      });
+      expect(covered.overlaps).toBe(true);
+      expect(covered.underTimeline).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+});
+
 describe("plan title row", { timeout: 60_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const phone = { width: 390, height: 844 };

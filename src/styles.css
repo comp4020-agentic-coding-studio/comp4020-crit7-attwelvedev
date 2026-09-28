@@ -496,13 +496,45 @@ nav[aria-label="site"] .nav-hide:hover {
   display: none;
 }
 
+/* The hide button rides the resize handle, outside the scrolling aside. It
+   keeps a 2.75rem target but draws only a small round chip on the handle's
+   line; the layout blocks below place it and give it no net size. Painted
+   above the handle, so the button wins where they overlap. */
 .reqs-hide {
-  align-self: flex-end;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  margin-block-end: 0.5rem;
-  min-height: 2.75rem;
+  position: relative;
+  z-index: 3;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.reqs-hide::before {
+  content: "";
+  position: absolute;
+  inset: 0.5rem;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color 0.12s ease;
+}
+
+.reqs-hide:hover::before {
+  border-color: var(--ink);
+}
+
+.reqs-hide:focus-visible {
+  outline: none;
+}
+
+.reqs-hide:focus-visible::before {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .reqs-rail {
@@ -1823,8 +1855,9 @@ button.course-card-allocation:focus-visible {
     --reqs-fit: 1;
   }
 
+  /* -3, so the hide button (-2) sits between it and the handle (-1). */
   .planner-panes > aside {
-    order: -1;
+    order: -3;
     display: flex;
     flex-direction: column;
     flex: 0 0 var(--reqs-w-1);
@@ -2051,6 +2084,15 @@ button.course-card-allocation:focus-visible {
       order: 2;
     }
 
+    /* A zero-height item just before the handle: the margins pull its
+       2.75rem box back to no net height, centred on the handle's 1rem
+       line at its end. */
+    .reqs-hide {
+      order: 1;
+      margin-block: -0.875rem -1.875rem;
+      margin-inline-end: 0.25rem;
+    }
+
     /* Drawn 1rem tall; the hit area is 2.75rem. */
     .reqs-resize::before {
       content: "";
@@ -2115,10 +2157,17 @@ button.course-card-allocation:focus-visible {
    specificity as the tier blocks above (and the preference caps that follow
    them), and the collapsed state has to win over all of them. */
 @container planner (min-width: 49.5rem) {
+  /* A zero-width item between the aside and the handle: the margins pull
+     its 2.75rem box back to no net width, centred on the handle's 1rem
+     line, near its top. Sticky like the handle when the page scrolls. */
   .reqs-hide {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
+    display: flex;
+    order: -2;
+    align-self: flex-start;
+    position: sticky;
+    top: 1.5rem;
+    margin-block-start: 0.5rem;
+    margin-inline: -0.875rem -1.875rem;
   }
 
   :root[data-reqs="collapsed"] .planner-panes > aside {
@@ -2149,12 +2198,14 @@ button.course-card-allocation:focus-visible {
 /* The stacked requirements collapse to a bar along the bottom of the
    planner. */
 @container planner (width < 49.5rem) {
+  /* A right-aligned row above the requirements; the fitted page moves it
+     onto the handle (with the handle, above). Below the unfitted page's
+     sticky timeline (z-index 2), so it scrolls under it like the
+     requirements do, and still above the handle. */
   .reqs-hide {
     display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    width: fit-content;
-    margin-inline-start: auto;
+    align-self: flex-end;
+    z-index: 1;
   }
 
   /* Points down: the requirements tuck away toward the bottom. */

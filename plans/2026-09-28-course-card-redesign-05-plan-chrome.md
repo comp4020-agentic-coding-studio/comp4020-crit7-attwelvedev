@@ -356,7 +356,7 @@ Task 15's placement depends on it (see above).
   and Figma style): no bar, no row, nothing sticky. Snap-to-close by
   dragging and Enter on the handle were offered as extras and are **not**
   part of this task.
-- [ ] **Description:**
+- [x] **Description:**
   - `Sidebar` returns a fragment: `button.reqs-hide`, then the `<aside>`.
     The button is icon-only, with the accessible name "Hide requirements"
     and the same text as its `title`.
@@ -382,7 +382,11 @@ Task 15's placement depends on it (see above).
        ≤ 8px. Red today: ≈ 52px, the old button's row;
      - axe is clean.
   2. At 700×400 (stacked, not fitted), the button is visible, ≥ 44px tall,
-     and its bottom is ≤ `#requirements`' top + 1.
+     and its bottom is ≤ `#requirements`' top + 1. Scrolled up under the
+     sticky timeline, the point at its centre belongs to the timeline, so
+     it goes under like the requirements do. *(Added during execution:
+     the first render had the chip floating over a timeline card. Fixed
+     with `z-index: 1` in the stacked layouts.)*
   3. Existing tests pass unchanged:
      - `describe("requirements sidebar collapse")`,
        `describe("stacked requirements collapse")` and the resize handle

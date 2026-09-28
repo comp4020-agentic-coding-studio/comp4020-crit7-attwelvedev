@@ -352,26 +352,17 @@ export default function Sidebar({
   });
 
   return (
-    <aside
-      id="requirements"
-      aria-label="requirements"
-      class={dropReady ? "reqs-drop-ready" : undefined}
-      onDragOver={(event) => event.preventDefault()}
-      onDrop={(event) => {
-        event.preventDefault();
-        onDragEnd?.();
-        if (readOnly) return;
-        const code = event.dataTransfer?.getData("text/plain");
-        if (!code || !view.placements.some((p) => p.code === code)) return;
-        onDropRemove(code);
-      }}
-    >
+    <>
+      {/* Outside the aside, which scrolls: the button rides the resize
+          handle instead of floating over the requirements or taking a row
+          above them. Its chip is drawn in CSS. */}
       <button
         type="button"
         class="reqs-hide"
         ref={hideRef}
         aria-controls="requirements-content"
         aria-expanded="true"
+        title="Hide requirements"
         onClick={() => {
           onHide();
           railRef.current?.focus();
@@ -380,145 +371,160 @@ export default function Sidebar({
         <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="m15 6-6 6 6 6" />
         </svg>
-        Hide requirements
+        <span class="visually-hidden">Hide requirements</span>
       </button>
-      <button
-        type="button"
-        class="reqs-rail"
-        ref={railRef}
-        aria-controls="requirements-content"
-        aria-expanded="false"
-        onClick={() => {
-          onShow();
-          hideRef.current?.focus();
+      <aside
+        id="requirements"
+        aria-label="requirements"
+        class={dropReady ? "reqs-drop-ready" : undefined}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          onDragEnd?.();
+          if (readOnly) return;
+          const code = event.dataTransfer?.getData("text/plain");
+          if (!code || !view.placements.some((p) => p.code === code)) return;
+          onDropRemove(code);
         }}
       >
-        {/* One span for the whole name: the rail is a flex container, so each
-            child is blockified and the name algorithm would put a space
-            between separate spans ("Show requirements : …"). */}
-        <span class="visually-hidden">
-          Show requirements: {view.total.completed} completed, {view.total.planned} planned of {view.total.required}
-        </span>
-        <span class="reqs-rail-label" aria-hidden="true">
-          Requirements
-        </span>
-        {/* The rail draws the fill vertically and the stacked bar
-            horizontally, from the same two numbers. */}
-        <span class="reqs-rail-bar" aria-hidden="true" style={`--completed: ${completedPct}%; --planned: ${plannedPct}%`}>
-          <span class="reqs-rail-completed" />
-          <span class="reqs-rail-planned" />
-        </span>
-      </button>
-      <ul class="requirements-scroll" id="requirements-content">
-        <SidebarSection
-          {...sectionProps("outstanding")}
-          label="What's left"
-          class="outstanding-panel"
-          compactSummary={
-            <p class={outstanding.length === 0 ? "outstanding-done" : "outstanding-count"}>
-              {outstanding.length === 0
-                ? "Nothing outstanding"
-                : `${outstanding.length} item${outstanding.length === 1 ? "" : "s"} outstanding`}
-            </p>
-          }
+        <button
+          type="button"
+          class="reqs-rail"
+          ref={railRef}
+          aria-controls="requirements-content"
+          aria-expanded="false"
+          onClick={() => {
+            onShow();
+            hideRef.current?.focus();
+          }}
         >
-          {outstanding.length === 0 ? (
-            <p class="outstanding-done">
-              Every requirement is satisfied or planned — nothing outstanding here.
-            </p>
-          ) : (
-            <ul class="outstanding-list">
-              {outstanding.map((item) => {
-                const target = outstandingTarget(item.id);
-                return (
-                  <li key={item.id}>
-                    {target ? (
-                      <button
-                        type="button"
-                        class="outstanding-link"
-                        onClick={() => onShowInSidebar(target.kind, target.id)}
-                      >
-                        {item.text}
-                      </button>
-                    ) : (
-                      item.text
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </SidebarSection>
-        <CourseSearch
-          view={view}
-          planId={planId}
-          onChanged={onChanged}
-          onAnnounce={onAnnounce}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-          onResults={onSearchResults}
-          openMenuCode={openMenuCode}
-          onMenuOpenChange={onMenuOpenChange}
-          onLocateCourse={onLocateCourse}
-          compact={compact.has("search")}
-          onToggleCompact={() => setSectionCompact("search", !compact.has("search"))}
-          onExpand={() => setSectionCompact("search", false)}
-        />
-        <SidebarSection
-          {...sectionProps("total")}
-          label="Total"
-          summary={
-            <ProgressBar
-              label="Total"
-              completed={view.total.completed}
-              planned={view.total.planned}
-              required={view.total.required}
-            />
-          }
-        >
-          <section aria-label="program checks">
-            <h3>Checks</h3>
-            <ul class="checks-list">
-              {view.checks.map((check) => (
-                <li key={check.id} data-check={check.id}>
-                  <h4 tabIndex={-1}>{check.label}</h4>
-                  {check.ok === null ? (
-                    <p>not tracked — verify on P&C</p>
-                  ) : (
-                    <ProgressBar
-                      label={check.label}
-                      completed={check.completed}
-                      planned={check.planned}
-                      required={check.units}
-                      bound={check.bound}
-                    />
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        </SidebarSection>
-        {view.groups.map((group) => (
-          <Group
-            key={group.id}
+          {/* One span for the whole name: the rail is a flex container, so each
+              child is blockified and the name algorithm would put a space
+              between separate spans ("Show requirements : …"). */}
+          <span class="visually-hidden">
+            Show requirements: {view.total.completed} completed, {view.total.planned} planned of {view.total.required}
+          </span>
+          <span class="reqs-rail-label" aria-hidden="true">
+            Requirements
+          </span>
+          {/* The rail draws the fill vertically and the stacked bar
+              horizontally, from the same two numbers. */}
+          <span class="reqs-rail-bar" aria-hidden="true" style={`--completed: ${completedPct}%; --planned: ${plannedPct}%`}>
+            <span class="reqs-rail-completed" />
+            <span class="reqs-rail-planned" />
+          </span>
+        </button>
+        <ul class="requirements-scroll" id="requirements-content">
+          <SidebarSection
+            {...sectionProps("outstanding")}
+            label="What's left"
+            class="outstanding-panel"
+            compactSummary={
+              <p class={outstanding.length === 0 ? "outstanding-done" : "outstanding-count"}>
+                {outstanding.length === 0
+                  ? "Nothing outstanding"
+                  : `${outstanding.length} item${outstanding.length === 1 ? "" : "s"} outstanding`}
+              </p>
+            }
+          >
+            {outstanding.length === 0 ? (
+              <p class="outstanding-done">
+                Every requirement is satisfied or planned — nothing outstanding here.
+              </p>
+            ) : (
+              <ul class="outstanding-list">
+                {outstanding.map((item) => {
+                  const target = outstandingTarget(item.id);
+                  return (
+                    <li key={item.id}>
+                      {target ? (
+                        <button
+                          type="button"
+                          class="outstanding-link"
+                          onClick={() => onShowInSidebar(target.kind, target.id)}
+                        >
+                          {item.text}
+                        </button>
+                      ) : (
+                        item.text
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </SidebarSection>
+          <CourseSearch
             view={view}
-            group={group}
             planId={planId}
-            readOnly={readOnly}
-            depth={0}
             onChanged={onChanged}
             onAnnounce={onAnnounce}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
+            onResults={onSearchResults}
             openMenuCode={openMenuCode}
             onMenuOpenChange={onMenuOpenChange}
             onLocateCourse={onLocateCourse}
-            onFocusGroup={onFocusGroup}
-            compact={compact.has(`group-${group.id}`)}
-            onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
+            compact={compact.has("search")}
+            onToggleCompact={() => setSectionCompact("search", !compact.has("search"))}
+            onExpand={() => setSectionCompact("search", false)}
           />
-        ))}
-      </ul>
-    </aside>
+          <SidebarSection
+            {...sectionProps("total")}
+            label="Total"
+            summary={
+              <ProgressBar
+                label="Total"
+                completed={view.total.completed}
+                planned={view.total.planned}
+                required={view.total.required}
+              />
+            }
+          >
+            <section aria-label="program checks">
+              <h3>Checks</h3>
+              <ul class="checks-list">
+                {view.checks.map((check) => (
+                  <li key={check.id} data-check={check.id}>
+                    <h4 tabIndex={-1}>{check.label}</h4>
+                    {check.ok === null ? (
+                      <p>not tracked — verify on P&C</p>
+                    ) : (
+                      <ProgressBar
+                        label={check.label}
+                        completed={check.completed}
+                        planned={check.planned}
+                        required={check.units}
+                        bound={check.bound}
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </SidebarSection>
+          {view.groups.map((group) => (
+            <Group
+              key={group.id}
+              view={view}
+              group={group}
+              planId={planId}
+              readOnly={readOnly}
+              depth={0}
+              onChanged={onChanged}
+              onAnnounce={onAnnounce}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              openMenuCode={openMenuCode}
+              onMenuOpenChange={onMenuOpenChange}
+              onLocateCourse={onLocateCourse}
+              onFocusGroup={onFocusGroup}
+              compact={compact.has(`group-${group.id}`)}
+              onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
+            />
+          ))}
+        </ul>
+      </aside>
+    </>
   );
 }
