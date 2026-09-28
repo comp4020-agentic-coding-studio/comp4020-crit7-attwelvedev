@@ -146,7 +146,10 @@ export default function CourseCard({
       <CourseCardHeader
         code={placement.code}
         title={course?.title ?? placement.code}
-        units={course ?? { units: 0, twoSemester: false }}
+        // A timeline card holds one semester, so it shows one semester's
+        // units, the amount the term's header counts. A two-semester
+        // course's other half shows its own on the stub.
+        units={{ units: course?.units ?? 0, twoSemester: false }}
         grip={!readOnly}
         onOpenDetails={() => {
           setDetailsFocus("top");

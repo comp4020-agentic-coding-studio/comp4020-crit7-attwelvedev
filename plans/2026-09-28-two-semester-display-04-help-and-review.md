@@ -333,7 +333,7 @@ This phase applies the rule to part 1's card and the stub.
 
 ### Task 10: The stub mirrors part 1's card, and each part shows its own units
 
-- [ ] **Description:** the part 2 stub becomes a small card with part 1's
+- [x] **Description:** the part 2 stub becomes a small card with part 1's
   layout. Its first line is the code and "12u" (spoken "12 units"). Its
   second line is "Part 2 of 2 · continued from [S1 2030]", where only the
   term is a button, and it locates part 1. The whole-stub button is gone.

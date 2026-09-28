@@ -8,6 +8,7 @@ import {
   familyOf,
   groupLeafIds,
   partTwoPlacements,
+  placedStatus,
   termBarLabel,
   termBarWidths,
   termFamilyUnits,
@@ -240,7 +241,8 @@ export default function Timeline({
                   <PartTwoStub
                     key={`${p.code}-2`}
                     code={p.code}
-                    startLabel={view.terms[p.term].label}
+                    part1={placedStatus(view, p).parts[0]}
+                    units={view.courses[p.code]?.units ?? 0}
                     family={p.countsToward ? familyOf(view, p.countsToward) : null}
                     receded={recededFor(p)}
                     onLocate={() => onLocateCourse(p.code)}

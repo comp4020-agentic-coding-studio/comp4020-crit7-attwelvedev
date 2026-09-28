@@ -786,11 +786,61 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
       const stub = page.locator('[data-term="7"] [data-part-two="COMP4550"]');
       expect(await stub.count()).toBe(1);
       expect(await stub.evaluate((el) => el.classList.contains("course-card"))).toBe(false);
-      expect(await stub.getByRole("button", { name: "COMP4550 part 2 of 2, continued from S1 2030", exact: true }).count()).toBe(1);
+      expect(await stub.locator("button").count()).toBe(1);
+      expect(
+        await stub
+          .getByRole("button", { name: /^COMP4550 part 1 is planned for S1 2030 — locate it on the timeline$/ })
+          .count(),
+      ).toBe(1);
       expect(await stub.getAttribute("data-family")).toBe(
         await page.locator('[data-placed="COMP4550"]').getAttribute("data-family"),
       );
     });
+  });
+
+  it.each([
+    { width: 1920, height: 1080 },
+    { width: 390, height: 844 },
+  ])("shows each part's own units on the timeline at $width×$height", async (viewport) => {
+    await withPlan(viewport, async (page) => {
+      for (const selector of ['[data-placed="COMP4550"]', '[data-part-two="COMP4550"]']) {
+        const units = page.locator(selector).locator(".course-card-unit-count");
+        expect(await units.locator('[aria-hidden="true"]').textContent()).toBe("12u");
+        expect(await units.locator(".visually-hidden").textContent()).toBe("12 units");
+      }
+      const stub = page.locator('[data-part-two="COMP4550"]');
+      expect(await stub.locator(".course-card-code").textContent()).toBe("COMP4550");
+      expect(await stub.locator(".course-card-part").innerText()).toBe("Part 2 of 2 · continued from S1 2030");
+      const lines = await stub.locator(".course-card-part-term").evaluate((el) => {
+        const text = document.createRange();
+        text.selectNodeContents(el);
+        return new Set([...text.getClientRects()].map((rect) => Math.round(rect.top))).size;
+      });
+      expect(lines).toBe(1);
+      const { scrollWidth, clientWidth } = await stub.evaluate((el) => ({
+        scrollWidth: el.scrollWidth,
+        clientWidth: el.clientWidth,
+      }));
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  });
+
+  it("keeps whole-course units on a search card", async () => {
+    const created = await fetch(new URL("/api/plans", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      redirect: "manual",
+    });
+    const id = created.headers.get("location")!.split("/").pop()!;
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.fill(".course-search input", "COMP4550");
+      await page.click(".course-search button[type=submit]");
+      const card = page.locator(".course-search .course-card").filter({ hasText: "COMP4550" });
+      expect(await card.locator('.course-card-unit-count [aria-hidden="true"]').textContent()).toBe("12+12u");
+    } finally {
+      await page.close();
+    }
   });
 
   it("the part 2 stub locates part 1 and both flash", async () => {

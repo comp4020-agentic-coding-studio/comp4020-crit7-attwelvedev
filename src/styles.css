@@ -1674,34 +1674,19 @@ button.course-card-allocation:focus-visible {
   box-shadow: inset 4px 0 0 var(--family);
 }
 
-/* A two-semester course's second semester: a compact stub in the column
-   after its card, never .course-card, so the card height budget doesn't
-   measure it. It carries part 1's family strip. */
+/* A two-semester course's second semester, in the column after its card:
+   part 1's card in miniature, reusing its head and part-line classes. Never
+   .course-card, so the card height budget doesn't measure it. It carries
+   part 1's family strip, and is positioned for its visually-hidden units
+   as .course-card is. */
 .part-two-stub {
+  position: relative;
   width: 13rem;
   flex-shrink: 0;
+  padding: 0.35rem 0.8rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 0.7rem;
-}
-
-.part-two-stub button {
-  display: block;
-  width: 100%;
-  padding: 0.35rem 0.8rem;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 0.85em;
-  color: var(--unigrey);
-  text-align: start;
-  cursor: pointer;
-}
-
-.part-two-stub button:hover,
-.part-two-stub button:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
 }
 
 .part-two-stub[data-family]:not([data-family="neutral"]) {
@@ -1710,9 +1695,9 @@ button.course-card-allocation:focus-visible {
 
 .part-two-stub-receded {
   background: var(--paper);
+  color: var(--muted);
 }
 
-.part-two-stub-receded button,
 .part-two-stub-receded strong {
   color: var(--muted);
 }
