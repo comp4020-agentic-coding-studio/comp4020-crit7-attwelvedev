@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { fromPandc, type PandcCourseJson } from "../catalogue/from-pandc";
 import type { CatalogueCourse } from "./types";
-import { horizonYear, offeredLabel, offeringStatus, TERMS, termLabel } from "./terms";
+import { horizonYear, offeredLabel, offeringStatus, TERMS, termLabel, termSpanLabel } from "./terms";
 
 function loadCourse(code: string): CatalogueCourse {
   const json: PandcCourseJson = JSON.parse(readFileSync(`data/2027/courses/${code}.json`, "utf-8"));
@@ -26,6 +26,24 @@ describe("TERMS", () => {
 
   it("termLabel(8) throws RangeError", () => {
     expect(() => termLabel(8)).toThrow(RangeError);
+  });
+});
+
+describe("termSpanLabel", () => {
+  it("a one-semester span is the single term label", () => {
+    expect(termSpanLabel(2, 1)).toBe("S1 2028");
+  });
+
+  it("a two-semester span reads as an en-dash range", () => {
+    expect(termSpanLabel(2, 2)).toBe("S1 2028 – S2 2028");
+  });
+
+  it("a two-semester span in the final term has no following term to name", () => {
+    expect(termSpanLabel(7, 2)).toBe("S2 2030");
+  });
+
+  it("throws RangeError past the last term", () => {
+    expect(() => termSpanLabel(8, 1)).toThrow(RangeError);
   });
 });
 

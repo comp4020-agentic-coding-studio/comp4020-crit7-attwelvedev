@@ -244,6 +244,28 @@ describe("evaluatePlan (synthetic catalogues)", () => {
     expect(result.termUnits[0]).toBeGreaterThan(24);
   });
 
+  it("suggests a two-semester prereq as a range", () => {
+    // Explicit 2028 rows: the horizon is 2028, so without them term 3 would
+    // be not-offered and hard-blocked.
+    const offerings = [2027, 2028].flatMap((year) => [
+      { year, session: "First Semester" },
+      { year, session: "Second Semester" },
+    ]);
+    const cat = syntheticCatalogue([
+      synthetic("ZZAA1000", { twoSemester: true, offerings }),
+      synthetic("ZZAA2000", { offerings, prereq: { kind: "course", code: "ZZAA1000", concurrent: false } }),
+    ]);
+    const feas = createFeasibility(cat);
+    const result = evaluatePlan(cat, feas, plan([{ code: "ZZAA2000", term: 3 }]));
+    const p = result.placements[0]!;
+    expect(p.suggestions).toContainEqual({
+      code: "ZZAA1000",
+      action: "place",
+      term: 0,
+      text: "Place ZZAA1000 in S1 2027 – S2 2027",
+    });
+  });
+
   it("requisiteStatus marks leaves ok/false/null (null for unverifiable)", () => {
     const okLeaf: ReqExpr = { kind: "course", code: "ZZCC1000", concurrent: false };
     const failLeaf: ReqExpr = { kind: "course", code: "ZZCC1001", concurrent: false };

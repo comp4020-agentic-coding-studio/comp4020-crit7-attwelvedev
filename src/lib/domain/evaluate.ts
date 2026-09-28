@@ -1,6 +1,6 @@
 import { createFeasibility } from "./feasibility";
 import { filterLabel, matchesFilter } from "./filters";
-import { termLabel, TERMS } from "./terms";
+import { termLabel, termSpanLabel, TERMS } from "./terms";
 import type { Catalogue, CatalogueCourse, CheckAnswer, CourseFilter, PlanState, Placement, ReqExpr } from "./types";
 import { verifyItemLabels } from "./verify-labels";
 
@@ -236,7 +236,10 @@ export function evaluatePlan(
     }
     if (target === -1) return null;
     const action: "place" | "move" = placedByCode.has(code) ? "move" : "place";
-    const text = action === "place" ? `Place ${code} in ${termLabel(target)}` : `Move ${code} to ${termLabel(target)}`;
+    const text =
+      action === "place"
+        ? `Place ${code} in ${termSpanLabel(target, spanOf(code))}`
+        : `Move ${code} to ${termSpanLabel(target, spanOf(code))}`;
     return { code, action, term: target, text };
   }
 

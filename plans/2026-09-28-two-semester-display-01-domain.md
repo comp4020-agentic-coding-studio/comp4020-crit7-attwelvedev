@@ -142,7 +142,7 @@ None.
 
 ### Task 1: Add `termSpanLabel` and use it in suggestion text
 
-- [ ] **Description:** add `termSpanLabel(index, span)` to `terms.ts`, and
+- [x] **Description:** add `termSpanLabel(index, span)` to `terms.ts`, and
   build `suggestionFor`'s text from it with `spanOf(code)`. A suggestion to
   place a two-semester course then reads as a range.
 - **Files touched:** `src/lib/domain/terms.ts`, `src/lib/domain/terms.test.ts`,

@@ -26,6 +26,14 @@ export function termLabel(index: number): string {
   return term.label;
 }
 
+// The range a placement starting at `index` occupies: "S1 2028 – S2 2028"
+// for a two-semester course, the single label when it has no following term.
+export function termSpanLabel(index: number, span: number): string {
+  const first = termLabel(index);
+  const next = span === 2 ? TERMS[index + 1] : undefined;
+  return next ? `${first} – ${next.label}` : first;
+}
+
 // "Other" sessions (Summer, Winter, Spring) don't have a slot on the 8-term
 // S1/S2 timeline, so they're ignored here (FR13, FR14).
 function sessionOf(semester: string): Session | null {
