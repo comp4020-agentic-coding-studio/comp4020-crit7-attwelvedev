@@ -321,14 +321,14 @@ onLocateCourse: (code: string, part?: 2) => void;
 | 01 | `…-01-domain.md` | 1–2 | — | `termSpanLabel`; suggestions show ranges; `completedParts` and per-part progress split, checked through the API | [x] |
 | 02 | `…-02-labels.md` | 3–4 | 01 | Menus show ranges; sidebar rows show range/straddle status | [x] |
 | 03 | `…-03-timeline.md` | 5–9 | 01, 02 | Part 1 marker, part 2 stub, linked locate/recede, per-part locate buttons in placed rows, drag outline, overlay out-edges from part 2 | [x] |
-| 04 | `…-04-help-and-review.md` | 10–13 | 01–03 | Stub mirrors the card with per-part units; term buttons both ways; help text; **human review** of both viewports; feature done | [ ] |
+| 04 | `…-04-help-and-review.md` | 10–13 | 01–03 | Stub mirrors the card with per-part units; term buttons both ways; help text; **human review** of both viewports; feature done | [x] |
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and every task is complete with its tests passing
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] Manually verified at 1920×1080 and 390×844:
+- [x] Every phase in §5 is ticked, and every task is complete with its tests passing
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] Manually verified at 1920×1080 and 390×844:
   - the example plan shows COMP4550 with "12u" and its part 1 marker in
     S1 2030, and a part 2 stub in S2 2030 laid out like the card, with
     "12u";
@@ -338,9 +338,9 @@ onLocateCourse: (code: string, part?: 2) => void;
     planned S2 2029" in search's placed row, and its "S2 2029" button
     focuses the part 2 stub;
   - Move to lists ranges.
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Task 12's and Task 13's `Human review:`s explicitly accepted by the user
-- [ ] No item remains in §8
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Task 12's and Task 13's `Human review:`s explicitly accepted by the user
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 

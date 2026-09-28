@@ -550,7 +550,7 @@ This phase applies the rule to part 1's card and the stub.
 
 ### Task 13: Two-viewport review and close-out
 
-- [ ] **Description:** run the app, walk the feature at both marking
+- [x] **Description:** run the app, walk the feature at both marking
   viewports with the user, then mark the feature done.
 - **Files touched:**
   - `plans/2026-09-28-two-semester-display-00-overview.md` (§5 ticks,
@@ -598,11 +598,11 @@ This phase applies the rule to part 1's card and the stub.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 10–13 complete, and Tasks 10, 11 and 12 are each committed
-- [ ] `pnpm check` passes, including `describe("card height budget")` and the invariants axe run
-- [ ] The example plan shows "12u" on COMP4550's card and on its stub, the stub's "S1 2030" focuses part 1, and the marker's "S2 2030" focuses the stub
-- [ ] The user has explicitly accepted Task 12's and Task 13's human reviews
-- [ ] Tick Phase 04 in overview §5, complete overview §6, and commit
+- [x] Tasks 10–13 complete, and Tasks 10, 11 and 12 are each committed
+- [x] `pnpm check` passes, including `describe("card height budget")` and the invariants axe run
+- [x] The example plan shows "12u" on COMP4550's card and on its stub, the stub's "S1 2030" focuses part 1, and the marker's "S2 2030" focuses the stub
+- [x] The user has explicitly accepted Task 12's and Task 13's human reviews
+- [x] Tick Phase 04 in overview §5, complete overview §6, and commit
 
 ## 7. Requirements coverage (this phase)
 

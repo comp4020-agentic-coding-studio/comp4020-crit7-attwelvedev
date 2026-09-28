@@ -1,7 +1,7 @@
 # Two-semester courses shown across both semesters
 
 - **Date:** 2026-09-28
-- **Status:** Draft
+- **Status:** Implemented
 - **Approved by user:** yes — 2026-09-28
 
 ## 1. Problem / intent
