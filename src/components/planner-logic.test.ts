@@ -17,6 +17,7 @@ import {
   groupBarTarget,
   groupLeafIds,
   groupPath,
+  linkedHighlights,
   menuTargets,
   outstandingItems,
   outstandingTarget,
@@ -794,6 +795,39 @@ describe("dependentsOf", () => {
     expect(unplaced.length).toBeGreaterThan(0);
     const dependents = dependentsOf(view, "COMP2100");
     for (const code of unplaced) expect(dependents).not.toContain(code);
+  });
+});
+
+describe("linkedHighlights", () => {
+  const view = buildPlanView(cat, AACOM_2027, EXAMPLE_PLAN);
+  const at = (placements: [string, number][]) =>
+    buildPlanView(cat, AACOM_2027, {
+      ...emptyPlan(),
+      placements: placements.map(([code, term]) => ({ code, term, pinnedGroupId: null })),
+    });
+
+  it("links COMP2100 to its group, the groups it could count toward, its prerequisites and dependents", () => {
+    const linked = linkedHighlights(view, "COMP2100")!;
+    const home = view.placements.find((p) => p.code === "COMP2100")!.countsToward;
+    expect(linked.code).toBe("COMP2100");
+    expect(linked.home).toBe(home);
+    expect(linked.could).toEqual(view.courses.COMP2100.eligibleGroups.filter((id) => id !== home));
+    expect(linked.needs).toContain("COMP2120");
+    expect(linked.prereqOf.COMP1140).toBe("ok");
+  });
+
+  it("calls a prerequisite in the same term, or later, too late", () => {
+    expect(linkedHighlights(at([["COMP1140", 2], ["COMP2100", 2]]), "COMP2100")!.prereqOf.COMP1140).toBe("late");
+    expect(linkedHighlights(at([["COMP1140", 3], ["COMP2100", 2]]), "COMP2100")!.prereqOf.COMP1140).toBe("late");
+  });
+
+  it("accepts a concurrent prerequisite in the same term", () => {
+    // COMP2120 may be taken alongside COMP2100.
+    expect(linkedHighlights(at([["COMP2100", 3], ["COMP2120", 3]]), "COMP2120")!.prereqOf.COMP2100).toBe("ok");
+  });
+
+  it("is null with no course open", () => {
+    expect(linkedHighlights(view, null)).toBeNull();
   });
 });
 

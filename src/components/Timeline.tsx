@@ -8,6 +8,7 @@ import {
   dropTargets,
   familyOf,
   groupLeafIds,
+  type LinkedHighlights,
   partTwoPlacements,
   placedStatus,
   termBarLabel,
@@ -61,6 +62,8 @@ interface Props {
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
   // The course open in the details sidebar, whose titles say so.
   openCode: string | null;
+  // What the open course links to, for the cards' chips and ring.
+  linked: LinkedHighlights | null;
 }
 
 export default function Timeline({
@@ -83,6 +86,7 @@ export default function Timeline({
   focusGroupId,
   onOpenDetails,
   openCode,
+  linked,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   // The term a mouse drag is currently over — the same gold outline
@@ -255,6 +259,7 @@ export default function Timeline({
                     receded={recededFor(placement)}
                     onOpenDetails={onOpenDetails}
                     current={openCode === placement.code}
+                    linked={linked}
                   />
                 ))}
                 {partTwoPlacements(view, term.index).map((p) => (

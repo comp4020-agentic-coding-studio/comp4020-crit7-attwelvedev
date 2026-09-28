@@ -26,7 +26,7 @@ import {
   saveSplit,
   type SplitStop,
 } from "./panel-state";
-import { completedReadout, dropTargets } from "./planner-logic";
+import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
 import Sidebar, { type ShowRequest } from "./Sidebar";
@@ -245,6 +245,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   }
 
   const readout = completedReadout(view.plan.cutoff, view.terms);
+  const linked = details.code ? linkedHighlights(view, details.code, knownCards[details.code]) : null;
 
   useTouchDrag(plannerRef, {
     onDragStart: setDraggingCode,
@@ -337,6 +338,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               focusGroupId={focusGroupId}
               onOpenDetails={openDetails}
               openCode={details.code}
+              linked={linked}
             />
           </div>
           <Sidebar
@@ -369,6 +371,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onFocusGroup={setFocusGroupId}
             onOpenDetails={openDetails}
             openCode={details.code}
+            linked={linked}
           />
           <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>

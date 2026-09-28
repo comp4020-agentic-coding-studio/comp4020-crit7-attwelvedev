@@ -20,6 +20,12 @@ interface Props {
   groupId?: string;
   // Hover or focus on the heading's toggle, and leaving it again.
   onHeadingActive?: (active: boolean) => void;
+  // The course open in the details sidebar counts toward this group: tint
+  // the section in its family colour.
+  linked?: boolean;
+  // A line under the heading naming that course (or one that could count
+  // here); outside the body, so it shows while compact too.
+  tag?: ComponentChildren;
 }
 
 // The heading's own text is the toggle (the WAI-ARIA disclosure pattern), so
@@ -37,12 +43,16 @@ export default function SidebarSection({
   family,
   groupId,
   onHeadingActive,
+  linked = false,
+  tag,
 }: Props) {
   const bodyId = `sidebar-section-${id}`;
   return (
     <li
-      class={`requirement-group${className ? ` ${className}` : ""}${compact ? " requirement-group-compact" : ""}`}
+      class={`requirement-group${className ? ` ${className}` : ""}${compact ? " requirement-group-compact" : ""}${linked ? " group-linked" : ""}`}
       data-group={groupId}
+      // Only while linked, so no other [data-family] rule reaches groups.
+      data-family={linked ? family : undefined}
     >
       <h2>
         <button
@@ -63,6 +73,7 @@ export default function SidebarSection({
           {label}
         </button>
       </h2>
+      {tag}
       {summary}
       {compact && compactSummary}
       <div id={bodyId} hidden={compact}>

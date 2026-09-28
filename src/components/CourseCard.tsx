@@ -7,6 +7,7 @@ import MoreOptions from "./MoreOptions";
 import {
   familyOf,
   groupLabel,
+  type LinkedHighlights,
   menuTargets,
   partOneMarker,
   placedStatus,
@@ -46,6 +47,9 @@ interface Props {
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
   // This course is the one open in the details sidebar.
   current: boolean;
+  // What the open course links to: this card may be its prerequisite or
+  // need it, or be the open course itself.
+  linked: LinkedHighlights | null;
 }
 
 export default function CourseCard({
@@ -64,6 +68,7 @@ export default function CourseCard({
   receded,
   onOpenDetails,
   current,
+  linked,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
@@ -133,7 +138,7 @@ export default function CourseCard({
 
   return (
     <li
-      class={`course-card course-card-${placement.state}${receded ? " course-card-receded" : ""}`}
+      class={`course-card course-card-${placement.state}${receded ? " course-card-receded" : ""}${linked?.code === placement.code ? " course-card-selected" : ""}`}
       data-placed={placement.code}
       data-family={family ?? undefined}
       aria-busy={pending}
@@ -188,6 +193,14 @@ export default function CourseCard({
           )}
         </p>
       )}
+      {linked?.prereqOf[placement.code] && (
+        <p class="badge badge-linked">
+          {linked.prereqOf[placement.code] === "ok"
+            ? `Prerequisite of ${linked.code}`
+            : "Prerequisite, planned too late"}
+        </p>
+      )}
+      {linked?.needs.includes(placement.code) && <p class="badge badge-linked">Needs {linked.code}</p>}
       <p
         class={`badge badge-state-${placement.state}${placement.state === "available" ? " visually-hidden" : ""}`}
       >

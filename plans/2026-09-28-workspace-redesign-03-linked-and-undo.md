@@ -86,9 +86,9 @@ Phase-specific:
   boolean }`.
 
 **Existing toast tests**
-- `spec/layout.test.ts:954-968` and :2896 expect the text to contain
-  "Removed COMP1130".
-- "undo toast placement" is at :1317.
+- `spec/layout.test.ts:982` and :2961 expect the text to contain
+  "Removed COMP1130" (re-verified 2026-09-29; were :954 and :2896).
+- "undo toast placement" is at :1333.
 
 **Sidebar**
 - A nested group is `li[data-group={id}]`, and a top-level group is a
@@ -110,7 +110,7 @@ export function prereqCodes(expr: ReqExpr | null): string[];
 export function dependentsOf(view: PlanView, code: string): string[];
 export interface StripCell {
   term: number; label: string; year: number; session: "S1" | "S2";
-  state: "here" | "part2" | "offered" | "projected" | "not-offered" | "unknown";
+  state: "here" | "part2" | "offered" | "projected" | "not-offered" | "needs-prereqs" | "cant-start" | "unknown";
   units: number; allowed: boolean; reason: string | null; actionLabel: string;
 }
 export function stripCells(view: PlanView, code: string, card: CourseCard): StripCell[];
@@ -140,13 +140,14 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
 
 ### Task 8: Linked highlights: group tint and tags, card chips, gold ring
 
-- **Description:** WR16–WR19 (the ring part of WR18).
+- [x] **Description:** WR16–WR19 (the ring part of WR18).
 - **Files touched:**
   - `src/components/planner-logic.ts`
   - `src/components/planner-logic.test.ts`
   - `Planner.tsx`, `Sidebar.tsx`, `Timeline.tsx`, `CourseCard.tsx`
   - `src/styles.css`
   - `spec/layout.test.ts`
+  - `SidebarSection.tsx` (a top-level group's element; added in execution)
 - **Tests first (red):**
   - `planner-logic.test.ts`, `linkedHighlights(view, "COMP2100")` on the
     example view:
@@ -199,6 +200,10 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
   - CSS gives `.course-card-selected` a 2px `--gold` ring
     (`box-shadow: 0 0 0 2px var(--gold)`) and tints `.group-linked` with
     `color-mix(in srgb, var(--family) 6%, var(--surface))`.
+  - Group elements don't carry `data-family`, so `--family` is unset on
+    them. The linked (home) group element gets `data-family={group.family}`
+    **only while it's linked**, so no existing `[data-family]` rule starts
+    matching groups otherwise (ruling, 2026-09-29).
 - **Refactor:** None expected.
 - **Acceptance criteria:**
   - `pnpm check` passes.
@@ -309,7 +314,9 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
   ```
 
   `runAction` appends `knockOnText(newlyBroken(view, result, action.code))`
-  to the toast message and to the live announcement.
+  to the toast message. The `role=status` toast is the live announcement;
+  there is no separate `setAnnouncement`, so it isn't heard twice (ruling,
+  2026-09-29).
 - **Refactor:** None expected.
 - **Acceptance criteria:** `pnpm check` passes.
 - **Depends on:** Task 9.

@@ -5,7 +5,14 @@ import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import type { DetailsFocus } from "./details-state";
 import PlacedCourseRow from "./PlacedCourseRow";
-import { groupBarTarget, groupPath, outstandingItems, outstandingTarget, progressSegments } from "./planner-logic";
+import {
+  groupBarTarget,
+  groupPath,
+  type LinkedHighlights,
+  outstandingItems,
+  outstandingTarget,
+  progressSegments,
+} from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 import SidebarSection from "./SidebarSection";
 
@@ -48,6 +55,8 @@ interface Props {
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
   // The course open in the details sidebar, whose titles say so.
   openCode: string | null;
+  // What the open course links to, so its groups can say so.
+  linked: LinkedHighlights | null;
 }
 
 interface GroupProps {
@@ -68,6 +77,7 @@ interface GroupProps {
   onOpenDetails: (code: string, focus?: DetailsFocus) => void;
   // The course open in the details sidebar, whose titles say so.
   openCode: string | null;
+  linked: LinkedHighlights | null;
   // Only top-level groups are compactable; nested ones go with their parent.
   compact?: boolean;
   onToggleCompact?: () => void;
@@ -119,6 +129,7 @@ function Group({
   onFocusGroup,
   onOpenDetails,
   openCode,
+  linked,
   compact = false,
   onToggleCompact,
 }: GroupProps) {
@@ -231,12 +242,21 @@ function Group({
               onFocusGroup={onFocusGroup}
               onOpenDetails={onOpenDetails}
               openCode={openCode}
+              linked={linked}
             />
           ))}
         </ul>
       )}
     </>
   );
+
+  const isHome = linked !== null && linked.home === group.id;
+  const tag =
+    linked === null ? null : isHome ? (
+      <span class="group-tag">{linked.code} counts here</span>
+    ) : linked.could.includes(group.id) ? (
+      <span class="group-tag">{linked.code} could count here</span>
+    ) : null;
 
   // A top-level group keeps its progress bar visible when compacted — the
   // bar is what a student scans the sidebar for; the course list is detail.
@@ -251,6 +271,8 @@ function Group({
         family={group.family}
         groupId={group.id}
         onHeadingActive={(active) => onFocusGroup(active ? group.id : null)}
+        linked={isHome}
+        tag={tag}
       >
         {body}
       </SidebarSection>
@@ -264,7 +286,12 @@ function Group({
   const Heading = `h${Math.min(depth + 2, 6)}` as "h3" | "h4" | "h5" | "h6";
 
   return (
-    <li data-group={group.id}>
+    <li
+      data-group={group.id}
+      class={isHome ? "group-linked" : undefined}
+      // Only while linked, so no other [data-family] rule reaches groups.
+      data-family={isHome ? group.family : undefined}
+    >
       {/* Not a tab stop, but focusable so a jump can land focus here. */}
       <Heading
         tabIndex={-1}
@@ -273,6 +300,7 @@ function Group({
       >
         {group.label}
       </Heading>
+      {tag}
       {progress}
       {body}
     </li>
@@ -299,6 +327,7 @@ export default function Sidebar({
   onFocusGroup,
   onOpenDetails,
   openCode,
+  linked,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -539,6 +568,7 @@ export default function Sidebar({
               onFocusGroup={onFocusGroup}
               onOpenDetails={onOpenDetails}
               openCode={openCode}
+              linked={linked}
               compact={compact.has(`group-${group.id}`)}
               onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
             />

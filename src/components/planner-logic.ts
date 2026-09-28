@@ -226,6 +226,49 @@ export function dependentsOf(view: PlanView, code: string): string[] {
     .map((p) => p.code);
 }
 
+// What the rest of the workspace marks while a course is open in the
+// details sidebar: the group it counts toward (`home`), the others it could
+// count toward, its placed prerequisites (whether each is planned early
+// enough) and the placed courses that need it.
+export interface LinkedHighlights {
+  code: string;
+  home: string | null;
+  could: string[];
+  prereqOf: Record<string, "ok" | "late">;
+  needs: string[];
+}
+
+export function linkedHighlights(view: PlanView, code: string | null, card?: CourseCard): LinkedHighlights | null {
+  if (code === null) return null;
+  const course = card ?? view.courses[code];
+  if (!course) return null;
+  const placement = view.placements.find((p) => p.code === code) ?? null;
+  const home = placement?.countsToward ?? null;
+  // A prerequisite named more than once counts as concurrent if any mention
+  // allows it; "late" is evaluate.ts's own rule, from the prerequisite's
+  // last term.
+  const concurrent = new Map<string, boolean>();
+  function walk(node: ReqExpr) {
+    if (node.kind === "and" || node.kind === "or") node.items.forEach(walk);
+    else if (node.kind === "course") concurrent.set(node.code, (concurrent.get(node.code) ?? false) || node.concurrent);
+  }
+  if (course.prereq) walk(course.prereq);
+  const prereqOf: Record<string, "ok" | "late"> = {};
+  for (const [prereq, together] of concurrent) {
+    const at = view.placements.find((p) => p.code === prereq);
+    if (!at) continue;
+    const early = !placement || (together ? at.lastTerm <= placement.term : at.lastTerm < placement.term);
+    prereqOf[prereq] = early ? "ok" : "late";
+  }
+  return {
+    code,
+    home,
+    could: course.eligibleGroups.filter((id) => id !== home),
+    prereqOf,
+    needs: dependentsOf(view, code),
+  };
+}
+
 // ANU numbers postgraduate courses 6000 and up (6xxx, 8xxx), which an
 // undergraduate can't take: say so beside the code.
 export function postgradLabel(code: string): string {

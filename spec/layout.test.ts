@@ -4087,3 +4087,67 @@ describe("details sidebar", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("linked highlighting", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  // COMP2100 counts toward the compulsory group; COMP1140 (S2 2027) is its
+  // prerequisite and COMP2120 (S2 2028) needs it.
+  const home = (page: Page) => page.locator('[data-group="compulsory"]');
+  const card = (page: Page, code: string) => page.locator(`[data-placed="${code}"]`);
+
+  async function openCOMP2100(page: Page) {
+    await card(page, "COMP2100").locator(".course-card-title").click();
+    await detailsPanel(page).waitFor();
+  }
+
+  it("marks the open course's group, prerequisites, dependents and card, and clears them on close", async () => {
+    await withPlan(desktop, async (page) => {
+      await openCOMP2100(page);
+      expect(await home(page).getAttribute("class")).toContain("group-linked");
+      expect(await home(page).textContent()).toContain("COMP2100 counts here");
+      expect(await page.locator('[data-group="electives"]').textContent()).toContain("COMP2100 could count here");
+      expect(await card(page, "COMP1140").textContent()).toContain("Prerequisite of COMP2100");
+      expect(await card(page, "COMP2120").textContent()).toContain("Needs COMP2100");
+      expect(await card(page, "COMP2100").getAttribute("class")).toContain("course-card-selected");
+
+      await detailsPanel(page).getByRole("button", { name: "Close details" }).click();
+      await expect.poll(() => detailsPanel(page).count()).toBe(0);
+      expect(await page.locator(".group-linked, .course-card-selected, .group-tag, .badge-linked").count()).toBe(0);
+    });
+  });
+
+  it("tints the home group in its family colour", async () => {
+    await withPlan(desktop, async (page) => {
+      const before = await home(page).evaluate((el) => getComputedStyle(el).backgroundColor);
+      await openCOMP2100(page);
+      const after = await home(page).evaluate((el) => getComputedStyle(el).backgroundColor);
+      expect(after).not.toBe(before);
+      expect(await card(page, "COMP2100").evaluate((el) => getComputedStyle(el).boxShadow)).toContain("2px");
+    });
+  });
+
+  it("keeps drawing the prerequisite links overlay while a course is open", async () => {
+    await withPlan(desktop, async (page) => {
+      // Links first: the open sidebar sits over the plan header's controls.
+      await page.getByRole("button", { name: "More options", exact: true }).click();
+      await page.getByLabel("Show prerequisite links").check();
+      await page.keyboard.press("Escape");
+      await openCOMP2100(page);
+      await page.locator(".badge-linked").first().waitFor({ state: "attached" });
+      expect(await page.locator(".prereq-overlay line").count()).toBeGreaterThan(0);
+    });
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("is axe clean at %i×%i with a course open and its chips showing", async (width, height) => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, { width, height });
+    try {
+      await page.locator(".badge-linked").first().waitFor({ state: "attached" });
+      expect(await axeViolations(page)).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+});
