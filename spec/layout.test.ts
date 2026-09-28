@@ -2672,3 +2672,122 @@ describe("family colours", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("show a group in the sidebar", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const highlighted = (page: Page) =>
+    page.locator(".requirement-highlighted").evaluateAll((els) => els.map((el) => el.getAttribute("data-group")));
+  const countsToward = (page: Page, code: string) => page.locator(`[data-placed="${code}"] .course-card-allocation`);
+
+  it("reveals, focuses and briefly highlights a top-level group", async () => {
+    await withPlan(desktop, async (page) => {
+      const button = countsToward(page, "COMP1130");
+      expect(await button.evaluate((el) => el.tagName)).toBe("BUTTON");
+      await button.click();
+      await expect.poll(() => highlighted(page)).toEqual(["prog-a"]);
+      expect(
+        await page.evaluate(
+          () => document.activeElement === document.querySelector('[data-group="prog-a"] > h2 .section-toggle'),
+        ),
+      ).toBe(true);
+      await page.waitForTimeout(3000);
+      expect(await highlighted(page)).toEqual([]);
+    });
+  });
+
+  it("scrolls to and focuses the exact nested group", async () => {
+    await withPlan(desktop, async (page) => {
+      await countsToward(page, "COMP2620").click();
+      await expect.poll(() => highlighted(page)).toEqual(["arin-a"]);
+      expect(await page.evaluate(() => document.activeElement?.textContent)).toBe(
+        "Artificial Intelligence — foundations (max 12)",
+      );
+      const inside = () =>
+        page.evaluate(() => {
+          const t = document.querySelector('[data-group="arin-a"]')!.getBoundingClientRect();
+          const r = document.querySelector("#requirements")!.getBoundingClientRect();
+          // "nearest" lands the group flush with an edge, so allow a
+          // pixel of layout rounding.
+          return t.top >= r.top - 1 && t.bottom <= r.bottom + 1;
+        });
+      await expect.poll(inside).toBe(true);
+    });
+  });
+
+  it("clears an earlier highlight when a newer jump lands", async () => {
+    await withPlan(desktop, async (page) => {
+      await countsToward(page, "COMP1130").click();
+      await countsToward(page, "COMP2620").click();
+      await expect.poll(() => highlighted(page)).toContain("arin-a");
+      expect(await highlighted(page)).toEqual(["arin-a"]);
+    });
+  });
+
+  it("expands hidden requirements first", async () => {
+    const page = await openPage(browser, planUrl(), desktop, { storage: { "panel-reqs": "collapsed" } });
+    try {
+      expect(await page.evaluate(() => document.documentElement.dataset.reqs)).toBe("collapsed");
+      await countsToward(page, "COMP1130").click();
+      await expect.poll(() => highlighted(page)).toEqual(["prog-a"]);
+      expect(await page.evaluate(() => document.documentElement.dataset.reqs)).not.toBe("collapsed");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("expands a compacted section first", async () => {
+    const page = await openPage(browser, planUrl(), desktop, {
+      storage: { "sidebar-compact": '["group-prog-a"]' },
+    });
+    try {
+      const toggle = page.locator('[data-group="prog-a"] > h2 .section-toggle');
+      await expect.poll(() => toggle.getAttribute("aria-expanded")).toBe("false");
+      await countsToward(page, "COMP1130").click();
+      await expect.poll(() => highlighted(page)).toEqual(["prog-a"]);
+      expect(await toggle.getAttribute("aria-expanded")).toBe("true");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("scrolls the stacked strip sideways to the group on a phone", async () => {
+    await withPlan({ width: 390, height: 844 }, async (page) => {
+      const button = countsToward(page, "COMP2620");
+      await button.scrollIntoViewIfNeeded();
+      await button.click();
+      await expect.poll(() => highlighted(page)).toEqual(["arin-a"]);
+      const intersects = () =>
+        page.evaluate(() => {
+          const t = document.querySelector('[data-group="arin-a"]')!.getBoundingClientRect();
+          const s = document.querySelector(".requirements-scroll")!.getBoundingClientRect();
+          return t.right > s.left && t.left < s.right;
+        });
+      await expect.poll(intersects).toBe(true);
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
+  });
+
+  it("leaves Not counting as plain text", async () => {
+    const id = await planWithPlacement("COMP1100");
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP1130", term: 0 }),
+    });
+    expect(placed.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const allocation = countsToward(page, "COMP1130");
+      expect(await allocation.textContent()).toBe("Not counting toward any requirement");
+      expect(await allocation.evaluate((el) => el.tagName)).toBe("P");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("stays axe-clean", async () => {
+    await withPlan(desktop, async (page) => {
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+});

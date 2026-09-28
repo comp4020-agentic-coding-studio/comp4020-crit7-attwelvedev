@@ -25,6 +25,8 @@ interface Props {
   // flash the matching card; a token so clicking the same badge twice in a
   // row re-triggers the effect even though the code didn't change.
   locateRequest: { code: string; token: number } | null;
+  // Opens a card's "Counts toward" group in the requirements sidebar.
+  onShowGroup: (groupId: string) => void;
 }
 
 export default function Timeline({
@@ -41,6 +43,7 @@ export default function Timeline({
   onMenuOpenChange,
   onRemoved,
   locateRequest,
+  onShowGroup,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   // The term a mouse drag is currently over — the same gold outline
@@ -185,6 +188,7 @@ export default function Timeline({
                     openMenuCode={openMenuCode}
                     onMenuOpenChange={onMenuOpenChange}
                     onRemoved={onRemoved}
+                    onShowGroup={onShowGroup}
                   />
                 ))}
               </ul>

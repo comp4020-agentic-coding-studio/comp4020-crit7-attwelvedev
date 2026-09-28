@@ -202,6 +202,21 @@ export function groupLabel(view: PlanView, groupId: string): string {
   return search(view.groups) ?? groupId;
 }
 
+// The chain from a top-level group down to `groupId`, so a jump knows which
+// sidebar section to expand before it can reach a nested group. Empty when
+// the group isn't in the tree.
+export function groupPath(view: PlanView, groupId: string): GroupView[] {
+  function search(groups: GroupView[]): GroupView[] | null {
+    for (const group of groups) {
+      if (group.id === groupId) return [group];
+      const found = search(group.children);
+      if (found) return [group, ...found];
+    }
+    return null;
+  }
+  return search(view.groups) ?? [];
+}
+
 // Legend order for the per-term bar and anything else that lists families.
 export const FAMILY_ORDER: readonly Family[] = ["foundations", "specialisation", "advanced", "ict", "capstone", "neutral"];
 export const FAMILY_LABELS: Record<Family, string> = {

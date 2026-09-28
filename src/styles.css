@@ -1415,6 +1415,13 @@ fieldset[aria-busy="true"] {
   outline-offset: 2px;
 }
 
+/* Inset, unlike the card highlight: the phone's horizontal strip is a
+   scroller, which would clip an outline drawn outside the group's box. */
+.requirement-highlighted {
+  outline: 3px solid var(--gold);
+  outline-offset: -3px;
+}
+
 .badge {
   font-size: 0.78em;
   font-weight: 600;
@@ -1487,6 +1494,30 @@ button.badge-verify:focus-visible {
   font-size: 0.85em;
   color: var(--unigrey);
   margin: 0.35rem 0 0;
+}
+
+/* Reads as the card's footer text, like .course-card-title reads as its
+   title: the underline on hover and focus is what says it's a link to the
+   group. The border reset repeats on :hover for the same reason. */
+button.course-card-allocation,
+button.course-card-allocation:hover {
+  border: 0;
+}
+
+button.course-card-allocation {
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.85em;
+  color: var(--unigrey);
+  text-align: start;
+  cursor: pointer;
+}
+
+button.course-card-allocation:hover,
+button.course-card-allocation:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 /* Timeline cards only: a sidebar card isn't counting toward anything yet,

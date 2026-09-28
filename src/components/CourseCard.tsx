@@ -28,6 +28,7 @@ interface Props {
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   onRemoved: (removed: RemovedPlacement) => void;
+  onShowGroup: (groupId: string) => void;
 }
 
 export default function CourseCard({
@@ -41,6 +42,7 @@ export default function CourseCard({
   openMenuCode,
   onMenuOpenChange,
   onRemoved,
+  onShowGroup,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
@@ -194,12 +196,21 @@ export default function CourseCard({
         </ul>
       )}
       <div class="course-card-foot">
-        <p class="course-card-allocation">
-          {family && family !== "neutral" && <span class="family-dot" data-family={family} aria-hidden="true" />}
-          {placement.countsToward
-            ? `Counts toward ${groupLabel(view, placement.countsToward)}`
-            : "Not counting toward any requirement"}
-        </p>
+        {/* A link to the group it serves, on read-only plans too: finding
+            the requirement isn't an edit. */}
+        {placement.countsToward ? (
+          <button
+            type="button"
+            class="course-card-allocation"
+            onClick={() => onShowGroup(placement.countsToward!)}
+          >
+            {family && family !== "neutral" && <span class="family-dot" data-family={family} aria-hidden="true" />}
+            Counts toward {groupLabel(view, placement.countsToward)}
+            <span class="visually-hidden">, show in requirements</span>
+          </button>
+        ) : (
+          <p class="course-card-allocation">Not counting toward any requirement</p>
+        )}
         {/* Rare actions, out of sight until asked for. A read-only plan gets
             no menu at all rather than one full of disabled buttons; its
             title still opens Details. */}

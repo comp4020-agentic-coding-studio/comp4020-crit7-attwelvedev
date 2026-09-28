@@ -49,6 +49,10 @@ The link between a course and its requirement starts working both ways:
 - **Nested headings** (`h3`–`h6`) aren't in the tab order, so they
   respond to hover. They get `tabIndex={-1}` here only so E5 can focus
   them programmatically.
+- **E5 then E4 (ruled 2026-09-28, execution review):** E5 focuses a
+  top-level toggle programmatically, which fires its `onFocus`, so after a
+  jump to a top-level group the other timeline cards recede until focus
+  leaves. That is intended; there's no guard against it.
 
 ## 3. Existing code context (verified 2026-09-28)
 
@@ -189,7 +193,7 @@ here calls `focus()` or scrolls.
 
 ### Task 11: "Counts toward" shows its group in the sidebar
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `groupPath` and `ShowRequest`, the Sidebar show effect,
     Planner's `showInSidebar`, and Timeline/CourseCard `onShowGroup`.
   - The "Counts toward" paragraph becomes a button.

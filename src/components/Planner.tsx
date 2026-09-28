@@ -18,7 +18,7 @@ import {
 import { completedReadout, dropTargets } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
-import Sidebar from "./Sidebar";
+import Sidebar, { type ShowRequest } from "./Sidebar";
 import type { Panels } from "./split-resize";
 import Timeline from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
@@ -50,6 +50,7 @@ export default function Planner({ view: initialView, title }: Props) {
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const [locateRequest, setLocateRequest] = useState<{ code: string; token: number } | null>(null);
+  const [showRequest, setShowRequest] = useState<ShowRequest | null>(null);
   const [removed, setRemoved] = useState<RemovedPlacement | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
@@ -73,6 +74,13 @@ export default function Planner({ view: initialView, title }: Props) {
     setReqs(next);
     applyReqsState(document.documentElement, next);
     if (commit) saveReqsState(next);
+  }
+
+  // Revealing a hidden sidebar is Planner's job; Sidebar does the rest
+  // (expanding the section, scrolling, focus, highlight) from the request.
+  function showInSidebar(kind: ShowRequest["kind"], id: string) {
+    if (reqs.collapsed) updateReqs({ ...reqs, collapsed: false }, true);
+    setShowRequest({ kind, id, token: Date.now() });
   }
 
   function updatePanels(next: Panels, commit: boolean) {
@@ -272,6 +280,7 @@ export default function Planner({ view: initialView, title }: Props) {
               onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
               onRemoved={handleRemoved}
               locateRequest={locateRequest}
+              onShowGroup={(id) => showInSidebar("group", id)}
             />
           </div>
           <Sidebar
@@ -294,6 +303,7 @@ export default function Planner({ view: initialView, title }: Props) {
             onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void performRemove(code)}
+            showRequest={showRequest}
           />
           <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>

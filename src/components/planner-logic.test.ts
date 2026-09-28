@@ -11,6 +11,7 @@ import {
   FAMILY_LABELS,
   FAMILY_ORDER,
   familyOf,
+  groupPath,
   menuTargets,
   outstandingItems,
   overlayEdges,
@@ -457,5 +458,21 @@ describe("termBarLabel", () => {
 
   it("labels neutral as Electives", () => {
     expect(termBarLabel([{ key: "neutral", units: 6 }])).toBe("6 units Electives");
+  });
+});
+
+describe("groupPath", () => {
+  const view = buildPlanView(cat, AACOM_2027, { ...emptyPlan(), choices: { spec: "arin" } });
+
+  it("returns the root-to-target chain for a nested group", () => {
+    expect(groupPath(view, "arin-a").map((g) => g.id)).toEqual(["spec", "arin", "arin-a"]);
+  });
+
+  it("returns just the group for a top-level one", () => {
+    expect(groupPath(view, "prog-a").map((g) => g.id)).toEqual(["prog-a"]);
+  });
+
+  it("returns nothing for an unknown group", () => {
+    expect(groupPath(view, "nope")).toEqual([]);
   });
 });

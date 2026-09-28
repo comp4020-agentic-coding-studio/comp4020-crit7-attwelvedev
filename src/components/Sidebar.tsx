@@ -4,9 +4,17 @@ import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import PlacedCourseRow from "./PlacedCourseRow";
-import { outstandingItems, progressSegments } from "./planner-logic";
+import { groupPath, outstandingItems, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 import SidebarSection from "./SidebarSection";
+
+// A request, from "Counts toward" or "What's left", to reveal and flash a
+// group or check row; a token so repeating the same jump re-triggers it.
+export interface ShowRequest {
+  kind: "group" | "check";
+  id: string;
+  token: number;
+}
 
 interface Props {
   view: PlanView;
@@ -29,6 +37,7 @@ interface Props {
   // Removes a placed course dropped here, through the same path as a touch
   // drop, so both offer the undo toast.
   onDropRemove: (code: string) => void;
+  showRequest: ShowRequest | null;
 }
 
 interface GroupProps {
@@ -231,7 +240,8 @@ function Group({
 
   return (
     <li data-group={group.id}>
-      <Heading>{group.label}</Heading>
+      {/* Not a tab stop, but focusable so a jump can land focus here. */}
+      <Heading tabIndex={-1}>{group.label}</Heading>
       {progress}
       {body}
     </li>
@@ -253,6 +263,7 @@ export default function Sidebar({
   onShow,
   dropReady,
   onDropRemove,
+  showRequest,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -279,6 +290,41 @@ export default function Sidebar({
       return next;
     });
   }
+
+  useEffect(() => {
+    if (!showRequest) return;
+    const { kind, id } = showRequest;
+    const sectionId = kind === "check" ? "total" : groupPath(view, id)[0]?.id;
+    if (!sectionId) return;
+    setSectionCompact(kind === "check" ? "total" : `group-${sectionId}`, false);
+    let el: HTMLElement | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // After the render that un-compacts the section: until then a nested
+    // target is inside a hidden body and has no box to scroll to or focus.
+    const frame = requestAnimationFrame(() => {
+      el = document.querySelector<HTMLElement>(kind === "check" ? `[data-check="${id}"]` : `[data-group="${id}"]`);
+      if (!el) return;
+      const heading = el.querySelector<HTMLElement>(
+        ":scope > h2 .section-toggle, :scope > h3, :scope > h4, :scope > h5, :scope > h6",
+      );
+      el.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+      // preventScroll: focus()'s own jump would fight the scroll above.
+      heading?.focus({ preventScroll: true });
+      el.classList.add("requirement-highlighted");
+      timer = setTimeout(() => el?.classList.remove("requirement-highlighted"), 2000);
+    });
+    // A newer request cancels this one, so it has to clear its own
+    // highlight, as Timeline's locate effect does.
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+      el?.classList.remove("requirement-highlighted");
+    };
+  }, [showRequest]);
 
   const sectionProps = (id: string) => ({
     id,
