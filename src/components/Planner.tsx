@@ -1,9 +1,18 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { CourseDetailsView, PlanView } from "../lib/domain/view";
+import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
 import CompletedMenu from "./CompletedMenu";
-import { type DetailsState, EMPTY_DETAILS, openCourse, withCourseParam } from "./details-state";
+import CourseDetailsPanel from "./CourseDetailsPanel";
+import {
+  closeDetails,
+  type DetailsFocus,
+  type DetailsState,
+  EMPTY_DETAILS,
+  openCourse,
+  stepHistory,
+  withCourseParam,
+} from "./details-state";
 import MoreOptions from "./MoreOptions";
 import {
   applyReqsState,
@@ -24,6 +33,7 @@ import Sidebar, { type ShowRequest } from "./Sidebar";
 import type { Panels } from "./split-resize";
 import Timeline from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
+import { useCourseDetails } from "./use-course-details";
 
 // How long "Undo" stays offered after a Remove — long enough to notice and
 // act on without thinking, short enough that it isn't still sitting there
@@ -46,14 +56,30 @@ interface Props {
 
 export default function Planner({ view: initialView, title, initialDetails = null }: Props) {
   const [view, setView] = useState(initialView);
+  // Token 0 marks the server-rendered open: the page just loaded on it, so
+  // nothing asked for focus to move there.
   const [details, setDetails] = useState<DetailsState>(() =>
-    initialDetails ? openCourse(EMPTY_DETAILS, initialDetails.course.code) : EMPTY_DETAILS,
+    initialDetails ? { ...openCourse(EMPTY_DETAILS, initialDetails.course.code), token: 0 } : EMPTY_DETAILS,
   );
   // replaceState, not pushState: stepping through courses shouldn't fill
   // the browser's own history, and the URL only has to be shareable.
   useEffect(() => {
     history.replaceState(null, "", withCourseParam(location.href, details.code));
   }, [details.code]);
+  const fetched = useCourseDetails(details.code, initialView.plan.id, initialDetails);
+  // Cards for courses outside view.courses (search results, or anything
+  // fetched for the sidebar), so the sidebar can show them from the plan's
+  // side too. Catalogue data, so an entry never goes stale.
+  const [knownCards, setKnownCards] = useState<Record<string, CourseCard>>(() =>
+    initialDetails ? { [initialDetails.course.code]: initialDetails.course } : {},
+  );
+  useEffect(() => {
+    const course = fetched.data?.course;
+    if (course) setKnownCards((prev) => (prev[course.code] ? prev : { ...prev, [course.code]: course }));
+  }, [fetched.data]);
+  function openDetails(code: string, focus: DetailsFocus = "top") {
+    setDetails((s) => openCourse(s, code, focus));
+  }
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
   // Hard-blocked terms of every course search has returned, by code: a
@@ -297,6 +323,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
               onShowGroup={(id) => showInSidebar("group", id)}
               focusGroupId={focusGroupId}
+              onOpenDetails={openDetails}
             />
           </div>
           <Sidebar
@@ -307,6 +334,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onDragStart={setDraggingCode}
             onDragEnd={() => setDraggingCode(null)}
             onSearchResults={(courses) => {
+              setKnownCards((prev) => ({ ...prev, ...Object.fromEntries(courses.map((course) => [course.code, course])) }));
               setSearchBlocked((prev) => ({
                 ...prev,
                 ...Object.fromEntries(courses.map((course) => [course.code, course.hardBlocked])),
@@ -326,10 +354,27 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             showRequest={showRequest}
             onShowInSidebar={showInSidebar}
             onFocusGroup={setFocusGroupId}
+            onOpenDetails={openDetails}
           />
           <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
         </div>
       </div>
+      {details.code && (
+        <CourseDetailsPanel
+          view={view}
+          details={details}
+          card={view.courses[details.code] ?? knownCards[details.code] ?? fetched.data?.course ?? null}
+          fetched={fetched}
+          onOpen={(code) => openDetails(code)}
+          onBack={() => setDetails((s) => stepHistory(s, -1))}
+          onForward={() => setDetails((s) => stepHistory(s, 1))}
+          onClose={() => setDetails(closeDetails)}
+          onPlace={(term) => void performPlace(term, details.code!)}
+          onRemove={() => void performRemove(details.code!)}
+          onChanged={setView}
+          onAnnounce={setAnnouncement}
+        />
+      )}
       {removed && (
         <div class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"} role="status">
           <span>Removed {removed.label}.</span>

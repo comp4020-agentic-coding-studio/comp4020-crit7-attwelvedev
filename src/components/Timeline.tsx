@@ -2,6 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCard, { type RemovedPlacement } from "./CourseCard";
+import type { DetailsFocus } from "./details-state";
 import PartTwoStub from "./PartTwoStub";
 import {
   dropTargets,
@@ -47,6 +48,8 @@ interface Props {
   onShowGroup: (groupId: string) => void;
   // A sidebar group under hover or focus: cards outside it recede.
   focusGroupId: string | null;
+  // Opens this course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
 }
 
 export default function Timeline({
@@ -67,6 +70,7 @@ export default function Timeline({
   onLocateCourse,
   onShowGroup,
   focusGroupId,
+  onOpenDetails,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
   // The term a mouse drag is currently over — the same gold outline
@@ -237,6 +241,7 @@ export default function Timeline({
                     onShowGroup={onShowGroup}
                     onLocateCourse={onLocateCourse}
                     receded={recededFor(placement)}
+                    onOpenDetails={onOpenDetails}
                   />
                 ))}
                 {partTwoPlacements(view, term.index).map((p) => (

@@ -1,7 +1,7 @@
 import axe from "axe-core";
 import { JSDOM } from "jsdom";
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { ROUTES } from "./routes";
+import { ROUTES, STATE_ROUTES } from "./routes";
 
 // The invariants run against the RUNNING app — spec/global-setup.ts boots the
 // built server (dist/server/entry.mjs, the same artefact production runs) and
@@ -13,7 +13,7 @@ import { ROUTES } from "./routes";
 // file. The routes they cover come from spec/routes.ts; keep it current.
 const baseUrl = inject("baseUrl");
 
-for (const route of ROUTES) {
+for (const route of [...ROUTES, ...STATE_ROUTES]) {
   describe(`invariants: ${route}`, () => {
     let status: number;
     let dom: JSDOM;

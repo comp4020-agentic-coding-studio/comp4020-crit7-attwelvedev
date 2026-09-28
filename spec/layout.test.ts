@@ -14,6 +14,22 @@ afterAll(async () => {
 
 const planUrl = () => new URL("/plan/example", baseUrl).href;
 
+// The one details sidebar every Details entry point opens.
+const detailsPanel = (page: Page) => page.locator('aside[aria-label="Course details"]');
+
+// What every Details entry point must do once activated: show the one panel
+// on `code`, put it in the URL, and undo both on Close.
+async function expectDetailsOpenThenClose(page: Page, code: string): Promise<void> {
+  const panel = detailsPanel(page);
+  await panel.waitFor();
+  expect(await panel.count()).toBe(1);
+  expect(await panel.locator("h2").textContent()).toContain(code);
+  await expect.poll(() => new URL(page.url()).searchParams.get("course")).toBe(code);
+  await panel.getByRole("button", { name: "Close details" }).click();
+  await expect.poll(() => panel.count()).toBe(0);
+  await expect.poll(() => new URL(page.url()).searchParams.has("course")).toBe(false);
+}
+
 async function withPlan<T>(viewport: Viewport, check: (page: Page) => Promise<T>): Promise<T> {
   const page = await openPage(browser, planUrl(), viewport);
   try {
@@ -2393,9 +2409,9 @@ describe("manual checks", { timeout: 30_000 }, () => {
 
   async function openDetails(page: Page, code: string) {
     await page.locator(`[data-placed="${code}"] .course-card-title`).click();
-    const dialog = page.locator("dialog[open]");
-    await dialog.waitFor(); // showModal() runs in an effect, after the click
-    return dialog;
+    const panel = detailsPanel(page);
+    await panel.waitFor();
+    return panel;
   }
 
   const desktop = { width: 1920, height: 1080 };
@@ -2407,8 +2423,8 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const id = await planWithMath1116();
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width, height });
     try {
-      const dialog = await openDetails(page, "MATH1116");
-      const fieldsets = dialog.locator("fieldset");
+      const panel = await openDetails(page, "MATH1116");
+      const fieldsets = panel.locator("fieldset");
       expect(await fieldsets.count()).toBe(2);
       expect(await fieldsets.locator("legend").allTextContents()).toEqual([
         "MATH1115 with a mark of 60 or above",
@@ -2420,9 +2436,9 @@ describe("manual checks", { timeout: 30_000 }, () => {
         }
         expect(await fieldset.getByRole("radio", { name: "Not sure", exact: true }).isChecked()).toBe(true);
       }
-      // The course's sidebar entry renders a second (closed) copy of this
-      // dialog; a radio name shared with it would merge the two groups.
-      const groupSizes = await dialog.locator('input[type="radio"]').evaluateAll((radios) =>
+      // Each item's radios are their own group: a name shared across items
+      // would merge them.
+      const groupSizes = await panel.locator('input[type="radio"]').evaluateAll((radios) =>
         [...new Set(radios.map((r) => (r as HTMLInputElement).name))].map(
           (name) => document.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`).length,
         ),
@@ -2438,19 +2454,18 @@ describe("manual checks", { timeout: 30_000 }, () => {
   it.each([
     [1920, 1080],
     [390, 844],
-  ])("at %i×%i the verify badge opens Details at Your checks", async (width, height) => {
+  ])("at %i×%i the verify badge opens Details at Requisites", async (width, height) => {
     const id = await planWithMath1116();
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width, height });
     try {
       const card = page.locator('[data-placed="MATH1116"]');
       const badge = card.locator("button.badge-verify");
       expect(await badge.textContent()).toBe("Verify on P&C: 2 items");
-      // innerText, not textContent: the card's own closed dialog lists the
-      // items in full, and that's where they belong.
-      expect(await card.innerText()).not.toContain("with a mark of 60");
+      // Details lists the items in full; the card only counts them.
+      expect(await card.textContent()).not.toContain("with a mark of 60");
       await badge.click();
-      await page.locator("dialog[open]").waitFor(); // showModal() runs in an effect, after the click
-      expect(await page.evaluate(() => document.activeElement?.textContent)).toBe("Your checks");
+      await detailsPanel(page).waitFor();
+      await expect.poll(() => page.evaluate(() => document.activeElement?.textContent)).toBe("Requisites");
       expect(await horizontalOverflow(page)).toBe(0);
     } finally {
       await page.close();
@@ -2461,8 +2476,8 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const id = await planWithMath1116();
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
-      const dialog = await openDetails(page, "MATH1116");
-      await dialog.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
+      const panel = await openDetails(page, "MATH1116");
+      await panel.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
       const card = page.locator('[data-placed="MATH1116"]');
       await expect.poll(() => card.locator('[class*="badge-state-"]').textContent()).toBe("Available");
       expect(await card.locator(".badge-verify").count()).toBe(0);
@@ -2479,8 +2494,8 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const id = await planWithMath1116();
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
-      const dialog = await openDetails(page, "MATH1116");
-      await dialog.locator("fieldset").first().getByRole("radio", { name: "Not met", exact: true }).check();
+      const panel = await openDetails(page, "MATH1116");
+      await panel.locator("fieldset").first().getByRole("radio", { name: "Not met", exact: true }).check();
       const card = page.locator('[data-placed="MATH1116"]');
       await expect.poll(() => card.locator(".badge-state-soft").count()).toBe(1);
       expect(await card.locator(".badge-reason").textContent()).toContain(
@@ -2493,13 +2508,13 @@ describe("manual checks", { timeout: 30_000 }, () => {
 
   it("the read-only example's check controls are disabled", async () => {
     await withPlan(desktop, async (page) => {
-      const dialog = await openDetails(page, "COMP4550");
+      const panel = await openDetails(page, "COMP4550");
       // Playwright's isDisabled() only knows form controls, not <fieldset>,
       // so read the fieldset's own property — and check what it disables.
-      const disabled = await dialog.locator("fieldset").evaluateAll((fs) => fs.map((f) => (f as HTMLFieldSetElement).disabled));
+      const disabled = await panel.locator("fieldset").evaluateAll((fs) => fs.map((f) => (f as HTMLFieldSetElement).disabled));
       expect(disabled.length).toBeGreaterThan(0);
       expect(disabled.every(Boolean)).toBe(true);
-      for (const radio of await dialog.locator('input[type="radio"]').all()) expect(await radio.isDisabled()).toBe(true);
+      for (const radio of await panel.locator('input[type="radio"]').all()) expect(await radio.isDisabled()).toBe(true);
     });
   });
 
@@ -2507,9 +2522,9 @@ describe("manual checks", { timeout: 30_000 }, () => {
     const id = await planWithMath1116();
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
-      const dialog = await openDetails(page, "MATH1116");
-      await dialog.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
-      await expect.poll(() => dialog.textContent()).toContain("✓ met (marked by you)");
+      const panel = await openDetails(page, "MATH1116");
+      await panel.locator("fieldset").first().getByRole("radio", { name: "Met", exact: true }).check();
+      await expect.poll(() => panel.textContent()).toContain("✓ met (marked by you)");
     } finally {
       await page.close();
     }
@@ -2529,7 +2544,7 @@ describe("course cards", { timeout: 30_000 }, () => {
         const tight: string[] = [];
         for (const card of cards) {
           const rects = Array.from(card.querySelectorAll("button"))
-            .filter((b) => !b.closest("dialog") && b.getClientRects().length > 0)
+            .filter((b) => b.getClientRects().length > 0)
             .map((b) => ({ label: b.textContent?.trim(), rect: b.getBoundingClientRect() }));
           for (let i = 0; i < rects.length; i++) {
             for (let j = i + 1; j < rects.length; j++) {
@@ -2576,7 +2591,6 @@ describe("course cards", { timeout: 30_000 }, () => {
       // Opacity compounds down the tree and a child can't undo it.
       const opacities = await card.locator("button").evaluateAll((buttons) =>
         buttons
-          .filter((b) => !b.closest("dialog"))
           .map((b) => {
             let product = 1;
             for (let el: Element | null = b; el; el = el.parentElement) product *= Number(getComputedStyle(el).opacity);
@@ -2601,7 +2615,6 @@ describe("course cards", { timeout: 30_000 }, () => {
       // every ancestor of each button, not just the button itself.
       const opacities = await card.locator("button").evaluateAll((buttons) =>
         buttons
-          .filter((b) => !b.closest("dialog"))
           .map((b) => {
             let product = 1;
             for (let el: Element | null = b; el; el = el.parentElement) product *= Number(getComputedStyle(el).opacity);
@@ -2660,8 +2673,7 @@ describe("placed rows", { timeout: 30_000 }, () => {
       expect(await title.getAttribute("title")).toBe("Programming as Problem Solving (Advanced)");
       expect(await row(page).getByRole("button", { name: "Programming as Problem Solving (Advanced), details", exact: true }).count()).toBe(1);
       await title.click();
-      await page.locator("dialog[open]").waitFor(); // showModal() runs in an effect, after the click
-      expect(await page.locator('dialog[open][aria-label="COMP1130 details"]').count()).toBe(1);
+      await expectDetailsOpenThenClose(page, "COMP1130");
     });
   });
 
@@ -2723,7 +2735,7 @@ describe("card header", { timeout: 30_000 }, () => {
       const headBox = (await card.locator(".course-card-head").boundingBox())!;
       expect(Math.abs(unitsBox.x + unitsBox.width - (headBox.x + headBox.width))).toBeLessThanOrEqual(1);
 
-      // Every text node, the card's own Details dialog included.
+      // Every text node.
       const dashed = await card.evaluate((el) => {
         const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
         const found: string[] = [];
@@ -2747,10 +2759,7 @@ describe("card header", { timeout: 30_000 }, () => {
       expect(await title.count()).toBe(1);
       expect(await title.getAttribute("aria-expanded")).toBeNull();
       await title.click();
-      const dialog = page.locator("dialog[open]");
-      await dialog.waitFor(); // showModal() runs in an effect, after the click
-      expect(await dialog.count()).toBe(1);
-      expect(await dialog.getAttribute("aria-label")).toBe("COMP1130 details");
+      await expectDetailsOpenThenClose(page, "COMP1130");
     });
   });
 
@@ -2766,11 +2775,9 @@ describe("card header", { timeout: 30_000 }, () => {
       expect(await grip.getAttribute("tabindex")).toBeNull();
       expect(await card.getByRole("button", { name: "Details", exact: true }).count()).toBe(0);
       await card.locator(".course-card-title").click();
-      const dialog = page.locator("dialog[open]");
-      await dialog.waitFor(); // showModal() runs in an effect, after the click
-      expect(await dialog.count()).toBe(1);
-      expect(await dialog.getAttribute("aria-label")).toBe("COMP1100 details");
+      await detailsPanel(page).waitFor();
       expect(await horizontalOverflow(page)).toBe(0);
+      await expectDetailsOpenThenClose(page, "COMP1100");
     });
   });
 
@@ -2867,15 +2874,13 @@ describe("course card menu", { timeout: 30_000 }, () => {
     });
   });
 
-  it("Details in the menu closes it and opens the course's dialog", async () => {
+  it("Details in the menu closes it and opens the course's details", async () => {
     await withFreshPlan(desktop, async (page) => {
       const toggle = cardMenu(page, "COMP1130");
       await toggle.click();
       await page.locator('[data-placed="COMP1130"] .course-card-menu').getByRole("button", { name: "Details" }).click();
-      const dialog = page.locator("dialog[open]");
-      await dialog.waitFor(); // showModal() runs in an effect, after the click
-      expect(await dialog.getAttribute("aria-label")).toBe("COMP1130 details");
       expect(await toggle.getAttribute("aria-expanded")).toBe("false");
+      await expectDetailsOpenThenClose(page, "COMP1130");
     });
   });
 
@@ -2970,17 +2975,18 @@ describe("course card menu", { timeout: 30_000 }, () => {
       expect(await page.locator("[data-placed]").count()).toBeGreaterThan(0);
       expect(await page.locator(".course-card-menu").count()).toBe(0);
       expect(await page.getByRole("button", { name: "Place in…" }).count()).toBe(0);
-      await page.locator("[data-placed] .course-card-title").first().click();
-      await page.locator("dialog[open]").waitFor();
-      expect(await page.locator("dialog[open]").count()).toBe(1);
+      const card = page.locator("[data-placed]").first();
+      const code = (await card.getAttribute("data-placed"))!;
+      await card.locator(".course-card-title").click();
+      await expectDetailsOpenThenClose(page, code);
     });
   });
 
   it("on /plan/example no timeline card shows a disabled button", async () => {
     await withPlan(desktop, async (page) => {
-      const buttons = page.locator("[data-placed] button:not(dialog button)").filter({ visible: true });
+      const buttons = page.locator("[data-placed] button").filter({ visible: true });
       expect(await buttons.count()).toBeGreaterThan(0);
-      expect(await page.locator("[data-placed] button:disabled:not(dialog button)").filter({ visible: true }).count()).toBe(0);
+      expect(await page.locator("[data-placed] button:disabled").filter({ visible: true }).count()).toBe(0);
     });
   });
 
@@ -3449,7 +3455,6 @@ describe("group heading highlights its courses", { timeout: 30_000 }, () => {
       expect(await codeColour()).not.toBe(atRest);
       const opacities = await card.locator("button").evaluateAll((buttons) =>
         buttons
-          .filter((b) => !b.closest("dialog"))
           .map((b) => {
             let product = 1;
             for (let el: Element | null = b; el; el = el.parentElement) product *= Number(getComputedStyle(el).opacity);
@@ -3562,5 +3567,137 @@ describe("card height budget", { timeout: 30_000 }, () => {
       expect(b.head.top, detail).toBeGreaterThanOrEqual(area.top);
       expect(b.head.bottom, detail).toBeLessThanOrEqual(area.bottom);
     });
+  });
+});
+
+describe("details sidebar", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const heading = (page: Page, name: string) =>
+    detailsPanel(page).getByRole("heading", { name, exact: true });
+
+  async function openFromCard(page: Page, code: string) {
+    await page.locator(`[data-placed="${code}"] .course-card-title`).click();
+    await detailsPanel(page).waitFor();
+  }
+
+  it("About loads after opening", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await openFromCard(page, "COMP2100");
+      await heading(page, "Learning outcomes").waitFor();
+      expect(await detailsPanel(page).locator("ol li").count()).toBe(6);
+      const assessment = await detailsPanel(page).locator(".details-assessment").textContent();
+      expect(assessment).toContain("Assessment");
+      expect(assessment).toContain("Final Exam");
+      expect(assessment).toContain("45%");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("stub course shows no extras", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.route("**/api/courses/*", async (route) => {
+        const response = await route.fetch();
+        const body = await response.json();
+        await route.fulfill({ response, json: { ...body, extras: null } });
+      });
+      await openFromCard(page, "COMP2100");
+      const panel = detailsPanel(page);
+      await expect.poll(() => panel.textContent()).toContain("Only basic details are available for this course");
+      expect(await heading(page, "Learning outcomes").count()).toBe(0);
+      expect(await panel.locator('a[href="https://programsandcourses.anu.edu.au/2027/course/COMP2100"]').count()).toBeGreaterThan(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("details fetch failure", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.route("**/api/courses/*", (route) => route.fulfill({ status: 500, json: { error: "boom" } }));
+      await openFromCard(page, "COMP2100");
+      const panel = detailsPanel(page);
+      await expect.poll(() => panel.textContent()).toContain("Couldn't load the full details");
+      expect(await panel.locator('a[href="https://programsandcourses.anu.edu.au/2027/course/COMP2100"]').count()).toBeGreaterThan(0);
+      // Everything but About comes from the plan's own view.
+      for (const name of ["In your plan", "Requisites"]) expect(await heading(page, name).count()).toBe(1);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("the sidebar stays open when its course is removed", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await openFromCard(page, "COMP2100");
+      await detailsPanel(page).getByRole("button", { name: "Remove from plan" }).click();
+      await expect.poll(() => page.locator('[data-placed="COMP2100"]').count()).toBe(0);
+      expect(await detailsPanel(page).isVisible()).toBe(true);
+      expect(await detailsPanel(page).textContent()).toContain("Not planned");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("the sidebar follows plan changes made elsewhere", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await openFromCard(page, "COMP2100");
+      const panel = detailsPanel(page);
+      expect(await panel.locator(".details-pills").textContent()).toContain("Planned S1 2028");
+      // The drawer sits over the timeline's end, so bring the card out from
+      // under it first, as a student would: a scroll closes an open menu.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            const card = document.querySelector('[data-placed="COMP2100"]')!.getBoundingClientRect();
+            const drawer = document.querySelector('aside[aria-label="Course details"]')!.getBoundingClientRect();
+            const scroller = document.querySelector(".timeline-scroll")!;
+            // Its scroll event has to land before the menu opens.
+            scroller.addEventListener("scroll", () => resolve(), { once: true });
+            scroller.scrollLeft += card.right - drawer.left + 16;
+          }),
+      );
+      await page.getByRole("button", { name: "More options for COMP2100" }).click();
+      await page.locator('[data-placed="COMP2100"] .card-menu-terms').getByRole("button", { name: "S2 2028" }).click();
+      await expect.poll(() => page.locator('[data-term="3"] [data-placed="COMP2100"]').count()).toBe(1);
+      await expect.poll(() => panel.locator(".details-pills").textContent()).toContain("Planned S2 2028");
+      expect(await panel.locator(".details-semester").textContent()).toContain("S2 2028");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("read-only details", async () => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, desktop);
+    try {
+      const panel = detailsPanel(page);
+      expect(await panel.isVisible()).toBe(true);
+      expect(await panel.getByRole("button", { name: "Remove from plan" }).count()).toBe(0);
+      expect(await panel.getByRole("combobox", { name: "Counts toward" }).isDisabled()).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    [1920, 1080],
+    [390, 844],
+  ])("at %i×%i axe is clean with details open", async (width, height) => {
+    const page = await openPage(browser, new URL("/plan/example?course=COMP2100", baseUrl).href, { width, height });
+    try {
+      expect(await detailsPanel(page).isVisible()).toBe(true);
+      expect(await axeViolations(page)).toEqual([]);
+      expect(await horizontalOverflow(page)).toBe(0);
+    } finally {
+      await page.close();
+    }
   });
 });

@@ -262,7 +262,7 @@ everywhere (and `answer: null`). The tree is then rendered with
 
 ### Task 5: `CourseDetailsPanel` shell, "In your plan", "About", loading and errors; remove the dialog
 
-- **Description:** Build the panel with its header (WR7), §1 In your plan
+- [x] **Description:** Build the panel with its header (WR7), §1 In your plan
   and §5 About. Point every Details entry point at it, and delete
   `CourseDetail.tsx`.
 - **Files touched:**
@@ -319,8 +319,12 @@ everywhere (and `answer: null`). The tree is then rendered with
       `aside[aria-label="Course details"]` in place of `dialog[open]`, with the
       same assertions. The one exception is the verify-badge case, which now
       expects focus on the "Requisites" h3 (Task 6's wording).
-  - `spec/routes.ts`: add `/plan/example?course=COMP2100` to `ROUTES` so
-    `invariants.test.ts` covers it.
+  - `spec/routes.ts`: add `/plan/example?course=COMP2100` so
+    `invariants.test.ts` covers it. **Ruled 2026-09-28:** it goes in a
+    separate `STATE_ROUTES` list, read only by `invariants.test.ts`, not in
+    `ROUTES`. The layout suite's nav-tab geometry test also loops over
+    `ROUTES`, and at 390px the interim full-width drawer covers the nav tab
+    by design. That's a known interim gap for Phase 07's phone sheet.
 - **Implementation (green):**
   - `use-course-details.ts`: `export function useCourseDetails(code: string
     | null, planId: string, initial: CourseDetailsView | null): { status:
@@ -389,7 +393,9 @@ everywhere (and `answer: null`). The tree is then rendered with
       Task 6 replaces the tree and the fieldsets.
     - **Focus effect, brought forward from Task 7:** an effect on
       `details.token` focuses the h2, or the "Requisites" h3 when
-      `details.focus === "requisites"`.
+      `details.focus === "requisites"`. The server-rendered `?course=` state
+      starts at `token: 0`, and the effect skips token 0, so a page load
+      doesn't move focus or show a focus ring.
   - `Planner`:
     - Adds the `knownCards` state, merged from `onSearchResults` and from
       `fetched.data.course`.

@@ -9,6 +9,23 @@ interface Props {
   onOpenDetails: () => void;
 }
 
+// Where to grab a draggable course: on its cards, and on the details
+// sidebar's header.
+export function CardGrip() {
+  return (
+    <span class="course-card-grip" aria-hidden="true">
+      <svg viewBox="0 0 10 16" focusable="false">
+        <circle cx="3" cy="3" r="1.4" />
+        <circle cx="7" cy="3" r="1.4" />
+        <circle cx="3" cy="8" r="1.4" />
+        <circle cx="7" cy="8" r="1.4" />
+        <circle cx="3" cy="13" r="1.4" />
+        <circle cx="7" cy="13" r="1.4" />
+      </svg>
+    </span>
+  );
+}
+
 // A card's first line (code and units) and its title. Shared by timeline
 // and sidebar cards so both read the same way. The title is the way into
 // Details, so no separate button is needed for it.
@@ -21,16 +38,7 @@ export default function CourseCardHeader({ code, title, units, grip, onOpenDetai
           // Decorative: the whole card is draggable and the keyboard route
           // is "Place in…"/"Move to", so the grip is neither announced nor
           // a tab stop.
-          <span class="course-card-grip" aria-hidden="true">
-            <svg viewBox="0 0 10 16" focusable="false">
-              <circle cx="3" cy="3" r="1.4" />
-              <circle cx="7" cy="3" r="1.4" />
-              <circle cx="3" cy="8" r="1.4" />
-              <circle cx="7" cy="8" r="1.4" />
-              <circle cx="3" cy="13" r="1.4" />
-              <circle cx="7" cy="13" r="1.4" />
-            </svg>
-          </span>
+          <CardGrip />
         )}
         <strong class="course-card-code">{code}</strong>
         <span class="course-card-unit-count">

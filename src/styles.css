@@ -994,21 +994,177 @@ section[aria-label="program checks"] > h3 {
   z-index: 1;
 }
 
-dialog small {
+/* The course details sidebar. For now a fixed drawer on the right edge,
+   over the panes, so it can't disturb their snapping-resize layout. */
+.details-panel {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(440px, 100vw);
+  overflow: auto;
+  z-index: 40;
+  padding: 0.75rem 1.25rem 1.5rem;
+  color: var(--unigrey);
+  background: var(--surface);
+  border-inline-start: 1px solid var(--line);
+  box-shadow: -12px 0 40px -24px rgb(23 24 26 / 0.35);
+}
+
+.details-panel small {
   display: block;
   max-width: 45ch;
   margin-block-start: 0.35rem;
   color: var(--unigrey);
 }
 
-dialog {
-  max-width: 40rem;
-  width: 90vw;
-  border: none;
-  border-radius: 1rem;
-  padding: 1.25rem 1.5rem;
-  box-shadow: 0 20px 60px -20px rgb(23 24 26 / 0.35);
-  color: var(--unigrey);
+.details-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-block-end: 0.5rem;
+}
+
+.details-nav .course-card-grip {
+  margin-inline: 0.4rem;
+}
+
+.details-close {
+  margin-inline-start: auto;
+}
+
+.details-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+}
+
+.details-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.details-head h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+}
+
+.details-meta {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.details-title {
+  flex-basis: 100%;
+  font-weight: 600;
+}
+
+.details-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.details-pills li {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.details-section {
+  padding-block: 0.85rem;
+  border-block-start: 1px solid var(--line);
+}
+
+.details-section h3 {
+  margin-block-start: 0.5rem;
+}
+
+.details-section h3:first-child {
+  margin-block-start: 0;
+}
+
+.details-pin label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.details-pin select {
+  min-height: 2.75rem;
+  font: inherit;
+}
+
+.details-remove {
+  min-height: 2.75rem;
+  margin-block-start: 0.75rem;
+}
+
+.details-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+
+.details-more {
+  min-height: 2.75rem;
+  margin-block-end: 0.5rem;
+}
+
+.details-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.assess-bar {
+  display: flex;
+  gap: 2px;
+  height: 0.5rem;
+  margin-block-end: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.assess-bar span {
+  background: var(--family-advanced);
+}
+
+.assess-bar span:nth-child(2n) {
+  background: var(--family-foundations);
+}
+
+.details-assessment-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.details-assessment-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.2rem;
+}
+
+.details-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
 }
 
 .verify-check {
@@ -1038,15 +1194,6 @@ dialog {
   align-items: center;
   gap: 0.3rem;
   white-space: nowrap;
-}
-
-/* The title on its own line under the code, as on the card. */
-.course-detail-title {
-  display: block;
-}
-
-dialog::backdrop {
-  background: rgb(23 24 26 / 0.55);
 }
 
 .undo-toast {

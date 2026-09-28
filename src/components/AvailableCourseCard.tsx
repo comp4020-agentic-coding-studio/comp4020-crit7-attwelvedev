@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import type { CourseCard, PlanView } from "../lib/domain/view";
 import { isError, placeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
-import CourseDetail from "./CourseDetail";
+import type { DetailsFocus } from "./details-state";
 import PlaceInMenu from "./PlaceInMenu";
 import { dropTargets } from "./planner-logic";
 
@@ -19,6 +19,8 @@ interface Props {
   onDragEnd?: () => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
+  // Opens this course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
 }
 
 export default function AvailableCourseCard({
@@ -32,10 +34,10 @@ export default function AvailableCourseCard({
   onDragEnd,
   openMenuCode,
   onMenuOpenChange,
+  onOpenDetails,
 }: Props) {
   const course = courseOverride ?? view.courses[code];
   const readOnly = view.plan.readOnly;
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const [pending, setPending] = useState(false);
   if (!course) return null;
 
@@ -89,7 +91,7 @@ export default function AvailableCourseCard({
         title={course.title}
         units={course}
         grip={draggable}
-        onOpenDetails={() => setDetailsOpen(true)}
+        onOpenDetails={() => onOpenDetails(code)}
       />
       <p class="course-card-offered">{course.offeredLabel}</p>
       {allBlocked && <p class="badge badge-state-hard">Blocked</p>}
@@ -108,16 +110,6 @@ export default function AvailableCourseCard({
           />
         </div>
       )}
-      <CourseDetail
-        view={view}
-        code={code}
-        course={courseOverride}
-        planId={planId}
-        open={detailsOpen}
-        onChanged={onChanged}
-        onAnnounce={onAnnounce}
-        onClose={() => setDetailsOpen(false)}
-      />
     </li>
   );
 }

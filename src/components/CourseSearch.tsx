@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import type { CourseCard as CourseCardData, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
+import type { DetailsFocus } from "./details-state";
 import { searchCourses, type SearchResult } from "./api";
 import PlacedCourseRow from "./PlacedCourseRow";
 import SidebarSection from "./SidebarSection";
@@ -21,6 +22,8 @@ interface Props {
   compact: boolean;
   onToggleCompact: () => void;
   onExpand: () => void;
+  // Opens this course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
 }
 
 // Same shape the search endpoint uses to decide whether to fetch from P&C.
@@ -61,6 +64,7 @@ export default function CourseSearch({
   compact,
   onToggleCompact,
   onExpand,
+  onOpenDetails,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CourseCardData[]>([]);
@@ -148,6 +152,7 @@ export default function CourseSearch({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+              onOpenDetails={onOpenDetails}
             />
           ))}
         </ul>
@@ -161,10 +166,8 @@ export default function CourseSearch({
               code={course.code}
               course={course}
               placement={placedOf(course.code)!}
-              planId={planId}
-              onChanged={onChanged}
-              onAnnounce={onAnnounce}
               onLocateCourse={onLocateCourse}
+              onOpenDetails={onOpenDetails}
             />
           ))}
         </ul>

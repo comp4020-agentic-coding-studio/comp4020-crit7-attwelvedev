@@ -3,6 +3,7 @@ import type { CourseCard, GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
+import type { DetailsFocus } from "./details-state";
 import PlacedCourseRow from "./PlacedCourseRow";
 import { groupBarTarget, groupPath, outstandingItems, outstandingTarget, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
@@ -43,6 +44,8 @@ interface Props {
   // The group whose heading is hovered or focused, so the timeline can
   // recede every card outside it; null when none is.
   onFocusGroup: (groupId: string | null) => void;
+  // Opens a course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
 }
 
 interface GroupProps {
@@ -59,6 +62,8 @@ interface GroupProps {
   onMenuOpenChange: (code: string, open: boolean) => void;
   onLocateCourse: (code: string, part?: 2) => void;
   onFocusGroup: (groupId: string | null) => void;
+  // Opens a course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
   // Only top-level groups are compactable; nested ones go with their parent.
   compact?: boolean;
   onToggleCompact?: () => void;
@@ -108,6 +113,7 @@ function Group({
   onMenuOpenChange,
   onLocateCourse,
   onFocusGroup,
+  onOpenDetails,
   compact = false,
   onToggleCompact,
 }: GroupProps) {
@@ -179,6 +185,7 @@ function Group({
               onDragEnd={onDragEnd}
               openMenuCode={openMenuCode}
               onMenuOpenChange={onMenuOpenChange}
+              onOpenDetails={onOpenDetails}
             />
           ))}
         </ul>
@@ -191,10 +198,8 @@ function Group({
               view={view}
               code={code}
               placement={placedByCode.get(code)!}
-              planId={planId}
-              onChanged={onChanged}
-              onAnnounce={onAnnounce}
               onLocateCourse={onLocateCourse}
+              onOpenDetails={onOpenDetails}
             />
           ))}
         </ul>
@@ -217,6 +222,7 @@ function Group({
               onMenuOpenChange={onMenuOpenChange}
               onLocateCourse={onLocateCourse}
               onFocusGroup={onFocusGroup}
+              onOpenDetails={onOpenDetails}
             />
           ))}
         </ul>
@@ -283,6 +289,7 @@ export default function Sidebar({
   showRequest,
   onShowInSidebar,
   onFocusGroup,
+  onOpenDetails,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -468,6 +475,7 @@ export default function Sidebar({
             compact={compact.has("search")}
             onToggleCompact={() => setSectionCompact("search", !compact.has("search"))}
             onExpand={() => setSectionCompact("search", false)}
+            onOpenDetails={onOpenDetails}
           />
           <SidebarSection
             {...sectionProps("total")}
@@ -519,6 +527,7 @@ export default function Sidebar({
               onMenuOpenChange={onMenuOpenChange}
               onLocateCourse={onLocateCourse}
               onFocusGroup={onFocusGroup}
+              onOpenDetails={onOpenDetails}
               compact={compact.has(`group-${group.id}`)}
               onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
             />

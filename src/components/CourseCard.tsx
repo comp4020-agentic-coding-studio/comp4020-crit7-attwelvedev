@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import type { PlacementView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse } from "./api";
 import CourseCardHeader from "./CourseCardHeader";
-import CourseDetail from "./CourseDetail";
+import type { DetailsFocus } from "./details-state";
 import MoreOptions from "./MoreOptions";
 import {
   familyOf,
@@ -42,6 +42,8 @@ interface Props {
   onLocateCourse: (code: string, part?: 2) => void;
   // Outside the sidebar group under hover or focus.
   receded: boolean;
+  // Opens this course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
 }
 
 export default function CourseCard({
@@ -58,12 +60,10 @@ export default function CourseCard({
   onShowGroup,
   onLocateCourse,
   receded,
+  onOpenDetails,
 }: Props) {
   const course = view.courses[placement.code];
   const readOnly = view.plan.readOnly;
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  // Where Details opens: at its top, or at "Your checks" from the badge.
-  const [detailsFocus, setDetailsFocus] = useState<"top" | "checks">("top");
   // Guards this card's own buttons for the duration of its own in-flight
   // request — not a global lock, so moving one card doesn't freeze others,
   // but does stop a slow connection from inviting a double-click that
@@ -164,10 +164,7 @@ export default function CourseCard({
         // course's other half shows its own on the stub.
         units={{ units: course?.units ?? 0, twoSemester: false }}
         grip={!readOnly}
-        onOpenDetails={() => {
-          setDetailsFocus("top");
-          setDetailsOpen(true);
-        }}
+        onOpenDetails={() => onOpenDetails(placement.code)}
       />
       {marker && (
         <p class="course-card-part">
@@ -199,10 +196,8 @@ export default function CourseCard({
         <button
           type="button"
           class="badge badge-verify"
-          onClick={() => {
-            setDetailsFocus("checks");
-            setDetailsOpen(true);
-          }}
+          // The badge is about the items to verify, so Details opens at them.
+          onClick={() => onOpenDetails(placement.code, "requisites")}
         >
           {verifyBadgeText(placement.verify.length)}
         </button>
@@ -267,8 +262,7 @@ export default function CourseCard({
               type="button"
               onClick={() => {
                 onMenuOpenChange(placement.code, false);
-                setDetailsFocus("top");
-                setDetailsOpen(true);
+                onOpenDetails(placement.code);
               }}
             >
               Details
@@ -310,16 +304,6 @@ export default function CourseCard({
           </MoreOptions>
         )}
       </div>
-      <CourseDetail
-        view={view}
-        code={placement.code}
-        planId={planId}
-        open={detailsOpen}
-        focusChecks={detailsFocus === "checks"}
-        onChanged={onChanged}
-        onAnnounce={onAnnounce}
-        onClose={() => setDetailsOpen(false)}
-      />
     </li>
   );
 }

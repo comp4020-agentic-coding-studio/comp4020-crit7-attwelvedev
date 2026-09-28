@@ -1,6 +1,5 @@
-import { useState } from "preact/hooks";
 import type { CourseCard, PlacementView, PlanView } from "../lib/domain/view";
-import CourseDetail from "./CourseDetail";
+import type { DetailsFocus } from "./details-state";
 import { placedStatus, type PlacedPart } from "./planner-logic";
 
 interface Props {
@@ -9,10 +8,9 @@ interface Props {
   // Given for a search result, which may have no view.courses entry.
   course?: CourseCard;
   placement: PlacementView;
-  planId: string;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
   onLocateCourse: (code: string, part?: 2) => void;
+  // Opens this course in the details sidebar.
+  onOpenDetails: (code: string, focus?: DetailsFocus) => void;
 }
 
 // A course already on the timeline, in one or two lines instead of a full
@@ -24,13 +22,10 @@ export default function PlacedCourseRow({
   code,
   course: courseOverride,
   placement,
-  planId,
-  onChanged,
-  onAnnounce,
   onLocateCourse,
+  onOpenDetails,
 }: Props) {
   const course = courseOverride ?? view.courses[code];
-  const [detailsOpen, setDetailsOpen] = useState(false);
   if (!course) return null;
 
   const { word, parts, joiner } = placedStatus(view, placement);
@@ -56,7 +51,7 @@ export default function PlacedCourseRow({
         class="placed-row-title"
         title={course.title}
         aria-label={`${course.title}, details`}
-        onClick={() => setDetailsOpen(true)}
+        onClick={() => onOpenDetails(code)}
       >
         {course.title}
       </button>
@@ -71,16 +66,6 @@ export default function PlacedCourseRow({
           </>
         )}
       </p>
-      <CourseDetail
-        view={view}
-        code={code}
-        course={courseOverride}
-        planId={planId}
-        open={detailsOpen}
-        onChanged={onChanged}
-        onAnnounce={onAnnounce}
-        onClose={() => setDetailsOpen(false)}
-      />
     </li>
   );
 }
