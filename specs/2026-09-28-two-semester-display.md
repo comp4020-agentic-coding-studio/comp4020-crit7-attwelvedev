@@ -61,8 +61,12 @@ placement rules.
    - Both parts on the same side of the cutoff: "Planned S1 2028 – S2 2028"
      (or "Completed S1 2028 – S2 2028").
    - Straddling: "Completed S1 2028 · planned S2 2028".
-   - The locate link targets part 1; its accessible label describes the
-     range / per-part status.
+   - ~~The locate link targets part 1; its accessible label describes the
+     range / per-part status.~~ *Amended 2026-09-28, during planning after
+     Phase 02:* each semester is its own locate button. The first goes to
+     part 1 and the second to the part 2 stub (focused, with both parts
+     flashing), and each button's accessible label names its part. See
+     overview TS6.
 7. **Prerequisite overlay.** Arrows from the course's prerequisites attach
    to part 1; arrows to courses that depend on it leave from part 2 (the
    stub), matching the existing rule that dependents wait for the last

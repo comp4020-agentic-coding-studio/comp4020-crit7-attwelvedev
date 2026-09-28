@@ -241,6 +241,9 @@ lastTerm: number;        // existing: term + span - 1 (8 for a final-term two-se
 ### Task 4: Range and straddle status in placed rows
 
 - [x] **Description:** replace `PlacedStatus` with the overview §4.1 shape.
+  *(Built as described. By a 2026-09-28 ruling, Phase 03's Task 7 later
+  reshapes it so each semester of a two-semester row is its own locate
+  button.)*
   `PlacedCourseRow` renders `word`, the locate button (`termLabel`), then
   `rest`, and takes its accessible label from `spoken`.
 - **Files touched:** `src/components/planner-logic.ts`,

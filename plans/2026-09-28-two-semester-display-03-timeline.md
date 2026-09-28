@@ -6,9 +6,9 @@
 - **Part of:** `plans/2026-09-28-two-semester-display-00-overview.md`. Read it
   first, especially §2 (TS1, TS2, TS3, TS7, NF1, NF2), §2.4, §3, §4.1 and
   §4.2 (the DOM contract).
-- **Depends on phases:** 01 (`termSpanLabel`, `span`/`lastTerm`), 02 (none of
-  its code is imported, but its spec `describe("two-semester labels")`
-  exists, and this phase adds tests to it).
+- **Depends on phases:** 01 (`termSpanLabel`, `span`/`lastTerm`), 02 (its
+  spec `describe("two-semester labels")` exists and this phase adds tests to
+  it; Task 7 reshapes Task 4's `placedStatus` and `PlacedCourseRow`).
 
 ## 1. Summary
 
@@ -16,18 +16,22 @@ This phase makes the timeline show both semesters of a two-semester course:
 - part 1 gets a marker line;
 - the next column gets a compact part 2 stub;
 - locating, receding and the drag outline treat both parts as one;
+- a two-semester placed row gets a locate button per part, the second going
+  to the stub;
 - overlay arrows to dependents leave from the stub.
 
 ## 2. Requirements (this phase)
 
 ### 2.1 Functional
 
-TS1, TS2, TS3 and TS7, all in full.
+TS1, TS2, TS3 and TS7, all in full, and TS6's per-part locate buttons and
+labels (Task 7; Task 4 already did its text).
 
 ### 2.2 Non-functional
 
 - NF1: the stub is not `.course-card`, and the budget spec is re-run.
-- NF2: the stub's accessible name; axe stays clean.
+- NF2: the stub's accessible name and the row's per-part button names; axe
+  stays clean.
 - NF4.
 
 ### 2.3 Out of scope for this phase
@@ -106,6 +110,48 @@ hovered `[data-term]` element, and removes it from all elements on end.
 - `overlayEdges(view, code)` already requires a two-semester prereq's
   `lastTerm` to be before the dependent.
 
+The placed row and the locate plumbing (for Task 7), as Phase 02 left them:
+- `src/components/PlacedCourseRow.tsx` imports
+  `import { placedStatus } from "./planner-logic";`, has prop
+  `onLocateCourse: (code: string) => void;` and renders:
+
+  ```tsx
+  const status = placedStatus(view, placement);
+  …
+  <p class="placed-row-status">
+    {status.word}{" "}
+    <button type="button" class="course-card-term-link" onClick={() => onLocateCourse(code)}
+      aria-label={`${code} is ${status.spoken} — locate it on the timeline`}>
+      {status.termLabel}
+    </button>
+    {status.rest && <> {status.rest}</>}
+  </p>
+  ```
+
+- `placedStatus` (Task 4) computes `first` / `second` labels, returns the
+  straddle object when `second && completedParts > 0 && !completed`, and
+  otherwise a range or single label with `rest: null`.
+- `planner-logic.test.ts` `describe("placedStatus")` has the COMP1100 /
+  COMP1110 tests, a local `thesisAt(cutoff)` helper (COMP4550 at 4 on
+  `emptyPlan()`), `"gives a two-semester course's range"` and
+  `"splits a two-semester course straddling the cutoff"`, all asserting the
+  Task 4 shape.
+- `spec/layout.test.ts` `describe("two-semester labels")` has
+  `"search's placed row shows the straddle and locates part 1"`, which finds
+  the locate button by
+  `/^COMP4550 is completed in S1 2029 and planned for S2 2029 — locate it on the timeline$/`.
+  `planWithPlacement(code, term = 0)` takes a term.
+- `onLocateCourse: (code: string) => void;` is declared in
+  `CourseSearch.tsx` (line 20) and in both prop interfaces of
+  `Sidebar.tsx` (lines 29 and 60), which only pass it down.
+- `Planner.tsx`:
+  `const [locateRequest, setLocateRequest] = useState<{ code: string; token: number } | null>(null);`
+  (line 54), and the Sidebar gets
+  `onLocateCourse={(code) => setLocateRequest({ code, token: Date.now() })}`
+  (line 296).
+- `Timeline.tsx` declares `locateRequest: { code: string; token: number } | null;`
+  (line 27) under a comment about the sidebar's badge.
+
 `src/styles.css`:
 - `.term-cards` is a flex column with `gap: 0.6rem`.
 - `.term-cards .course-card, .available-courses .course-card { width: 13rem; flex-shrink: 0; }`
@@ -134,7 +180,16 @@ export function termSpanLabel(index: number, span: number): string;
 
 // PlacementView (extends PlacementEval), fields used here:
 code: string; term: number; span: number; lastTerm: number;
-countsToward: string | null; completedParts: number;
+countsToward: string | null; completedParts: number; completed: boolean;
+
+// src/components/planner-logic.ts (Task 4), which Task 7 replaces
+export interface PlacedStatus {
+  word: "Completed" | "Planned";
+  termLabel: string;
+  rest: string | null;
+  spoken: string;
+}
+export function placedStatus(view: PlanView, placement: PlacementView): PlacedStatus;
 ```
 
 ## 4. Approach
@@ -148,6 +203,11 @@ countsToward: string | null; completedParts: number;
   `onLocateCourse(code)`, which Planner wires to the same
   `setLocateRequest` the sidebar uses. The locate effect highlights part 1
   and also `[data-part-two=code]`, and focus stays on part 1.
+- **Per-part row buttons (Task 7):** `placedStatus` returns one
+  `PlacedPart` per locate button plus the `joiner` text between them. The
+  row passes `part` 2 up through `onLocateCourse`, Planner puts it on the
+  locate request, and the locate effect focuses the stub's button for it.
+  Visible text is unchanged; only the buttons and their names split.
 - **Drag outline for both terms:** Timeline sets
   `data-drag-span="2"` on `.timeline-scroll` while a two-semester course is
   dragged. A CSS adjacent-sibling rule outlines the term after an outlined
@@ -303,7 +363,131 @@ countsToward: string | null; completedParts: number;
   - `pnpm check` is green.
 - **Depends on:** Task 5 (same files; the order avoids conflicts).
 
-### Task 7: Outline both terms while dragging a two-semester course
+### Task 7: Per-part locate buttons in placed rows
+
+- [ ] **Description:** a two-semester placed row (sidebar and search) gets
+  one locate button per part: "Planned [S1 2029] – [S2 2029]", or when
+  straddling "Completed [S1 2029] · planned [S2 2029]". The part 2 button
+  scrolls to and focuses the stub's button, and both parts flash. A
+  one-semester row, or a two-semester course with no part 2 term, keeps its
+  single button. Added 2026-09-28 by user ruling, after Phase 02 shipped
+  Task 4; it replaces Task 4's `PlacedStatus` shape (overview §4.1).
+- **Files touched:**
+  - `src/components/planner-logic.ts`, `src/components/planner-logic.test.ts`
+  - `src/components/PlacedCourseRow.tsx`, `src/components/CourseSearch.tsx`,
+    `src/components/Sidebar.tsx`
+  - `src/components/Planner.tsx`, `src/components/Timeline.tsx`
+  - `spec/layout.test.ts`
+- **Tests first (red):**
+  - `planner-logic.test.ts` `describe("placedStatus")`: rewrite its tests
+    to the new shape. This is a requirement change (overview TS6), not a
+    loosened test: every value stays pinned with `toEqual`.
+    - COMP1100 (cutoff 1) →
+      `{ word: "Completed", parts: [{ termLabel: "S1 2027", spoken: "is completed in S1 2027" }], joiner: null }`;
+    - COMP1110 →
+      `{ word: "Planned", parts: [{ termLabel: "S2 2027", spoken: "is planned for S2 2027" }], joiner: null }`;
+    - `"gives a two-semester course's range"`: `thesisAt(0)` →
+      `{ word: "Planned", parts: [{ termLabel: "S1 2029", spoken: "part 1 is planned for S1 2029" }, { termLabel: "S2 2029", spoken: "part 2 is planned for S2 2029" }], joiner: "–" }`;
+      `thesisAt(6)` → the same with `word: "Completed"` and spokens
+      `"part 1 is completed in S1 2029"` / `"part 2 is completed in S2 2029"`;
+    - `"splits a two-semester course straddling the cutoff"`: `thesisAt(5)` →
+      `{ word: "Completed", parts: [{ termLabel: "S1 2029", spoken: "part 1 is completed in S1 2029" }, { termLabel: "S2 2029", spoken: "part 2 is planned for S2 2029" }], joiner: "· planned" }`;
+    - new `"gives a final-term two-semester course one part"`: a view with
+      COMP4550 at 7, cutoff 0 →
+      `{ word: "Planned", parts: [{ termLabel: "S2 2030", spoken: "is planned for S2 2030" }], joiner: null }`.
+  - `spec/layout.test.ts` `describe("two-semester labels")`:
+    - in `"search's placed row shows the straddle and locates part 1"`,
+      change the locate button's name to
+      `/^COMP4550 part 1 is completed in S1 2029 — locate it on the timeline$/`.
+      The `.placed-row-status` innerText assertion
+      (`"Completed S1 2029 · planned S2 2029"`) and the focus check stay
+      unchanged;
+    - new `"a placed row's part 2 button locates the stub"`, same fixture
+      (`planWithPlacement("COMP4550", 4)`, `PUT` cutoff 5, 1920×1080,
+      search "COMP4550"):
+      - click the row's button named
+        `/^COMP4550 part 2 is planned for S2 2029 — locate it on the timeline$/`;
+      - poll until
+        `document.activeElement?.closest("[data-part-two]")?.getAttribute("data-part-two")`
+        is `"COMP4550"`;
+      - poll until the `.course-card-highlighted` elements'
+        `data-placed` / `data-part-two` attributes are exactly
+        `["COMP4550", "COMP4550"]` (as in Task 6's stub test).
+- **Implementation (green):**
+  - `planner-logic.ts`: replace `PlacedStatus` with overview §4.1's
+    `PlacedPart` + `PlacedStatus`, and rewrite `placedStatus`, keeping its
+    comment's point (per part, from the same `completedParts` the progress
+    numbers use) and adding that each part is its own locate button:
+
+    ```ts
+    export function placedStatus(view: PlanView, placement: PlacementView): PlacedStatus {
+      const first = view.terms[placement.term].label;
+      const second = placement.span === 2 ? (view.terms[placement.lastTerm]?.label ?? null) : null;
+      const says = (done: boolean, label: string) => `${done ? "completed in" : "planned for"} ${label}`;
+      const firstDone = placement.completedParts > 0;
+      if (!second) {
+        return {
+          word: firstDone ? "Completed" : "Planned",
+          parts: [{ termLabel: first, spoken: `is ${says(firstDone, first)}` }],
+          joiner: null,
+        };
+      }
+      const secondDone = placement.completed;
+      return {
+        word: firstDone ? "Completed" : "Planned",
+        parts: [
+          { termLabel: first, spoken: `part 1 is ${says(firstDone, first)}` },
+          { termLabel: second, spoken: `part 2 is ${says(secondDone, second)}` },
+        ],
+        joiner: firstDone && !secondDone ? "· planned" : "–",
+      };
+    }
+    ```
+
+    `termSpanLabel` stays imported (`menuTargets` uses it).
+  - `PlacedCourseRow.tsx`:
+    - import `type PlacedPart` alongside `placedStatus`;
+    - prop `onLocateCourse: (code: string, part?: 2) => void`;
+    - `const { word, parts, joiner } = placedStatus(view, placement);` and a
+      local
+      `const locate = (part: PlacedPart, which?: 2) => (<button type="button" class="course-card-term-link" onClick={() => onLocateCourse(code, which)} aria-label={\`${code} ${part.spoken} — locate it on the timeline\`}>{part.termLabel}</button>);`
+    - render
+      `<p class="placed-row-status">{word}{" "}{locate(parts[0])}{parts[1] && <>{" "}{joiner}{" "}{locate(parts[1], 2)}</>}</p>`,
+      so innerText stays "Planned S1 2029 – S2 2029" /
+      "Completed S1 2029 · planned S2 2029" / "Planned S1 2027".
+  - `CourseSearch.tsx` (line 20) and `Sidebar.tsx` (lines 29 and 60): widen
+    `onLocateCourse` to `(code: string, part?: 2) => void`. They only pass
+    it through.
+  - `Planner.tsx`:
+    - `locateRequest` state type becomes
+      `{ code: string; token: number; part?: 2 } | null`;
+    - the Sidebar's prop becomes
+      `onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}`.
+      Task 6's Timeline `onLocateCourse` (the stub, to part 1) is
+      unchanged.
+  - `Timeline.tsx`:
+    - `locateRequest` prop type becomes
+      `{ code: string; token: number; part?: 2 } | null`, and its comment
+      says a row's part 2 button asks for the stub;
+    - in the locate effect as Task 6 leaves it (part 1 `el` plus
+      `part2`), scroll to and focus
+      `const target = (locateRequest.part === 2 && part2?.querySelector("button")) || el;`
+      instead of `el` (typed `HTMLElement`, since `el` is already
+      narrowed), with a comment that without a stub it falls back to part 1. The highlight still goes on both `el` and `part2`.
+- **Refactor:** none.
+- **Acceptance criteria:**
+  - The rewritten and new tests pass.
+  - The one-semester spec strings pass unchanged: `"Completed S1 2027"`,
+    `"Planned S1 2027"`, `/^COMP1130 is planned for S1 2027/` and the
+    locate tests' `/^COMP1100 is (completed in|planned for)/`.
+  - Task 6's `"the part 2 stub locates part 1 and both flash"` passes
+    unchanged.
+  - `spec/invariants.test.ts` axe passes.
+  - `pnpm check` is green.
+- **Depends on:** Task 4 (Phase 02, `placedStatus`), Task 6 (the stub and
+  the locate effect's `part2`).
+
+### Task 8: Outline both terms while dragging a two-semester course
 
 - [ ] **Description:** while a two-semester course is dragged (mouse or
   touch, from the timeline, sidebar or search), an allowed hovered term T
@@ -351,9 +535,9 @@ countsToward: string | null; completedParts: number;
   - The existing touch-drag outline test passes unchanged, since a
     one-semester drag outlines only one term.
   - `pnpm check` is green.
-- **Depends on:** Task 6 (the Timeline prop list).
+- **Depends on:** Task 7 (it edits the same Timeline and Planner lines).
 
-### Task 8: Overlay arrows to dependents leave from part 2
+### Task 9: Overlay arrows to dependents leave from part 2
 
 - [ ] **Description:** an overlay edge whose prerequisite (`from`) is a
   two-semester course starts at its part 2 stub when there is one. Lines
@@ -390,10 +574,11 @@ countsToward: string | null; completedParts: number;
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 5–8 complete, their tests pass, and each is committed
+- [ ] Tasks 5–9 complete, their tests pass, and each is committed
 - [ ] `pnpm test:unit` passes
 - [ ] `pnpm check` passes, including `describe("card height budget")` and the invariants axe run
 - [ ] The example plan at `/plan/example` shows COMP4550's marker in S1 2030 and its stub in S2 2030
+- [ ] A straddling COMP4550's placed row has two locate buttons, and "S2 2029" focuses the stub
 - [ ] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
@@ -402,11 +587,12 @@ countsToward: string | null; completedParts: number;
 | --- | --- |
 | TS1 | Task 5 |
 | TS2 | Task 6 |
-| TS3 | Task 6 (recede, flash), Task 7 (drag outline) |
-| TS7 | Task 8 |
+| TS3 | Task 6 (recede, flash), Task 8 (drag outline) |
+| TS6 (per-part buttons and labels) | Task 7 |
+| TS7 | Task 9 |
 | NF1 | Tasks 5, 6 |
-| NF2 (stub name, axe) | Task 6 |
-| NF4 | Tasks 5–8 |
+| NF2 (stub name, row button names, axe) | Tasks 6, 7 |
+| NF4 | Tasks 5–9 |
 
 ## 8. Risks / open questions
 
