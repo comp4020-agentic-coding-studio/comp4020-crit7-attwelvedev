@@ -637,3 +637,32 @@ How I knew it was right: the same test, unchanged, failed on the flex
 build and passed on the inline one. Screenshots at 390×844 and
 1920×1080 showed the word and the term button still aligned, with the
 same gap, in both the two-line and the one-line layouts.
+
+## 2026-09-28 — Persisting colour families as data instead of patching them in on load
+
+Resolved by 0265a2e.
+
+Phase 03's plan put a `family` on each top-level `GroupDef` in
+`aacom-2027.ts` and resolved it in `view.ts`, on the premise that
+"another program only has to edit data". Implemented as written, every
+new family test passed — but the unit suite's existing seed test,
+"loadProgram round-trips AACOM_2027", failed: `family` vanished. The
+plan had missed that the running app never reads `AACOM_2027` at request
+time; seed writes it into SQLite and every view comes from
+`loadProgram(db)`. Shipped as planned, every group would have rendered
+neutral grey in the real app while the unit tests stayed green.
+
+Two fixes were on the table. The one with no migration — have
+`loadProgram` copy families from `AACOM_2027` by group id — would have
+made the round-trip test pass by re-injecting the value from outside the
+DB, silencing the very check that caught the gap, and would reintroduce
+the hard-coded lookup the plan set out to avoid. I chose a nullable
+`requirement_groups.family` column instead (migration 0004), even though
+the overview said "no schema change": that rule protects saved plans and
+the API, and this is a reference table seed rebuilds on every boot. I
+recorded it as a scoped exemption, overview ruling 4, so later phases
+don't re-litigate it.
+
+The evidence it was right: the round-trip test passes unmodified, so it
+still proves nothing is lost between data and view, and `pnpm check` is
+green with 574 tests.
