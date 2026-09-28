@@ -28,6 +28,10 @@ The layout mechanics (widths, resizing) are unchanged in this phase.
 - WR20–WR25: all.
 - WR22: the allowlist check covers layers added in later phases too. Their
   selectors are listed now.
+- Carried from the Phase 02 review (2026-09-29): decide once, site-wide,
+  whether figures (units, weights, class numbers, dates) use a monospaced
+  face, as in the mockup. Today they use tabular numerals, inconsistently.
+  Phase 02 deliberately didn't make that call for the details sidebar alone.
 
 ### 2.2 Non-functional
 
@@ -103,8 +107,7 @@ New tokens are added; none are renamed.
 From Phase 02:
 - `<aside class="details-panel" aria-label="Course details">`, rendered by
   `CourseDetailsPanel` (fixed drawer CSS for now).
-- `span.course-card-grip` sits inside `div.details-drag` (Phase 04), if
-  present.
+- The details sidebar has no grip (removed in the Phase 02 review).
 
 From Phase 04 (if landed):
 - `div.palette-backdrop > div.course-search.palette[role=dialog]`

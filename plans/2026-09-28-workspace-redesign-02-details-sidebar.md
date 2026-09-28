@@ -520,7 +520,7 @@ everywhere (and `answer: null`). The tree is then rendered with
 
 ### Task 7: "When it runs" strip, offerings table, provenance footer; focus, Escape, scroll-to-card, `aria-current`
 
-- **Description:** WR9 §2 and §6, WR13, WR14, and the `aria-current` part of
+- [x] **Description:** WR9 §2 and §6, WR13, WR14, and the `aria-current` part of
   WR18.
 - **Files touched:**
   - `src/components/planner-logic.ts`
@@ -537,8 +537,15 @@ everywhere (and `answer: null`). The tree is then rendered with
     - Cell 2 has `state: "here"`.
     - Cell 0 has `state: "offered"` and `allowed` as given by
       `dropTargets`. Completed terms can be allowed.
-    - A term in `card.hardBlocked` gives `state: "not-offered"`,
-      `allowed: false` and the `reason`.
+    - (Superseded by review round 1, item 4: see below.)
+    - A term hard-blocked for its **offering** gives `state:
+      "not-offered"`, `allowed: false` and the `reason` (COMP1130, S1 only,
+      in term 1). **Ruled 2026-09-28:** `hardBlocked` also holds requisite
+      impossibilities, such as COMP2100 before S1 2028. Those terms keep
+      their offering state ("offered"), and are refused with the reason from
+      `dropTargets`. An offering reason is recognised by
+      `isOfferingReason(reason)`, exported from `feasibility.ts` next to the
+      template that builds it.
     - A term in `card.projectedTerms` gives `state: "projected"`.
     - `card.offeringUnknown` gives `state: "unknown"`.
     - `units` equals `view.terms[i].units`.
@@ -550,10 +557,13 @@ everywhere (and `answer: null`). The tree is then rendered with
     `weightLabel("Hurdle")` is "Hurdle".
   - `spec/layout.test.ts`, `describe("details sidebar")`:
     - "strip moves a course": on an editable plan with COMP2100 in term 2,
-      activating the "Move to S2 2027" cell moves it. The card is now in
-      `section[data-term="1"]`, and the panel stays open on COMP2100.
-    - "strip refuses a non-offered term": the refused cell is disabled and
-      its accessible description is the reason.
+      activating the "Move to S2 2028" cell moves it. The card is now in
+      `section[data-term="3"]`, and the panel stays open on COMP2100.
+      (Ruled 2026-09-28: the planned S2 2027 is refused, since COMP2100
+      can't go before S1 2028.)
+    - "strip refuses a non-offered term": COMP1130 (S1 only) on a fresh
+      plan. Its S2 2027 cell is disabled, and its accessible description is
+      the reason.
     - "offerings table": COMP2100 shows a row with "In Person" and "5103".
     - "footer provenance": the footer contains "Open COMP2100 on Programs &
       Courses" linking to the course URL, and "updated".
@@ -621,6 +631,63 @@ everywhere (and `answer: null`). The tree is then rendered with
 
   Region styling comes later (Phase 05), so judge content and layout, not
   finish.
+- **Accepted by the user on 2026-09-29, after round 2** (round 2 added
+  items 11–12 below).
+- **Review round 1 (2026-09-29): rejected, with these amendments** (the
+  spec's WR7, WR9 and WR15 are amended to match). The approach stands;
+  these are content and presentation changes within Task 7.
+  1. **No grip.** Remove it from the header. Phase 04's Task 12 no longer
+     drags from the sidebar.
+  2. **"In your plan" only for placed courses**, with no semester line,
+     since the pills say it. The WR11 test checks the header pill "Not in
+     your plan" and the absence of the "In your plan" heading. The WR12
+     test checks the pills only.
+  3. **"Counts toward" uses the header's popup.** Extract `CompletedMenu`'s
+     toggle-and-panel into a shared `ChoiceMenu` (`src/components/
+     ChoiceMenu.tsx`) with the same markup, keyboard and Escape behaviour.
+     `CompletedMenu` and the pin menu are both built on it. The toggle
+     reads "Counts toward: <choice>". The read-only test checks that the
+     toggle is disabled.
+  4. **Blocked isn't "Not offered".** `StripCell["state"]` gains
+     `"needs-prereqs"` ("Needs prerequisites") and `"cant-start"` ("Can't
+     start here"). `hardBlockKind(reason): "not-offered" | "two-semester" |
+     "requisites"`, exported from `feasibility.ts`, replaces
+     `isNotOfferedReason`. The not-offered and two-semester templates are
+     built from constants next to it. State comes from `card.hardBlocked`
+     alone, so read-only cells keep their true state. Read-only cells are
+     disabled but not faded. Unit tests: COMP2100 cell 0 →
+     `needs-prereqs`; unplaced COMP4550 cell 7 → `cant-start`; the
+     example's COMP2100 cell 3 → `offered`.
+  5. **Strip legend** under the strip, with one swatch per state present.
+     **The offerings table reads "S1 2027"**, and a test checks the row
+     text. Year headings stay.
+  6. **Tree guide lines and leaf detail.** A vertical line runs from each
+     and/or node's mark down its items. A course leaf shows its code, its
+     title (when known), and a second line: "Completed <term>", "Planned
+     <term>" or "Not in your plan". **An unplaced course's tree shows plain
+     dots** (`span.mark-dot`) in place of marks, still with no ✓, ✗ or ?.
+  7. **Assessment legend.** Each list item has a dot in its bar segment's
+     colour, from a new assessment palette (`--assess-1…5`), not the
+     family colours.
+  8. **↗ on P&C links**, with a visually hidden "(opens in a new tab)".
+  9. **Destructive Remove.** "Remove from plan" and the card menu's Remove
+     use `--rust`. A test reads their computed colour.
+  10. **Monospaced figures are deferred** to Phase 05, noted there, and
+      decided site-wide.
+  11. **Remove shows for completed courses too**, as the card menu and
+      dragging already allow. This supersedes Task 5's "not shown when …
+      completed". The cell words are "Needs prereqs" and "Can't start", and
+      a cell's labels never wrap: year columns are at least 5.9rem and
+      reflow to a second row on narrow screens. The legend keeps the full
+      wording, and has no Part 2 entry: those cells look like "In your
+      plan" and say "Part 2" themselves.
+  12. **Round 2:** the hatching on refused cells is coarser, in `--line`, so
+      it reads at swatch size.
+  - **Also found while building** (not review items): the drawer covered the
+    timeline's last ~440px, so the final semesters couldn't be scrolled
+    into view. While the panel is open, `.timeline-scroll` gets matching
+    `padding-inline-end` and `scroll-padding-inline-end` (interim, until
+    Phase 06 docks the panel).
 - **Depends on:** Task 6.
 
 ## 6. Phase Definition of Done

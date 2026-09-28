@@ -17,8 +17,9 @@
   - the same API and outcome messages, including the live P&C lookup
   - draggable result cards with "Place in…", or placed rows
 - Enter on a result opens it in the details sidebar.
-- Dragging a result (or the sidebar's grip) onto the timeline works with
-  mouse and touch, and the palette steps aside while you drag.
+- Dragging a result onto the timeline works with mouse and touch, and the
+  palette steps aside while you drag. (The sidebar's grip was removed in the
+  Phase 02 review, 2026-09-29; there's no drag from the sidebar.)
 
 ## 2. Requirements (this phase)
 
@@ -26,7 +27,6 @@
 
 - WR26, WR27, WR28, WR29, WR30, WR31: all.
 - WR6: palette Enter.
-- WR7: the grip drag.
 
 ### 2.2 Non-functional
 
@@ -112,7 +112,7 @@ From Phase 02:
 ```ts
 // Planner: openDetails(code: string, focus?: DetailsFocus): void; knownCards: Record<string, CourseCard>
 // Card components: onOpenDetails: (code: string, focus?: DetailsFocus) => void
-// CourseDetailsPanel renders span.course-card-grip in its header (aria-hidden), omitted when read-only or completed
+// CourseDetailsPanel has no grip (removed in the Phase 02 review, 2026-09-29)
 ```
 
 From Phase 03 (optional; see this file's §2.4):
@@ -145,11 +145,6 @@ export type PlanAction = { kind: "place"; code: string; term: number } | { kind:
   reachable while the dragged element stays in the DOM.
 - At `dragend` or `onDragEnd` the palette closes.
 
-**Grip drag in the sidebar.** The panel header's grip becomes a draggable
-source:
-- `draggable`, and `data-drag-code={code}` on a small `div.details-drag`
-  wrapping the grip and the code.
-- When dropped, it goes through the same `performPlace` / `runAction` path.
 
 ## 5. Task breakdown
 
@@ -239,11 +234,11 @@ source:
   - `grep -rn "CourseSearch" src` finds nothing.
 - **Depends on:** Phase 02.
 
-### Task 12: Drag out of the palette and from the sidebar's grip
+### Task 12: Drag out of the palette
 
-- **Description:** WR30, and WR7's grip drag.
+- **Description:** WR30.
 - **Files touched:**
-  - `SearchPalette.tsx`, `CourseDetailsPanel.tsx`, `Planner.tsx`
+  - `SearchPalette.tsx`, `Planner.tsx`
   - `src/styles.css`
   - `spec/layout.test.ts`
 - **Tests first (red):** in `spec/layout.test.ts`, on an editable plan:
@@ -256,9 +251,6 @@ source:
   - "touch-drag a palette result": at 390×844 with `hasTouch`, hold for
     300ms and move onto the term, using the same technique as the existing
     touch-drag test near :1081. The course is placed.
-  - "drag the sidebar's grip onto a term": with COMP4680 open (unplaced),
-    dragging `.details-drag` onto term 4 places it. The panel then shows
-    "Planned S1 2029".
   - "a refused drop announces its reason": dragging a result onto a term
     in its `hardBlocked` doesn't place it, and the live region shows the
     reason.
@@ -271,11 +263,6 @@ source:
       intercepting `elementFromPoint` before the finger moves.
     - Native `onDragEnd` and the touch `onDragEnd` both clear
       `paletteDragging` and call `onClose`.
-  - `CourseDetailsPanel`: wrap the grip and the code in `div.details-drag`
-    with `draggable={!readOnly && !completed}`,
-    `data-drag-code={…code}`, and native `onDragStart` setting
-    `dataTransfer` and calling `onDragStart(code)`. Add the props
-    `onDragStart: (code: string) => void; onDragEnd: () => void`.
   - CSS: `.palette-backdrop[data-dragging] { visibility: hidden;
     pointer-events: none; }`.
 - **Refactor:** None expected.
@@ -298,7 +285,6 @@ source:
 | WR26–WR29, WR31 | Task 11 |
 | WR6 (palette Enter) | Task 11 |
 | WR30 | Task 12 |
-| WR7 (grip drag) | Task 12 |
 
 ## 8. Risks / open questions
 

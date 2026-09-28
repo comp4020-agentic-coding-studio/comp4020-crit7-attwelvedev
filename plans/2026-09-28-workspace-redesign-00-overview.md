@@ -315,7 +315,7 @@ depends only on 02 (the sidebar exists to be styled as a region).
 | WR4 | Out of scope (none) |
 | WR5 | Task 5 |
 | WR6 | Tasks 5, 11 (palette Enter) |
-| WR7 | Tasks 4, 5 (grip drag wired in Task 12) |
+| WR7 | Tasks 4, 5 (grip removed in the Phase 02 review, 2026-09-29) |
 | WR8 | Tasks 4, 5 |
 | WR9 | Tasks 5 (1, 5), 6 (3, 4), 7 (2, 6) |
 | WR10 | Task 5 |

@@ -70,7 +70,9 @@ Numbering is local to this spec (WR = workspace redesign).
   - back and forward through the courses opened in this session
   - a narrow/wide toggle (WR36)
   - Close
-  - a drag grip (not on completed or read-only courses)
+  - ~~a drag grip (not on completed or read-only courses)~~ *Amended in Phase 02 review, 2026-09-29:*
+    removed. Dragging a sidebar onto the timeline is an odd gesture, and
+    the "When it runs" strip already places the course in one click.
   - the code, units, level and title
   - status pills: planned or completed term, "Counts toward", and the
     requisite state
@@ -80,15 +82,24 @@ Numbering is local to this spec (WR = workspace redesign).
     including the WR2 details.
   - An unknown code is ignored and the sidebar stays closed.
 - WR9. Content, in order:
-  1. **In your plan.**
-     - The semester (or "Not planned").
+  1. **In your plan.** *Amended in Phase 02 review, 2026-09-29:* shown only for a placed course; the
+     header pills already say the semester, so there's no status line.
      - The "Counts toward" pin menu, with today's `setPin` behaviour and help
-       text.
-     - A Remove button (today's remove with undo).
+       text, built from the same popup as the header's "Completed through"
+       menu (no native picker).
+     - A Remove button (today's remove with undo), styled as destructive
+       (red), as is the card menu's Remove. Completed courses have it too,
+       as the card menu does.
   2. **When it runs.**
      - A strip of every term in the plan, grouped by year. Each cell shows
        its state (in your plan / part 2 / offered / projected / not offered /
        unknown) and that term's load, e.g. "18 of 24u".
+       *Amended in Phase 02 review, 2026-09-29:* a term that runs the course but is refused has its own state
+       and look: "Needs prereqs" (unreachable requisites) or "Can't
+       start" (a two-semester course with no valid second term). "Not
+       offered" is only for terms that don't run the course. On a
+       read-only plan, cells keep their true state and are only disabled.
+       A legend under the strip keys every cell style shown.
      - Selecting a cell moves or places the course, using the same
        allowed/refused rules and reasons as dragging (`dropTargets` /
        `hardBlocked`).
@@ -96,7 +107,8 @@ Numbering is local to this spec (WR = workspace redesign).
      - Accessible names read "Move to <term>" for a placed course and "Place
        in <term>" for an unplaced one.
      - Below the strip, a table of offerings with the columns Semester,
-       Delivery and Class number.
+       Delivery and Class number. The semester reads "S1 2027", the format
+       used everywhere else.
      - Two-semester courses explain their per-semester and total units.
   3. **Requisites.**
      - The requisite tree with each manual check's Met / Not met / Not sure
@@ -108,7 +120,11 @@ Numbering is local to this spec (WR = workspace redesign).
        postgraduate 6xxx/8xxx codes labelled. A warning shows if an
        incompatible course is in the plan.
      - For a course not in the plan, the tree renders without met or not-met
-       marks.
+       marks. *Amended in Phase 02 review, 2026-09-29:* plain dots stand in for the marks.
+     - *Amended in Phase 02 review, 2026-09-29:* guide lines run from each "All of" / "One of" down to the
+       items it governs. A course leaf shows its code (a link when it has
+       details), its title, and a second line with its place in this plan:
+       "Completed <term>", "Planned <term>" or "Not in your plan".
   4. **Courses in your plan that need it.** Placed courses whose prerequisite
      expression references this course, each linking to its own details.
   5. **About.**
@@ -116,9 +132,13 @@ Numbering is local to this spec (WR = workspace redesign).
        description" / "Show less".
      - Learning outcomes as a numbered list.
      - Assessment as a proportional bar plus a list of task and weight,
-       labelled "Indicative, may change".
+       labelled "Indicative, may change". *Amended in Phase 02 review, 2026-09-29:* each list item has a dot
+       in its segment's colour, from an assessment palette of its own (not
+       the requirement family colours).
   6. **Footer.** "Open <CODE> on Programs & Courses" and "Details from
-     Programs & Courses <year>, updated <date>".
+     Programs & Courses <year>, updated <date>". *Amended in Phase 02 review, 2026-09-29:* every P&C link in
+     the sidebar shows a ↗ icon, with "(opens in a new tab)" for screen
+     readers.
 - WR10. Loading and errors.
   - Sections 1–4 render immediately from `PlanView`. Only the WR2 fields
     load.
@@ -141,7 +161,7 @@ Numbering is local to this spec (WR = workspace redesign).
   - Escape closes the sidebar when focus is inside it.
 - WR15. Read-only plans.
   - Everything reads normally.
-  - Strip cells, Remove, the pin menu, check controls and the grip are
+  - Strip cells, Remove, the pin menu and check controls are
     inactive or absent, following today's read-only rules (CR11).
 
 **C. Linked highlighting (while a course is open)**
