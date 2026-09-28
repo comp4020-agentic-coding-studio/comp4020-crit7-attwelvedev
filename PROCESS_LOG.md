@@ -857,3 +857,37 @@ and no horizontal overflow. The same run surfaced a flaky test (MoreOptions
 closes on scroll, and a click on the off-screen term 4 card scrolled). It
 was fixed by scrolling first, and the test was then red twice for the
 right reason before going green three times.
+
+## 2026-09-28 — The part 1 marker broke inside its term label, and the spec only read text
+
+Resolved by ca396a7.
+
+Phase 03 Task 5 added a line under a two-semester card's title, "Part 1
+of 2 · continues in S2 2030". Its spec checked the line's innerText, which
+passed, as did `pnpm check`. The obvious move was to go on to Task 6.
+
+The render check caught what the text check couldn't. At both 1920×1080
+and 390×844 the 13rem card broke the line inside the label ("continues
+in S2 / 2030"). This is the same kind of defect the Place in… ranges had
+(217be2a), in a different component. Overview §2.4 already said a term
+label must never break inside itself. The plan's CSS didn't enforce that,
+so Claude finished the independent tasks (6–9) and then brought it to me
+before closing the phase, rather than improvising a fix. I ruled to fix
+it in Phase 03.
+
+Why this beat the quick fix: putting a non-breaking space into the string
+would have leaked ` ` into innerText and the unit tests. Instead,
+`partOneMarker` returns the text and the term label separately, and the
+card holds the label in a `white-space: nowrap` span. The visible text
+is unchanged, so the existing spec didn't move. The plan's Task 5 and the
+overview's signature were amended in place first.
+
+How I knew it was right: a new spec counts the label's line boxes with a
+DOM Range at both viewports. With only the `nowrap` rule removed it failed
+with `expected 2 to be 1` at both sizes, and with the rule back it passed.
+Re-rendered cards show "S2 2030" wrapping as a whole. The card height
+budget was unchanged.
+
+This kind of label wrap has now come up twice, both times caught only by
+a screenshot. One check over every rendered term label would catch the
+next one without it.

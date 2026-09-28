@@ -602,12 +602,12 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 5–9 complete, their tests pass, and each is committed
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes, including `describe("card height budget")` and the invariants axe run
-- [ ] The example plan at `/plan/example` shows COMP4550's marker in S1 2030 and its stub in S2 2030
-- [ ] A straddling COMP4550's placed row has two locate buttons, and "S2 2029" focuses the stub
-- [ ] Tick Phase 03 in overview §5 and commit
+- [x] Tasks 5–9 complete, their tests pass, and each is committed
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes, including `describe("card height budget")` and the invariants axe run
+- [x] The example plan at `/plan/example` shows COMP4550's marker in S1 2030 and its stub in S2 2030
+- [x] A straddling COMP4550's placed row has two locate buttons, and "S2 2029" focuses the stub
+- [x] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

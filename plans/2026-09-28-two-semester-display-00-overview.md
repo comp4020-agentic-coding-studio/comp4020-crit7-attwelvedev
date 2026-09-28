@@ -264,7 +264,7 @@ export function partTwoPlacements(view: PlanView, term: number): PlacementView[]
 | --- | --- | --- | --- | --- | --- |
 | 01 | `…-01-domain.md` | 1–2 | — | `termSpanLabel`; suggestions show ranges; `completedParts` and per-part progress split, checked through the API | [x] |
 | 02 | `…-02-labels.md` | 3–4 | 01 | Menus show ranges; sidebar rows show range/straddle status | [x] |
-| 03 | `…-03-timeline.md` | 5–9 | 01, 02 | Part 1 marker, part 2 stub, linked locate/recede, per-part locate buttons in placed rows, drag outline, overlay out-edges from part 2 | [ ] |
+| 03 | `…-03-timeline.md` | 5–9 | 01, 02 | Part 1 marker, part 2 stub, linked locate/recede, per-part locate buttons in placed rows, drag outline, overlay out-edges from part 2 | [x] |
 | 04 | `…-04-help-and-review.md` | 10–11 | 01–03 | Help text; **human review** of both viewports; feature done | [ ] |
 
 ## 6. Feature-level Definition of Done
