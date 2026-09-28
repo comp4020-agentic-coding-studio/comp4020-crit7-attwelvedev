@@ -159,8 +159,15 @@ export default function Timeline({
             >
               <div class="term-head">
                 <h2>{term.label}</h2>
+                {/* Abbreviated like the cards' "6u", which leaves room for "Completed" beside the heading in a 15rem column. */}
                 <p class="term-units">
-                  {term.units}/{NORMAL_TERM_UNITS} units
+                  <span aria-hidden="true">
+                    {term.units}/{NORMAL_TERM_UNITS}u
+                  </span>
+                  <span class="visually-hidden">
+                    {term.units} of {NORMAL_TERM_UNITS} units
+                  </span>
+                  {term.index < view.plan.cutoff && <span class="term-completed">Completed</span>}
                 </p>
               </div>
               <div class="term-bar" role="img" aria-label={termBarLabel(segments)}>

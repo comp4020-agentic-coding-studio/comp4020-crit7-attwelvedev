@@ -1748,6 +1748,55 @@ describe("more options", { timeout: 30_000 }, () => {
   });
 });
 
+describe("completed terms", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+
+  it("label the example's completed terms and only those", async () => {
+    await withPlan(desktop, async (page) => {
+      const labels = page.locator(".term-completed");
+      expect(await labels.count()).toBe(2);
+      for (const term of ["0", "1"]) {
+        expect(await page.locator(`[data-term="${term}"] .term-completed`).textContent()).toBe("Completed");
+      }
+      expect(await page.locator('[data-term="2"] .term-completed').count()).toBe(0);
+    });
+  });
+
+  it("abbreviate the unit count like the cards do", async () => {
+    await withPlan(desktop, async (page) => {
+      const units = page.locator('[data-term="0"] .term-units');
+      expect(await units.locator('[aria-hidden="true"]').textContent()).toMatch(/^24\/24u$/);
+      expect(await units.locator(".visually-hidden").textContent()).toBe("24 of 24 units");
+    });
+  });
+
+  it("keep the header's height", async () => {
+    await withPlan(desktop, async (page) => {
+      const headerHeight = (term: string) =>
+        page.evaluate((term) => {
+          const column = document.querySelector(`[data-term="${term}"]`)!;
+          const card = column.querySelector(".term-cards .course-card")!;
+          return card.getBoundingClientRect().top - column.querySelector("h2")!.getBoundingClientRect().top;
+        }, term);
+      expect(Math.abs((await headerHeight("0")) - (await headerHeight("2")))).toBeLessThanOrEqual(2);
+    });
+  });
+
+  it("follow the completed semesters as they change", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const labels = page.locator(".term-completed");
+      expect(await labels.count()).toBe(0);
+      await page.locator(".completed-toggle").click();
+      await page.locator(".completed-panel").getByRole("button", { name: "S1 2027" }).click();
+      await expect.poll(() => labels.count()).toBe(1);
+    } finally {
+      await page.close();
+    }
+  });
+});
+
 describe("plan title row", { timeout: 60_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const phone = { width: 390, height: 844 };

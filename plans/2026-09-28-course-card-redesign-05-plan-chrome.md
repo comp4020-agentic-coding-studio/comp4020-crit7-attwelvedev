@@ -305,8 +305,15 @@ Task 15's placement depends on it (see above).
 
 ### Task 15: "Completed" in completed terms' headers
 
-- [ ] **Description:** each term whose index is below `view.plan.cutoff`
-  shows a "Completed" label in its units line.
+- [x] **Description:** each term whose index is below `view.plan.cutoff`
+  shows a "Completed" label in its units line. Every term's unit count
+  reads "24/24u", with "24 of 24 units" as its accessible text.
+- **Ruling (user, 2026-09-28, mid-task):** with the plan's CSS alone, the
+  heading, "24/24 units" and the pill don't fit in the 209px column. Both
+  the heading and the count wrap, and the header grows by 20px (the height
+  criterion caught it). The user chose to shorten the count to "24/24u",
+  matching the cards' "6u" (CR1), over an icon-only badge or a taller
+  header.
 - **Files touched:**
   - `src/components/Timeline.tsx`
   - `src/styles.css`
@@ -315,13 +322,18 @@ Task 15's placement depends on it (see above).
   - on `withPlan`, the `.term-completed` count is 2, inside
     `[data-term="0"]` and `[data-term="1"]`, with text "Completed";
   - `[data-term="2"] .term-completed` has count 0;
+  - `[data-term="0"] .term-units`' visible (`aria-hidden`) text starts
+    with "24/24u", and its visually hidden text is "24 of 24 units";
   - on a fresh plan (cutoff 0) the count is 0, and after
     choosing the "S1 2027" option in the Completed menu it polls to 1.
     If Task 14 hasn't run, use the "One more semester completed" button
     instead.
 - **Implementation (green):**
-  - `Timeline.tsx`: inside `p.term-units`, after the units text: `{term.index <
-    view.plan.cutoff && <span class="term-completed">Completed</span>}`.
+  - `Timeline.tsx`: `p.term-units` holds `<span
+    aria-hidden="true">{term.units}/{NORMAL_TERM_UNITS}u</span><span
+    class="visually-hidden">{term.units} of {NORMAL_TERM_UNITS}
+    units</span>`, then `{term.index < view.plan.cutoff && <span
+    class="term-completed">Completed</span>}`.
   - `styles.css`:
     - `.term-units { display: flex; align-items: center; gap: 0.5rem; }`
       (keep its margin);

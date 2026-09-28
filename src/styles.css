@@ -1106,10 +1106,23 @@ dialog::backdrop {
 }
 
 .term-units {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.82rem;
   color: var(--unigrey);
   margin: 0 0 0 auto;
   font-variant-numeric: tabular-nums;
+}
+
+/* Says in words what the gold line marks, on each term it covers. */
+.term-completed {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--moss);
+  background: var(--moss-tint);
+  border-radius: 0.35rem;
+  padding: 0.05rem 0.4rem;
 }
 
 /* The term's units by family, out of a normal 24-unit load: the empty
