@@ -3171,3 +3171,51 @@ describe("progress bars", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("card height budget", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const phone = { width: 390, height: 844 };
+
+  it("the median timeline card is at most 150px tall at 1920×1080", async () => {
+    await withPlan(desktop, async (page) => {
+      const heights = await page.$$eval(".term-cards .course-card", (cards) =>
+        cards.map((card) => card.getBoundingClientRect().height).sort((a, b) => a - b),
+      );
+      // More than a handful, so an empty or near-empty selection can't pass.
+      expect(heights.length).toBeGreaterThan(10);
+      const mid = Math.floor(heights.length / 2);
+      const median = heights.length % 2 ? heights[mid] : (heights[mid - 1] + heights[mid]) / 2;
+      expect(median, `sorted heights: ${heights.map((h) => h.toFixed(1)).join(", ")}`).toBeLessThanOrEqual(150);
+    });
+  });
+
+  // The phone pane has about 215px below its first term's header. Half the
+  // second card didn't fit even with every spacing lever at its floor (the
+  // first card's title and "Counts toward" wrap to three lines each, and card
+  // text is never clamped), so the budget is one full card plus the next
+  // one's code line: enough to show another course follows (ruled 2026-09-28).
+  it("the first card and the second's code line fit in the timeline pane at 390×844", async () => {
+    await withPlan(phone, async (page) => {
+      const { area, cards } = await page.evaluate(() => {
+        const rect = (el: Element) => {
+          const { top, bottom } = el.getBoundingClientRect();
+          return { top, bottom };
+        };
+        return {
+          area: rect(document.querySelector(".planner-timeline-area")!),
+          cards: [...document.querySelectorAll('[data-term="0"] .term-cards .course-card')].map((card) => ({
+            card: rect(card),
+            head: rect(card.querySelector(".course-card-head")!),
+          })),
+        };
+      });
+      expect(cards.length).toBeGreaterThanOrEqual(2);
+      const [a, b] = cards;
+      const detail = `area ${JSON.stringify(area)}, first ${JSON.stringify(a.card)}, second head ${JSON.stringify(b.head)}`;
+      expect(a.card.top, detail).toBeGreaterThanOrEqual(area.top);
+      expect(a.card.bottom, detail).toBeLessThanOrEqual(area.bottom);
+      expect(b.head.top, detail).toBeGreaterThanOrEqual(area.top);
+      expect(b.head.bottom, detail).toBeLessThanOrEqual(area.bottom);
+    });
+  });
+});

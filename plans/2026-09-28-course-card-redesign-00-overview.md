@@ -171,7 +171,10 @@ search results, unless stated)
   - at 1920×1080 on `/plan/example`, the median timeline card is at most
     150px tall;
   - at 390×844 (nav shown, default split), the first timeline card is
-    fully inside the timeline pane and at least half of the second is too.
+    fully inside the timeline pane and so is the second card's code line
+    (its `.course-card-head`). *(Revised 2026-09-28 during Phase 06 from
+    "at least half of the second", which failed by 9px with every lever
+    at its floor.)*
 
 **E. Documentation and tests**
 
@@ -244,6 +247,13 @@ search results, unless stated)
   3. **E10 phone target:** the user replaced "two full cards" with "first
      card full, half the second", because the pane has 215px below its
      header.
+  6. **E10 phone target revised (2026-09-28, during Phase 06):** with all
+     five §4 levers at their floors, 46.0px of the second card showed
+     against the 55.0px that half of it needs. The first card (COMP1130) is
+     169px, because its title and its "Counts toward" each wrap to three
+     lines, and those lines can't be clamped. The user chose "the second
+     card's code line is visible" (a 24px head row) over adding more
+     levers.
   4. **Family persistence (2026-09-28, during Phase 03):** the app reads
      the program from SQLite (`seed.ts` → `requirement_groups` →
      `repo.ts` `loadProgram`), not from `AACOM_2027`, so `family` needs
@@ -432,4 +442,5 @@ None. The risks the spec named are settled:
 - drag from a button is covered by the grip (Task 1);
 - axe with buttons inside a draggable `<li>` is asserted in Tasks 1–2;
 - the hues pass (§2.4);
-- E2's placement and E10's target were ruled on 2026-09-28.
+- E2's placement and E10's target were ruled on 2026-09-28 (E10's phone
+  target re-ruled the same day, ruling 6).

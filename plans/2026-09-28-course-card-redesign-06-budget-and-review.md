@@ -3,7 +3,8 @@
 - **Date:** 2026-09-28
 - **Status:** Approved
 - **Requirements confirmed by user:** yes — 2026-09-27; E10's phone target
-  ruled 2026-09-28
+  ruled 2026-09-28, and re-ruled the same day during Task 18 (overview
+  §2.4 ruling 6)
 - **Part of:** `plans/2026-09-28-course-card-redesign-00-overview.md`. Read
   it first: E10, CR24, §2.4 and §6 (the feature DoD this phase closes).
 - **Depends on phases:** 01–05, all ticked.
@@ -140,7 +141,7 @@ The controls Help must name, as built:
 
 ### Task 18: Height budget as a spec check
 
-- [ ] **Description:** add the E10 measurements, and tune the levers only
+- [x] **Description:** add the E10 measurements, and tune the levers only
   if they fail.
 - **Files touched:**
   - `spec/layout.test.ts`
@@ -157,8 +158,11 @@ The controls Help must name, as built:
      .term-cards .course-card` rects. Assert:
      - `a.top >= area.top` and `a.bottom <= area.bottom` (first card fully
        visible);
-     - `Math.min(b.bottom, area.bottom) - b.top >= b.height / 2` (at least
-       half of the second).
+     - with `h = b`'s `.course-card-head` rect, `h.top >= area.top` and
+       `h.bottom <= area.bottom` (the second card's code line is visible).
+       *(Revised 2026-09-28, overview ruling 6. It was "at least half of
+       the second", which failed at 46.0 / 55.0px with every lever at its
+       floor.)*
      Both must exist (`count >= 2`).
   3. **Record** in the commit message whether this was red on the
      Phase-05 build, and the numbers before and after.

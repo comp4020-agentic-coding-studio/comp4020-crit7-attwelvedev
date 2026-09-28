@@ -1236,7 +1236,7 @@ aside.drag-hover-target {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 0.7rem;
-  padding: 0.7rem 0.8rem;
+  padding: 0.55rem 0.8rem;
 }
 
 /* Without this, Chrome commits a touch that starts on a card to native
@@ -1331,6 +1331,7 @@ fieldset[aria-busy="true"] {
   padding: 0;
   background: none;
   font: inherit;
+  line-height: 1.3;
   font-weight: 400;
   color: var(--ink);
   text-align: start;
@@ -1624,6 +1625,10 @@ button.badge-verify:focus-visible {
   margin: 0.35rem 0 0;
 }
 
+.course-card-allocation {
+  font-size: 0.8rem;
+}
+
 /* Reads as the card's footer text, like .course-card-title reads as its
    title: the underline on hover and focus is what says it's a link to the
    group. The border reset repeats on :hover for the same reason. */
@@ -1636,7 +1641,7 @@ button.course-card-allocation {
   padding: 0;
   background: none;
   font: inherit;
-  font-size: 0.85em;
+  font-size: 0.8rem;
   color: var(--unigrey);
   text-align: start;
   cursor: pointer;
