@@ -1,7 +1,7 @@
 import { globSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseRequisites } from "../domain/requisites";
-import { fromPandc, isUndergrad, type PandcCourseJson } from "./from-pandc";
+import { extrasFromPandc, fromPandc, isUndergrad, type PandcCourseJson } from "./from-pandc";
 
 function loadCourse(code: string): PandcCourseJson {
   return JSON.parse(readFileSync(`data/2027/courses/${code}.json`, "utf-8"));
@@ -55,5 +55,47 @@ describe("fromPandc", () => {
       const course = fromPandc(JSON.parse(readFileSync(file, "utf-8")), null, parseRequisites);
       expect(course.requisites.incompatible, course.code).not.toContain(course.code);
     }
+  });
+});
+
+describe("extrasFromPandc", () => {
+  it("carries learning outcomes, assessment and co-taught codes", () => {
+    const extras = extrasFromPandc(loadCourse("COMP2100"));
+    expect(extras.learningOutcomes).toHaveLength(6);
+    expect(extras.learningOutcomes[0]).toBe("Apply object-oriented programming concepts for medium-scale software projects");
+    expect(extras.assessment).toEqual([
+      { task: "Assignments", weight: "30" },
+      { task: "Labs and Video Assignments", weight: "25" },
+      { task: "Final Exam", weight: "45" },
+    ]);
+    expect(extras.cotaught).toEqual(["COMP6442"]);
+  });
+
+  it("keeps every class with its mode and class number", () => {
+    const json = loadCourse("COMP2100");
+    const extras = extrasFromPandc(json);
+    expect(extras.classes[0]).toEqual({ year: 2027, session: "First Semester", mode: "In Person", classNumber: "5103" });
+    expect(extras.classes).toHaveLength(json.offerings.length);
+  });
+
+  it("defaults missing fields", () => {
+    const json = {
+      ...loadCourse("COMP2100"),
+      learning_outcomes: undefined,
+      assessment: undefined,
+      cotaught: undefined,
+      offerings: [{ year: "2027", semester: "First Semester", mode: "Online" }],
+    };
+    expect(extrasFromPandc(json)).toEqual({
+      learningOutcomes: [],
+      assessment: [],
+      cotaught: [],
+      classes: [{ year: 2027, session: "First Semester", mode: "Online", classNumber: null }],
+    });
+  });
+
+  it("drops the course's own code from co-taught", () => {
+    const json = { ...loadCourse("COMP2100"), cotaught: ["COMP2100", "COMP6442"] };
+    expect(extrasFromPandc(json).cotaught).toEqual(["COMP6442"]);
   });
 });

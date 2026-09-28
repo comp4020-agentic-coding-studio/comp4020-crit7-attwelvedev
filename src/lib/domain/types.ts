@@ -22,6 +22,17 @@ export interface CatalogueCourse {
   twoSemester: boolean; isTdp: boolean; isStub: boolean; scrapedAt: string;
 }
 export interface Catalogue { courses: Map<string, CatalogueCourse>; horizonYear: number }
+// Details-only facts from the P&C scrape, kept out of CatalogueCourse so
+// plan views never carry them (WR1). One ClassOffering per P&C class, so a
+// session can repeat (topics) and a class number can be missing.
+export interface AssessmentItem { task: string; weight: string }
+export interface ClassOffering { year: number; session: string; mode: string; classNumber: string | null }
+export interface CourseExtras {
+  learningOutcomes: string[];
+  assessment: AssessmentItem[];
+  cotaught: string[];
+  classes: ClassOffering[];
+}
 export type OfferingStatus = "offered" | "not-offered" | "projected" | "unknown";
 export interface Placement { code: string; term: number; pinnedGroupId: string | null }
 export type CheckAnswer = "met" | "not-met";

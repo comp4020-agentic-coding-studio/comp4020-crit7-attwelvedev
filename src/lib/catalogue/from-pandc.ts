@@ -1,4 +1,4 @@
-import type { CatalogueCourse, Offering, ParsedRequisites } from "../domain/types";
+import type { CatalogueCourse, CourseExtras, Offering, ParsedRequisites } from "../domain/types";
 
 export interface PandcCourseJson {
   code: string;
@@ -11,7 +11,10 @@ export interface PandcCourseJson {
   requisite_raw: string;
   description: string;
   scraped_at: string;
-  offerings: { year: string; semester: string; mode: string }[];
+  offerings: { year: string; semester: string; mode: string; class_number?: string | null }[];
+  learning_outcomes?: string[];
+  assessment?: { task: string; weight: string }[];
+  cotaught?: string[];
 }
 
 const TWO_SEMESTER_PATTERN = /completed twice,? in consecutive semesters/i;
@@ -63,5 +66,21 @@ export function fromPandc(
     isTdp: tdpCourses?.includes(json.code) ?? false,
     isStub: false,
     scrapedAt: json.scraped_at,
+  };
+}
+
+// Unlike fromPandc's offerings, classes aren't deduplicated by session:
+// Details lists every class P&C does, each with its own mode and number.
+export function extrasFromPandc(json: PandcCourseJson): CourseExtras {
+  return {
+    learningOutcomes: (json.learning_outcomes ?? []).map((outcome) => outcome.trim()),
+    assessment: (json.assessment ?? []).map((item) => ({ task: item.task.trim(), weight: item.weight.trim() })),
+    cotaught: (json.cotaught ?? []).map((code) => code.trim()).filter((code) => code !== json.code),
+    classes: json.offerings.map((o) => ({
+      year: Number(o.year),
+      session: o.semester.trim(),
+      mode: o.mode.trim(),
+      classNumber: o.class_number?.trim() ?? null,
+    })),
   };
 }

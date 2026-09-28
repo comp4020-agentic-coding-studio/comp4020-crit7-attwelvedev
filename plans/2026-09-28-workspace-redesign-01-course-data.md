@@ -129,7 +129,7 @@ None.
 
 ### Task 1: Parse course extras from P&C JSON (`extrasFromPandc`)
 
-- **Description:** Add the WR1 types and a pure function that pulls them out
+- [x] **Description:** Add the WR1 types and a pure function that pulls them out
   of a `PandcCourseJson`.
 - **Files touched:**
   - `src/lib/domain/types.ts`
