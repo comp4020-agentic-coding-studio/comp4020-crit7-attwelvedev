@@ -694,3 +694,35 @@ count, so I updated its plan to say it now shares the heading row, and
 its existing "header height unchanged within 2px" check is what will
 catch it wrapping in a narrow column. Verified with `pnpm check` (591
 tests) and renders at both marking viewports.
+
+## 2026-09-28 — Turning a highlight that passed every test into a checked rule
+
+Resolved by 1f549b5..9178eaa.
+
+Task 11's plan gave the sidebar highlight `outline-offset: -3px`, drawn
+inside the box so the phone's horizontal strip (a scroller) couldn't clip
+it. Every spec test for the jump passed: the right group was highlighted,
+focused, scrolled into view and cleared. The screenshot of a "What's left"
+jump to a check row showed what those tests couldn't: the gold line sat
+over the row's text, so "not tracked" read as "hot tracked", and the
+nested "Artificial Intelligence — foundations" heading touched it too.
+Top-level sections have padding for an inset outline. Check rows and
+nested groups have none.
+
+The obvious fixes were to leave it for the final human review, or to
+pad the rows. Padding would shift the sidebar's layout everywhere to fix
+something visible for 2 seconds. Instead I asked what the inset was for:
+only the strip's own items get clipped. So the outline sits outside the
+box (+2px, like the timeline card highlight) everywhere except
+`.requirement-group`, where it stays inset. The user ruled on the
+deviation before I changed a value the plan fixed, and I updated the plan
+in place.
+
+A second look at a screenshot wouldn't stop this coming back, so I added
+a spec check for the rule itself. For a highlighted check row, nested
+group and top-level group, the outline's inward reach
+(`max(0, -outline-offset)`) must be at most border plus padding on every
+side. It failed red on exactly the two cases the screenshot showed (a
+3px reach into 0px of room) and passed on the top-level group. After the
+fix it's green, as is `pnpm check` (615 tests), and re-rendered at both
+marking viewports.
