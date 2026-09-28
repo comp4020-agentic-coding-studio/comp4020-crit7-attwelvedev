@@ -275,7 +275,7 @@ through custom properties set by the head script and `Planner` (Task 17):
 | Phase | File | Tasks | Needs | Ends with | Done |
 | --- | --- | --- | --- | --- | --- |
 | 01 | `…-01-course-data.md` | 1–3 | — | `GET /api/courses/COMP2100` returns outcomes, assessment, classes and co-taught; the plan payload is unchanged | [x] |
-| 02 | `…-02-details-sidebar.md` | 4–7 | 01 | Every Details entry point opens one docked sidebar with all WR9 sections; `?course=` SSR works; no `<dialog>` left. **Human review** (Task 7) | [ ] |
+| 02 | `…-02-details-sidebar.md` | 4–7 | 01 | Every Details entry point opens one docked sidebar with all WR9 sections; `?course=` SSR works; no `<dialog>` left. **Human review** (Task 7) | [x] |
 | 03 | `…-03-linked-and-undo.md` | 8–10 | 02 | Linked highlights while a course is open; every move, place and remove offers Undo with knock-on warnings | [ ] |
 | 04 | `…-04-search-palette.md` | 11–12 | 02 | Header search and ⌘K palette with draggable results; inline Search section gone | [ ] |
 | 05 | `…-05-region-restyle.md` | 13–15 | 02 | Regions, glass allowlist check, reordered Requirements, year-grouped timeline. **Human review** (Tasks 13, 15) | [ ] |

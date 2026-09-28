@@ -692,13 +692,13 @@ everywhere (and `answer: null`). The tree is then rendered with
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 4–7 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] No `<dialog` in any planner render
-- [ ] `/plan/example?course=COMP2100` renders the panel on the server
-- [ ] Task 7 human review accepted by the user
-- [ ] Tick Phase 02 in overview §5 and commit
+- [x] Tasks 4–7 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes
+- [x] No `<dialog` in any planner render
+- [x] `/plan/example?course=COMP2100` renders the panel on the server
+- [x] Task 7 human review accepted by the user
+- [x] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
