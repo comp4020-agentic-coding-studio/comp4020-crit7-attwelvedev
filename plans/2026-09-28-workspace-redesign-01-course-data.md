@@ -221,7 +221,7 @@ None.
 
 ### Task 3: `GET /api/courses/{code}` and `courseDetailsView`
 
-- **Description:** Assemble a course's card plus extras. Serve it over HTTP,
+- [x] **Description:** Assemble a course's card plus extras. Serve it over HTTP,
   and make it callable from the plan page for server rendering.
 - **Files touched:**
   - `src/lib/domain/view.ts`

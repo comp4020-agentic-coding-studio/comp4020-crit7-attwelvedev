@@ -4,8 +4,8 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../catalogue/from-
 import { AACOM_2027 } from "../../data/aacom-2027";
 import { EXAMPLE_PLAN } from "../../data/example-plan";
 import { parseRequisites } from "./requisites";
-import type { Catalogue, CatalogueCourse, PlanState } from "./types";
-import { buildPlanView, courseCard } from "./view";
+import type { Catalogue, CatalogueCourse, CourseExtras, PlanState } from "./types";
+import { buildPlanView, courseCard, courseDetailsView } from "./view";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -43,6 +43,61 @@ describe("courseCard", () => {
     const card = courseCard(cat, AACOM_2027, {}, "COMP3630");
     expect(card.hardBlocked[0]).toBeDefined();
     expect(card.offeredLabel).toBe("S1");
+  });
+});
+
+describe("courseDetailsView", () => {
+  const extras: CourseExtras = {
+    learningOutcomes: ["Build things"],
+    assessment: [{ task: "Exam", weight: "100" }],
+    cotaught: ["COMP6442"],
+    classes: [{ year: 2027, session: "First Semester", mode: "In Person", classNumber: "5103" }],
+  };
+
+  it("returns the course's card, scrape time and extras for a catalogue code", () => {
+    expect(courseDetailsView(cat, AACOM_2027, {}, "COMP2100", extras)).toEqual({
+      course: courseCard(cat, AACOM_2027, {}, "COMP2100"),
+      scrapedAt: cat.courses.get("COMP2100")!.scrapedAt,
+      extras,
+    });
+  });
+
+  it("returns null for a code not in the catalogue", () => {
+    expect(courseDetailsView(cat, AACOM_2027, {}, "ZZZZ9999", extras)).toBeNull();
+  });
+
+  it("passes extras: null through unchanged", () => {
+    expect(courseDetailsView(cat, AACOM_2027, {}, "COMP2100", null)?.extras).toBeNull();
+  });
+});
+
+// The details sidebar fetches extras per course, so plan views mustn't grow
+// to carry them (NFR payload): pin CourseCard's key set.
+describe("buildPlanView's CourseCards gain no extras fields", () => {
+  it("COMP2100's card has exactly the CourseCard keys", () => {
+    const card = buildPlanView(cat, AACOM_2027, EXAMPLE_PLAN).courses.COMP2100;
+    expect(Object.keys(card).sort()).toEqual(
+      [
+        "code",
+        "title",
+        "units",
+        "level",
+        "description",
+        "url",
+        "twoSemester",
+        "isStub",
+        "offeredLabel",
+        "offeringUnknown",
+        "verify",
+        "otherPrograms",
+        "incompatible",
+        "requisiteRaw",
+        "prereq",
+        "hardBlocked",
+        "projectedTerms",
+        "eligibleGroups",
+      ].sort(),
+    );
   });
 });
 

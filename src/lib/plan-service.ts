@@ -1,13 +1,14 @@
 import { db } from "./db";
 import { activeEligibleLeaves } from "./domain/allocation";
 import { createFeasibility } from "./domain/feasibility";
-import { buildPlanView, type PlanView } from "./domain/view";
+import { buildPlanView, courseDetailsView, type CourseDetailsView, type PlanView } from "./domain/view";
 import { TERMS } from "./domain/terms";
 import type { Catalogue, CheckAnswer, GroupDef } from "./domain/types";
 import {
   deletePlacement,
   getPlan,
   loadCatalogue,
+  loadCourseExtras,
   loadProgram,
   setCheck as repoSetCheck,
   setChoice as repoSetChoice,
@@ -34,6 +35,13 @@ export function getView(planId: string): PlanView | null {
   const plan = getPlan(db, planId);
   if (!plan) return null;
   return buildPlanView(loadCatalogue(db), loadProgram(db), plan);
+}
+
+// For the details sidebar, over HTTP and when the plan page server-renders
+// ?course=. Catalogue courses only: an unknown code is null, never fetched.
+export function getCourseDetails(code: string, planId?: string | null): CourseDetailsView | null {
+  const choices = (planId ? getPlan(db, planId)?.choices : undefined) ?? {};
+  return courseDetailsView(loadCatalogue(db), loadProgram(db), choices, code, loadCourseExtras(db, code));
 }
 
 export function placeCourse(planId: string, code: string, term: number): ServiceResult {

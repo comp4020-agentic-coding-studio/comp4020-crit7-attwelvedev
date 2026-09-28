@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, inject, it } from "vitest";
 
 // Follows the starter's HTTP test conventions (spec/guestbook.test.ts, now
@@ -384,5 +385,51 @@ describe("planner", () => {
     for (const course of body.courses) {
       expect(course.title.toLowerCase()).toContain("software");
     }
+  });
+});
+
+describe("course details endpoint", () => {
+  type Details = {
+    course: { code: string };
+    scrapedAt: string;
+    extras: { learningOutcomes: string[]; cotaught: string[]; classes: { classNumber: string | null }[] } | null;
+  };
+
+  function expectComp2100(body: Details): void {
+    expect(body.course.code).toBe("COMP2100");
+    expect(body.extras?.learningOutcomes).toHaveLength(6);
+    expect(body.extras?.classes[0].classNumber).toBe("5103");
+    expect(body.extras?.cotaught).toContain("COMP6442");
+    expect(typeof body.scrapedAt).toBe("string");
+    expect(body.scrapedAt.length).toBeGreaterThan(0);
+  }
+
+  it("GET /api/courses/COMP2100 returns its card, scrape time and extras", async () => {
+    const res = await fetch(new URL("/api/courses/COMP2100", baseUrl));
+    expect(res.status).toBe(200);
+    expectComp2100((await res.json()) as Details);
+  });
+
+  it("accepts ?plan= with the same shape", async () => {
+    const res = await fetch(new URL("/api/courses/COMP2100?plan=example", baseUrl));
+    expect(res.status).toBe(200);
+    expectComp2100((await res.json()) as Details);
+  });
+
+  it("rejects a malformed code with 400", async () => {
+    const res = await fetch(new URL("/api/courses/comp2100x", baseUrl));
+    expect(res.status).toBe(400);
+    expect(typeof ((await res.json()) as { error: string }).error).toBe("string");
+  });
+
+  // Details never live-fetches (overview §4.3): an unknown code is a fast
+  // 404, and the route doesn't even import the P&C fetcher.
+  it("answers an unknown code with a fast 404 and no P&C fetch", async () => {
+    const start = performance.now();
+    const res = await fetch(new URL("/api/courses/ZZZZ9999", baseUrl));
+    expect(performance.now() - start).toBeLessThan(1000);
+    expect(res.status).toBe(404);
+    expect(typeof ((await res.json()) as { error: string }).error).toBe("string");
+    expect(readFileSync("src/pages/api/courses/[code].ts", "utf8")).not.toContain("fetchCourseFromPandc");
   });
 });

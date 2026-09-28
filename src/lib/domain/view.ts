@@ -6,6 +6,7 @@ import { offeredLabel, offeringStatus, TERMS } from "./terms";
 import type {
   Catalogue,
   CatalogueCourse,
+  CourseExtras,
   Family,
   GroupDef,
   GroupKind,
@@ -170,6 +171,25 @@ export function courseCard(
   code: string,
 ): CourseCard {
   return buildCard(cat, program, choices, code, createFeasibility(cat), tdpSetOf(program));
+}
+
+export interface CourseDetailsView {
+  course: CourseCard;
+  scrapedAt: string; // ISO timestamp from the scrape (or live fetch)
+  extras: CourseExtras | null; // null for live-fetched stubs (WR3)
+}
+
+// Served one course at a time (GET /api/courses/{code}) so the extras never
+// ride along in a PlanView.
+export function courseDetailsView(
+  cat: Catalogue,
+  program: ProgramDef,
+  choices: Record<string, string>,
+  code: string,
+  extras: CourseExtras | null,
+): CourseDetailsView | null {
+  if (!cat.courses.has(code)) return null;
+  return { course: courseCard(cat, program, choices, code), scrapedAt: cat.courses.get(code)!.scrapedAt, extras };
 }
 
 function buildCheckView(

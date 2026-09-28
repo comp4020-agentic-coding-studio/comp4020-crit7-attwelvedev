@@ -1,5 +1,5 @@
 import type { CheckAnswer } from "../lib/domain/types";
-import type { CourseCard, PlanView } from "../lib/domain/view";
+import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
 
 export type ApiResult = PlanView | { error: string };
 
@@ -55,4 +55,13 @@ export async function searchCourses(q: string, planId?: string): Promise<SearchR
   if (planId) params.set("plan", planId);
   const res = await fetch(`/api/courses/search?${params.toString()}`);
   return (await res.json()) as SearchResult;
+}
+
+export async function fetchCourseDetails(code: string, planId?: string): Promise<CourseDetailsView | { error: string }> {
+  const params = new URLSearchParams();
+  if (planId) params.set("plan", planId);
+  const res = await fetch(`/api/courses/${encodeURIComponent(code)}?${params.toString()}`);
+  const body = (await res.json()) as CourseDetailsView | { error: string };
+  if (!res.ok) return { error: "error" in body ? body.error : "Request failed" };
+  return body;
 }
