@@ -124,6 +124,15 @@ describe("planner", () => {
     expect(html).toContain('data-cutoff="3"');
   });
 
+  it("a course straddling the cutoff counts its first semester as completed", async () => {
+    const id = await createPlan();
+    expect((await postJson(`/api/plans/${id}/placements`, { code: "COMP4550", term: 4 })).status).toBe(200);
+    expect((await postJson(`/api/plans/${id}/placements`, { code: "COMP4620", term: 7 })).status).toBe(200);
+    const res = await putJson(`/api/plans/${id}/cutoff`, { cutoff: 5 });
+    const view = await res.json();
+    expect(view.total).toEqual({ required: 192, completed: 12, planned: 18 });
+  });
+
   it("cutoff 9 returns 400", async () => {
     const id = await createPlan();
     const res = await putJson(`/api/plans/${id}/cutoff`, { cutoff: 9 });

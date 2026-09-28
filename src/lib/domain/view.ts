@@ -102,6 +102,14 @@ function totalUnitsOf(course: CatalogueCourse): number {
   return course.twoSemester ? course.units * 2 : course.units;
 }
 
+// Each part of a two-semester course is completed or planned by its own
+// term, so a course straddling the cutoff counts one semester's units on
+// each side rather than all of them as planned.
+function unitsSplit(course: CatalogueCourse, placement: PlacementEval): { completed: number; planned: number } {
+  const completed = course.units * placement.completedParts;
+  return { completed, planned: totalUnitsOf(course) - completed };
+}
+
 function tdpSetOf(program: ProgramDef): Set<string> | null {
   return program.tdpCourses ? new Set(program.tdpCourses) : null;
 }
@@ -176,9 +184,9 @@ function buildCheckView(
     const course = cat.courses.get(placement.code);
     if (!course) continue;
     if (!matchesFilter(course, check.filter, tdp)) continue;
-    const units = totalUnitsOf(course);
-    if (placement.completed) completed += units;
-    else planned += units;
+    const split = unitsSplit(course, placement);
+    completed += split.completed;
+    planned += split.planned;
   }
 
   let ok: boolean | null;
@@ -294,10 +302,10 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
     if (!leaf) continue;
     const course = cat.courses.get(placement.code);
     if (!course) continue;
-    const units = totalUnitsOf(course);
+    const split = unitsSplit(course, placement);
     const bucket = leafTotals.get(leaf) ?? { completed: 0, planned: 0 };
-    if (placement.completed) bucket.completed += units;
-    else bucket.planned += units;
+    bucket.completed += split.completed;
+    bucket.planned += split.planned;
     leafTotals.set(leaf, bucket);
     const codes = leafCourses.get(leaf) ?? new Set<string>();
     codes.add(placement.code);
@@ -371,9 +379,9 @@ export function buildPlanView(cat: Catalogue, program: ProgramDef, plan: PlanSta
   for (const placement of nonLoserEvals) {
     const course = cat.courses.get(placement.code);
     if (!course) continue;
-    const units = totalUnitsOf(course);
-    if (placement.completed) totalCompleted += units;
-    else totalPlanned += units;
+    const split = unitsSplit(course, placement);
+    totalCompleted += split.completed;
+    totalPlanned += split.planned;
   }
 
   return {

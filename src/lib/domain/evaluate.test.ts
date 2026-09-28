@@ -200,6 +200,18 @@ describe("evaluatePlan (real 2027 catalogue)", () => {
     expect(result.termUnits[6]).toBe(12);
     expect(result.termUnits[7]).toBe(12);
   });
+
+  it("counts each part before the cutoff as completed", () => {
+    const at = (cutoff: number) => evaluatePlan(cat, feas, plan([{ code: "COMP4550", term: 4 }], cutoff)).placements[0]!;
+    expect(at(4).completedParts).toBe(0);
+    expect(at(5).completedParts).toBe(1);
+    expect(at(5).completed).toBe(false);
+    expect(at(6).completedParts).toBe(2);
+    expect(at(6).completed).toBe(true);
+
+    const single = evaluatePlan(cat, feas, plan([{ code: "COMP1100", term: 0 }], 1)).placements[0]!;
+    expect(single.completedParts).toBe(1);
+  });
 });
 
 describe("evaluatePlan (synthetic catalogues)", () => {

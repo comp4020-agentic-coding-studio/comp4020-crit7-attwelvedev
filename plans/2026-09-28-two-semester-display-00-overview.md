@@ -226,7 +226,7 @@ export function partTwoPlacements(view: PlanView, term: number): PlacementView[]
 
 | Phase | File | Tasks | Needs | Ends with | Done |
 | --- | --- | --- | --- | --- | --- |
-| 01 | `…-01-domain.md` | 1–2 | — | `termSpanLabel`; suggestions show ranges; `completedParts` and per-part progress split, checked through the API | [ ] |
+| 01 | `…-01-domain.md` | 1–2 | — | `termSpanLabel`; suggestions show ranges; `completedParts` and per-part progress split, checked through the API | [x] |
 | 02 | `…-02-labels.md` | 3–4 | 01 | Menus show ranges; sidebar rows show range/straddle status | [ ] |
 | 03 | `…-03-timeline.md` | 5–8 | 01, 02 | Part 1 marker, part 2 stub, linked locate/recede/drag outline, overlay out-edges from part 2 | [ ] |
 | 04 | `…-04-help-and-review.md` | 9–10 | 01–03 | Help text; **human review** of both viewports; feature done | [ ] |

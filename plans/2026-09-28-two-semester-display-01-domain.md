@@ -185,7 +185,7 @@ None.
 
 ### Task 2: Per-part completion (`completedParts`) and the per-part progress split
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `completedParts: number` to `PlacementEval`, set on all three
     return paths.
   - Make the three accumulations in `view.ts` split units per part through
@@ -243,11 +243,11 @@ None.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 1–2 complete, their tests pass, and each is committed
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] The spec straddle test shows `completed: 12, planned: 18` through the API
-- [ ] Tick Phase 01 in overview §5 and commit
+- [x] Tasks 1–2 complete, their tests pass, and each is committed
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] The spec straddle test shows `completed: 12, planned: 18` through the API
+- [x] Tick Phase 01 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

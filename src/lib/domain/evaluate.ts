@@ -49,6 +49,9 @@ export interface PlacementEval {
   conflictWith: string[];
   loser: boolean;
   completed: boolean;
+  // How many of the occupied terms fall before the cutoff — 0, 1 or 2 — so
+  // progress can count a straddling two-semester course's first half as done.
+  completedParts: number;
   placedPrereqs: string[];
   // The fewest more courses that would have to be placed to meet the
   // requisite (0 unless "soft"): an OR costs its cheapest branch, an AND the
@@ -248,6 +251,7 @@ export function evaluatePlan(
     const span = spanOf(p.code);
     const lastTerm = lastTermOf(p);
     const completed = lastTerm < plan.cutoff;
+    const completedParts = Math.max(0, Math.min(span, plan.cutoff - p.term));
 
     // FR 10: only answers to the course's current items count — one left
     // over from older wording is never shown and reads as unanswered.
@@ -279,6 +283,7 @@ export function evaluatePlan(
         conflictWith: conflicts,
         loser,
         completed,
+        completedParts,
         placedPrereqs,
         prereqsToPlace: 0,
         requisiteStatus: null,
@@ -305,6 +310,7 @@ export function evaluatePlan(
         conflictWith: conflicts,
         loser,
         completed,
+        completedParts,
         placedPrereqs,
         prereqsToPlace: 0,
         requisiteStatus,
@@ -341,6 +347,7 @@ export function evaluatePlan(
       conflictWith: conflicts,
       loser,
       completed,
+      completedParts,
       placedPrereqs,
       prereqsToPlace: coursesToPlace(requisiteStatus!, placedByCode),
       requisiteStatus,

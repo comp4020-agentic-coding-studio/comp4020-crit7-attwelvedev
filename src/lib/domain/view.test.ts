@@ -105,6 +105,32 @@ describe("buildPlanView (example plan)", () => {
   });
 });
 
+describe("buildPlanView (straddling two-semester course)", () => {
+  // COMP4550 spans S1 2029 – S2 2029; cutoff 5 completes only its first part.
+  const view = buildPlanView(cat, AACOM_2027, {
+    ...emptyPlan(),
+    cutoff: 5,
+    choices: { capstone: "cap-research" },
+    placements: [{ code: "COMP4550", term: 4, pinnedGroupId: null }],
+  });
+
+  it("the total counts one semester's units as completed", () => {
+    expect(view.total).toEqual({ required: 192, completed: 12, planned: 12 });
+  });
+
+  it("its group splits the same way", () => {
+    const group = findGroup(view.groups, "cap-research")!;
+    expect(group.completed).toBe(12);
+    expect(group.planned).toBe(12);
+  });
+
+  it("a program check splits the same way", () => {
+    const check = view.checks.find((c) => c.id === "comp4000-min")!;
+    expect(check.completed).toBe(12);
+    expect(check.planned).toBe(12);
+  });
+});
+
 describe("buildPlanView (empty plan)", () => {
   const view = buildPlanView(cat, AACOM_2027, emptyPlan());
 
