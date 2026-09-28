@@ -6,6 +6,7 @@ import type {
   Catalogue,
   CatalogueCourse,
   CheckAnswer,
+  CourseExtras,
   CourseFilter,
   GroupDef,
   Offering,
@@ -16,6 +17,7 @@ import type {
   ProgramDef,
 } from "./domain/types";
 import {
+  courseExtras,
   courseOfferings,
   courseRequisites,
   courses,
@@ -339,6 +341,20 @@ export function upsertFetchedCourse(db: Db, c: CatalogueCourse): void {
       notes: JSON.stringify({ unverifiable: [], otherPrograms: [] }),
     })
     .run();
+}
+
+// One course's details-only facts, read on demand for the details sidebar
+// rather than through loadCatalogue. null when there's no row: an unknown
+// code, or a live-fetched stub (WR3).
+export function loadCourseExtras(db: Db, code: string): CourseExtras | null {
+  const row = db.select().from(courseExtras).where(eq(courseExtras.courseCode, code)).get();
+  if (!row) return null;
+  return {
+    learningOutcomes: JSON.parse(row.learningOutcomes),
+    assessment: JSON.parse(row.assessment),
+    cotaught: JSON.parse(row.cotaught),
+    classes: JSON.parse(row.classes),
+  };
 }
 
 // DB matches only (FR10): code prefix or title substring. The catalogue Map

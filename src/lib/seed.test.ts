@@ -6,10 +6,10 @@ import { readdirSync, readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { AACOM_2027 } from "../data/aacom-2027";
 import { EXAMPLE_PLAN } from "../data/example-plan";
-import type { PandcCourseJson } from "./catalogue/from-pandc";
+import { extrasFromPandc, fromPandc, type PandcCourseJson } from "./catalogue/from-pandc";
 import type { GroupDef, ProgramDef } from "./domain/types";
-import { getPlan, loadCatalogue, loadProgram, type Db } from "./repo";
-import { courses, planCourses, plans, requirementGroups } from "./schema";
+import { getPlan, loadCatalogue, loadCourseExtras, loadProgram, upsertFetchedCourse, type Db } from "./repo";
+import { courseExtras, courses, planCourses, plans, requirementGroups } from "./schema";
 import { seedReferenceData, type SeedInput } from "./seed";
 
 function loadCourseFixtures(): PandcCourseJson[] {
@@ -120,5 +120,28 @@ describe("seedReferenceData", () => {
   it("horizonYear is 2028", () => {
     seedReferenceData(db, input);
     expect(loadCatalogue(db).horizonYear).toBe(2028);
+  });
+
+  it("seeds course extras for every catalogue course", () => {
+    seedReferenceData(db, input);
+    const json = input.courses.find((course) => course.code === "COMP2100")!;
+    expect(loadCourseExtras(db, "COMP2100")).toEqual(extrasFromPandc(json));
+  });
+
+  it("reseeding replaces extras rather than duplicating", () => {
+    seedReferenceData(db, input);
+    const first = loadCourseExtras(db, "COMP2100");
+    seedReferenceData(db, input);
+    expect(db.select().from(courseExtras).where(eq(courseExtras.courseCode, "COMP2100")).all()).toHaveLength(1);
+    expect(loadCourseExtras(db, "COMP2100")).toEqual(first);
+  });
+
+  it("returns null for an unknown or stub course", () => {
+    seedReferenceData(db, input);
+    expect(loadCourseExtras(db, "ZZZZ9999")).toBeNull();
+
+    const stub = { ...fromPandc({ ...input.courses.find((course) => course.code === "COMP2100")!, code: "ABCD1234" }, null), isStub: true };
+    upsertFetchedCourse(db, stub);
+    expect(loadCourseExtras(db, stub.code)).toBeNull();
   });
 });

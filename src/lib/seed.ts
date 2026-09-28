@@ -1,7 +1,8 @@
-import { emptyParse, fromPandc, isUndergrad, type PandcCourseJson } from "./catalogue/from-pandc";
+import { emptyParse, extrasFromPandc, fromPandc, isUndergrad, type PandcCourseJson } from "./catalogue/from-pandc";
 import type { GroupDef, ParsedRequisites, PlanState, ProgramDef } from "./domain/types";
 import { invalidateCatalogue, type Db } from "./repo";
 import {
+  courseExtras,
   courseOfferings,
   courseRequisites,
   courses,
@@ -186,6 +187,18 @@ function seedCourses(db: Db, jsonCourses: PandcCourseJson[], tdpCourses: string[
         expression: JSON.stringify(course.requisites.incompatible),
         rawText: json.incompatibilities,
         notes: JSON.stringify({ unverifiable: [], otherPrograms: [] }),
+      })
+      .run();
+
+    const extras = extrasFromPandc(json);
+    db.delete(courseExtras).where(eq(courseExtras.courseCode, course.code)).run();
+    db.insert(courseExtras)
+      .values({
+        courseCode: course.code,
+        learningOutcomes: JSON.stringify(extras.learningOutcomes),
+        assessment: JSON.stringify(extras.assessment),
+        cotaught: JSON.stringify(extras.cotaught),
+        classes: JSON.stringify(extras.classes),
       })
       .run();
   }

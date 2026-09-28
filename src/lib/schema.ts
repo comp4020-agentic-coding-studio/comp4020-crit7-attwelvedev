@@ -88,6 +88,18 @@ export const courseRequisites = sqliteTable(
   (table) => [primaryKey({ columns: [table.courseCode, table.reqType] })],
 );
 
+// Details-only facts (CourseExtras), read one course at a time and never by
+// loadCatalogue, so plan views don't pay for them. Classes live here rather
+// than in course_offerings because a class can lack a number and a session
+// can hold several (topics). Live-fetched stubs never get a row.
+export const courseExtras = sqliteTable("course_extras", {
+  courseCode: text("course_code").primaryKey(),
+  learningOutcomes: text("learning_outcomes").notNull(), // JSON string[]
+  assessment: text().notNull(), // JSON AssessmentItem[]
+  cotaught: text().notNull(), // JSON string[]
+  classes: text().notNull(), // JSON ClassOffering[]
+});
+
 export const plans = sqliteTable("plans", {
   id: text().primaryKey(),
   programCode: text("program_code").notNull(),

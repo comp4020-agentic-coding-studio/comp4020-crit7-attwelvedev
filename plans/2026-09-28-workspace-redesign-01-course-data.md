@@ -174,7 +174,7 @@ None.
 
 ### Task 2: Store and load course extras (`course_extras` table, seed, `loadCourseExtras`)
 
-- **Description:** Persist the extras for every seeded course and read them
+- [x] **Description:** Persist the extras for every seeded course and read them
   back per course.
 - **Files touched:**
   - `src/lib/schema.ts`
