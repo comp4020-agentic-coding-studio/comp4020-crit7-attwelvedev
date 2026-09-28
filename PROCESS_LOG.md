@@ -792,3 +792,38 @@ render then showed something the tests didn't: on a short page the chip
 floated over the sticky timeline. I added a check for that
 (`elementFromPoint` at the chip's centre must belong to the timeline),
 watched it fail, then fixed the z-index.
+
+## 2026-09-28 — Re-setting the phone height budget from a measurement, not a lever
+
+Resolved by 215e7a0.
+
+E10 promised shorter cards and backed it with a `spec/` budget. On the
+phone that meant the first card fully in the timeline pane, plus at least
+half the second. The plan set five spacing levers, each with a floor, and
+said: if a budget still fails at the floors, stop and ask. Don't clamp
+text or reach for another rule.
+
+I applied the levers one at a time, rebuilding and re-measuring after
+each. Two of them did nothing, and I checked why before counting them
+spent. The "Counts toward" font lever lost on specificity:
+`button.course-card-allocation` set its own 0.85em, and every example
+card uses the button. So the lever had to cover both rules. The badge
+margin lever couldn't work: the only badge on those cards is visually
+hidden and out of flow. With all five at their floors, the phone still
+showed 46.0px of the second card against the 55.0px it needed.
+
+The obvious move was another lever, such as footer line-height. Worked
+through, that missed by 0.04px. A budget that passes on rounding is no
+budget. The measurement showed where the height was: COMP1130's title
+and its "Counts toward" each wrap to three lines, and no rule is allowed
+to shorten text. So the target itself was wrong. I proposed a different
+one: the second card's code line is visible, so a student can see
+another course follows. The user accepted it, and I recorded it in the
+plan as ruling 6 before changing the test.
+
+How I knew it was right: the desktop median test was red at 159.4px and
+went green at 149.0px, with only three levers kept (the smallest passing
+set). The committed spec prints the sorted heights and the pane
+geometry on failure, so a future regression shows its numbers. I also
+had to correct my own report. I had written "149.9" for a desktop run I
+never saw, and I re-measured before committing.
