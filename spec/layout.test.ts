@@ -2976,4 +2976,35 @@ describe("progress bars", { timeout: 30_000 }, () => {
       for (const bar of found) expect(bar.now, `${bar.label}: ${bar.now} > ${bar.max}`).toBeLessThanOrEqual(bar.max);
     });
   });
+
+  // "example" is the seeded plan; each other value is a fresh plan with that
+  // specialisation chosen, so every cap-only group is rendered at least once.
+  it.each(["example", "arin", "hccc", "syar", "thcs"])("no bar is measured against nothing (%s)", async (choice) => {
+    let id = "example";
+    if (choice !== "example") {
+      const created = await fetch(new URL("/api/plans", baseUrl), {
+        method: "POST",
+        headers: { origin: baseUrl },
+        redirect: "manual",
+      });
+      id = created.headers.get("location")!.split("/").pop()!;
+      const chosen = await fetch(new URL(`/api/plans/${id}/choices`, baseUrl), {
+        method: "PUT",
+        headers: { origin: baseUrl, "content-type": "application/json" },
+        body: JSON.stringify({ groupId: "spec", childId: choice }),
+      });
+      expect(chosen.status).toBe(200);
+    }
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      const found = await bars(page);
+      expect(found.length).toBeGreaterThan(0);
+      for (const bar of found) {
+        expect(bar.max > 0 || bar.now === 0, `${bar.label}: ${bar.now} of ${bar.max}`).toBe(true);
+        expect(bar.text, bar.label ?? "").not.toMatch(/of 0$/);
+      }
+    } finally {
+      await page.close();
+    }
+  });
 });

@@ -4,13 +4,14 @@ import { AACOM_2027 } from "../data/aacom-2027";
 import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/from-pandc";
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
-import { buildPlanView } from "../lib/domain/view";
+import { buildPlanView, type GroupView } from "../lib/domain/view";
 import {
   completedReadout,
   dropTargets,
   FAMILY_LABELS,
   FAMILY_ORDER,
   familyOf,
+  groupBarTarget,
   groupLeafIds,
   groupPath,
   menuTargets,
@@ -128,6 +129,34 @@ describe("progressBarNumbers", () => {
 
   it("uses the singular for one unit over", () => {
     expect(progressBarNumbers(0, 61, 60, "max").text).toMatch(/— 1 unit over the 60-unit limit$/);
+  });
+});
+
+describe("groupBarTarget", () => {
+  it("measures a cap-only group toward its cap", () => {
+    expect(groupBarTarget({ unitsRequired: 0, unitsMax: 12 })).toEqual({ required: 12, bound: "max" });
+  });
+
+  it("measures a minimum-only group toward its minimum", () => {
+    expect(groupBarTarget({ unitsRequired: 6, unitsMax: null })).toEqual({ required: 6, bound: "min" });
+  });
+
+  it("measures a group with both toward its minimum", () => {
+    expect(groupBarTarget({ unitsRequired: 24, unitsMax: 24 })).toEqual({ required: 24, bound: "min" });
+  });
+
+  it.each(["arin", "hccc", "syar", "thcs"])("gives every group a non-zero target with %s chosen", (choice) => {
+    const view = buildPlanView(cat, AACOM_2027, { ...emptyPlan(), choices: { spec: choice } });
+    let visited = 0;
+    const walk = (groups: GroupView[]) => {
+      for (const group of groups) {
+        visited++;
+        expect(groupBarTarget(group).required, group.id).toBeGreaterThan(0);
+        walk(group.children);
+      }
+    };
+    walk(view.groups);
+    expect(visited).toBeGreaterThan(0);
   });
 });
 

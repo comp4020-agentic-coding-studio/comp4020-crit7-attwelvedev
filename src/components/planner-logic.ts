@@ -87,6 +87,15 @@ export function progressBarNumbers(
   };
 }
 
+// A cap-only group ("(max 12)", unitsRequired 0) has nothing to reach, only
+// a limit, so its bar measures toward the cap rather than against 0.
+export function groupBarTarget(
+  group: Pick<GroupView, "unitsRequired" | "unitsMax">,
+): { required: number; bound: "min" | "max" } {
+  if (group.unitsRequired === 0 && group.unitsMax !== null) return { required: group.unitsMax, bound: "max" };
+  return { required: group.unitsRequired, bound: "min" };
+}
+
 // "required": a course named outright on an all-AND path — the dependent
 // can't be taken without it. "option": one of several ways through — an OR
 // branch, or a course counting toward an "N units of ..." pool — where

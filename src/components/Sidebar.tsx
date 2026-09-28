@@ -4,7 +4,7 @@ import AvailableCourseCard from "./AvailableCourseCard";
 import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import PlacedCourseRow from "./PlacedCourseRow";
-import { groupPath, outstandingItems, outstandingTarget, progressSegments } from "./planner-logic";
+import { groupBarTarget, groupPath, outstandingItems, outstandingTarget, progressSegments } from "./planner-logic";
 import ProgressBar from "./ProgressBar";
 import SidebarSection from "./SidebarSection";
 
@@ -134,12 +134,14 @@ function Group({
   const placed = courses.filter((c) => placedByCode.has(c));
   const columns = Math.min(unplaced.length, MAX_COLUMNS) || 1;
 
+  const target = groupBarTarget(group);
   const progress = (
     <ProgressBar
       label={group.label}
       completed={group.completed}
       planned={group.planned}
-      required={group.unitsRequired}
+      required={target.required}
+      bound={target.bound}
       family={group.family}
     />
   );

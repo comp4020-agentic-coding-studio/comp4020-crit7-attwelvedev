@@ -252,7 +252,7 @@ bar would need to know about groups), and changing the data to
 
 ### Task 2: Cap-only groups measure against their cap
 
-- [ ] **Description:** add `groupBarTarget` and use it at `Sidebar.tsx`'s
+- [x] **Description:** add `groupBarTarget` and use it at `Sidebar.tsx`'s
   `Group` call site, so `arin-a`/`hccc-c`/`syar-a`/`thcs-a` read "C
   completed, P planned of up to N" and fill toward the cap. Extend the
   harness spec with the "of 0" assertion across every specialisation.
@@ -314,18 +314,18 @@ bar would need to know about groups), and changing the data to
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Tasks 1–2 complete, their tests passing
-- [ ] `pnpm exec vitest run --project unit` passes
-- [ ] `pnpm check` passes
-- [ ] Axe clean on `/plan/example` at 1920×1080 (the existing axe spec
+- [x] Tasks 1–2 complete, their tests passing
+- [x] `pnpm exec vitest run --project unit` passes
+- [x] `pnpm check` passes
+- [x] Axe clean on `/plan/example` at 1920×1080 (the existing axe spec
       tests still pass)
-- [ ] Manually, from renders at 1920×1080 and 390×844 on `/plan/example`:
+- [x] Manually, from renders at 1920×1080 and 390×844 on `/plan/example`:
       `arin-a` reads "of up to 12" with a full bar; the 1000-level check
       reads "of up to 60"; "At least 48 units of 4000-level COMP" still
       reads "… of 48 — 12 units more than the 48-unit minimum, already
       covered"
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] No item remains in §8
+- [x] Every requirement in §2 is covered (see §7)
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 
