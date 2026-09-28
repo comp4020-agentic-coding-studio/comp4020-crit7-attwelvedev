@@ -814,6 +814,11 @@ nav[aria-label="site"] .nav-hide:hover {
   margin: 0.6rem 0 0;
 }
 
+/* Separates the checks from the Total bar's text directly above them. */
+section[aria-label="program checks"] > h3 {
+  margin-block-start: 0.9rem;
+}
+
 .group-children,
 .checks-list {
   list-style: none;

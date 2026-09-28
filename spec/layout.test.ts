@@ -41,6 +41,25 @@ async function planWithPlacement(code: string): Promise<string> {
 }
 
 describe("layout", { timeout: 30_000 }, () => {
+  it("the Checks subheading has room above it", async () => {
+    await withPlan({ width: 1920, height: 1080 }, async (page) => {
+      const gap = await page.evaluate(() => {
+        const checks = document.querySelector('section[aria-label="program checks"]')!;
+        const heading = checks.querySelector("h3")!.getBoundingClientRect();
+        // The Total section's own bar text: the nearest one above Checks that isn't a check's.
+        let section = checks.parentElement;
+        let text: Element | null = null;
+        while (section && !text) {
+          text = [...section.querySelectorAll(".progress-bar-text")].find((el) => !checks.contains(el)) ?? null;
+          section = section.parentElement;
+        }
+        return { height: heading.height, gap: heading.top - text!.getBoundingClientRect().bottom };
+      });
+      expect(gap.height).toBeGreaterThan(0);
+      expect(gap.gap).toBeGreaterThanOrEqual(12);
+    });
+  });
+
   it("the plan page doesn't scroll sideways on a phone", async () => {
     const page = await openPage(browser, new URL("/plan/example", baseUrl).href, { width: 390, height: 844 });
     expect(await horizontalOverflow(page)).toBe(0);

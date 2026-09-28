@@ -396,7 +396,7 @@ Task 15's placement depends on it (see above).
 
 ### Task 17: Space above the "Checks" subheading
 
-- [ ] **Description:** give the Total section's "Checks" `h3` top margin.
+- [x] **Description:** give the Total section's "Checks" `h3` top margin.
 - **Files touched:**
   - `src/styles.css`
   - `spec/layout.test.ts`
