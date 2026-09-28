@@ -190,7 +190,7 @@ Task 15's placement depends on it (see above).
 
 ### Task 14: "Completed through" menu replaces the chevrons
 
-- [ ] **Description:**
+- [x] **Description:**
   - Add `cutoffOptions`.
   - Replace the readout span and both chevron buttons with a
     `CompletedMenu` disclosure (read-only: plain text), and `moveCutoff`

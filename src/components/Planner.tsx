@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
 import type { RemovedPlacement } from "./CourseCard";
+import CompletedMenu from "./CompletedMenu";
 import MoreOptions from "./MoreOptions";
 import {
   applyReqsState,
@@ -28,10 +29,11 @@ import { useTouchDrag } from "./touch-drag";
 // (offering to restore a now-stale course) minutes into unrelated work.
 const UNDO_TIMEOUT_MS = 8000;
 
-// The More options panel shares openMenuCode with the course menus, so only
-// one is ever open; course codes (four letters, four digits) never look like
-// this.
+// The More options and completed-semesters panels share openMenuCode with
+// the course menus, so only one is ever open; course codes (four letters,
+// four digits) never look like these.
 const MORE_OPTIONS = "more-options";
+const COMPLETED_MENU = "completed-menu";
 
 interface Props {
   view: PlanView;
@@ -93,9 +95,8 @@ export default function Planner({ view: initialView, title }: Props) {
     if (commit) saveSplit(next.split);
   }
 
-  async function moveCutoff(delta: 1 | -1) {
-    const next = view.plan.cutoff + delta;
-    if (next < 0 || next > 8) return;
+  async function changeCutoff(next: number) {
+    if (next < 0 || next > view.terms.length) return;
     setCutoffPending(true);
     try {
       const result = await setCutoff(view.plan.id, next);
@@ -218,32 +219,22 @@ export default function Planner({ view: initialView, title }: Props) {
         </div>
         <div class="plan-actions">
           <div class="completed-control" aria-busy={cutoffPending}>
-            <span class="completed-readout" aria-hidden="true">
-              {readout.short}
-            </span>
-            <span class="visually-hidden">{readout.full}</span>
-            <button
-              type="button"
-              class="completed-step"
-              aria-label="One fewer semester completed"
-              disabled={readOnly || cutoffPending || view.plan.cutoff <= 0}
-              onClick={() => moveCutoff(-1)}
-            >
-              <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="m15 6-6 6 6 6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              class="completed-step"
-              aria-label="One more semester completed"
-              disabled={readOnly || cutoffPending || view.plan.cutoff >= 8}
-              onClick={() => moveCutoff(1)}
-            >
-              <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="m9 6 6 6-6 6" />
-              </svg>
-            </button>
+            {readOnly ? (
+              <>
+                <span class="completed-readout" aria-hidden="true">
+                  {readout.short}
+                </span>
+                <span class="visually-hidden">{readout.full}</span>
+              </>
+            ) : (
+              <CompletedMenu
+                view={view}
+                open={openMenuCode === COMPLETED_MENU}
+                onOpenChange={(next) => setOpenMenuCode(next ? COMPLETED_MENU : null)}
+                onChoose={(next) => void changeCutoff(next)}
+                pending={cutoffPending}
+              />
+            )}
           </div>
           <MoreOptions
             open={openMenuCode === MORE_OPTIONS}

@@ -555,23 +555,62 @@ nav[aria-label="site"] .nav-hide:hover {
 .completed-control {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
-.completed-readout {
+.completed-readout,
+.completed-toggle {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--ink);
-  margin-inline-end: 0.25rem;
 }
 
-.completed-step {
+/* Positioned like .more-options, so its panel hangs off the toggle's end
+   edge and opens toward the row's start. */
+.completed-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.completed-toggle {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+}
+
+/* Every label in one cell: the toggle takes the widest one's width. */
+.completed-toggle-labels {
+  display: grid;
+  text-align: start;
+}
+
+.completed-toggle-labels > span {
+  grid-area: 1 / 1;
+}
+
+.completed-toggle-labels > span:not([data-current]) {
+  visibility: hidden;
+}
+
+/* Like the Place in… options. The start padding holds the current
+   semester's check, so every label lines up. */
+.completed-panel button {
+  display: flex;
+  align-items: center;
+  border: none;
+  text-align: start;
+  font-weight: 500;
+  padding-inline-start: 1.75rem;
+}
+
+.completed-panel button:hover:not(:disabled) {
+  background: var(--paper);
+}
+
+.completed-check {
+  margin-inline-start: -1.25rem;
+  width: 1.25rem;
 }
 
 .show-links-toggle {
@@ -610,7 +649,8 @@ nav[aria-label="site"] .nav-hide:hover {
   fill: currentColor;
 }
 
-.more-options-panel {
+.more-options-panel,
+.completed-panel {
   position: absolute;
   top: 100%;
   inset-inline-end: 0;
@@ -628,11 +668,13 @@ nav[aria-label="site"] .nav-hide:hover {
   box-shadow: 0 10px 30px -12px rgb(23 24 26 / 0.3);
 }
 
-.more-options-panel[hidden] {
+.more-options-panel[hidden],
+.completed-panel[hidden] {
   display: none;
 }
 
-.more-options-panel > * {
+.more-options-panel > *,
+.completed-panel > * {
   min-height: 2.75rem;
 }
 

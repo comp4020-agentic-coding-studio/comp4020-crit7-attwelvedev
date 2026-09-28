@@ -377,13 +377,23 @@ export function placedStatus(view: PlanView, placement: PlacementView): PlacedSt
   };
 }
 
+// The completed-semesters menu's options: nothing, then each term by label,
+// with the last term as "All semesters" since completing it completes them all.
+export function cutoffOptions(terms: readonly { label: string }[]): { value: number; label: string }[] {
+  return [
+    { value: 0, label: "Nothing yet" },
+    ...terms.map((term, i) => ({ value: i + 1, label: i === terms.length - 1 ? "All semesters" : term.label })),
+  ];
+}
+
 export interface CompletedReadout {
   short: string;
   full: string;
 }
 
-// The short form is the completed-semesters control's visible label; the full
-// sentence is what assistive technology hears, so it also names the gold line.
+// The short form is the completed-semesters menu's visible label (or plain
+// text on a read-only plan); the full sentence is its description, so it also
+// says where planning starts and names the gold line.
 export function completedReadout(cutoff: number, terms: readonly { label: string }[]): CompletedReadout {
   const boundary = " The gold line on the timeline marks that boundary.";
   if (cutoff <= 0) {

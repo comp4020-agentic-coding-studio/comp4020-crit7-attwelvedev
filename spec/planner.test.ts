@@ -284,12 +284,22 @@ describe("planner", () => {
     expect(html).toContain("Drag a course onto a semester, or use Place in…");
   });
 
-  it("the completed semesters have keyboard buttons", async () => {
+  it("the completed semesters have a menu", async () => {
     const id = await createPlan();
     const page = await fetch(new URL(`/plan/${id}`, baseUrl));
     const html = await page.text();
-    expect(html).toContain('aria-label="One fewer semester completed"');
-    expect(html).toContain('aria-label="One more semester completed"');
+    const toggle = html.match(/<button[^>]*class="completed-toggle"[^>]*>[\s\S]*?<\/button>/);
+    expect(toggle).not.toBeNull();
+    expect(toggle![0]).toContain('aria-expanded="false"');
+    expect(toggle![0]).toMatch(/aria-controls="[^"]+"/);
+    expect(toggle![0]).toMatch(/<span data-current[^>]*>Nothing completed yet<\/span>/);
+    expect(html).toMatch(/<button[^>]*>(?:<[^>]+>[^<]*<\/[^>]+>)?Nothing yet<\/button>/);
+    expect(html).toMatch(/<button[^>]*>All semesters<\/button>/);
+    expect(html).not.toContain("One more semester completed");
+
+    const example = await (await fetch(new URL("/plan/example", baseUrl))).text();
+    expect(example).not.toContain("completed-toggle");
+    expect(example).toContain("Completed through S2 2027");
   });
 
   it("program checks render with the two-segment bar, and the untracked TDP check shows as not tracked", async () => {

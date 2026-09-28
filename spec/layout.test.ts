@@ -1360,62 +1360,99 @@ describe("requirements resize handle", { timeout: 30_000 }, () => {
 
 describe("completed-semesters row", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
-  const fewer = { name: "One fewer semester completed" };
-  const more = { name: "One more semester completed" };
+  const phone = { width: 390, height: 844 };
+  const toggle = (page: Page) => page.locator("button.completed-toggle");
+  const panel = (page: Page) => page.locator(".completed-panel");
+  const moreOptions = (page: Page) => page.getByRole("button", { name: "More options", exact: true });
 
   function verticalCentre(box: { y: number; height: number } | null): number {
     return box!.y + box!.height / 2;
   }
 
-  it("shows the short readout, the chevrons and More options on one row", async () => {
+  async function onEditable(viewport: Viewport, check: (page: Page) => Promise<void>) {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, viewport);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  it("shows the read-only readout and More options on one row", async () => {
     await withPlan(desktop, async (page) => {
+      expect(await page.locator(".completed-control button").count()).toBe(0);
       const readout = page.locator(".completed-readout");
-      await expect.poll(() => readout.textContent()).toBe("Completed through S2 2027");
-      const centre = verticalCentre(await readout.boundingBox());
-      for (const name of [fewer, more]) {
-        const chevron = page.getByRole("button", name);
-        expect(await chevron.isDisabled()).toBe(true);
-        const box = await chevron.boundingBox();
-        expect(box!.width).toBeGreaterThanOrEqual(44);
-        expect(box!.height).toBeGreaterThanOrEqual(44);
-        expect(Math.abs(verticalCentre(box) - centre)).toBeLessThanOrEqual(4);
-      }
-      const moreOptions = await page.getByRole("button", { name: "More options", exact: true }).boundingBox();
-      expect(moreOptions!.width).toBeGreaterThanOrEqual(44);
-      expect(moreOptions!.height).toBeGreaterThanOrEqual(44);
-      expect(Math.abs(verticalCentre(moreOptions) - centre)).toBeLessThanOrEqual(4);
+      expect(await readout.textContent()).toBe("Completed through S2 2027");
+      const box = await moreOptions(page).boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      expect(Math.abs(verticalCentre(box) - verticalCentre(await readout.boundingBox()))).toBeLessThanOrEqual(4);
       expect(await horizontalOverflow(page)).toBe(0);
       expect(await verticalOverflow(page)).toBe(0);
     });
   });
 
-  it("puts More options on the readout's row on an editable plan", async () => {
-    const id = await planWithPlacement("COMP1130");
-    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
-    try {
-      const centre = verticalCentre(await page.locator(".completed-readout").boundingBox());
-      const moreOptions = await page.getByRole("button", { name: "More options", exact: true }).boundingBox();
-      expect(Math.abs(verticalCentre(moreOptions) - centre)).toBeLessThanOrEqual(4);
-    } finally {
-      await page.close();
-    }
+  it("puts More options on the menu toggle's row on an editable plan", async () => {
+    await onEditable(desktop, async (page) => {
+      const box = await toggle(page).boundingBox();
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      const more = await moreOptions(page).boundingBox();
+      expect(Math.abs(verticalCentre(more) - verticalCentre(box))).toBeLessThanOrEqual(4);
+    });
   });
 
-  it("the › chevron completes one more semester and enables ‹", async () => {
-    const id = await planWithPlacement("COMP1130");
-    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
-    try {
-      const planner = page.locator(".planner");
-      const readout = page.locator(".completed-readout");
-      const before = Number(await planner.getAttribute("data-cutoff"));
-      const beforeText = await readout.textContent();
-      await page.getByRole("button", more).click();
-      await expect.poll(async () => Number(await planner.getAttribute("data-cutoff"))).toBe(before + 1);
-      await expect.poll(() => readout.textContent()).not.toBe(beforeText);
-      expect(await page.getByRole("button", fewer).isEnabled()).toBe(true);
-    } finally {
-      await page.close();
-    }
+  it("choosing a later semester completes it", async () => {
+    await onEditable(desktop, async (page) => {
+      await toggle(page).click();
+      await panel(page).getByRole("button", { name: "S1 2028" }).click();
+      await expect.poll(async () => Number(await page.locator(".planner").getAttribute("data-cutoff"))).toBe(3);
+      expect(await panel(page).isHidden()).toBe(true);
+      expect(await toggle(page).evaluate((el) => el === document.activeElement)).toBe(true);
+      await expect.poll(() => toggle(page).innerText()).toBe("Completed through S1 2028");
+      await toggle(page).click();
+      const current = panel(page).locator('button[aria-current="true"]');
+      expect(await current.count()).toBe(1);
+      expect(await current.innerText()).toContain("S1 2028");
+    });
+  });
+
+  it("describes the menu toggle with the full completed sentence", async () => {
+    await onEditable(desktop, async (page) => {
+      const description = await toggle(page).evaluate(
+        (el) => document.getElementById(el.getAttribute("aria-describedby") ?? "")?.textContent ?? null,
+      );
+      expect(description).toBe(
+        "Nothing on the timeline counts as completed yet. The gold line on the timeline marks that boundary.",
+      );
+    });
+  });
+
+  it("closes on Escape and shares one open menu with More options", async () => {
+    await onEditable(desktop, async (page) => {
+      await toggle(page).click();
+      expect(await panel(page).isVisible()).toBe(true);
+      await page.keyboard.press("Escape");
+      expect(await panel(page).isHidden()).toBe(true);
+      expect(await toggle(page).evaluate((el) => el === document.activeElement)).toBe(true);
+
+      await toggle(page).click();
+      await moreOptions(page).click();
+      expect(await panel(page).isHidden()).toBe(true);
+      expect(await moreOptions(page).getAttribute("aria-expanded")).toBe("true");
+      await toggle(page).click();
+      expect(await panel(page).isVisible()).toBe(true);
+      expect(await moreOptions(page).getAttribute("aria-expanded")).toBe("false");
+    });
+  });
+
+  it.each([desktop, phone])("is clean under axe and doesn't overflow when open at $width", async (viewport) => {
+    await onEditable(viewport, async (page) => {
+      await toggle(page).click();
+      expect(await panel(page).isVisible()).toBe(true);
+      expect(await axeViolations(page)).toEqual([]);
+      expect(await horizontalOverflow(page)).toBe(0);
+    });
   });
 
   it("no user-facing text says cutoff", async () => {
@@ -1721,7 +1758,7 @@ describe("plan title row", { timeout: 60_000 }, () => {
         h1: box(h1)!,
         h1Text: { top: text.top, bottom: text.bottom, left: text.left, right: text.right },
         note: box(document.querySelector('[role="note"]')),
-        readout: box(document.querySelector(".completed-readout")),
+        readout: box(document.querySelector(".completed-toggle, .completed-readout")),
         more: box(document.querySelector(".more-options-toggle")),
         row: box(document.querySelector(".plan-title")),
         actions: box(document.querySelector(".plan-actions")),
@@ -1833,28 +1870,24 @@ describe("plan title row", { timeout: 60_000 }, () => {
   it.each([
     [390, 844],
     [1920, 1080],
-  ])("at %i×%i stepping the completed semesters doesn't move the buttons", async (width, height) => {
+  ])("at %i×%i changing the completed semesters doesn't move the controls", async (width, height) => {
     const id = await planWithPlacement("COMP1130");
     await onPlan(`/plan/${id}`, { width, height }, async (page) => {
-      const buttons = () =>
+      const boxes = () =>
         page.evaluate(() =>
-          [
-            'button[aria-label="One fewer semester completed"]',
-            'button[aria-label="One more semester completed"]',
-            ".more-options-toggle",
-          ].map((selector) => {
-            const { left, top } = document.querySelector(selector)!.getBoundingClientRect();
-            return { left, top };
+          [".completed-toggle", ".more-options-toggle"].map((selector) => {
+            const { left, top, right } = document.querySelector(selector)!.getBoundingClientRect();
+            return { left, top, right };
           }),
         );
-      const readout = page.locator(".completed-readout");
-      const before = await buttons();
-      const beforeText = await readout.textContent();
-      await page.getByRole("button", { name: "One more semester completed" }).click();
-      await expect.poll(() => readout.textContent()).not.toBe(beforeText);
-      const after = await buttons();
+      const before = await boxes();
+      await page.locator(".completed-toggle").click();
+      await page.locator(".completed-panel").getByRole("button", { name: "S1 2029" }).click();
+      await expect.poll(async () => Number(await page.locator(".planner").getAttribute("data-cutoff"))).toBe(5);
+      const after = await boxes();
       after.forEach((box, i) => {
         expect(Math.abs(box.left - before[i].left)).toBeLessThanOrEqual(1);
+        expect(Math.abs(box.right - before[i].right)).toBeLessThanOrEqual(1);
         expect(Math.abs(box.top - before[i].top)).toBeLessThanOrEqual(1);
       });
     });

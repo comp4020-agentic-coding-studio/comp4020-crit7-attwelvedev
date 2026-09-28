@@ -7,6 +7,7 @@ import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types"
 import { buildPlanView, type GroupView } from "../lib/domain/view";
 import {
   completedReadout,
+  cutoffOptions,
   dropTargets,
   FAMILY_LABELS,
   FAMILY_ORDER,
@@ -349,6 +350,27 @@ describe("completedReadout", () => {
       short: "Completed through S2 2027",
       full: "Completed through S2 2027 — planned from S1 2028 onward. The gold line on the timeline marks that boundary.",
     });
+  });
+});
+
+describe("cutoffOptions", () => {
+  const terms = ["S1 2027", "S2 2027", "S1 2028", "S2 2028", "S1 2029", "S2 2029", "S1 2030", "S2 2030"].map(
+    (label) => ({ label }),
+  );
+
+  it("offers nothing, each term, then all semesters", () => {
+    const options = cutoffOptions(terms);
+    expect(options).toHaveLength(9);
+    expect(options[0]).toEqual({ value: 0, label: "Nothing yet" });
+    expect(options[1]).toEqual({ value: 1, label: "S1 2027" });
+    expect(options[7]).toEqual({ value: 7, label: "S1 2030" });
+    expect(options[8]).toEqual({ value: 8, label: "All semesters" });
+  });
+
+  it("names the last option All semesters however many terms there are", () => {
+    const options = cutoffOptions(terms.slice(0, 3));
+    expect(options.map((o) => o.value)).toEqual([0, 1, 2, 3]);
+    expect(options[3].label).toBe("All semesters");
   });
 });
 
