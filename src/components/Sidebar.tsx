@@ -509,6 +509,7 @@ export default function Sidebar({
                         planned={check.planned}
                         required={check.units}
                         bound={check.bound}
+                        figuresOnly
                       />
                     )}
                     <p class="check-note">{checkNote(check)}</p>

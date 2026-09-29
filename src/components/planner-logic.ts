@@ -81,6 +81,9 @@ export interface ProgressBarNumbers {
   valueNow: number;
   valueMax: number;
   text: string;
+  // The text without its over note, for a bar whose own note already says
+  // how far over it is (a program check's checkNote).
+  figures: string;
 }
 
 export function progressBarNumbers(
@@ -96,12 +99,14 @@ export function progressBarNumbers(
         ? ` — ${over} unit${over === 1 ? "" : "s"} over the ${required}-unit limit`
         : ` — ${over} unit${over === 1 ? "" : "s"} more than the ${required}-unit minimum, already covered`
       : "";
+  const figures = `${completed} completed, ${planned} planned of ${bound === "max" ? "up to " : ""}${required}`;
   return {
     // ARIA requires aria-valuenow to sit within [valuemin, valuemax]; the
     // true total, and by how much it's over, lives in the text instead.
     valueNow: Math.min(completed + planned, required),
     valueMax: required,
-    text: `${completed} completed, ${planned} planned of ${bound === "max" ? "up to " : ""}${required}${overNote}`,
+    text: `${figures}${overNote}`,
+    figures,
   };
 }
 

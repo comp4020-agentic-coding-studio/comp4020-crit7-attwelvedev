@@ -759,15 +759,18 @@ describe("requirements order and check notes", { timeout: 30_000 }, () => {
         [...document.querySelectorAll("li[data-check]")].map((li) => ({
           id: li.getAttribute("data-check"),
           bars: li.querySelectorAll('[role="progressbar"]').length,
+          caption: li.querySelector(".progress-bar-text")?.textContent ?? null,
           note: li.querySelector("p.check-note")?.textContent ?? null,
         })),
       );
       // The example plan: 48 units at 1000-level against a 60 maximum, 60
-      // planned at 4000-level against a 48 minimum, and TDP untracked.
+      // planned at 4000-level against a 48 minimum, and TDP untracked. The
+      // caption is the figures alone: the note already says how far over
+      // or under the check is (Task 14 review, 2026-09-29).
       expect(checks).toEqual([
-        { id: "lvl1000-max", bars: 1, note: "Room for 12 more units" },
-        { id: "comp4000-min", bars: 1, note: "Covered, with 12 units to spare" },
-        { id: "tdp-min", bars: 0, note: "Not tracked yet. Check it on Programs & Courses." },
+        { id: "lvl1000-max", bars: 1, caption: "48 completed, 0 planned of up to 60", note: "Room for 12 more units" },
+        { id: "comp4000-min", bars: 1, caption: "0 completed, 60 planned of 48", note: "Covered, with 12 units to spare" },
+        { id: "tdp-min", bars: 0, caption: null, note: "Not tracked yet. Check it on Programs & Courses." },
       ]);
     });
   });

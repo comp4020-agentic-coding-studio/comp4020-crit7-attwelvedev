@@ -119,7 +119,12 @@ describe("progressSegments", () => {
 
 describe("progressBarNumbers", () => {
   it("reads a met minimum as-is", () => {
-    expect(progressBarNumbers(6, 0, 6, "min")).toEqual({ valueNow: 6, valueMax: 6, text: "6 completed, 0 planned of 6" });
+    expect(progressBarNumbers(6, 0, 6, "min")).toEqual({
+      valueNow: 6,
+      valueMax: 6,
+      text: "6 completed, 0 planned of 6",
+      figures: "6 completed, 0 planned of 6",
+    });
   });
 
   it("clamps valueNow over a minimum, keeping the true numbers in the text", () => {
@@ -130,13 +135,25 @@ describe("progressBarNumbers", () => {
   });
 
   it("reads a max bound as \"of up to N\"", () => {
-    expect(progressBarNumbers(48, 0, 60, "max")).toEqual({ valueNow: 48, valueMax: 60, text: "48 completed, 0 planned of up to 60" });
+    expect(progressBarNumbers(48, 0, 60, "max")).toEqual({
+      valueNow: 48,
+      valueMax: 60,
+      text: "48 completed, 0 planned of up to 60",
+      figures: "48 completed, 0 planned of up to 60",
+    });
   });
 
   it("clamps valueNow over a max and notes the overage", () => {
     const n = progressBarNumbers(0, 66, 60, "max");
     expect(n.valueNow).toBe(60);
     expect(n.text).toBe("0 completed, 66 planned of up to 60 — 6 units over the 60-unit limit");
+  });
+
+  // A check's own note (checkNote) says how far over it is, so its bar
+  // shows only the figures (Task 14 review, 2026-09-29).
+  it("gives the figures alone, without the over note", () => {
+    expect(progressBarNumbers(0, 66, 60, "max").figures).toBe("0 completed, 66 planned of up to 60");
+    expect(progressBarNumbers(0, 60, 48, "min").figures).toBe("0 completed, 60 planned of 48");
   });
 
   it("uses the singular for one unit over", () => {

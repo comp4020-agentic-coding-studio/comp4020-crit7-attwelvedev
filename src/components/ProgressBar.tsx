@@ -15,11 +15,22 @@ interface Props {
   // A requirement group's colour family. Without one (Total, the checks)
   // the bar stays gold.
   family?: Family;
+  // Shows only the figures under the bar, for a bar with its own note
+  // beside it (a program check). Its value text keeps the over note.
+  figuresOnly?: boolean;
 }
 
-export default function ProgressBar({ label, completed, planned, required, bound = "min", family }: Props) {
+export default function ProgressBar({
+  label,
+  completed,
+  planned,
+  required,
+  bound = "min",
+  family,
+  figuresOnly = false,
+}: Props) {
   const { completedPct, plannedPct } = progressSegments(completed, planned, required);
-  const { valueNow, valueMax, text } = progressBarNumbers(completed, planned, required, bound);
+  const { valueNow, valueMax, text, figures } = progressBarNumbers(completed, planned, required, bound);
   return (
     <div class="progress-bar" data-family={family}>
       <div
@@ -34,7 +45,7 @@ export default function ProgressBar({ label, completed, planned, required, bound
         <span class="progress-bar-completed" style={{ width: `${completedPct}%` }} />
         <span class="progress-bar-planned" style={{ width: `${plannedPct}%`, insetInlineStart: `${completedPct}%` }} />
       </div>
-      <p class="progress-bar-text">{text}</p>
+      <p class="progress-bar-text">{figuresOnly ? figures : text}</p>
     </div>
   );
 }
