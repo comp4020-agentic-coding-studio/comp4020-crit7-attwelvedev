@@ -672,11 +672,11 @@ Routine calls:
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 16–19 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] Task 19 human review accepted by the user
-- [ ] Tick Phase 06 in overview §5 and commit
+- [x] Tasks 16–19 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes (941 tests, 2026-09-29)
+- [x] Task 19 human review accepted by the user
+- [x] Tick Phase 06 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
