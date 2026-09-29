@@ -39,11 +39,20 @@ all of it, so styling and navigation around it pass and a trimmed copy fails.
 
 ## Layout (real browser)
 
-`layout.test.ts` drives the same built server in headless Chromium (through
-the helpers in `spec/browser.ts`) to check geometry that jsdom can't measure:
-sideways overflow, pane widths, which pane sits beside which, and how many card
-columns a grid actually renders. CI installs Chromium before `pnpm check`;
-locally it's a one-time setup:
+`layout/*.test.ts` drives the same built server in headless Chromium (through
+the helpers in `spec/browser.ts` and `spec/layout/helpers.ts`) to check
+geometry that jsdom can't measure: sideways overflow, pane widths, which pane
+sits beside which, and how many card columns a grid actually renders.
+
+The suites are split into one file per area of the page (`undo`, `details`,
+`timeline`, …) because vitest runs a file's tests one after another but runs
+files in parallel: as a single file they took about seven minutes, split they
+take about one. Put a new `describe` in the file for its area, or start a new
+file (calling `useBrowser()` at the top) once one runs much longer than the
+rest. To run one suite, filter by its name rather than its file:
+`pnpm build && pnpm vitest run --project spec -t "<describe>"`.
+
+CI installs Chromium before `pnpm check`; locally it's a one-time setup:
 
 ```sh
 pnpm exec playwright install chromium

@@ -117,9 +117,8 @@ Spec §2.4, plus these verified in code while planning:
   - `pnpm check`: `astro check` plus `pnpm test`. **It must be green before
     every commit.**
   - One unit file: `pnpm vitest run --project unit <path>`.
-  - One spec suite: `pnpm build && pnpm vitest run --project spec
-    spec/layout.test.ts -t "<describe name>"`. Spec tests run against
-    `dist/`, so rebuild first.
+  - One spec suite: `pnpm build && pnpm vitest run --project spec -t
+    "<describe name>"`. Spec tests run against `dist/`, so rebuild first.
   - `pnpm db:generate`: writes a Drizzle migration after `schema.ts`
     changes. Commit both.
 - **Layering.**
@@ -138,9 +137,19 @@ Spec §2.4, plus these verified in code while planning:
 - **Tests.**
   - Unit tests sit beside the module (`x.test.ts`).
   - HTTP and SSR contract tests: `spec/planner.test.ts`.
-  - Real-browser geometry, behaviour and axe: `spec/layout.test.ts`, using
-    the helpers in `spec/browser.ts` (`openPage(browser, url, viewport,
-    {storage})`, `horizontalOverflow`, `verticalOverflow`, `axeViolations`).
+  - Real-browser geometry, behaviour and axe: `spec/layout/*.test.ts`,
+    using the helpers in `spec/browser.ts` (`openPage(browser, url,
+    viewport, {storage})`, `horizontalOverflow`, `verticalOverflow`,
+    `axeViolations`) and `spec/layout/helpers.ts`.
+  - **Split on 2026-09-29.** The phase files still say
+    `spec/layout.test.ts`, with line numbers from before the split. That
+    single file is now one file per area (`page-and-nav`,
+    `plan-header-and-fit`, `requirements-panel`, `timeline`,
+    `course-cards`, `details`, `sidebar-groups`, `undo`), so vitest runs
+    them in parallel (about 7 minutes down to about 1). Read a phase
+    file's `spec/layout.test.ts` as "the file for that area". Find a named
+    `describe` with `grep -n 'describe("<name>"' spec/layout/*.test.ts`,
+    and put a new one in the file for its area (see `spec/README.md`).
   - Route checks: `spec/invariants.test.ts`.
 - **Commits** (CLAUDE.md).
   - One commit per task once `pnpm check` passes. The message says what
