@@ -923,3 +923,32 @@ invariants and jsdom axe running on the new route (737 tests). The one
 real product gap left, the phone drawer covering the nav tab, is recorded
 in the phase file as interim, for Phase 07's bottom sheet to close. It
 isn't hidden by a test exception.
+
+## 2026-09-29 — The knock-on warning passed every test and still couldn't be seen on a phone
+
+Resolved by 16c526a.
+
+Task 10 adds a knock-on warning to the undo toast ("COMP2120 now misses a
+prerequisite."). Its spec asserted the toast's `textContent`, and it was
+green at both marking viewports, as were the full suite and axe. The
+obvious call was to commit. The render said otherwise. At 390×844 the
+details panel covers the whole screen at z-index 40, and the toast sat
+at 10, so any change made from the panel (every strip move, and Remove
+since Phase 02) offered its Undo invisibly. Raising the toast then showed
+two more problems. The one-line ellipsis cut the sentence off at "COM…",
+and `left: 50%` squeezed the toast to half the screen. The part that had
+been truncated was exactly the warning the task existed to show.
+
+`textContent` can't see any of this. It reads the DOM, not what's
+painted, so text-based assertions pass whatever covers or clips the
+text. Instead of trusting the green run, I took screenshots, and I asked
+before changing the toast's layering because it touches what Phase 07's
+sheet will build on.
+
+The fix is in the harness as well as the CSS. A new 390×844 spec checks
+three things. The toast is the element actually hit at its own centre
+(`elementFromPoint`), not just present. Its text isn't clipped
+(`scrollWidth <= clientWidth`). It spans the phone's width rather than
+half of it. Without the CSS change, the spec failed at the first check.
+With it, the full suite is green (811 tests), and the phone screenshot
+shows the whole sentence wrapped beside Undo.
