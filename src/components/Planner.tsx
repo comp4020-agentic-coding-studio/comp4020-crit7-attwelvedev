@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
-import { isError, placeCourse, removeCourse, setCutoff, setPin } from "./api";
+import { isError, placeCourse, removeCourse, setCheck, setChoice, setCutoff, setPin } from "./api";
 import CompletedMenu from "./CompletedMenu";
 import CourseDetailsPanel from "./CourseDetailsPanel";
 import {
@@ -25,7 +25,16 @@ import {
   saveSplit,
   type SplitStop,
 } from "./panel-state";
-import { actionFor, changesNothing, knockOnText, newlyBroken, type PlanAction, type UndoEntry, undoEntry } from "./plan-actions";
+import {
+  actedOn,
+  actionFor,
+  changesNothing,
+  type HistoryStep,
+  historyStep,
+  knockOnText,
+  newlyBroken,
+  type PlanAction,
+} from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
@@ -109,7 +118,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
   const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
-  const [undo, setUndo] = useState<{ entry: UndoEntry; knockOn: string } | null>(null);
+  const [undo, setUndo] = useState<{ step: HistoryStep; knockOn: string } | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -180,9 +189,22 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   }
 
   function apply(action: PlanAction) {
-    return action.kind === "remove"
-      ? removeCourse(view.plan.id, action.code)
-      : placeCourse(view.plan.id, action.code, action.term);
+    const planId = view.plan.id;
+    switch (action.kind) {
+      case "place":
+      case "move":
+        return placeCourse(planId, action.code, action.term);
+      case "remove":
+        return removeCourse(planId, action.code);
+      case "pin":
+        return setPin(planId, action.code, action.groupId);
+      case "check":
+        return setCheck(planId, action.code, action.item, action.answer);
+      case "choice":
+        return setChoice(planId, action.groupId, action.childId);
+      case "cutoff":
+        return setCutoff(planId, action.cutoff);
+    }
   }
 
   // The one path every place, move and remove takes — drag (mouse or touch),
@@ -192,7 +214,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     if (changesNothing(view, action)) return;
     if (action.kind === "remove") {
       if (!view.placements.some((p) => p.code === action.code)) return;
-    } else {
+    } else if (action.kind === "place" || action.kind === "move") {
       // A search result has no view.courses entry, so its blocked terms
       // come from the card search (or the sidebar) fetched.
       const blocked = knownCards[action.code]?.hardBlocked ?? searchBlocked[action.code];
@@ -203,7 +225,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       }
     }
     // From the view before the change: it still knows where the course was.
-    const entry = undoEntry(view, action);
+    const step = historyStep(view, action);
     const result = await apply(action);
     if (isError(result)) {
       setAnnouncement(result.error);
@@ -211,7 +233,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     }
     setView(result);
     // The toast is role=status, so this is also what gets announced.
-    setUndo({ entry, knockOn: knockOnText(newlyBroken(view, result, action.code)) });
+    setUndo({ step, knockOn: knockOnText(newlyBroken(view, result, actedOn(action))) });
     startUndoTimer();
   }
 
@@ -238,22 +260,20 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   async function handleUndo() {
     if (!undo || undoPending) return;
     if (undoTimer.current) clearTimeout(undoTimer.current);
-    const { entry } = undo;
+    const { step } = undo;
     setUndoPending(true);
     setUndo(null);
     try {
-      const undone = await apply(entry.undo);
-      if (isError(undone)) {
-        setAnnouncement(undone.error);
-        return;
-      }
-      if (!entry.restorePin) {
+      // In order: a removed course is placed back before its pin returns.
+      for (const action of step.undo) {
+        const undone = await apply(action);
+        if (isError(undone)) {
+          setAnnouncement(undone.error);
+          return;
+        }
         setView(undone);
-      } else {
-        const pinned = await setPin(view.plan.id, entry.undo.code, entry.restorePin);
-        setView(isError(pinned) ? undone : pinned);
       }
-      setAnnouncement(`Undone: ${entry.message}`);
+      setAnnouncement(`Undone: ${step.message}`);
     } finally {
       setUndoPending(false);
     }
@@ -416,7 +436,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           }}
         >
           <span>
-            {undo.entry.message}.{undo.knockOn}
+            {undo.step.message}.{undo.knockOn}
           </span>
           <button type="button" disabled={undoPending} onClick={handleUndo}>
             {undoPending ? "Undoing…" : "Undo"}
