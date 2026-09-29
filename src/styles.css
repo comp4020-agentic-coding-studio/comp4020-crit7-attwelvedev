@@ -1970,9 +1970,23 @@ fieldset[aria-busy="true"] {
   border-radius: 0;
 }
 
+/* The scroll edge starts below the input's focus ring (a 2px outline 2px
+   out), so scrolled cards clip clear of it rather than under it. The
+   first result keeps the usual 0.6rem from the form between the two. */
 .palette-results {
   min-height: 0;
   overflow: auto;
+  margin-top: 0.35rem;
+}
+
+.palette-results > :first-child {
+  margin-top: 0.25rem;
+}
+
+/* Cards are positioned, so they'd paint over the ring's outline. */
+.palette form {
+  position: relative;
+  z-index: 1;
 }
 
 /* The requirement groups' 13rem cards, as many across as fit. */

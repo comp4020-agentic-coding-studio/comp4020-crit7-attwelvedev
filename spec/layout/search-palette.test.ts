@@ -151,6 +151,22 @@ describe("search palette", { timeout: 30_000 }, () => {
     });
   });
 
+  it("scrolled results stay clear of the input's focus ring", async () => {
+    await withPlan(desktop, async (page) => {
+      await openSearch(page);
+      await search(page, "COMP4");
+      await palette(page).locator(".course-card").first().waitFor();
+      await page.locator(".palette-results").evaluate((el) => el.scrollBy(0, 80));
+      await page.locator(".palette input").focus();
+      // The ring is a 2px outline 2px outside the input: probe its middle.
+      const underRing = await page.locator(".palette input").evaluate((input) => {
+        const r = input.getBoundingClientRect();
+        return !!document.elementFromPoint(r.left + r.width / 2, r.bottom + 3)?.closest(".palette-results");
+      });
+      expect(underRing).toBe(false);
+    });
+  });
+
   it("fills the screen on a phone", async () => {
     await withPlan(phone, async (page) => {
       await openSearch(page);
