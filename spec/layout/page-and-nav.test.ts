@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage } from "../browser";
 import { ROUTES } from "../routes";
-import { baseUrl, browser, planUrl, useBrowser, withPlan } from "./helpers";
+import { baseUrl, browser, openSearch, planUrl, useBrowser, withPlan } from "./helpers";
 
 useBrowser();
 
@@ -92,9 +92,10 @@ describe("layout", { timeout: 30_000 }, () => {
     [1100, 800],
     [900, 800],
     [390, 844],
-  ])("at %i×%i the course-search placeholder isn't cut off", async (width, height) => {
-    const fit = await withPlan({ width, height }, (page) =>
-      page.evaluate(() => {
+  ])("at %i×%i the palette's placeholder isn't cut off", async (width, height) => {
+    const fit = await withPlan({ width, height }, async (page) => {
+      await openSearch(page);
+      return page.evaluate(() => {
         // An input never scrolls its placeholder, so measure the text itself
         // in the input's own font against the input's content box.
         const input = document.querySelector<HTMLInputElement>(".course-search-field input")!;
@@ -104,8 +105,8 @@ describe("layout", { timeout: 30_000 }, () => {
         const text = context.measureText(input.placeholder).width;
         const box = input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
         return { text: Math.ceil(text), box };
-      }),
-    );
+      });
+    });
     expect(fit.text).toBeLessThanOrEqual(fit.box);
   });
 

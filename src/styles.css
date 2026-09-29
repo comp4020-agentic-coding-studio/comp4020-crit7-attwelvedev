@@ -1919,15 +1919,64 @@ fieldset[aria-busy="true"] {
   gap: 0.6rem;
 }
 
+/* The search palette: the one sanctioned modal, since it's a transient
+   chooser. Centred near the top so results grow downwards; above the
+   details panel (40) but under the undo toast (45), so a Place in… made
+   here still shows its Undo. */
+.palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  background: rgb(23 24 26 / 0.35);
+}
+
+.palette {
+  position: absolute;
+  top: 12vh;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: min(620px, 100% - 2rem);
+  max-height: 76vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  color: var(--unigrey);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px -24px rgb(23 24 26 / 0.5);
+}
+
+/* The planner's stacked (phone) layout: the whole screen. */
+.palette-backdrop[data-stacked] .palette {
+  inset: 0;
+  transform: none;
+  width: auto;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.palette-results {
+  min-height: 0;
+  overflow: auto;
+}
+
+/* The requirement groups' 13rem cards, as many across as fit. */
+.palette .available-courses {
+  grid-template-columns: repeat(auto-fill, 13rem);
+}
+
 .course-search form {
   display: flex;
   gap: 0.5rem;
   align-items: flex-end;
+  margin: 0;
 }
 
-/* Override the enclosing .requirement-group label rule: its centring
-   shrank the input to its min-width, and its margin pushed the input's
-   bottom edge above the Search button's. */
+/* Input over its label, stretched to the form's width, with the input's
+   bottom edge level with the Search button's. */
 .course-search label {
   display: flex;
   flex-direction: column;
@@ -1949,7 +1998,7 @@ fieldset[aria-busy="true"] {
 .course-search-field input,
 .course-search button[type="submit"] {
   box-sizing: border-box;
-  height: 2.5rem;
+  height: 2.75rem;
 }
 
 .course-search-field input {
@@ -1957,18 +2006,23 @@ fieldset[aria-busy="true"] {
   padding-left: 2.1rem;
 }
 
+.course-search-icon,
+.search-trigger-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
 .course-search-icon {
   position: absolute;
   left: 0.7rem;
   top: 50%;
-  width: 1rem;
-  height: 1rem;
   transform: translateY(-50%);
-  fill: none;
-  stroke: var(--unigrey);
-  stroke-width: 2;
-  stroke-linecap: round;
-  pointer-events: none;
+  color: var(--unigrey);
 }
 
 .course-search-status {
@@ -1979,6 +2033,56 @@ fieldset[aria-busy="true"] {
 
 .course-search-results {
   margin-top: 0.6rem;
+}
+
+/* Styled as the field it opens, with its shortcut beside the words. */
+.search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.6rem 0 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.search-trigger-icon {
+  flex: none;
+}
+
+.search-trigger-key {
+  padding: 0.1rem 0.4rem;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+}
+
+/* The header's own phone breakpoint: an icon button, still named
+   "Search courses". */
+@media (width < 44rem) {
+  .search-trigger {
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0;
+  }
+
+  .search-trigger-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .search-trigger-more,
+  .search-trigger-key {
+    display: none;
+  }
 }
 
 .course-card-unplaced {

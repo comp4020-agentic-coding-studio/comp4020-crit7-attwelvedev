@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage, verticalOverflow, type Viewport } from "../browser";
-import { baseUrl, browser, planUrl, planWithPlacement, useBrowser, withPlan } from "./helpers";
+import { baseUrl, browser, openSearch, planUrl, planWithPlacement, useBrowser, withPlan } from "./helpers";
 
 useBrowser();
 
@@ -23,6 +23,7 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
     const id = created.headers.get("location")!.split("/").pop()!;
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP4550");
       await page.click(".course-search button[type=submit]");
       const card = page.locator(".course-search .course-card").filter({ hasText: "COMP4550" });
@@ -75,6 +76,7 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
     expect(cutoff.status).toBe(200);
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP4550");
       await page.click(".course-search button[type=submit]");
       const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP4550" });
@@ -101,6 +103,7 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
     expect(cutoff.status).toBe(200);
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP4550");
       await page.click(".course-search button[type=submit]");
       const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP4550" });
@@ -201,6 +204,7 @@ describe("two-semester labels", { timeout: 30_000 }, () => {
     const id = created.headers.get("location")!.split("/").pop()!;
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP4550");
       await page.click(".course-search button[type=submit]");
       const card = page.locator(".course-search .course-card").filter({ hasText: "COMP4550" });
@@ -328,6 +332,7 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP2700");
       await page.click(".course-search button[type=submit]");
       const card = page.locator('.course-search-results [data-drag-code="COMP2700"]');
@@ -350,6 +355,7 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP1130");
       await page.click(".course-search button[type=submit]");
       const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP1130" });
@@ -368,6 +374,7 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
     const id = await planWithPlacement("COMP1130");
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
     try {
+      await openSearch(page);
       await page.fill(".course-search input", "COMP11");
       await page.click(".course-search button[type=submit]");
       const row = page.locator(".course-search .placed-row").filter({ hasText: "COMP1130" });

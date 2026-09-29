@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage, type Viewport } from "../browser";
-import { baseUrl, browser, detailsPanel, planWithPlacement, useBrowser } from "./helpers";
+import { baseUrl, browser, detailsPanel, openSearch, planWithPlacement, useBrowser } from "./helpers";
 
 useBrowser();
 
@@ -541,10 +541,26 @@ describe("history shortcuts", { timeout: 30_000 }, () => {
     await onFreshPlan("", async (page) => {
       const mod = await modifier(page);
       await moveToS1_2028(page);
+      await openSearch(page);
       const search = page.locator(".course-search input");
       await search.fill("COMP");
       await search.press(`${mod}+z`);
       // Long enough for the plan to have changed if the shortcut undid it.
+      await page.waitForTimeout(1000);
+      expect(await inTerm(page, 2).count()).toBe(1);
+    });
+  });
+
+  it("do nothing while the search palette is open, even off its input", async () => {
+    await onFreshPlan("", async (page) => {
+      const mod = await modifier(page);
+      await moveToS1_2028(page);
+      await openSearch(page);
+      await page.fill(".course-search input", "COMP11");
+      await page.click(".course-search button[type=submit]");
+      const title = page.locator(".palette .course-card-title").first();
+      await title.focus();
+      await page.keyboard.press(`${mod}+z`);
       await page.waitForTimeout(1000);
       expect(await inTerm(page, 2).count()).toBe(1);
     });

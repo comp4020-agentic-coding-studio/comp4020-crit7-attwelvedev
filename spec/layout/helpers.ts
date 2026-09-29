@@ -40,6 +40,13 @@ export async function expectDetailsOpenThenClose(page: Page, code: string): Prom
   await expect.poll(() => new URL(page.url()).searchParams.has("course")).toBe(false);
 }
 
+// Search lives in a palette opened from the plan header, so every search
+// test opens it first.
+export async function openSearch(page: Page): Promise<void> {
+  await page.locator(".search-trigger").click();
+  await page.locator(".palette input").waitFor();
+}
+
 export async function withPlan<T>(viewport: Viewport, check: (page: Page) => Promise<T>): Promise<T> {
   const page = await openPage(browser, planUrl(), viewport);
   try {

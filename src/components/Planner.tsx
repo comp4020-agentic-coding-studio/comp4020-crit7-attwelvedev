@@ -37,6 +37,7 @@ import {
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
+import SearchPalette from "./SearchPalette";
 import Sidebar, { type ShowRequest } from "./Sidebar";
 import type { Panels } from "./split-resize";
 import Timeline, { type LocateRequest } from "./Timeline";
@@ -170,6 +171,14 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // from search outlines both of the terms it would take.
   const [searchTwoSemester, setSearchTwoSemester] = useState<Record<string, boolean>>({});
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  // For the history shortcuts' listener, which is registered once.
+  const searchOpenRef = useRef(false);
+  searchOpenRef.current = searchOpen;
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
+  // "Ctrl K" until hydrated, so the server and first client render agree.
+  const [onMac, setOnMac] = useState(false);
+  useEffect(() => setOnMac(/Mac|iP/.test(navigator.platform)), []);
   const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
   const [locateRequest, setLocateRequest] = useState<LocateRequest | null>(null);
   const [showRequest, setShowRequest] = useState<ShowRequest | null>(null);
@@ -396,7 +405,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     const mac = /Mac|iP/.test(navigator.platform);
     function onKeyDown(event: KeyboardEvent) {
       const which = historyShortcut(event, mac);
-      if (!which || isTextEntry(event.target as HTMLElement | null)) return;
+      // The palette covers the plan it would change, so it's out of reach.
+      if (!which || searchOpenRef.current || isTextEntry(event.target as HTMLElement | null)) return;
       event.preventDefault();
       if (busyRef.current > 0) return;
       void (which === "undo" ? undo() : redo());
@@ -404,6 +414,40 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [readOnly]);
+
+  // Focus goes back to the trigger however the palette closes, so the
+  // keyboard never lands on <body>.
+  function closeSearch() {
+    setSearchOpen(false);
+    searchTriggerRef.current?.focus();
+  }
+
+  // ⌘K or Ctrl-K opens and closes the palette from anywhere, including its
+  // own input.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "k") return;
+      event.preventDefault();
+      if (searchOpenRef.current) closeSearch();
+      else setSearchOpen(true);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  // Search results can be courses outside the plan's tree; remember what
+  // the drag highlights and the sidebar need to know about them.
+  function rememberSearchResults(courses: CourseCard[]) {
+    setKnownCards((prev) => ({ ...prev, ...Object.fromEntries(courses.map((course) => [course.code, course])) }));
+    setSearchBlocked((prev) => ({
+      ...prev,
+      ...Object.fromEntries(courses.map((course) => [course.code, course.hardBlocked])),
+    }));
+    setSearchTwoSemester((prev) => ({
+      ...prev,
+      ...Object.fromEntries(courses.map((course) => [course.code, course.twoSemester])),
+    }));
+  }
 
   // The toast is role=status, so what it says is also what gets announced.
   function showToast(next: NonNullable<typeof toast>) {
@@ -457,6 +501,26 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           )}
         </div>
         <div class="plan-actions">
+          <button
+            type="button"
+            class="search-trigger"
+            ref={searchTriggerRef}
+            aria-haspopup="dialog"
+            aria-keyshortcuts="Meta+K Control+K"
+            onClick={() => setSearchOpen(true)}
+          >
+            <svg class="search-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+            {/* On phones only the icon shows; "Search courses" stays as its name. */}
+            <span class="search-trigger-label">
+              Search courses<span class="search-trigger-more"> by code or title</span>
+            </span>
+            <kbd class="search-trigger-key" aria-hidden="true">
+              {onMac ? "⌘K" : "Ctrl K"}
+            </kbd>
+          </button>
           <div class="completed-control" aria-busy={cutoffPending}>
             {readOnly ? (
               <>
@@ -533,22 +597,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           </div>
           <Sidebar
             view={view}
-            planId={view.plan.id}
-            onAnnounce={setAnnouncement}
             onAction={runAction}
             onDragStart={setDraggingCode}
             onDragEnd={() => setDraggingCode(null)}
-            onSearchResults={(courses) => {
-              setKnownCards((prev) => ({ ...prev, ...Object.fromEntries(courses.map((course) => [course.code, course])) }));
-              setSearchBlocked((prev) => ({
-                ...prev,
-                ...Object.fromEntries(courses.map((course) => [course.code, course.hardBlocked])),
-              }));
-              setSearchTwoSemester((prev) => ({
-                ...prev,
-                ...Object.fromEntries(courses.map((course) => [course.code, course.twoSemester])),
-              }));
-            }}
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
             onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
@@ -581,6 +632,24 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           onAction={runAction}
         />
       )}
+      {/* Inside .planner, so the touch-drag root covers its results, but outside the size container, which would pin it. */}
+      <SearchPalette
+        view={view}
+        planId={view.plan.id}
+        open={searchOpen}
+        onClose={closeSearch}
+        onResults={rememberSearchResults}
+        onOpenDetails={(code) => openDetails(code)}
+        onAnnounce={setAnnouncement}
+        onDragStart={setDraggingCode}
+        onDragEnd={() => setDraggingCode(null)}
+        openMenuCode={openMenuCode}
+        onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
+        onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
+        onAction={runAction}
+        openCode={details.code}
+        stacked={fit === 0}
+      />
       {toast && (
         <div
           class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"}

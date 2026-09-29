@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { CourseCard, GroupView, PlanView } from "../lib/domain/view";
+import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
-import CourseSearch from "./CourseSearch";
 import type { DetailsFocus } from "./details-state";
 import type { PlanAction } from "./plan-actions";
 import PlacedCourseRow from "./PlacedCourseRow";
@@ -26,13 +25,10 @@ export interface ShowRequest {
 
 interface Props {
   view: PlanView;
-  planId: string;
-  onAnnounce: (message: string) => void;
-  // Place in… on a group's or a search result's card, and a group's choice.
+  // Place in… on a group's card, and a group's choice.
   onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
-  onSearchResults?: (courses: CourseCard[]) => void;
   openMenuCode: string | null;
   onMenuOpenChange: (code: string, open: boolean) => void;
   onLocateCourse: (code: string, part?: 2) => void;
@@ -300,12 +296,9 @@ function Group({
 
 export default function Sidebar({
   view,
-  planId,
-  onAnnounce,
   onAction,
   onDragStart,
   onDragEnd,
-  onSearchResults,
   openMenuCode,
   onMenuOpenChange,
   onLocateCourse,
@@ -490,23 +483,6 @@ export default function Sidebar({
               </ul>
             )}
           </SidebarSection>
-          <CourseSearch
-            view={view}
-            planId={planId}
-            onAnnounce={onAnnounce}
-            onAction={onAction}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onResults={onSearchResults}
-            openMenuCode={openMenuCode}
-            onMenuOpenChange={onMenuOpenChange}
-            onLocateCourse={onLocateCourse}
-            compact={compact.has("search")}
-            onToggleCompact={() => setSectionCompact("search", !compact.has("search"))}
-            onExpand={() => setSectionCompact("search", false)}
-            onOpenDetails={onOpenDetails}
-            openCode={openCode}
-          />
           <SidebarSection
             {...sectionProps("total")}
             label="Total"

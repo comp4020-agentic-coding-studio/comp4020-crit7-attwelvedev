@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SearchResult } from "./api";
-import { outcomeMessage } from "./CourseSearch";
+import { outcomeMessage } from "./search-message";
 
 describe("outcomeMessage — not_found", () => {
   const notFound: SearchResult = { status: "not_found", courses: [] };

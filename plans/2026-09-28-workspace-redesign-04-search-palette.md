@@ -171,7 +171,7 @@ export function isTextEntry(el: { tagName: string; type?: string; isContentEdita
 
 ### Task 11: `SearchPalette` with header trigger and ⌘K; retire the inline Search section
 
-- **Description:** WR26–WR29, WR31, and WR6 (palette Enter).
+- [x] **Description:** WR26–WR29, WR31, and WR6 (palette Enter).
 - **Files touched:**
   - new `src/components/SearchPalette.tsx`
   - `src/components/CourseSearch.tsx`: delete it; move `outcomeMessage`
@@ -259,8 +259,28 @@ export function isTextEntry(el: { tagName: string; type?: string; isContentEdita
   - CSS: the palette is centred, `min(620px, 100% - 2rem)` wide and 12vh
     from the top. At container widths under 49.5rem it's `inset: 0`, full
     screen (WR31).
+    - *Ruled 2026-09-29:* a container query can't reach the palette. It
+      sits outside `.planner-layout` (the `planner` container), because
+      containment would pin a fixed child to the container, just as it
+      would the undo toast. So `Planner` passes `stacked={fit === 0}`
+      (`useReqsFit`'s `fit` is 0 exactly when the container is under
+      49.5rem), the backdrop carries `data-stacked`, and the CSS keys the
+      full-screen rule on it.
+  - *Ruled 2026-09-29:* the palette also takes `onAction` (Phase 03
+    landed) and `openCode` (cards and rows need `current`). It stays
+    mounted while closed, so the last results survive a reopen.
+  - *Ruled 2026-09-29, found in the 390 render:* full screen on a phone
+    leaves no backdrop to tap and no Escape key. So the form row ends in
+    a 44px "Close search" icon button, on every viewport, which returns
+    focus to the trigger. Test: "a 44px close button closes it" at both
+    viewports.
+  - New `describe`s for Tasks 11–12 go in a new
+    `spec/layout/search-palette.test.ts`. Ported tests stay in their
+    current area files.
 - **Refactor:** Remove `.course-search` sidebar-section CSS that's no
-  longer used, and the `search` entry handling in `loadCompact`.
+  longer used. (*Ruled 2026-09-29:* `loadCompact` has no `search`
+  special case to remove. It accepts any string id, and a stale
+  `"search"` id is inert.)
 - **Acceptance criteria:**
   - `pnpm check` passes.
   - `grep -rn "CourseSearch" src` finds nothing.
