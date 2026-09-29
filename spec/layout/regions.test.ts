@@ -12,7 +12,7 @@ const desktop = { width: 1920, height: 1080 };
 // workspace. Later phases' layers are listed ahead of time, so glass added
 // anywhere else fails here rather than in a review.
 const GLASS_ALLOWLIST = [
-  ".timeline-year-head",
+  ".timeline-glass",
   ".details-head",
   ".palette",
   ".undo-toast",

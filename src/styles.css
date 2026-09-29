@@ -1050,6 +1050,8 @@ section[aria-label="program checks"] > h3 {
 
 .timeline-scroll-wrap {
   position: relative;
+  /* For .timeline-glass, which is exactly the scroller's width (cqi). */
+  container-type: inline-size;
 }
 
 /* The ‹ › buttons page the scroller sideways. Plain chevrons, floating
@@ -1129,7 +1131,32 @@ section[aria-label="program checks"] > h3 {
 }
 
 /* One calendar year: its head spans both terms. */
+/* The frosted strip behind every year's header, as tall as a year's
+   label row and term tops. Sticky on both axes and exactly the scroller's
+   visible width, so it never scrolls sideways: Chromium only blurred the
+   part of a scroll-wide strip that was on screen when it first painted,
+   leaving the rest sharp once scrolled. It sits under the years' labels,
+   headings and hairlines (all later in the DOM at the same z-index) and
+   over the cards. */
+.timeline-glass {
+  grid-row: 1;
+  align-self: start;
+  justify-self: start;
+  position: sticky;
+  top: 0;
+  /* Sticky offsets count from inside the scroller's padding. */
+  inset-inline-start: calc(-1 * var(--edge));
+  z-index: 1;
+  width: 100cqi;
+  height: calc(var(--year-band) + var(--term-top));
+  /* Negative both ends, so its sticky range reaches the scroller's padded
+     ends, not just the years' grid area. */
+  margin-inline: calc(-1 * var(--edge));
+  pointer-events: none;
+}
+
 .timeline-year {
+  grid-row: 1;
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, calc(13rem + 2 * var(--term-pad)));
@@ -1160,11 +1187,10 @@ section[aria-label="program checks"] > h3 {
   content: none;
 }
 
-/* Sticks to the scroller's top while the cards scroll under it, frosted
-   (.glass) so they pass beneath softly. One surface for the whole year's
-   header: it runs down behind its terms' tops (.term-top, transparent),
-   and the negative margin gives that height back, so the terms still
-   start under the label's row. */
+/* Sticks to the scroller's top while the cards scroll under it, on the
+   one frosted strip (.timeline-glass). It spans the label's row and its
+   terms' tops (.term-top), and the negative margin gives that height
+   back, so the terms still start under the label's row. */
 .timeline-year-head {
   grid-column: 1 / -1;
   position: sticky;
@@ -1179,18 +1205,6 @@ section[aria-label="program checks"] > h3 {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--unigrey);
-  /* Across the gap and hairline to the next year's band, so the header is
-     one strip; the first and last reach the scroller's padded ends. */
-  margin-inline-end: calc(-1 * (2 * var(--year-gap) + 1px));
-}
-
-.timeline-year:first-of-type > .timeline-year-head {
-  margin-inline-start: calc(-1 * var(--edge));
-  padding-inline-start: calc(var(--edge) + var(--term-pad));
-}
-
-.timeline-year:last-child > .timeline-year-head {
-  margin-inline-end: calc(-1 * var(--edge));
 }
 
 /* Holds at the scroller's start edge while any of its year is on screen,

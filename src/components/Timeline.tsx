@@ -253,10 +253,15 @@ export default function Timeline({
           }}
         >
           <PrereqOverlay view={view} show={showPrereqLinks} hoveredCode={hoveredCode} />
-          {years.map(({ year, terms }) => (
-            <div key={year} class="timeline-year" data-year={year}>
+          {/* One frosted strip behind every year's header, not a band per
+              year: a backdrop blur stops at its own edge, so bands left a
+              seam at each year. It shares the years' grid row, so they're
+              placed in columns explicitly. */}
+          <div class="timeline-glass glass" aria-hidden="true" style={{ gridColumn: `1 / span ${years.length}` }} />
+          {years.map(({ year, terms }, i) => (
+            <div key={year} class="timeline-year" data-year={year} style={{ gridColumn: String(i + 1) }}>
               {/* The term headings already say the year, so this is for the eye only. */}
-              <div class="timeline-year-head glass">
+              <div class="timeline-year-head">
                 <span class="timeline-year-label" aria-hidden="true">
                   {year}
                 </span>

@@ -123,16 +123,21 @@ From Phase 05:
     `.planner-timeline-area` is a region that doesn't scroll (a flex
     column with `overflow: hidden`), and the toolbar and legend sit fixed
     above the scroller.
-  - It's a one-row grid of `div.timeline-year[data-year]`. Each year is a
-    sticky frosted `.timeline-year-head.glass`, which runs down behind its
-    terms' sticky `.term-top` rows, then two `section.term[data-term]`.
+  - It's a one-row grid of `div.timeline-year[data-year]`, each placed in
+    its column explicitly. Each year is a sticky transparent
+    `.timeline-year-head` (the label's row plus its terms' sticky
+    `.term-top` rows), then two `section.term[data-term]`.
   - A term is a 13rem card plus `--term-pad` (0.5rem) either side. The
     region has no inner gutter, and the scroller's ends are padded by
     `--edge` (0.5rem). `--year-band` is 2.75rem, or 1.9rem below the
     49.5rem container.
-  - The frosted header is one strip from edge to edge. Each band extends
-    across the gap to the next, and the hairlines are `::after` lines
-    drawn over it.
+  - The frosted header is one element, `div.timeline-glass.glass`, which
+    shares the years' grid row. It's sticky on both axes and `100cqi`
+    wide, since `.timeline-scroll-wrap` is an inline-size container. It
+    never scrolls sideways because Chromium blurred only the part of a
+    scroll-wide strip that was on screen at first paint. The hairlines
+    are `::after` lines drawn over it. In the glass allowlist,
+    `.timeline-glass` replaces `.timeline-year-head`.
   - `--timeline-min` (31rem) is unchanged. Two terms and their padding
     now come to about 28rem, so it has slack.
   - The ‹ › buttons (`.timeline-toolbar`) float over the band's right end,

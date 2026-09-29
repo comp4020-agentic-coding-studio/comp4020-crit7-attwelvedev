@@ -46,14 +46,18 @@ describe("timeline years", { timeout: 30_000 }, () => {
         const scroller = document.querySelector<HTMLElement>(".timeline-scroll")!;
         scroller.scrollTop = 400;
         const head = document.querySelector<HTMLElement>(".timeline-year-head")!;
+        const glass = document.querySelector<HTMLElement>(".timeline-glass")!;
+        const top = scroller.getBoundingClientRect().top;
         return {
           scrolled: scroller.scrollTop,
-          offset: head.getBoundingClientRect().top - scroller.getBoundingClientRect().top,
-          glass: head.classList.contains("glass"),
+          offset: head.getBoundingClientRect().top - top,
+          glassOffset: glass.getBoundingClientRect().top - top,
+          glass: glass.classList.contains("glass"),
         };
       });
       expect(result.scrolled).toBeGreaterThan(0);
       expect(Math.abs(result.offset)).toBeLessThanOrEqual(1);
+      expect(Math.abs(result.glassOffset)).toBeLessThanOrEqual(1);
       expect(result.glass).toBe(true);
     });
   });
@@ -172,33 +176,44 @@ describe("timeline years", { timeout: 30_000 }, () => {
     });
   });
 
-  // The frosted header is one strip, edge to edge of the region: no clear
-  // gap at either end or between years, with the years' hairlines drawn
-  // over it (Task 15 review, 2026-09-29).
-  it("the frosted header runs unbroken from edge to edge", async () => {
-    await withPlan(desktop, async (page) => {
+  // The frosted header is one glass surface across every year, edge to
+  // edge of the region, with the years' labels, term headings and
+  // hairlines drawn over it. A band per year, even touching, left a seam
+  // at each year: a backdrop blur stops at its own element's edge (Task 15
+  // review, 2026-09-29).
+  it("the frosted header is one surface, edge to edge", async () => {
+    await withPlan({ width: 1920, height: 800 }, async (page) => {
       const measure = () =>
         page.evaluate(() => {
           const areaEl = document.querySelector(".planner-timeline-area")!;
           const area = areaEl.getBoundingClientRect();
           const border = parseFloat(getComputedStyle(areaEl).borderLeftWidth);
-          const bands = [...document.querySelectorAll(".timeline-year-head")].map((h) => h.getBoundingClientRect());
+          const scroller = document.querySelector(".timeline-scroll")!;
+          const frosted = [...scroller.querySelectorAll("*")].filter(
+            (el) => getComputedStyle(el).backdropFilter !== "none",
+          );
+          const rect = frosted[0]?.getBoundingClientRect();
           const years = [...document.querySelectorAll(".timeline-year")];
           return {
-            startGap: bands[0].left - (area.left + border),
-            endGap: area.right - border - bands[bands.length - 1].right,
-            betweenGaps: bands.slice(1).map((b, i) => b.left - bands[i].right),
+            count: frosted.length,
+            startGap: rect ? rect.left - (area.left + border) : null,
+            endGap: rect ? area.right - border - rect.right : null,
+            stuck: rect ? Math.abs(rect.top - scroller.getBoundingClientRect().top) : null,
             hairlines: years.map((y) => getComputedStyle(y, "::after").backgroundColor),
           };
         });
+      await page.locator(".timeline-scroll").evaluate((el) => {
+        el.scrollTop = 150;
+      });
       const start = await measure();
       await page.locator(".timeline-scroll").evaluate((el) => {
         el.scrollLeft = el.scrollWidth;
       });
       const end = await measure();
+      expect(start.count).toBe(1);
       expect(start.startGap).toBeLessThanOrEqual(0.5);
       expect(end.endGap).toBeLessThanOrEqual(0.5);
-      for (const gap of start.betweenGaps) expect(gap).toBeLessThanOrEqual(0.5);
+      expect(start.stuck).toBeLessThanOrEqual(1);
       // Every year but the last draws its hairline, in the line colour.
       const drawn = start.hairlines.slice(0, -1);
       expect(new Set(drawn).size).toBe(1);
