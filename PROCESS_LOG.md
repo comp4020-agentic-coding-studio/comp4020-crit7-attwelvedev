@@ -1097,3 +1097,35 @@ my arithmetic: "opening details at 1664 … docks 440" and "widening
 requirements beside docked details squeezes details, not the columns"
 feed the drag's preferences back into `computeLayout` and assert that the
 width survives. Those are the two properties that were broken on paper.
+
+## 2026-09-29 — Measuring the phone card budget against what the tab bar leaves
+
+Resolved by a664b9b.
+
+Phase 07 replaced the phone's stacked split with a floating Timeline /
+Requirements tab bar, and its plan said to restore the card-height budget
+that Phase 05 had relaxed. The old rule was "term 0's first card, and the
+second card's code line, are inside `.planner-timeline-area`". The obvious
+move was to put the removed assertion back as it was.
+
+Reviewing the plan against the new layout before building, I saw the
+catch. The tab bar is `position: fixed` and floats over the foot of the
+full-height Timeline region, so the region's own bottom edge is no longer
+the edge of what a student can see. Measured the old way, the second card's
+code line could sit entirely under the bar and the test would still pass.
+It would pass vacuously on exactly the guarantee it exists for: "you can
+see another course follows".
+
+I raised it as a ruling rather than quietly tightening the plan. The user
+agreed, and the rule now reads: the budget's bottom edge is
+`min(region bottom, .tabbar top)`. That is recorded in the phase file §2.2,
+and the spec (`plan-header-and-fit.test.ts`, "card height budget") computes
+it that way.
+
+How I knew it was right: before the tab bar existed, the restored test
+failed red, waiting for `.tabbar`. With the bar in place it passes, and the
+390×844 render shows the second card's code line clear above the pill. Each
+scroller also gained end padding of `--tabbar-h + 1rem`, so the last card
+of any column can be scrolled out from under the bar. That keeps "the bar
+never hides something you need" a property of the layout, not a lucky
+screenshot.
