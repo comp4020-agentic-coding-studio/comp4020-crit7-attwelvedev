@@ -268,7 +268,7 @@ A failure names the spec, the list heading, and the missing or extra codes.
 
 ### Task 2: `SPECIALISATIONS` link module and the drift test
 
-- [ ] **Description.** Build the typed, statically imported module of
+- [x] **Description.** Build the typed, statically imported module of
   overview §4.2 (`SpecList`, `SpecialisationInfo`, `SPEC_CHOICE_GROUP`,
   `SPECIALISATIONS`, and the three lookups), per this file's §4.3. Add the
   SD5 drift test per §4.4. Then log the PROCESS moment.
