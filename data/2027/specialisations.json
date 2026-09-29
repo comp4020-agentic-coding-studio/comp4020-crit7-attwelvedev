@@ -1,0 +1,272 @@
+{
+  "generatedBy": "scripts/merge-subplans.ts from data/2027/subplans/*.json and data/2027/subplans-supplement.json. Don't hand-edit: change the supplement and re-run.",
+  "specialisations": [
+    {
+      "code": "ARIN-SPEC",
+      "title": "Artificial Intelligence",
+      "url": "https://programsandcourses.anu.edu.au/2027/specialisation/ARIN-SPEC",
+      "year": "2027",
+      "scrapedAt": "2026-09-26T07:04:53Z",
+      "minUnits": 24,
+      "introduction": [
+        "The Artificial Intelligence specialisation covers modern artificial intelligence across both its symbolic and learning-based traditions. Students study logic-based reasoning, search, planning and optimisation alongside statistical machine learning, deep learning, computer vision and document analysis, and develop the theoretical understanding, technical skills and critical judgement to formulate, build and evaluate AI systems for real-world problems. The specialisation is designed for students aiming for advanced applied or research roles in AI."
+      ],
+      "topics": [],
+      "learningOutcomes": [
+        "Apply methods of artificial intelligence across symbolic and/or learning-based traditions.",
+        "Formalise real-world problems mathematically and select appropriate AI methods.",
+        "Design, implement and empirically evaluate AI algorithms.",
+        "Critically analyse state-of-the-art AI methods and the ethical, social and data-related implications of their use."
+      ],
+      "requirements": [
+        {
+          "type": "text",
+          "content": "This Specialisation requires the completion of 24 units, which must include a minimum of 12 units of 4000-level courses."
+        },
+        {
+          "type": "list",
+          "heading": "A maximum of 12 units from the following list:",
+          "courses": [
+            "COMP2620",
+            "COMP3242",
+            "COMP3620",
+            "COMP3670"
+          ]
+        },
+        {
+          "type": "list",
+          "heading": "A minimum of 12 units from the following list:",
+          "courses": [
+            "COMP4528",
+            "COMP4620",
+            "COMP4650",
+            "COMP4670",
+            "COMP4680",
+            "COMP4691"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "This specialisation is not compatible with the INSY-MAJ."
+        },
+        {
+          "type": "text",
+          "content": "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+        }
+      ],
+      "otherInformation": [
+        "This Specialisation is incompatible with the Computing and Mathematical Foundations minor and the Intelligent Systems major. Students planning to complete COMP4691 Optimisation should ensure they complete MATH1013 or MATH1115 from the Information and Communications Technology-related course list early in their program."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    },
+    {
+      "code": "HCCC-SPEC",
+      "title": "Human-Centred and Creative Computing",
+      "url": "https://programsandcourses.anu.edu.au/2027/specialisation/HCCC-SPEC",
+      "year": "2027",
+      "scrapedAt": "2026-09-26T07:04:54Z",
+      "minUnits": 24,
+      "introduction": [
+        "The Human-Centred and Creative Computing specialisation offers an interdisciplinary grounding in human-computer interaction, humanities-centred computing, and creative computing, including games, music, or graphics. This specialisation is where computing meets a complex world with unique and varied social contexts to create impacts that change and enrich our lives. Students will gain insight and skills in designing, developing, and evaluating human-centred and creative applications."
+      ],
+      "topics": [],
+      "learningOutcomes": [
+        "Identify and describe challenges in human-centred and creative computing",
+        "Synthesise knowledge of human-centred and creative computing systems and their social context to address problems",
+        "Design and develop human-centred and creative technologies",
+        "Apply theoretical frameworks to evaluate and critique human-centred and creative computing systems"
+      ],
+      "requirements": [
+        {
+          "type": "heading",
+          "content": "Advice to Students"
+        },
+        {
+          "type": "text",
+          "content": "This Undergraduate Specialisation requires the completion of 24 units, which must include a minimum of 12 units of 4000-level courses:"
+        },
+        {
+          "type": "text",
+          "content": "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+        },
+        {
+          "type": "list",
+          "heading": "The 24 units must consist of:",
+          "courses": [
+            "COMP3900"
+          ]
+        },
+        {
+          "type": "and"
+        },
+        {
+          "type": "list",
+          "heading": "A minimum of 12 units from completion of courses from the following list:",
+          "courses": [
+            "COMP4020",
+            "COMP4350",
+            "COMP4528",
+            "COMP4610"
+          ]
+        },
+        {
+          "type": "and"
+        },
+        {
+          "type": "list",
+          "heading": "A maximum of 6 units from completion of courses from the following list:",
+          "courses": [
+            "COMP3540",
+            "COMP3670"
+          ]
+        }
+      ],
+      "otherInformation": [
+        "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    },
+    {
+      "code": "SYAR-SPEC",
+      "title": "Systems and Architecture",
+      "url": "https://programsandcourses.anu.edu.au/2027/specialisation/SYAR-SPEC",
+      "year": "2027",
+      "scrapedAt": "2026-09-26T07:04:55Z",
+      "minUnits": 24,
+      "introduction": [
+        "Computer systems and computer system architectures provide critical resources for modern computing environments. This ranges from resources for general purpose user application programming, to highly specialised real time embedded development environments. By gaining a deep understanding of these systems a developer can produce robust and high performing implementations. This also facilitates the exploration of better ways of providing these fundamental resources.",
+        "The Systems and Architecture specialisation focuses on computer systems including their use, architecture,  hardware, design, implementation, and limitations.",
+        "Depending on the chosen courses, students will learn about:"
+      ],
+      "topics": [
+        "concurrency and the design and implementation of concurrent programs",
+        "synchronisation approaches",
+        "operating system design",
+        "memory management",
+        "process scheduling",
+        "files systems",
+        "network layers and protocols including datalink, network, and transport layer protocols and their performance",
+        "modelling and simulation and the limitations and design of such systems",
+        "numerical calculation",
+        "developing algorithms and implementing code that yields good performance on high-performance architectures",
+        "database design methods",
+        "database query processing and optimisation",
+        "transaction and security management in a relational database management system."
+      ],
+      "learningOutcomes": [
+        "Demonstrate a deep understanding of a variety of computer system approaches",
+        "Choose an appropriate computer system approach and architecture to solve a given problem",
+        "Design, implement, test and evaluate different computer system approaches."
+      ],
+      "requirements": [
+        {
+          "type": "text",
+          "content": "This specialisation requires the completion of 24 units, which must consist of a minimum of 12 units of 4000 level courses."
+        },
+        {
+          "type": "list",
+          "heading": "A minimum of 12 units from completion of courses from the following list:",
+          "courses": [
+            "COMP4045",
+            "COMP4300",
+            "COMP4712"
+          ]
+        },
+        {
+          "type": "list",
+          "heading": "A maximum of 12 units from completion of courses from the following list:",
+          "courses": [
+            "COMP3300",
+            "COMP3310",
+            "COMP3320",
+            "COMP3610"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "This specialisation is incompatible with the Computer Systems (COMS) Major."
+        },
+        {
+          "type": "text",
+          "content": "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+        }
+      ],
+      "otherInformation": [
+        "COMP4045 Advanced Topics in Computer Systems is a special topics course and the particular topics taught under this code will vary. The topic to be covered in each instance of the course will be advertised on the School of Computing website."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    },
+    {
+      "code": "THCS-SPEC",
+      "title": "Theoretical Computer Science",
+      "url": "https://programsandcourses.anu.edu.au/2027/specialisation/THCS-SPEC",
+      "year": "2027",
+      "scrapedAt": "2026-09-26T07:04:56Z",
+      "minUnits": 24,
+      "introduction": [
+        "In 2009, a group of Australian researchers, including several associated with the ANU, announced the comprehensive formal verification of an entire operating system micro kernel. It now provides guaranteed security in over a billion mobile devices. This was a world first at the time, and remains one of the outstanding success stories of its field.",
+        "How was it done? A team of computer scientists helped with logical reasoning software and deep understanding of the semantics of programming languages.",
+        "The specialisation in Theoretical Computer Science gives you that kind of understanding and the knowledge to devise and apply such software. You will use the tools of logic and discrete mathematics to investigate the complexity of problems, the scope and limits of computation and the fundamental properties of algorithms. The focus of this specialisation is on the foundations of the entire discipline: the science and mathematics of computation itself.",
+        "Graduates will be prepared for a range of research roles to drive research and innovation in computational foundations in fundamental areas of computing such as programming language design and implementation, software verification and security."
+      ],
+      "topics": [],
+      "learningOutcomes": [
+        "Describe and explain key concepts of algorithm design, formal models of computation and complexity theory",
+        "Expertly apply techniques of logic, information theory and finite mathematics to the analysis of algorithms",
+        "Think critically and assimilate information from different disciplines in order to solve problems related to computer science",
+        "Evaluate and critically analyse scientific literature to extend their knowledge in the field",
+        "Communicate and present their knowledge of computer science clearly to diverse audiences"
+      ],
+      "requirements": [
+        {
+          "type": "text",
+          "content": "This specialisation requires the completion of 24 units, of which:"
+        },
+        {
+          "type": "text",
+          "content": "A minimum of 12 units must come from the completion of 4000-level courses."
+        },
+        {
+          "type": "list",
+          "heading": "A minimum of 12 units from completion of the following courses:",
+          "courses": [
+            "COMP4011",
+            "COMP4600",
+            "MATH4343"
+          ]
+        },
+        {
+          "type": "list",
+          "heading": "A maximum of 12 units from completion of courses from the following list:",
+          "courses": [
+            "COMP2620",
+            "COMP3610",
+            "COMP3630",
+            "COMP4712"
+          ]
+        },
+        {
+          "type": "text",
+          "content": "This specialisation is only available to students studying Bachelor of Advanced Computing (AACOM) and Bachelor of Advanced Computing Research & Development (AACRD)."
+        }
+      ],
+      "otherInformation": [
+        "To enrol in MATH4343 students will need to apply to the course convener for a permission code.",
+        "COMP4011 Advanced Topics in Formal Methods and Programming Languages is a special topics course and the particular topics taught under this code will vary. The topic to be covered in each instance of the course will be advertised on the School of Computing website."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    }
+  ]
+}

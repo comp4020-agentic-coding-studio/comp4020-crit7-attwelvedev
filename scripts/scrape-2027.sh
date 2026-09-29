@@ -6,6 +6,7 @@ set -u
 P=.venv/bin/anu-pandc
 
 "$P" get AACOM ARIN-SPEC HCCC-SPEC SYAR-SPEC THCS-SPEC --year 2027 --save data --recursive --format json --format md || true
+node scripts/merge-subplans.ts
 "$P" catalogue COMP --year 2027 --save data --format json || true
 "$P" courses --year 2027 --save data --format json || true
 

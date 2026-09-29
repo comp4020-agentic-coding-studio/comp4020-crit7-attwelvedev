@@ -1,0 +1,58 @@
+{
+  "source": "Hand-copied from https://programsandcourses.anu.edu.au/2027/specialisation/<CODE> on 2026-09-29: the sections anu-pandc 0.3.1 doesn't capture. Edit this, then run node scripts/merge-subplans.ts.",
+  "specialisations": {
+    "ARIN-SPEC": {
+      "otherInformation": [
+        "This Specialisation is incompatible with the Computing and Mathematical Foundations minor and the Intelligent Systems major. Students planning to complete COMP4691 Optimisation should ensure they complete MATH1013 or MATH1115 from the Information and Communications Technology-related course list early in their program."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    },
+    "HCCC-SPEC": {
+      "otherInformation": [
+        "This specialisation is only available to students studying BAC (AACOM) and BACR&D (AACRD)."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ],
+      "headings": ["Advice to Students"]
+    },
+    "SYAR-SPEC": {
+      "topics": [
+        "concurrency and the design and implementation of concurrent programs",
+        "synchronisation approaches",
+        "operating system design",
+        "memory management",
+        "process scheduling",
+        "files systems",
+        "network layers and protocols including datalink, network, and transport layer protocols and their performance",
+        "modelling and simulation and the limitations and design of such systems",
+        "numerical calculation",
+        "developing algorithms and implementing code that yields good performance on high-performance architectures",
+        "database design methods",
+        "database query processing and optimisation",
+        "transaction and security management in a relational database management system."
+      ],
+      "otherInformation": [
+        "COMP4045 Advanced Topics in Computer Systems is a special topics course and the particular topics taught under this code will vary. The topic to be covered in each instance of the course will be advertised on the School of Computing website."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    },
+    "THCS-SPEC": {
+      "otherInformation": [
+        "To enrol in MATH4343 students will need to apply to the course convener for a permission code.",
+        "COMP4011 Advanced Topics in Formal Methods and Programming Languages is a special topics course and the particular topics taught under this code will vary. The topic to be covered in each instance of the course will be advertised on the School of Computing website."
+      ],
+      "relevantDegrees": [
+        "Bachelor of Advanced Computing (Honours) (AACOM)",
+        "Bachelor of Advanced Computing (Research and Development) (Honours) (AACRD)"
+      ]
+    }
+  }
+}

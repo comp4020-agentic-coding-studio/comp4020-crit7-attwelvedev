@@ -127,6 +127,10 @@ None.
 - **Text source.** Take the text from the spec's SD1 reference (verbatim,
   including SYAR's "files systems" typo). Re-check each page live with
   `curl -sL <url>` before committing.
+  - *2026-09-30, at execution:* the live re-check couldn't be done, because
+    P&C kept returning "500 - The request timed out". With the user's
+    agreement, the supplement was committed from the SD1 reference text
+    (seen 2026-09-29) without that check.
 - **Paragraphs.** THCS's Other Information is two paragraphs: the MATH4343
   permission code, then COMP4011's special topics. The others are one each.
 - **Types**, in `src/data/specialisation-types.ts`:
@@ -201,7 +205,7 @@ A failure names the spec, the list heading, and the missing or extra codes.
 
 ### Task 1: Supplement, merge script and merged data
 
-- [ ] **Description.** Add the supplement from the live P&C pages, a pure
+- [x] **Description.** Add the supplement from the live P&C pages, a pure
   and tested merge script, the generated `data/2027/specialisations.json`,
   and a freshness test, per this file's §4.1–4.2. Also add the merge step to
   the scrape script and a package script.
