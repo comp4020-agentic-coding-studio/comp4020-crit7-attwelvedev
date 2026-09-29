@@ -6,7 +6,7 @@ import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/f
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
-import { actionFor, knockOnText, newlyBroken, undoEntry } from "./plan-actions";
+import { actionFor, changesNothing, knockOnText, newlyBroken, undoEntry } from "./plan-actions";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -32,6 +32,18 @@ describe("actionFor", () => {
 
   it("places one that isn't placed", () => {
     expect(actionFor(view, "COMP4680", 4)).toEqual({ kind: "place", code: "COMP4680", term: 4 });
+  });
+});
+
+describe("changesNothing", () => {
+  it("is true for a move to the term the course is already in", () => {
+    expect(changesNothing(view, { kind: "move", code: "COMP2100", term: 2 })).toBe(true);
+  });
+
+  it("is false for a real move, a place or a remove", () => {
+    expect(changesNothing(view, { kind: "move", code: "COMP2100", term: 3 })).toBe(false);
+    expect(changesNothing(view, { kind: "place", code: "COMP4680", term: 4 })).toBe(false);
+    expect(changesNothing(view, { kind: "remove", code: "COMP2100" })).toBe(false);
   });
 });
 

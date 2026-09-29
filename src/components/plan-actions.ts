@@ -35,6 +35,13 @@ export function knockOnText(codes: string[]): string {
   return ` ${codes.length} courses now miss a prerequisite, including ${codes[0]}.`;
 }
 
+// Dropping a course back on its own term (or choosing it from any other
+// entry point): nothing to send, and nothing to undo.
+export function changesNothing(view: PlanView, action: PlanAction): boolean {
+  if (action.kind !== "move") return false;
+  return view.placements.some((p) => p.code === action.code && p.term === action.term);
+}
+
 // Putting a course in a term is a move if it's already placed.
 export function actionFor(view: PlanView, code: string, term: number): PlanAction {
   const placed = view.placements.some((p) => p.code === code);

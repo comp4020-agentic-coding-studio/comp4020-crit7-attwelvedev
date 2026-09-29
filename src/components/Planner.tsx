@@ -25,7 +25,7 @@ import {
   saveSplit,
   type SplitStop,
 } from "./panel-state";
-import { actionFor, knockOnText, newlyBroken, type PlanAction, type UndoEntry, undoEntry } from "./plan-actions";
+import { actionFor, changesNothing, knockOnText, newlyBroken, type PlanAction, type UndoEntry, undoEntry } from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
@@ -186,6 +186,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // card menu, suggestion, Place in…, the details sidebar — so each is
   // refused by the same rule as dragging and each offers the same Undo.
   async function runAction(action: PlanAction): Promise<void> {
+    if (changesNothing(view, action)) return;
     if (action.kind === "remove") {
       if (!view.placements.some((p) => p.code === action.code)) return;
     } else {

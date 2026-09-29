@@ -4192,6 +4192,21 @@ describe("undo for every plan change", { timeout: 30_000 }, () => {
     });
   });
 
+  it("dropping a course back on its own semester changes nothing and offers no Undo", async () => {
+    await withFreshPlan(async (page) => {
+      const card = page.locator('[data-term="0"] [data-placed="COMP1130"]');
+      const term = (await page.locator('[data-term="0"]').boundingBox())!;
+      await card.hover();
+      await page.mouse.down();
+      await page.mouse.move(term.x + term.width / 2, term.y + term.height - 40, { steps: 10 });
+      await page.mouse.up();
+      // Long enough for a toast to have arrived if the drop sent a request.
+      await page.waitForTimeout(1000);
+      expect(await toast(page).count()).toBe(0);
+      expect(await card.count()).toBe(1);
+    });
+  });
+
   it("a move from the details strip offers Undo", async () => {
     await withFreshPlan(async (page) => {
       await page.locator('[data-placed="COMP1130"] .course-card-title').click();
