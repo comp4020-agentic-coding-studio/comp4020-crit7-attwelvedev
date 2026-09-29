@@ -364,6 +364,11 @@ harness, not just in a review.
     scroll-wide strip unblurred wherever it was off screen at first
     paint. The allowlist swaps `.timeline-year-head` for
     `.timeline-glass`.
+  - **Scroll buttons, revised:** ‹ › sit in a 32px frosted pill,
+    `.timeline-toolbar.glass`, added to the allowlist, not on a fading
+    white backing. Each button keeps a 44px target. The pill and the edge
+    fades sit clear of the scroller's scrollbars (`--bar-w`/`--bar-h`,
+    measured by Timeline).
   - **Cutoff line:** the gold cutoff line is removed. The Completed
     control's description and Help now say each completed semester is
     marked in its heading. `.term.term-cutoff` replaced the
