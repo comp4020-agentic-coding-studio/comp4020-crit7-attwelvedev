@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
-import { openPage, type Viewport } from "../browser";
+import { axeViolations, openPage, type Viewport } from "../browser";
 import { baseUrl, browser, planWithPlacement, useBrowser, withPlan } from "./helpers";
 
 useBrowser();
@@ -148,6 +148,27 @@ describe("timeline years", { timeout: 30_000 }, () => {
       });
       expect(result.ring).toBeGreaterThan(0);
       expect(result.clearance).toBeGreaterThanOrEqual(result.ring);
+    });
+  });
+
+  // With no courses placed, the scroller holds nothing to tab to, and on a
+  // phone there are no ‹ › buttons either: it's a focusable, labelled
+  // region, so the keyboard can still scroll it (found by axe at the
+  // Phase 05 close, 2026-09-29).
+  it.each([desktop, phone])("an empty plan's timeline can be scrolled from the keyboard at $width", async (viewport) => {
+    const created = await fetch(new URL("/api/plans", baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl },
+      redirect: "manual",
+    });
+    const id = created.headers.get("location")!.split("/").pop()!;
+    await onPlan(id, viewport, async (page) => {
+      const scroller = page.getByRole("region", { name: "Timeline" });
+      expect(await scroller.evaluate((el) => el.classList.contains("timeline-scroll"))).toBe(true);
+      expect(await axeViolations(page)).toEqual([]);
+      await scroller.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
     });
   });
 

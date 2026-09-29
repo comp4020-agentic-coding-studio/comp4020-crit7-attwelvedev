@@ -238,6 +238,11 @@ export default function Timeline({
         <div
           class="timeline-scroll"
           ref={scrollRef}
+          // A labelled tab stop, so the keyboard can scroll it even when it
+          // holds nothing focusable (an empty plan, with no ‹ › on a phone).
+          role="region"
+          aria-label="Timeline"
+          tabIndex={0}
           onMouseOver={(event) => {
             const card = (event.target as Element).closest("[data-placed]");
             if (card) setHoveredCode(card.getAttribute("data-placed"));

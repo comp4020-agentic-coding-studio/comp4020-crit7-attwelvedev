@@ -1121,6 +1121,11 @@ section[aria-label="program checks"] > h3 {
   scroll-padding-block-start: calc(var(--year-band) + 3rem);
 }
 
+/* Inset: the region clips anything drawn outside the scroller. */
+.timeline-scroll:focus-visible {
+  outline-offset: -2px;
+}
+
 /* One calendar year: its head spans both terms. */
 .timeline-year {
   display: grid;
