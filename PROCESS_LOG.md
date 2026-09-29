@@ -952,3 +952,33 @@ three things. The toast is the element actually hit at its own centre
 half of it. Without the CSS change, the spec failed at the first check.
 With it, the full suite is green (811 tests), and the phone screenshot
 shows the whole sentence wrapped beside Undo.
+
+## 2026-09-29 — Measuring the slow check before fixing it, then budgeting it
+
+Resolved by 404caf9..8b86423.
+
+`pnpm check` had crept up to about seven minutes, one phase at a time.
+The obvious explanations were "more tests" (nothing to do) or trimming
+fixed waits. Neither had been measured. A JSON-reporter run gave per-file
+and per-test times. One file, `spec/layout.test.ts`, took 416s of the
+roughly 420s: 299 browser tests at a median of 1.2s with no outliers,
+while every other file finished inside 2s. Vitest runs a file's tests
+serially and only runs files in parallel, so that file set the wall time
+by itself and grew with every plan. So the fix is structural, not
+per-test.
+
+The 33 `describe` blocks moved by script into eight
+`spec/layout/<area>.test.ts` files, balanced by the measured suite times.
+A second script confirmed every block survived byte-for-byte, and the
+test count stayed at 827. Three consecutive full runs were green in
+66–69s. That also settles the real risk, which was flakiness from
+timing-sensitive tests running under parallel load.
+
+A split only holds if nothing grows back, so the correction also went
+into the harness. `spec/suite-size.test.ts` fails any browser spec file
+over 1,000 lines (about 80s at the measured median) and names the fix.
+I proved it fails on the pre-split file and passes now. CLAUDE.md says
+where browser suites go and to measure before guessing. The global
+`plan-feature` and `execute-plan` skills now check runner parallelism
+when planning tests, and watch the check's time against a baseline while
+executing.
