@@ -49,7 +49,8 @@ The suites are split into one file per area of the page (`undo`, `details`,
 files in parallel: as a single file they took about seven minutes, split they
 take about one. Put a new `describe` in the file for its area, or start a new
 file (calling `useBrowser()` at the top) once one runs much longer than the
-rest. To run one suite, filter by its name rather than its file:
+rest. `suite-size.test.ts` fails any browser file past its line budget, so a
+file can't quietly grow back into the bottleneck. To run one suite, filter by its name rather than its file:
 `pnpm build && pnpm vitest run --project spec -t "<describe>"`.
 
 CI installs Chromium before `pnpm check`; locally it's a one-time setup:

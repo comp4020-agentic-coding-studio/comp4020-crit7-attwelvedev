@@ -7,6 +7,15 @@
   viewports (`1920 1080`, `390 844`) — the render is the truth, not the
   source.
 
+## Test speed
+
+vitest runs a file's tests serially and files in parallel, so the slowest
+file sets `pnpm check`'s time. Put a browser `describe` in the
+`spec/layout/<area>.test.ts` for its area; `spec/suite-size.test.ts` fails
+any browser file past its line budget. If the check gets noticeably
+slower, measure per file (`vitest run --reporter=json`) before guessing
+at a fix.
+
 ## Generated files
 
 Never hand-edit `dist/`, `.astro/`, or generated `api/*.json`; fix the
