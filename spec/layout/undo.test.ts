@@ -482,6 +482,16 @@ describe("history buttons", { timeout: 30_000 }, () => {
     });
   });
 
+  it("are axe clean with the toast offering Redo", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      await moveToS1_2028(page);
+      await expect.poll(() => undoButton(page).isEnabled()).toBe(true);
+      await undoButton(page).click();
+      await page.locator(".undo-toast").getByRole("button", { name: "Redo" }).waitFor();
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
   it("are axe clean on a phone", async () => {
     await onFreshPlan(phone, async (page) => {
       expect(await axeViolations(page)).toEqual([]);
