@@ -1040,3 +1040,33 @@ that focus returns to the trigger. The button reuses the details panel's
 44px icon-button style, so it added no new CSS. The next check ran 876
 tests, all green, and a fresh 390 render showed the button beside
 Search.
+
+## 2026-09-29 — A glass allowlist check that can't pass by finding no glass
+
+Resolved by 67ef119.
+
+WR22 limits frosted glass to floating layers. The obvious check walks the
+page and asserts that every element with a `backdrop-filter` matches the
+allowlist. The catch is that this passes just as happily when nothing is
+frosted at all. So I made it assert the other direction too: with Details
+and the palette open, `.details-head` and `.palette` must actually be
+frosted. I added a static pass over `src/styles.css` as well, because
+Playwright can't emulate `prefers-reduced-transparency`. It requires the
+`.glass` fallback, and it requires every `backdrop-filter` declaration to
+sit on an allowlisted selector.
+
+That second assertion failed on a build where the CSS was plainly
+correct. Reading `dist/` showed why. The minifier had collapsed the
+`backdrop-filter` / `-webkit-backdrop-filter` pair to the last one, the
+prefixed form, which Chromium ignores. Glass was shipping nowhere, and a
+one-way allowlist test would have been green. Reversing the declaration
+order fixed it. The comment on `.glass` says why the prefixed one comes
+first, so nobody "tidies" it back.
+
+I knew the fix was right because the same test went green on the rebuilt
+`dist/`, with no change to the test. The rendered screenshots showed the
+Details head frosting its sections. The rule now lives in the harness:
+glass added off the allowlist fails `pnpm check`, and so does glass that
+silently stops rendering. The allowlist already names Phases 06–07's
+layers (`.size-tip`, `.tabbar`, `.sheet-head`), so they're covered before
+they exist.
