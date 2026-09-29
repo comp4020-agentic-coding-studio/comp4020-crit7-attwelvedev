@@ -1463,10 +1463,126 @@ section[aria-label="program checks"] > h3 {
   }
 }
 
+/* On a phone, details rise from the bottom as a sheet (WR44). At the peek
+   (the header alone) and half the screen it lies over the region below,
+   on the region's own edges and corners, and the tab bar floats over its
+   foot as it does over the region's; its end padding lets the last
+   section scroll out from under the bar. At full it stands 8px in from
+   every edge, over the tab bar, which fades away beneath it. A drag sets
+   --sheet-h itself, following the finger. */
+.details-panel[data-mode="sheet"] {
+  --sheet-h: 56dvh;
+  --sheet-inset: 1.25rem;
+  inset: auto var(--sheet-inset) var(--sheet-inset);
+  width: auto;
+  height: var(--sheet-h);
+  padding-block-end: calc(var(--tabbar-h) + 1rem);
+  scroll-padding-block-end: calc(var(--tabbar-h) + 1rem);
+  /* No reserved gutter: with one, Chromium's local background stopped
+     short of the inline-end padding, so the frosted header's right end
+     showed the page behind it (the dark site nav, at full height). The
+     gutter only steadies the two-column query, which a phone never
+     reaches; on touch it also held room for a scrollbar that overlays. */
+  scrollbar-gutter: auto;
+  /* No rubber-band past either end: the white is a local background (for
+     the frosted header, above), so it went with the bounce and showed the
+     page behind the sheet while the scrollbar's own white stayed put. */
+  overscroll-behavior-y: none;
+  box-shadow: 0 -12px 40px -20px rgb(23 24 26 / 0.45);
+  transition:
+    height 0.25s ease,
+    left 0.25s ease,
+    right 0.25s ease,
+    bottom 0.25s ease;
+}
+
+/* The header clear of the tab bar: its 151px, the bar's 42px overlap
+   with the sheet's foot, and a 10px gap. sheet-detent.ts holds the same
+   number. Nothing scrolls, so no end padding either. */
+.details-panel[data-mode="sheet"][data-detent="peek"] {
+  --sheet-h: 204px;
+  padding-block-end: 0;
+  overflow: hidden;
+}
+
+/* The button row, the code and a two-line title say which course it is.
+   The pills and the footer (where the data came from) say more than a
+   peek needs, and show again from half, or as a drag grows it. */
+.details-panel[data-detent="peek"]:not([data-dragging]) :is(.details-pills, .details-footer) {
+  display: none;
+}
+
+.details-panel[data-mode="sheet"][data-detent="full"] {
+  --sheet-h: calc(100dvh - 16px);
+  --sheet-inset: 8px;
+  padding-block-end: 1.5rem;
+}
+
+.tabbar {
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+
+.planner:has(.details-panel[data-detent="full"]:not([data-dragging])) .tabbar {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Follows the finger, not the ease. */
+.details-panel[data-mode="sheet"][data-dragging] {
+  transition: none;
+}
+
+.details-body[hidden] {
+  display: none;
+}
+
+/* The grabber is centred in the header's button row, clear of the
+   history buttons and Close: a full 44px target, drawn as the usual
+   short bar. Centred on the content, as the buttons are: a classic
+   scrollbar lies outside every box in the sheet. */
+.sheet-head .details-nav {
+  position: relative;
+}
+
+.sheet-handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 5rem;
+  height: 2.75rem;
+  padding: 0;
+  background: none;
+  border-color: transparent;
+  transform: translateX(-50%);
+  cursor: grab;
+  touch-action: none;
+}
+
+.sheet-handle::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.5rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--muted);
+  transform: translate(-50%, -50%);
+}
+
+.sheet-handle:hover:not(:disabled) {
+  border-color: transparent;
+}
+
+.sheet-handle:hover::before,
+.sheet-handle:focus-visible::before {
+  background: var(--ink);
+}
+
 /* The drawer covers the timeline's end. Room past the last semester keeps
    every card scrollable out from under it, and locating a card from Details
    aims at the part still showing. */
-.planner:has(.details-panel:not([data-mode="docked"])) .timeline-scroll {
+.planner:has(.details-panel:not([data-mode="docked"], [data-mode="sheet"])) .timeline-scroll {
   padding-inline-end: min(440px, 100vw);
   scroll-padding-inline-end: min(440px, 100vw);
 }
@@ -3212,7 +3328,8 @@ button.course-card-allocation:focus-visible {
 
 /* A phone shows one region at a time, picked from a floating tab bar
    (WR43). Each scroller ends with room to bring its last row out from
-   under the bar. */
+   under the bar, and anything scrolled into view (a focused control, a
+   located card) stops clear of it. */
 @container planner (width < 49.5rem) {
   .planner-layout[data-tab="timeline"] #requirements,
   .planner-layout[data-tab="requirements"] .planner-timeline-area {
@@ -3221,21 +3338,27 @@ button.course-card-allocation:focus-visible {
 
   .timeline-scroll {
     padding-block-end: calc(var(--tabbar-h) + 1rem);
+    scroll-padding-block-end: calc(var(--tabbar-h) + 1rem);
   }
 
   .requirements-scroll {
     padding-block-end: calc(var(--tabbar-h) + 1rem);
   }
+
+  .planner-panes > #requirements {
+    scroll-padding-block-end: calc(var(--tabbar-h) + 1rem);
+  }
 }
 
 /* Floats bottom centre over whichever region shows, frosted (.glass) so
-   it reads as a layer over the plan. Under details (40), so a sheet at
-   full height covers it. */
+   it reads as a layer over the plan, and over the details sheet's foot
+   too: above details (40), under the palette (42). A sheet at full
+   height hides it (below). */
 .tabbar {
   position: fixed;
   left: 50%;
   bottom: 0.5rem;
-  z-index: 30;
+  z-index: 41;
   transform: translateX(-50%);
   display: flex;
   gap: 0.25rem;
@@ -3285,6 +3408,11 @@ button.course-card-allocation:focus-visible {
 
   .planner-panes > .details-panel[data-mode="drawer"] {
     animation: none;
+  }
+
+  .details-panel[data-mode="sheet"],
+  .tabbar {
+    transition-duration: 0s;
   }
 }
 

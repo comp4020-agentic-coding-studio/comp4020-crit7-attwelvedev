@@ -63,6 +63,36 @@ Below the phone threshold (a planner container under 49.5rem):
   aren't displayed in stacked mode.
 - The sheet's pill after Remove is the app's real text, "Not in your
   plan" (Task 21's "Not planned" meant this).
+- **Handle semantics (ruled 2026-09-29, Task 21).** axe rejects
+  `aria-valuetext` on a plain `<button>` (`aria-allowed-attr`), so the
+  handle is `<button class="sheet-handle" role="slider">`, with
+  `aria-orientation="vertical"`, `aria-valuemin` 0, `aria-valuemax` 2,
+  `aria-valuenow` 0/1/2 and `aria-valuetext` "Peek" / "Half height" /
+  "Full height". A tap, Enter or Space cycles the heights (`nextDetent`),
+  and ↑/↓ step one height without wrapping.
+- **Sheet geometry (amended in Task 21's human review, 2026-09-29).** The
+  user asked for this, deliberately drifting from the mockup. The regions
+  still run under the floating tab bar, because the frosted content
+  beneath it is worth the dead space on a dense small screen. The sheet
+  follows them:
+  - **Peek and half:** on the region's own 1.25rem side and bottom insets
+    and radius. The tab bar (z-index 41, above details at 40, below the
+    palette at 42) floats over the sheet's foot, and the sheet's end
+    padding and scroll padding keep content clear of it.
+  - **Full:** 8px in from every edge, all corners round, over the tab bar,
+    which fades out.
+  - **Heights** (`sheet-detent.ts`, mirrored in CSS): peek `PEEK_PX` =
+    204, which is the 151px header plus the bar's 42px overlap and a gap;
+    half is 0.56 × the viewport; full is the viewport less 16.
+  - **The peek** hides the pills and the footer, and shows the button
+    row, the code and the title.
+  - **The handle** is absolutely centred in the header's button row.
+  - **The header** keeps the desktop panel's padding.
+  - **Scrollbar gutter:** the sheet drops `scrollbar-gutter: stable`.
+    With the gutter, the local background stopped short of the header's
+    inline-end padding and the page showed through it.
+  - **This supersedes §4's "8px from the sides, bottom at tab bar + 8px",
+    the 148px peek, and "full: 100% − 8px, square bottom corners".**
 
 ### 2.3 Out of scope for this phase
 
@@ -295,6 +325,25 @@ export interface LayoutResult {
 - **Depends on:** Phase 06.
 
 ### Task 21: Details bottom sheet with peek / half / full, handle tap and drag, and Remove from the sheet
+
+- [x] **Done 2026-09-29.** The user accepted the human review ("pass")
+  after two rounds. The handle and the geometry were amended per §2.2a.
+  - **Specs:** `spec/layout/phone-layout.test.ts` ("details sheet").
+  - **Before measurement** Planner passes `"drawer"`, because an
+    unmeasured layout reads as stacked. The panel keeps the CSS fixed
+    drawer until the width is known.
+  - **Overscroll:** the sheet doesn't rubber-band
+    (`overscroll-behavior-y: none`), because its white is a local
+    background.
+  - **`pixelAt` / `detailsHeadEnd`** (`spec/layout/helpers.ts`) read the
+    rendered colour under the header's end, so the see-through-header
+    bug fails a spec, not just a screenshot.
+  - **Found in the review:** the Phase 06 drawer had the same two
+    faults. At the user's request it was fixed in a separate commit.
+  - **Refactor:** there was no stacked-only interim drawer rule to
+    delete. Phase 02's fixed drawer is the base rule that the unmeasured
+    panel still uses, so it stays. The drawer's timeline end padding
+    now excludes the sheet.
 
 - **Description:** WR44 and WR45.
 - **Files touched:**

@@ -77,3 +77,33 @@ export async function planWithPlacement(code: string, term = 0): Promise<string>
   expect(placed.status).toBe(200);
   return id;
 }
+
+// The colour the page renders at (x, y), read back from a screenshot, for
+// the cases only paint shows: what a translucent layer lets through.
+export async function pixelAt(page: Page, x: number, y: number): Promise<[number, number, number]> {
+  const png = await page.screenshot({ clip: { x, y, width: 1, height: 1 } });
+  return page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${b64}`;
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(img, 0, 0, 1, 1);
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    return [r, g, b] as [number, number, number];
+  }, png.toString("base64"));
+}
+
+// Near the top of the details header's inline-end padding, which lies
+// over whatever is behind the panel: the panel's own white must reach it,
+// or the frosted header shows the page through its end.
+export async function detailsHeadEnd(page: Page): Promise<[number, number, number]> {
+  const box = await detailsPanel(page)
+    .locator(".details-head")
+    .evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.right - 8, y: r.top + 40 };
+    });
+  return pixelAt(page, Math.round(box.x), Math.round(box.y));
+}
