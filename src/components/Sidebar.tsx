@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { CourseCard, GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
-import { isError, setChoice } from "./api";
 import CourseSearch from "./CourseSearch";
 import type { DetailsFocus } from "./details-state";
 import type { PlanAction } from "./plan-actions";
@@ -28,9 +27,8 @@ export interface ShowRequest {
 interface Props {
   view: PlanView;
   planId: string;
-  onChanged: (view: PlanView) => void;
   onAnnounce: (message: string) => void;
-  // Place in… on a group's or a search result's card.
+  // Place in… on a group's or a search result's card, and a group's choice.
   onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
@@ -65,11 +63,8 @@ interface Props {
 interface GroupProps {
   view: PlanView;
   group: GroupView;
-  planId: string;
   readOnly: boolean;
   depth: number;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
   onAction: (action: PlanAction) => Promise<void>;
   onDragStart?: (code: string) => void;
   onDragEnd?: () => void;
@@ -120,11 +115,8 @@ function saveCompact(ids: Set<string>) {
 function Group({
   view,
   group,
-  planId,
   readOnly,
   depth,
-  onChanged,
-  onAnnounce,
   onAction,
   onDragStart,
   onDragEnd,
@@ -143,9 +135,7 @@ function Group({
   async function choose(childId: string | null) {
     setChoicePending(true);
     try {
-      const result = await setChoice(planId, group.id, childId);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
+      await onAction({ kind: "choice", groupId: group.id, childId });
     } finally {
       setChoicePending(false);
     }
@@ -232,11 +222,8 @@ function Group({
               key={child.id}
               view={view}
               group={child}
-              planId={planId}
               readOnly={readOnly}
               depth={depth + 1}
-              onChanged={onChanged}
-              onAnnounce={onAnnounce}
               onAction={onAction}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
@@ -314,7 +301,6 @@ function Group({
 export default function Sidebar({
   view,
   planId,
-  onChanged,
   onAnnounce,
   onAction,
   onDragStart,
@@ -560,11 +546,8 @@ export default function Sidebar({
               key={group.id}
               view={view}
               group={group}
-              planId={planId}
               readOnly={readOnly}
               depth={0}
-              onChanged={onChanged}
-              onAnnounce={onAnnounce}
               onAction={onAction}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}

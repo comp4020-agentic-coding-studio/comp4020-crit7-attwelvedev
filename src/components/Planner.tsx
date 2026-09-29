@@ -164,9 +164,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     if (next < 0 || next > view.terms.length) return;
     setCutoffPending(true);
     try {
-      const result = await setCutoff(view.plan.id, next);
-      if (isError(result)) setAnnouncement(result.error);
-      else setView(result);
+      await runAction({ kind: "cutoff", cutoff: next });
     } finally {
       setCutoffPending(false);
     }
@@ -207,9 +205,10 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     }
   }
 
-  // The one path every place, move and remove takes — drag (mouse or touch),
-  // card menu, suggestion, Place in…, the details sidebar — so each is
-  // refused by the same rule as dragging and each offers the same Undo.
+  // The one path every plan change takes — drag (mouse or touch), card
+  // menu, suggestion, Place in…, the details sidebar, a choice, the
+  // Completed menu — so a place or move is refused by the same rule as
+  // dragging, and every change offers the same Undo.
   async function runAction(action: PlanAction): Promise<void> {
     if (changesNothing(view, action)) return;
     if (action.kind === "remove") {
@@ -375,7 +374,6 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           <Sidebar
             view={view}
             planId={view.plan.id}
-            onChanged={setView}
             onAnnounce={setAnnouncement}
             onAction={runAction}
             onDragStart={setDraggingCode}
@@ -420,8 +418,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           onClose={() => setDetails(closeDetails)}
           onPlace={(term) => void runAction(actionFor(view, details.code!, term))}
           onRemove={() => void runAction({ kind: "remove", code: details.code! })}
-          onChanged={setView}
-          onAnnounce={setAnnouncement}
+          onAction={runAction}
         />
       )}
       {undo && (

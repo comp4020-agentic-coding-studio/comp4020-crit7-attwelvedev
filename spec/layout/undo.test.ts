@@ -196,3 +196,103 @@ describe("knock-on warning", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("every edit toasts", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const toast = (page: Page) => page.locator(".undo-toast");
+
+  async function onPlan(id: string, path: string, check: (page: Page) => Promise<void>): Promise<void> {
+    const page = await openPage(browser, new URL(`/plan/${id}${path}`, baseUrl).href, desktop);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  async function undoFromToast(page: Page) {
+    await toast(page).getByRole("button", { name: "Undo" }).click();
+  }
+
+  it("a pin offers Undo, which sets it back to Automatic", async () => {
+    await onPlan(await planWithPlacement("COMP2100", 2), "?course=COMP2100", async (page) => {
+      const panel = detailsPanel(page);
+      const toggle = panel.locator(".pin-toggle");
+      await toggle.click();
+      await panel.locator(".pin-panel").getByRole("button", { name: "Electives", exact: true }).click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("COMP2100 now counts toward Electives.");
+      await undoFromToast(page);
+      await expect.poll(() => toggle.textContent()).toContain("Counts toward: Automatic");
+    });
+  });
+
+  it("a check answer offers Undo, which sets it back to Not sure", async () => {
+    const id = await planWithPlacement("MATH1115");
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "MATH1116", term: 1 }),
+    });
+    expect(placed.status).toBe(200);
+    await onPlan(id, "?course=MATH1116", async (page) => {
+      const group = detailsPanel(page).locator(".requisite-tree [role=group]").first();
+      await group.getByRole("button", { name: "Met", exact: true }).click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      const text = await toast(page).textContent();
+      expect(text).toContain("MATH1116: '");
+      expect(text).toContain("marked Met.");
+      await undoFromToast(page);
+      await expect
+        .poll(() => group.getByRole("button", { name: "Not sure", exact: true }).getAttribute("aria-pressed"))
+        .toBe("true");
+    });
+  });
+
+  it("a specialisation choice offers Undo, which clears it again", async () => {
+    await onPlan(await planWithPlacement("COMP1130"), "", async (page) => {
+      const fieldset = page.getByRole("group", { name: "Choose Specialisation" });
+      // click, not check: the radio is controlled by the plan, so it only
+      // turns checked once the server's view comes back.
+      await fieldset.getByLabel("Human-Centred & Creative Computing").click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain(
+        "Chose Human-Centred & Creative Computing for Specialisation.",
+      );
+      await undoFromToast(page);
+      await expect.poll(() => fieldset.locator("input[type=radio]:checked").count()).toBe(0);
+    });
+  });
+
+  it("Completed through offers Undo, which sets it back", async () => {
+    await onPlan(await planWithPlacement("COMP1130"), "", async (page) => {
+      const toggle = page.locator("button.completed-toggle");
+      await toggle.click();
+      await page.locator(".completed-panel").getByRole("button", { name: "S2 2027" }).click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Completed through S2 2027.");
+      await undoFromToast(page);
+      await expect.poll(() => toggle.innerText()).toBe("Nothing completed yet");
+    });
+  });
+
+  it("choosing the pin already set shows no toast", async () => {
+    await onPlan(await planWithPlacement("COMP2100", 2), "?course=COMP2100", async (page) => {
+      const panel = detailsPanel(page);
+      await panel.locator(".pin-toggle").click();
+      await panel.locator(".pin-panel").getByRole("button", { name: "Automatic", exact: true }).click();
+      // Long enough for a toast to have arrived if it sent a request.
+      await page.waitForTimeout(1000);
+      expect(await toast(page).count()).toBe(0);
+    });
+  });
+
+  it("choosing the Completed through already set shows no toast", async () => {
+    await onPlan(await planWithPlacement("COMP1130"), "", async (page) => {
+      await page.locator("button.completed-toggle").click();
+      await page.locator(".completed-panel").getByRole("button", { name: "Nothing yet" }).click();
+      await page.waitForTimeout(1000);
+      expect(await toast(page).count()).toBe(0);
+    });
+  });
+});

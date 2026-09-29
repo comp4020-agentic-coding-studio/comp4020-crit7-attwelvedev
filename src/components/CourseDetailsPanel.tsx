@@ -2,9 +2,9 @@ import { useEffect, useId, useRef, useState } from "preact/hooks";
 import type { ComponentChildren } from "preact";
 import type { CheckAnswer } from "../lib/domain/types";
 import { type CourseCard, type CourseDetailsView, NORMAL_TERM_UNITS, type PlanView } from "../lib/domain/view";
-import { isError, setCheck, setPin } from "./api";
 import ChoiceMenu from "./ChoiceMenu";
 import type { DetailsState } from "./details-state";
+import type { PlanAction } from "./plan-actions";
 import {
   dependentsOf,
   familyOf,
@@ -30,8 +30,7 @@ interface Props {
   onClose: () => void;
   onPlace: (term: number) => void;
   onRemove: () => void;
-  onChanged: (view: PlanView) => void;
-  onAnnounce: (message: string) => void;
+  onAction: (action: PlanAction) => Promise<void>;
 }
 
 const STATE_WORD: Record<StripCell["state"], string> = {
@@ -120,8 +119,7 @@ export default function CourseDetailsPanel({
   onClose,
   onPlace,
   onRemove,
-  onChanged,
-  onAnnounce,
+  onAction,
 }: Props) {
   const code = details.code!;
   const placement = view.placements.find((p) => p.code === code) ?? null;
@@ -155,9 +153,7 @@ export default function CourseDetailsPanel({
   async function pin(groupId: string) {
     setPinPending(true);
     try {
-      const result = await setPin(view.plan.id, code, groupId || null);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
+      await onAction({ kind: "pin", code, groupId: groupId || null });
     } finally {
       setPinPending(false);
     }
@@ -166,9 +162,7 @@ export default function CourseDetailsPanel({
   async function answer(item: string, value: CheckAnswer | null) {
     setPendingCheck({ item, value });
     try {
-      const result = await setCheck(view.plan.id, code, item, value);
-      if (isError(result)) onAnnounce(result.error);
-      else onChanged(result);
+      await onAction({ kind: "check", code, item, answer: value });
     } finally {
       setPendingCheck(null);
     }
