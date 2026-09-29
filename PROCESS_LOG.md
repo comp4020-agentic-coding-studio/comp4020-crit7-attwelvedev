@@ -1070,3 +1070,30 @@ glass added off the allowlist fails `pnpm check`, and so does glass that
 silently stops rendering. The allowlist already names Phases 06–07's
 layers (`.size-tip`, `.tabbar`, `.sheet-head`), so they're covered before
 they exist.
+
+## 2026-09-29 — Working the layout plan's numbers before building it
+
+Resolved by 20d5be8.
+
+Phase 06's plan specified the layout engine step by step, and the obvious
+move was to transcribe it: the steps were precise and the tests were
+named. Before writing code I worked the plan's own test cases through its
+formulas by hand, and two didn't hold. Step 5 ("shrink the sidebar":
+`details = max(DETAILS_MIN, avail − reqs − TL_MIN)`) would *widen* a
+docked 440px panel to 638px at a 1920 viewport, contradicting the test
+beside it that says it "docks 440". Worse, the drag rule let Requirements
+grow up to the room left beside the *minimum* details width, while the
+engine steps Requirements down *before* it shrinks details. So a user
+widening Requirements past the room details left would watch it jump back
+a whole column in the middle of the drag: exactly the "snaps fighting
+you" the Task 19 review would reject, found only after a full UI build.
+
+I ruled that step 5 only ever shrinks (a `min`), and that a Requirements
+drag squeezes details down to their minimum in the preferences it
+returns, so the engine keeps what was dragged. Both went into the phase
+file's rulings before any code, so the plan still describes what was
+built. The check that the result is right is in the unit suite, not in
+my arithmetic: "opening details at 1664 … docks 440" and "widening
+requirements beside docked details squeezes details, not the columns"
+feed the drag's preferences back into `computeLayout` and assert that the
+width survives. Those are the two properties that were broken on paper.
