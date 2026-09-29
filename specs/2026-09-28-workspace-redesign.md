@@ -229,8 +229,13 @@ Numbering is local to this spec (WR = workspace redesign).
 **E. Search palette**
 
 - WR27. The plan page's header row, next to the title and the
-  Completed-through control, holds a search field. On phones it's a 44px
-  search button.
+  Completed-through control, holds a 44px search icon button named "Search
+  courses". It shows the ⌘K / Ctrl K hint beside the icon where there's a
+  keyboard, and just the icon on phones. The palette's input is labelled
+  "Search courses by code or title".
+  - *Amended 2026-09-29, after Phase 04:* it was a search field on wide
+    layouts. Styled as an input, it looked like typing would happen in
+    place, and its long text cluttered the header.
   - The field, the button and ⌘K / Ctrl-K each open a palette.
   - ⌘K or Escape closes it.
   - The site nav is unchanged.

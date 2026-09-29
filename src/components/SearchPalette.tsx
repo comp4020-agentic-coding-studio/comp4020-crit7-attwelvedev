@@ -174,7 +174,7 @@ export default function SearchPalette({
       >
         <form onSubmit={onSubmit}>
           <label>
-            Course code or title
+            Search courses by code or title
             <span class="course-search-field">
               <svg class="course-search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <circle cx="11" cy="11" r="7" />

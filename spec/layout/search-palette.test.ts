@@ -44,6 +44,31 @@ describe("search palette", { timeout: 30_000 }, () => {
     });
   });
 
+  // A button, not a field: styled as an input, it promised typing in place.
+  it.each([
+    [desktop, /^(⌘K|Ctrl K)$/],
+    [phone, /^$/],
+  ])("the trigger is an icon button, showing only the shortcut where there's a keyboard, at $width×$height", async (viewport, shown) => {
+    await withPlan(viewport, async (page) => {
+      const trigger = page.locator(".search-trigger");
+      expect((await trigger.innerText()).trim()).toMatch(shown);
+      expect(await trigger.getAttribute("title")).toMatch(/^Search courses/);
+      const box = (await trigger.boundingBox())!;
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.width).toBeLessThanOrEqual(120);
+    });
+  });
+
+  it("labels the palette's input with what it searches", async () => {
+    await withPlan(desktop, async (page) => {
+      await openSearch(page);
+      expect(await page.getByLabel("Search courses by code or title").evaluate((el) => el.matches(".palette input"))).toBe(
+        true,
+      );
+    });
+  });
+
   it("⌘K and Ctrl-K toggle the palette; Escape closes it and returns focus to the trigger", async () => {
     await withPlan(desktop, async (page) => {
       for (const mod of ["Meta", "Control"]) {

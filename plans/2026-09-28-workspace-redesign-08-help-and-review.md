@@ -94,7 +94,8 @@ User-facing names this phase documents, as built:
 **Help rewrite.** Keep the page's structure and voice (plain, second
 person, sentence case). The changes:
 - **"The basics"**: clicking a course's title opens its details beside the
-  plan; the plan stays usable; search with the header field or ⌘K; drag
+  plan; the plan stays usable; search with the header's search button or ⌘K (an icon button since the
+  WR27 amendment, 2026-09-29); drag
   results onto the timeline.
 - **New section "Course details"**: what each section shows, including the
   strip, and that the details come from Programs & Courses with the date

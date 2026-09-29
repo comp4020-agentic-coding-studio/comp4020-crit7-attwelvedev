@@ -2061,15 +2061,18 @@ fieldset[aria-busy="true"] {
   margin-top: 0.6rem;
 }
 
-/* Styled as the field it opens, with its shortcut beside the words. */
+/* An icon button, with its shortcut beside the icon where there's a
+   keyboard to press it on. */
 .search-trigger {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0 0.6rem 0 0.75rem;
   font-weight: 400;
-  color: var(--muted);
+  color: var(--unigrey);
 }
 
 .search-trigger-icon {
@@ -2086,26 +2089,13 @@ fieldset[aria-busy="true"] {
   border-radius: 0.3rem;
 }
 
-/* The header's own phone breakpoint: an icon button, still named
-   "Search courses". */
-@media (width < 44rem) {
+/* No shortcut hint on the header's phone breakpoint, or on a touch-only
+   device at any width: there's no keyboard to press it on. */
+@media (width < 44rem), (hover: none) and (pointer: coarse) {
   .search-trigger {
-    justify-content: center;
-    min-width: 2.75rem;
     padding: 0;
   }
 
-  .search-trigger-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
-  .search-trigger-more,
   .search-trigger-key {
     display: none;
   }

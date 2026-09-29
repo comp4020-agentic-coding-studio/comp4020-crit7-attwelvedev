@@ -519,17 +519,18 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             class="search-trigger"
             ref={searchTriggerRef}
             aria-haspopup="dialog"
+            aria-label="Search courses"
             aria-keyshortcuts="Meta+K Control+K"
+            title={`Search courses (${onMac ? "⌘K" : "Ctrl K"})`}
             onClick={() => setSearchOpen(true)}
           >
+            {/* An icon button, not a field: styled as an input it promised
+                typing in place. The palette's own label says what it
+                searches. */}
             <svg class="search-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-4-4" />
             </svg>
-            {/* On phones only the icon shows; "Search courses" stays as its name. */}
-            <span class="search-trigger-label">
-              Search courses<span class="search-trigger-more"> by code or title</span>
-            </span>
             <kbd class="search-trigger-key" aria-hidden="true">
               {onMac ? "⌘K" : "Ctrl K"}
             </kbd>

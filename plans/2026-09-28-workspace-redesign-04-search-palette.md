@@ -156,6 +156,11 @@ export function isTextEntry(el: { tagName: string; type?: string; isContentEdita
     title", with a "⌘K" hint (Ctrl on non-Mac).
   - On phones it collapses to an icon button with the accessible name
     "Search courses".
+  - *Amended 2026-09-29 (WR27, after the phase closed):* it's an icon
+    button at every width, named "Search courses", with a matching
+    tooltip. The ⌘K / Ctrl K hint shows only where there's a keyboard (not
+    below 44rem, and not on touch-only devices). The palette's label reads
+    "Search courses by code or title".
 - `Planner` holds `searchOpen`, and a document `keydown` listener toggles
   it on ⌘K or Ctrl-K.
 
