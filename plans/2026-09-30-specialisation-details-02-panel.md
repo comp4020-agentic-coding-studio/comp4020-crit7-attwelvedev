@@ -445,7 +445,7 @@ using only existing tokens:
 
 ### Task 4: Extract `DetailsFrame` from `CourseDetailsPanel`
 
-- [ ] **Description.** Move the shell into `DetailsFrame.tsx` per this
+- [x] **Description.** Move the shell into `DetailsFrame.tsx` per this
   file's §4.2 and render `CourseDetailsPanel` through it, with no visible
   change except that the accessible name comes from the `label` prop.
 - **Files touched:**
