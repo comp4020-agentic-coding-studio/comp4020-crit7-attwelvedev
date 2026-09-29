@@ -471,6 +471,43 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
       await context.close();
     }
   });
+
+  // The ghost once lost to .course-card's position: relative, so it sat in
+  // the flow at the end of <body>: off-screen, and making the page taller.
+  it("floats the touch-drag ghost under the finger without growing the page", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto(new URL(`/plan/${id}`, baseUrl).href, { waitUntil: "networkidle" });
+      const cdp = await context.newCDPSession(page);
+      const touch = (type: string, x = 0, y = 0) =>
+        cdp.send("Input.dispatchTouchEvent", {
+          type,
+          touchPoints: type === "touchEnd" ? [] : [{ x, y }],
+        } as never);
+      const height = () => page.evaluate(() => document.documentElement.scrollHeight);
+      const before = await height();
+      const box = (await page.locator('[data-drag-code="COMP1130"]').boundingBox())!;
+      const [x, y] = [box.x + box.width / 2, box.y + 20];
+      await touch("touchStart", x, y);
+      await page.waitForTimeout(450); // past touch-drag.ts's HOLD_MS
+      await touch("touchMove", x + 30, y + 30);
+      const ghost = page.locator(".drag-ghost");
+      await expect.poll(() => ghost.count()).toBe(1);
+      expect(await ghost.evaluate((el) => getComputedStyle(el).position)).toBe("fixed");
+      // The clone is an <li> outside its list, which would give it a bullet.
+      expect(await ghost.evaluate((el) => getComputedStyle(el).listStyleType)).toBe("none");
+      const g = (await ghost.boundingBox())!;
+      // touch-drag.ts puts the ghost's corner 14px below-right of the finger.
+      expect(Math.abs(g.x - (x + 30 + 14))).toBeLessThanOrEqual(2);
+      expect(Math.abs(g.y - (y + 30 + 14))).toBeLessThanOrEqual(2);
+      expect(await height()).toBe(before);
+      await touch("touchEnd");
+    } finally {
+      await context.close();
+    }
+  });
 });
 
 describe("locating a placed course from its term badge", { timeout: 30_000 }, () => {

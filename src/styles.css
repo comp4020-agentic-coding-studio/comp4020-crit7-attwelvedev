@@ -1742,9 +1742,14 @@ button.requisite-code:hover {
 
 /* Touch drag-and-drop (touch-drag.ts) — a floating clone of the card being
    dragged, since native HTML5 drag (which draws its own drag image) never
-   fires from a touch gesture in the first place. */
-.drag-ghost {
+   fires from a touch gesture in the first place. body > (touch-drag.ts
+   appends it there) outranks .course-card's position: relative, which
+   comes later and otherwise left the clone in the flow, off-screen. The
+   clone is an <li> outside its list, so it also needs the list's
+   list-style: none, or it wears a bullet. */
+body > .drag-ghost {
   position: fixed;
+  list-style: none;
   top: 0;
   left: 0;
   z-index: 20;
