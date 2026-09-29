@@ -1163,3 +1163,38 @@ at rgb(195,195,196) and passes at white.
 The user then asked for the same fix in the Phase 06 drawer. The same
 check, with the timeline painted black behind it, failed red there
 first, and it now guards both.
+
+## 2026-09-30 — Restoring what the scrape silently dropped, and guarding the hand-copied lists
+
+Resolved by b144541..4e7c006.
+
+Specialisations were going to open in the details panel from the scraped
+`data/2027/subplans/*.json`. The obvious fix was to tidy that JSON at
+display time: split the run-together introduction, drop the stray "AND"
+entries, style "Advice to Students". I compared the raw P&C HTML against
+the JSON first, and that ruled it out. The scrape hadn't just flattened
+the page; it had lost whole sections. Other Information and Relevant
+Degrees were missing from every page. SYAR's introduction ended on
+"students will learn about:" with the 13 topics gone. No display-time
+cleaning can restore content that was never captured, and patching the
+external `anu-pandc` was out of scope.
+
+So I fixed the data in the repo. A hand-copied supplement holds the lost
+sections, and `scripts/merge-subplans.ts` merges it with the scrape into
+one generated file the app imports statically. The merge throws if a
+supplement heading stops matching the scrape, or if the two disagree on
+which codes exist, so a re-scrape can't quietly undo the fix.
+
+The second call was about course lists that now live in two places: P&C's
+lists and the hand-written groups in `aacom-2027.ts` that allocation
+actually uses. Instead of trusting the copy, I added a drift test in
+`spec/`. It compares each list's course set and "minimum/maximum of N
+units" against the linked group.
+
+Both guards were proven red on a deliberate break. Changing one SYAR
+topic made the freshness test say "stale: run node scripts/merge-subplans.ts".
+Dropping COMP4691 from `arin-b` made the drift test name ARIN, the list
+heading and the missing code. Both edits were then reverted, and the suite
+went green. One gap stays open: the live re-check of the supplement text on
+2026-09-30 couldn't run, because P&C kept timing out. The text is the
+reference text copied on 2026-09-29.
