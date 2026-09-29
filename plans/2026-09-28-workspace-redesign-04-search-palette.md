@@ -82,7 +82,11 @@ Phase-specific:
 
 **`src/components/Planner.tsx`**
 - The header row is `.plan-title > .plan-title-main (h1, badge) +
-  .plan-actions (completed-control, MoreOptions)`.
+  .plan-actions (completed-control, history-controls, MoreOptions)`.
+  `.history-controls` (Undo/Redo, from the undo-redo plan) is only on
+  editable plans. Below `44rem` it's absolutely positioned at the end of
+  the title's line (which gets a 44px minimum height), so on phones
+  `.plan-actions` holds only Completed and More options.
 - `plannerRef` is the root of `useTouchDrag(plannerRef, {onDragStart,
   onDragEnd, onDrop})`, and `draggingCode` is its state.
 
@@ -115,12 +119,29 @@ From Phase 02:
 // CourseDetailsPanel has no grip (removed in the Phase 02 review, 2026-09-29)
 ```
 
-From Phase 03 (optional; see this file's §2.4):
+From Phase 03 (optional; see this file's §2.4), as extended by the
+undo-redo plan (`plans/2026-09-29-undo-redo.md`, executed before this
+phase):
 
 ```ts
 // src/components/plan-actions.ts
-export type PlanAction = { kind: "place"; code: string; term: number } | { kind: "move"; code: string; term: number } | { kind: "remove"; code: string };
-// Card components: onAction: (action: PlanAction) => Promise<void>
+export type PlanAction =
+  | { kind: "place"; code: string; term: number }
+  | { kind: "move"; code: string; term: number }
+  | { kind: "remove"; code: string }
+  | { kind: "pin"; code: string; groupId: string | null }
+  | { kind: "check"; code: string; item: string; answer: CheckAnswer | null }
+  | { kind: "choice"; groupId: string; childId: string | null }
+  | { kind: "cutoff"; cutoff: number };
+// Card components, Sidebar and CourseDetailsPanel: onAction: (action: PlanAction) => Promise<void>
+// (Sidebar and CourseDetailsPanel no longer take onChanged.)
+
+// src/components/undo-history.ts
+export interface ShortcutKeys { key: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean }
+export function historyShortcut(keys: ShortcutKeys, mac: boolean): "undo" | "redo" | null;
+export function isTextEntry(el: { tagName: string; type?: string; isContentEditable?: boolean } | null): boolean;
+// Planner registers the history keydown listener once (useEffect, [readOnly]),
+// ignoring isTextEntry(event.target); undo()/redo() read state through refs.
 ```
 
 ## 4. Approach
@@ -182,6 +203,13 @@ export type PlanAction = { kind: "place"; code: string; term: number } | { kind:
     selectors `.course-search input` and `.course-search
     button[type=submit]` stay valid, because the palette keeps those class
     names. Rewrite :130 as "the palette's placeholder isn't cut off".
+    Port the undo-redo plan's "history shortcuts" case "leave the search
+    box its own text undo" (`spec/layout/undo.test.ts`) the same way,
+    through `openSearch(page)`.
+  - From the undo-redo plan (UR16): "with the palette open, `${mod}+z`
+    doesn't undo". Make a card-menu move, open the palette, move focus to
+    a result title (not the input), press `${mod}+z`, and after 1s the
+    move still stands.
 - **Implementation (green):**
   - `SearchPalette.tsx`. Its default export takes:
 
@@ -222,6 +250,10 @@ export type PlanAction = { kind: "place"; code: string; term: number } | { kind:
     - render `<SearchPalette>` inside `.planner`
     - `onResults` merges into `knownCards`, `searchBlocked` and
       `searchTwoSemester`, as the old `onSearchResults` did
+    - the history shortcuts are ignored while the palette is open (UR16).
+      Its input is already a text entry, and the history `keydown`
+      listener also returns early while `searchOpen`. The listener is
+      registered once, so read `searchOpen` through a ref.
   - `Sidebar`: remove `CourseSearch` and its props (`onSearchResults`, the
     search compact id).
   - CSS: the palette is centred, `min(620px, 100% - 2rem)` wide and 12vh
@@ -232,6 +264,12 @@ export type PlanAction = { kind: "place"; code: string; term: number } | { kind:
 - **Acceptance criteria:**
   - `pnpm check` passes.
   - `grep -rn "CourseSearch" src` finds nothing.
+  - The header (search trigger, completed control, history controls, More
+    options) fits one row at 390 with no overflow, or wraps without
+    overflow if it can't. At 390 the history controls sit on the title's
+    line (see the header note above), so the second row holds the
+    trigger, Completed and More options. The "plan title row" suite's
+    100px height budget still holds.
 - **Depends on:** Phase 02.
 
 ### Task 12: Drag out of the palette

@@ -398,6 +398,12 @@ export function unfoldPrefs(input: LayoutInput): { prefs: LayoutPrefs } | { erro
   - "the panel docks as the third grid column": with `?course=COMP2100` at
     1920×1080, `.details-panel` is a child of `.planner-panes` with
     `data-mode="docked"`, and its left edge meets the details divider.
+    Docked, it no longer covers the plan header. `button.completed-toggle`,
+    both `.history-button`s and the More options toggle must each be the
+    element hit at its own centre (`elementFromPoint`). Before this phase
+    the fixed drawer covered them. The undo-redo plan accepted that
+    (user ruling, 2026-09-29) on the understanding that this phase fixes
+    it.
   - "release to close": dragging the details divider far right closes the
     panel and removes `?course`.
   - "double-click resets": each divider returns to its default (Requirements

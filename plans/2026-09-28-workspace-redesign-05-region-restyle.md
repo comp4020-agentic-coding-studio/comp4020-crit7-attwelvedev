@@ -113,6 +113,11 @@ From Phase 04 (if landed):
 - `div.palette-backdrop > div.course-search.palette[role=dialog]`
 - `button.search-trigger`
 
+From the undo-redo plan (`plans/2026-09-29-undo-redo.md`):
+- `.plan-actions > div.history-controls > button.history-button` ×2
+  (Undo, Redo), editable plans only, after `.completed-control`. Below
+  `44rem` it's absolutely positioned at the end of the title's line.
+
 ## 4. Approach
 
 **Tokens.** Add these to `:root`:
@@ -216,6 +221,13 @@ harness, not just in a review.
     `.tabbar` (Task 20) and `.sheet-head` (Task 21).
   - Requirement group cards are flattened: remove their border, radius and
     background, and add `border-block-end: 1px solid var(--line)`.
+  - The header controls take the control tier (`--r-control`) and a
+    consistent look as one set: `.completed-toggle`, the
+    `.history-controls` Undo/Redo `.history-button`s (from the undo-redo
+    plan), `.more-options-toggle`, and `button.search-trigger` if Phase
+    04 has landed. Keep the history buttons at least 44px, and keep their
+    disabled state visibly muted. Below `44rem` they sit at the end of the
+    title's line, so check both placements.
 - **Refactor:** Delete the per-group card rules this replaces.
 - **Acceptance criteria:**
   - `pnpm check` passes.
@@ -223,6 +235,7 @@ harness, not just in a review.
 - **Human review:** the running app at 1920×1080 and 390×844, with and
   without `?course=COMP2100`. A pass means:
   - the regions read as distinct, calm areas
+  - the header controls (including Undo/Redo) read as one set
   - only floating layers look frosted
   - nothing looks like boxes inside boxes
   - it matches the approved mockup's spirit (overview §0, "Visual

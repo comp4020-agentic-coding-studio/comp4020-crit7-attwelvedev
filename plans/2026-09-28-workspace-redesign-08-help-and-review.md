@@ -133,7 +133,8 @@ asserts `axeViolations(page)` is empty:
   - Required: "Completed through", "gold line", "More options", "Place in…",
     "Counts toward", "Verify on P&C", "Completed", "Planned", "When it
     runs", "Met", "Not sure", "⌘K", "Search courses", "double-click",
-    "fold", "Timeline", "Requirements", and "Programs & Courses".
+    "fold", "Timeline", "Requirements", "Programs & Courses", "Undo",
+    "Redo", "⌘Z" and "Ctrl+Y".
   - Forbidden: the existing four, plus "Your checks", "Details dialog" and
     "Pin to".
 
@@ -141,6 +142,17 @@ asserts `axeViolations(page)` is empty:
   "Arranging the workspace" and "On a phone" exist. Keep the :1838 and
   :2371 tests unchanged.
 - **Implementation (green):** the rewrite described in this file's §4.
+  It also covers undo and redo (from the undo-redo plan, which ran after
+  this file was written):
+  - every change to the plan can be undone and redone: placing, moving
+    and removing, "Counts toward", check answers, choices and "Completed
+    through"
+  - the Undo/Redo buttons in the header, whose names and tooltips say
+    which change
+  - the toast's Undo/Redo
+  - the shortcuts: ⌘Z / ⌘⇧Z on a Mac; Ctrl+Z, Ctrl+Shift+Z or Ctrl+Y
+    elsewhere. They're not active while typing in a text field.
+  - history lasts for the page visit, and is gone after a reload
 - **Refactor:** None expected.
 - **Acceptance criteria:**
   - `pnpm check` passes.
