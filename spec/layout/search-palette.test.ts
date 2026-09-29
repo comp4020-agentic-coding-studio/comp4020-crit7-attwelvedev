@@ -169,3 +169,89 @@ describe("search palette", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("dragging out of the search palette", { timeout: 30_000 }, () => {
+  const inTerm = (page: Page, term: number, code: string) =>
+    page.locator(`[data-term="${term}"] [data-placed="${code}"]`);
+  const resultCard = (page: Page, code: string) => page.locator(`.palette [data-drag-code="${code}"]`);
+
+  async function searchFor(page: Page, code: string): Promise<void> {
+    await openSearch(page);
+    await search(page, code);
+    await resultCard(page, code).waitFor();
+  }
+
+  it("mouse-drag a palette result onto a term", async () => {
+    const id = await planWithPlacement("COMP1130");
+    await onPlan(id, desktop, async (page) => {
+      await searchFor(page, "COMP4680");
+      // force: the palette covers the term until the drag starts, and
+      // dragTo's hit test would wait for it before ever moving the mouse.
+      await resultCard(page, "COMP4680").dragTo(page.locator('section[data-term="4"]'), { force: true });
+      await expect.poll(() => inTerm(page, 4, "COMP4680").count()).toBe(1);
+      await expect.poll(() => palette(page).count()).toBe(0);
+    });
+  });
+
+  it("the palette hides during a drag", async () => {
+    const id = await planWithPlacement("COMP1130");
+    await onPlan(id, desktop, async (page) => {
+      await searchFor(page, "COMP4680");
+      const card = resultCard(page, "COMP4680");
+      const start = (await card.boundingBox())!;
+      await page.mouse.move(start.x + start.width / 2, start.y + 20);
+      await page.mouse.down();
+      await page.mouse.move(start.x + start.width / 2 + 30, start.y + 20, { steps: 4 });
+      await expect
+        .poll(() => page.locator(".palette-backdrop").evaluate((el) => getComputedStyle(el).visibility))
+        .toBe("hidden");
+      await page.mouse.up();
+    });
+  });
+
+  it("touch-drag a palette result", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const context = await browser.newContext({ viewport: phone, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto(new URL(`/plan/${id}`, baseUrl).href, { waitUntil: "networkidle" });
+      const cdp = await context.newCDPSession(page);
+      const touch = (type: string, x = 0, y = 0) =>
+        cdp.send("Input.dispatchTouchEvent", {
+          type,
+          touchPoints: type === "touchEnd" ? [] : [{ x, y }],
+        } as never);
+      await searchFor(page, "COMP4680");
+      const card = (await resultCard(page, "COMP4680").boundingBox())!;
+      await touch("touchStart", card.x + card.width / 2, card.y + 20);
+      await page.waitForTimeout(450); // past touch-drag.ts's HOLD_MS
+      await expect.poll(() => page.locator(".drag-ghost").count()).toBe(1);
+      // Narrow timeline: bring term 4 on-screen mid-drag, sideways only; a
+      // vertical page scroll here is undone by the next touch move.
+      await page
+        .locator('[data-term="4"]')
+        .evaluate((el) => el.scrollIntoView({ block: "nearest", inline: "center" }));
+      const term = (await page.locator('[data-term="4"]').boundingBox())!;
+      await touch("touchMove", term.x + term.width / 2, term.y + 40);
+      await touch("touchMove", term.x + term.width / 2 + 4, term.y + 44);
+      await touch("touchEnd");
+      await expect.poll(() => inTerm(page, 4, "COMP4680").count()).toBe(1);
+      await expect.poll(() => palette(page).count()).toBe(0);
+    } finally {
+      await context.close();
+    }
+  });
+
+  // COMP2700 is outside a new plan's tree and hard-blocked from term 0
+  // (S2-only), so only the search result knows why.
+  it("a refused drop announces its reason", async () => {
+    const id = await planWithPlacement("COMP1130");
+    await onPlan(id, desktop, async (page) => {
+      await searchFor(page, "COMP2700");
+      await resultCard(page, "COMP2700").dragTo(page.locator('section[data-term="0"]'), { force: true });
+      await expect.poll(() => page.locator('p[aria-live="polite"]').textContent()).not.toBe("");
+      expect(await inTerm(page, 0, "COMP2700").count()).toBe(0);
+      expect(await page.locator('[data-placed="COMP2700"]').count()).toBe(0);
+    });
+  });
+});

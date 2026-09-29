@@ -294,7 +294,7 @@ export function isTextEntry(el: { tagName: string; type?: string; isContentEdita
 
 ### Task 12: Drag out of the palette
 
-- **Description:** WR30.
+- [x] **Description:** WR30.
 - **Files touched:**
   - `SearchPalette.tsx`, `Planner.tsx`
   - `src/styles.css`
@@ -323,18 +323,27 @@ export function isTextEntry(el: { tagName: string; type?: string; isContentEdita
       `paletteDragging` and call `onClose`.
   - CSS: `.palette-backdrop[data-dragging] { visibility: hidden;
     pointer-events: none; }`.
+  - *As built, 2026-09-29:*
+    - `onDragStartCapture` sets the native-drag flag on the next task
+      (`setTimeout`). Chrome abandons a drag whose source is hidden
+      during `dragstart` itself.
+    - The mouse tests use `locator.dragTo(target, { force: true })`.
+      Without `force`, Playwright's hit test waits for a target the
+      palette covers until the drag begins, so it never moves the mouse.
+    - The touch test scrolls term 4 with `block: "nearest"`, because a
+      vertical page scroll is undone by the next touch move.
 - **Refactor:** None expected.
 - **Acceptance criteria:** `pnpm check` passes.
 - **Depends on:** Task 11.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 11–12 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] ⌘K → "COMP4680" → drag onto S1 2029 works in the running app at
+- [x] Tasks 11–12 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes
+- [x] ⌘K → "COMP4680" → drag onto S1 2029 works in the running app at
   1920×1080. The same works by touch in device emulation at 390×844.
-- [ ] Tick Phase 04 in overview §5 and commit
+- [x] Tick Phase 04 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

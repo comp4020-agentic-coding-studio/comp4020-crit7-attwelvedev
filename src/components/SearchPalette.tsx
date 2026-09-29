@@ -24,6 +24,9 @@ interface Props {
   onAction: (action: PlanAction) => Promise<void>;
   // The course open in the details sidebar, whose titles say so.
   openCode: string | null;
+  // A touch drag from a result is under way (Planner's touch-drag hook
+  // reports it); a native one the palette sees for itself.
+  dragging: boolean;
   // The planner is in its stacked (phone) layout, so the palette takes the
   // whole screen. Its container query can't reach out here: see Planner.
   stacked: boolean;
@@ -49,12 +52,14 @@ export default function SearchPalette({
   onLocateCourse,
   onAction,
   openCode,
+  dragging,
   stacked,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CourseCardData[]>([]);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState<{ query: string; message: string } | null>(null);
+  const [nativeDrag, setNativeDrag] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -100,6 +105,13 @@ export default function SearchPalette({
     onLocateCourse(code, part);
   }
 
+  // The drop behaves like any other; the palette's job is done after it.
+  function endDrag() {
+    setNativeDrag(false);
+    onDragEnd();
+    onClose();
+  }
+
   function onKeyDown(event: KeyboardEvent) {
     const dialog = dialogRef.current!;
     const active = document.activeElement as HTMLElement | null;
@@ -141,6 +153,10 @@ export default function SearchPalette({
     <div
       class="palette-backdrop"
       data-stacked={stacked || undefined}
+      // Hidden, not removed, while a result is dragged: the terms beneath
+      // become reachable, and the dragged card stays in the DOM to get its
+      // dragend.
+      data-dragging={dragging || nativeDrag || undefined}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -152,6 +168,9 @@ export default function SearchPalette({
         aria-label="Search courses"
         ref={dialogRef}
         onKeyDown={onKeyDown}
+        // Next task, not during dragstart: Chrome abandons a drag whose
+        // source is hidden before it has taken the drag image.
+        onDragStartCapture={() => setTimeout(() => setNativeDrag(true))}
       >
         <form onSubmit={onSubmit}>
           <label>
@@ -194,7 +213,7 @@ export default function SearchPalette({
                   course={course}
                   onAction={onAction}
                   onDragStart={onDragStart}
-                  onDragEnd={onDragEnd}
+                  onDragEnd={endDrag}
                   openMenuCode={openMenuCode}
                   onMenuOpenChange={onMenuOpenChange}
                   onOpenDetails={openDetails}

@@ -1948,6 +1948,13 @@ fieldset[aria-busy="true"] {
   box-shadow: 0 24px 60px -24px rgb(23 24 26 / 0.5);
 }
 
+/* Out of the way while a result is dragged, so the drop lands on what's
+   beneath it. */
+.palette-backdrop[data-dragging] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* The planner's stacked (phone) layout: the whole screen. */
 .palette-backdrop[data-stacked] .palette {
   inset: 0;

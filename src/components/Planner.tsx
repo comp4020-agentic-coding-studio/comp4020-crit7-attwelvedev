@@ -172,6 +172,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const [searchTwoSemester, setSearchTwoSemester] = useState<Record<string, boolean>>({});
   const [showPrereqLinks, setShowPrereqLinks] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // A touch drag started from a palette result: the palette hides so the
+  // terms under the finger are what elementFromPoint finds.
+  const [paletteDragging, setPaletteDragging] = useState(false);
   // For the history shortcuts' listener, which is registered once.
   const searchOpenRef = useRef(false);
   searchOpenRef.current = searchOpen;
@@ -478,8 +481,18 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const linked = details.code ? linkedHighlights(view, details.code, knownCards[details.code]) : null;
 
   useTouchDrag(plannerRef, {
-    onDragStart: setDraggingCode,
-    onDragEnd: () => setDraggingCode(null),
+    onDragStart: (code) => {
+      setDraggingCode(code);
+      if (searchOpenRef.current) setPaletteDragging(true);
+    },
+    // Called just before the drop is resolved under the finger; the palette
+    // only re-renders afterwards, so it's still hidden then.
+    onDragEnd: () => {
+      setDraggingCode(null);
+      if (!searchOpenRef.current) return;
+      setPaletteDragging(false);
+      closeSearch();
+    },
     onDrop: (target, code) => {
       void runAction(target.kind === "term" ? actionFor(view, code, target.term) : { kind: "remove", code });
     },
@@ -648,6 +661,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
         onAction={runAction}
         openCode={details.code}
+        dragging={paletteDragging}
         stacked={fit === 0}
       />
       {toast && (
