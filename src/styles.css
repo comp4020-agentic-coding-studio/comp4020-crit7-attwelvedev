@@ -594,19 +594,17 @@ body:has(.planner) {
   --reqs-fit: 0;
 }
 
-/* A hairline gutter inside the region's border, no more: the timeline
-   starts right under the title row (plan-header-and-fit "leaves nothing
-   above the timeline"), and the phone's card budget has no slack. The
-   region itself doesn't scroll. .timeline-scroll inside it scrolls both
-   ways, so the year heads have a scroller to stick to, and the toolbar
-   and legend above it stay put. */
+/* No gutter inside the region's border, so the frosted year header can
+   run to its edges; the scroller's own padding (--edge) spaces the cards.
+   The region itself doesn't scroll. .timeline-scroll inside it scrolls
+   both ways, so the year heads have a scroller to stick to, and the
+   toolbar and legend above it stay put. */
 .planner-timeline-area {
   position: sticky;
   top: 0;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  padding: 0.15rem;
   max-height: 50vh;
   overflow: hidden;
 }
@@ -1034,6 +1032,8 @@ section[aria-label="program checks"] > h3 {
 }
 
 .timeline-hint {
+  margin: 0;
+  padding: 0.75rem 1rem 0;
   font-style: italic;
   color: var(--unigrey);
 }
@@ -1101,19 +1101,21 @@ section[aria-label="program checks"] > h3 {
    --term-pad is a term's inline padding: a term is a 13rem card plus
    that padding either side, so tightening the spacing never resizes a
    card. --edge pads the scroller's ends, so the first and last cards sit
-   as far from the region's edge (with its 0.15rem gutter) as every card
-   sits from a year's hairline: 1rem all round. */
+   as far from the region's edge as every card sits from a year's
+   hairline: 1rem all round. --year-gap is the space either side of a
+   hairline. */
 .timeline-scroll {
   --year-band: 2.75rem;
   --term-top: 2.35rem;
   --term-pad: 0.5rem;
-  --edge: 0.35rem;
+  --edge: 0.5rem;
+  --year-gap: 0.5rem;
   position: relative;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: max-content;
   grid-template-rows: minmax(max-content, 1fr);
-  column-gap: 0.5rem;
+  column-gap: var(--year-gap);
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
@@ -1128,16 +1130,34 @@ section[aria-label="program checks"] > h3 {
 
 /* One calendar year: its head spans both terms. */
 .timeline-year {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, calc(13rem + 2 * var(--term-pad)));
   grid-template-rows: auto 1fr;
-  padding-inline-end: 0.5rem;
-  border-inline-end: 1px solid var(--line);
+  padding-inline-end: var(--year-gap);
+  border-inline-end: 1px solid transparent;
+}
+
+/* The hairline between years, drawn over the frosted header (which runs
+   across it) rather than as the border underneath it. */
+.timeline-year::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -1px;
+  z-index: 1;
+  width: 1px;
+  background: var(--line);
+  pointer-events: none;
 }
 
 .timeline-year:last-child {
   padding-inline-end: 0;
   border-inline-end: 0;
+}
+
+.timeline-year:last-child::after {
+  content: none;
 }
 
 /* Sticks to the scroller's top while the cards scroll under it, frosted
@@ -1159,6 +1179,18 @@ section[aria-label="program checks"] > h3 {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--unigrey);
+  /* Across the gap and hairline to the next year's band, so the header is
+     one strip; the first and last reach the scroller's padded ends. */
+  margin-inline-end: calc(-1 * (2 * var(--year-gap) + 1px));
+}
+
+.timeline-year:first-of-type > .timeline-year-head {
+  margin-inline-start: calc(-1 * var(--edge));
+  padding-inline-start: calc(var(--edge) + var(--term-pad));
+}
+
+.timeline-year:last-child > .timeline-year-head {
+  margin-inline-end: calc(-1 * var(--edge));
 }
 
 /* Holds at the scroller's start edge while any of its year is on screen,
@@ -1234,7 +1266,7 @@ section[aria-label="program checks"] > h3 {
   gap: 0.25rem 1rem;
   padding-block: 0.35rem;
   margin-block-end: 0.35rem;
-  padding-inline: 0.5rem;
+  padding-inline: 1rem;
   color: var(--unigrey);
   font-size: 0.8rem;
 }

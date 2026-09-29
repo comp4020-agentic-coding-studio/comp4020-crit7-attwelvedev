@@ -355,6 +355,9 @@ harness, not just in a review.
   - **Spacing:** tighter, with the cards unchanged. Every card sits 1rem
     from each column edge, and the header ends clear of a first card's
     5px ring.
+  - **Header strip:** after the phase closed, the frosted header was made
+    one strip from edge to edge. The region lost its 0.15rem gutter, and
+    the hairlines are drawn over the glass.
   - **Cutoff line:** the gold cutoff line is removed. The Completed
     control's description and Help now say each completed semester is
     marked in its heading. `.term.term-cutoff` replaced the

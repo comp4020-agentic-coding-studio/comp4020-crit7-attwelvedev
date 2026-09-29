@@ -127,8 +127,12 @@ From Phase 05:
     sticky frosted `.timeline-year-head.glass`, which runs down behind its
     terms' sticky `.term-top` rows, then two `section.term[data-term]`.
   - A term is a 13rem card plus `--term-pad` (0.5rem) either side. The
-    scroller's ends are padded by `--edge` (0.35rem), and `--year-band`
-    is 2.75rem, or 1.9rem below the 49.5rem container.
+    region has no inner gutter, and the scroller's ends are padded by
+    `--edge` (0.5rem). `--year-band` is 2.75rem, or 1.9rem below the
+    49.5rem container.
+  - The frosted header is one strip from edge to edge. Each band extends
+    across the gap to the next, and the hairlines are `::after` lines
+    drawn over it.
   - `--timeline-min` (31rem) is unchanged. Two terms and their padding
     now come to about 28rem, so it has slack.
   - The ‹ › buttons (`.timeline-toolbar`) float over the band's right end,

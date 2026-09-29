@@ -172,6 +172,40 @@ describe("timeline years", { timeout: 30_000 }, () => {
     });
   });
 
+  // The frosted header is one strip, edge to edge of the region: no clear
+  // gap at either end or between years, with the years' hairlines drawn
+  // over it (Task 15 review, 2026-09-29).
+  it("the frosted header runs unbroken from edge to edge", async () => {
+    await withPlan(desktop, async (page) => {
+      const measure = () =>
+        page.evaluate(() => {
+          const areaEl = document.querySelector(".planner-timeline-area")!;
+          const area = areaEl.getBoundingClientRect();
+          const border = parseFloat(getComputedStyle(areaEl).borderLeftWidth);
+          const bands = [...document.querySelectorAll(".timeline-year-head")].map((h) => h.getBoundingClientRect());
+          const years = [...document.querySelectorAll(".timeline-year")];
+          return {
+            startGap: bands[0].left - (area.left + border),
+            endGap: area.right - border - bands[bands.length - 1].right,
+            betweenGaps: bands.slice(1).map((b, i) => b.left - bands[i].right),
+            hairlines: years.map((y) => getComputedStyle(y, "::after").backgroundColor),
+          };
+        });
+      const start = await measure();
+      await page.locator(".timeline-scroll").evaluate((el) => {
+        el.scrollLeft = el.scrollWidth;
+      });
+      const end = await measure();
+      expect(start.startGap).toBeLessThanOrEqual(0.5);
+      expect(end.endGap).toBeLessThanOrEqual(0.5);
+      for (const gap of start.betweenGaps) expect(gap).toBeLessThanOrEqual(0.5);
+      // Every year but the last draws its hairline, in the line colour.
+      const drawn = start.hairlines.slice(0, -1);
+      expect(new Set(drawn).size).toBe(1);
+      expect(drawn[0]).not.toBe("rgba(0, 0, 0, 0)");
+    });
+  });
+
   it("scroll buttons", async () => {
     await withPlan(desktop, async (page) => {
       const scrollLeft = () => page.locator(".timeline-scroll").evaluate((el) => el.scrollLeft);
