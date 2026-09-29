@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
-import { openPage, type Viewport } from "../browser";
+import { axeViolations, horizontalOverflow, openPage, type Viewport } from "../browser";
 import { baseUrl, browser, detailsPanel, planWithPlacement, useBrowser } from "./helpers";
 
 useBrowser();
@@ -332,6 +332,159 @@ describe("every edit toasts", { timeout: 30_000 }, () => {
       await page.locator(".completed-panel").getByRole("button", { name: "Nothing yet" }).click();
       await page.waitForTimeout(1000);
       expect(await toast(page).count()).toBe(0);
+    });
+  });
+});
+
+describe("history buttons", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const phone = { width: 390, height: 844 };
+  const controls = (page: Page) => page.locator(".history-controls");
+  // By position, not name: the name changes with what they'd do.
+  const undoButton = (page: Page) => controls(page).locator("button").nth(0);
+  const redoButton = (page: Page) => controls(page).locator("button").nth(1);
+  const inTerm = (page: Page, term: number) => page.locator(`[data-term="${term}"] [data-placed="COMP1130"]`);
+
+  async function onFreshPlan(viewport: Viewport, check: (page: Page) => Promise<void>): Promise<void> {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, viewport);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  async function openCardMenu(page: Page) {
+    await page.locator('[data-placed="COMP1130"]').getByRole("button", { name: "More options for COMP1130" }).click();
+  }
+
+  async function moveToS1_2028(page: Page) {
+    await openCardMenu(page);
+    await page.locator('[data-placed="COMP1130"] .card-menu-terms').getByRole("button", { name: "S1 2028" }).click();
+    await expect.poll(() => inTerm(page, 2).count()).toBe(1);
+  }
+
+  it("start disabled, named Undo and Redo, each at least 44px", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      expect(await controls(page).locator("button").count()).toBe(2);
+      expect(await undoButton(page).getAttribute("aria-label")).toBe("Undo");
+      expect(await redoButton(page).getAttribute("aria-label")).toBe("Redo");
+      for (const button of [undoButton(page), redoButton(page)]) {
+        expect(await button.isDisabled()).toBe(true);
+        const box = (await button.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(44);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+      }
+    });
+  });
+
+  it("name the edit Undo would reverse", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      await moveToS1_2028(page);
+      await expect.poll(() => undoButton(page).getAttribute("aria-label")).toBe("Undo: Moved COMP1130 to S1 2028");
+      expect(await undoButton(page).getAttribute("title")).toBe("Undo: Moved COMP1130 to S1 2028");
+      expect(await undoButton(page).isEnabled()).toBe(true);
+      expect(await redoButton(page).isDisabled()).toBe(true);
+    });
+  });
+
+  it("undo from the header, then name the edit Redo would re-apply", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      await moveToS1_2028(page);
+      await expect.poll(() => undoButton(page).isEnabled()).toBe(true);
+      await undoButton(page).click();
+      await expect.poll(() => inTerm(page, 0).count()).toBe(1);
+      await expect.poll(() => redoButton(page).getAttribute("aria-label")).toBe("Redo: Moved COMP1130 to S1 2028");
+      expect(await undoButton(page).isDisabled()).toBe(true);
+    });
+  });
+
+  it("undo newest first", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      await moveToS1_2028(page);
+      await openCardMenu(page);
+      await page.locator('[data-placed="COMP1130"] .course-card-menu').getByRole("button", { name: "Remove" }).click();
+      await expect.poll(() => page.locator('[data-placed="COMP1130"]').count()).toBe(0);
+      await expect.poll(() => undoButton(page).getAttribute("aria-label")).toContain("Removed COMP1130");
+      await undoButton(page).click();
+      await expect.poll(() => inTerm(page, 2).count()).toBe(1);
+      await expect.poll(() => undoButton(page).isEnabled()).toBe(true);
+      await undoButton(page).click();
+      await expect.poll(() => inTerm(page, 0).count()).toBe(1);
+    });
+  });
+
+  it("a new edit clears Redo", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      await moveToS1_2028(page);
+      await expect.poll(() => undoButton(page).isEnabled()).toBe(true);
+      await undoButton(page).click();
+      await expect.poll(() => redoButton(page).isEnabled()).toBe(true);
+      await moveToS1_2028(page);
+      await expect.poll(() => undoButton(page).getAttribute("aria-label")).toBe("Undo: Moved COMP1130 to S1 2028");
+      expect(await redoButton(page).isDisabled()).toBe(true);
+    });
+  });
+
+  it("aren't on the read-only example", async () => {
+    const page = await openPage(browser, new URL("/plan/example", baseUrl).href, desktop);
+    try {
+      expect(await controls(page).count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("at 1920×1080 sit in the controls' one row, with no overflow", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      expect(await controls(page).count()).toBe(1);
+      expect(await horizontalOverflow(page)).toBe(0);
+      const tops = await page
+        .locator(".plan-actions > *")
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().top));
+      expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(4);
+    });
+  });
+
+  // Beside Completed through they'd squeeze it onto two lines on a phone
+  // (user ruling, 2026-09-29), so there they sit beside the title instead.
+  it("at 390×844 sit beside the title, leaving Completed through its own line", async () => {
+    await onFreshPlan(phone, async (page) => {
+      expect(await controls(page).count()).toBe(1);
+      expect(await horizontalOverflow(page)).toBe(0);
+      const rects = await page.evaluate(() => {
+        const box = (selector: string) => {
+          const { top, bottom } = document.querySelector(selector)!.getBoundingClientRect();
+          return { top, bottom, centre: (top + bottom) / 2 };
+        };
+        return {
+          h1: box("h1"),
+          history: box(".history-controls"),
+          completed: box(".completed-toggle"),
+          more: box(".more-options-toggle"),
+        };
+      });
+      expect(Math.abs(rects.history.centre - rects.h1.centre)).toBeLessThanOrEqual(4);
+      expect(Math.abs(rects.completed.top - rects.more.top)).toBeLessThanOrEqual(4);
+      expect(rects.completed.top).toBeGreaterThanOrEqual(rects.history.bottom);
+      // One line of label: no taller than a single 44px control.
+      expect(rects.completed.bottom - rects.completed.top).toBeLessThanOrEqual(46);
+    });
+  });
+
+  it("are axe clean disabled, and again after an edit", async () => {
+    await onFreshPlan(desktop, async (page) => {
+      expect(await axeViolations(page)).toEqual([]);
+      await moveToS1_2028(page);
+      await expect.poll(() => undoButton(page).isEnabled()).toBe(true);
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
+  it("are axe clean on a phone", async () => {
+    await onFreshPlan(phone, async (page) => {
+      expect(await axeViolations(page)).toEqual([]);
     });
   });
 });

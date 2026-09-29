@@ -143,6 +143,29 @@ h1 {
   margin-inline-start: auto;
 }
 
+/* Below about 44rem the plan's controls no longer fit beside the title and
+   wrap under it, where Undo/Redo would squeeze Completed through onto two
+   lines. So they move up beside the title, leaving the second row to
+   Completed through and More options. */
+@media (width < 44rem) {
+  .plan-title:has(.history-controls) {
+    position: relative;
+  }
+
+  /* A control's height, so the buttons fit the title's line exactly, and
+     room at its end so a longer title never runs under them. */
+  .plan-title:has(.history-controls) .plan-title-main {
+    min-height: 2.75rem;
+    padding-inline-end: 6.25rem;
+  }
+
+  .history-controls {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+  }
+}
+
 h2 {
   font-size: 1.15rem;
 }
@@ -1062,6 +1085,25 @@ section[aria-label="program checks"] > h3 {
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0;
+}
+
+.history-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.history-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+}
+
+/* On top of every disabled button's half opacity. */
+.history-button:disabled {
+  color: var(--muted);
 }
 
 .details-icon {

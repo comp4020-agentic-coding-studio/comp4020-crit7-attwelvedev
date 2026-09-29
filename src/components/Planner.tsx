@@ -55,6 +55,55 @@ const UNDO_TIMEOUT_MS = 8000;
 const MORE_OPTIONS = "more-options";
 const COMPLETED_MENU = "completed-menu";
 
+// Beside Completed through: icon buttons named by what they'd do next, so
+// a screen reader (and the tooltip) says which edit, not just "Undo".
+function HistoryControls({
+  history,
+  disabled,
+  onUndo,
+  onRedo,
+}: {
+  history: History;
+  disabled: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+}) {
+  const undoing = history.past.at(-1);
+  const redoing = history.future.at(-1);
+  const undoName = undoing ? `Undo: ${undoing.message}` : "Undo";
+  const redoName = redoing ? `Redo: ${redoing.message}` : "Redo";
+  return (
+    <div class="history-controls">
+      <button
+        type="button"
+        class="history-button"
+        aria-label={undoName}
+        title={undoName}
+        disabled={disabled || !undoing}
+        onClick={onUndo}
+      >
+        <svg class="details-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M9 14 4 9l5-5" />
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="history-button"
+        aria-label={redoName}
+        title={redoName}
+        disabled={disabled || !redoing}
+        onClick={onRedo}
+      >
+        <svg class="details-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m15 14 5-5-5-5" />
+          <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 interface Props {
   view: PlanView;
   title: string;
@@ -394,6 +443,14 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               />
             )}
           </div>
+          {!readOnly && (
+            <HistoryControls
+              history={history}
+              disabled={busy > 0}
+              onUndo={() => void undo()}
+              onRedo={() => void redo()}
+            />
+          )}
           <MoreOptions
             open={openMenuCode === MORE_OPTIONS}
             onOpenChange={(next) => setOpenMenuCode(next ? MORE_OPTIONS : null)}
