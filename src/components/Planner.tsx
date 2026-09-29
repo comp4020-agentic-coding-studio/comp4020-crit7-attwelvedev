@@ -62,6 +62,7 @@ import {
   type LayoutInput,
   type LayoutPrefs,
   reqsSnapTargets,
+  unfoldPrefs,
 } from "./workspace-layout";
 
 // How long "Undo" stays offered after a change — long enough to notice and
@@ -199,9 +200,12 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
   const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
-  // The one toast: the latest edit or redo ("edit", offering Undo), or the
-  // latest undo ("undone", offering Redo).
-  const [toast, setToast] = useState<{ mode: "edit" | "undone"; message: string; knockOn: string } | null>(null);
+  // The one toast: the latest edit or redo ("edit", offering Undo), the
+  // latest undo ("undone", offering Redo), or a layout change the student
+  // didn't ask for ("notice", offering nothing).
+  const [toast, setToast] = useState<{ mode: "edit" | "undone" | "notice"; message: string; knockOn: string } | null>(
+    null,
+  );
   const [history, setHistory] = useState<History>(EMPTY_HISTORY);
   // Edits, undos and redos queued or running; Undo and Redo wait for none.
   const [busy, setBusy] = useState(0);
@@ -279,6 +283,29 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     commitPrefs({ ...prefs, reqsFolded: folded });
   }
 
+  // Off the rail, whether the student folded it or details did. Where
+  // unfolding as saved would only fold again beside details, it unfolds at
+  // one column and narrows details to fit, or says why neither fits.
+  function unfoldRequirements() {
+    const unfolded = { ...prefs, reqsFolded: false };
+    const input = { ...layoutInput, prefs: unfolded };
+    if (!computeLayout(input).autoFolded) return commitPrefs(unfolded);
+    const result = unfoldPrefs(input);
+    if ("error" in result) setAnnouncement(result.error);
+    else commitPrefs(result.prefs);
+  }
+
+  // A fold details forced is said once, as it happens: not for a page that
+  // loaded folded, and not mid-drag, where the size label already says it.
+  const lastFold = useRef({ measured: false, autoFolded: false });
+  useEffect(() => {
+    const was = lastFold.current;
+    lastFold.current = { measured, autoFolded: layout.autoFolded };
+    if (was.measured && !was.autoFolded && layout.autoFolded && preview === null) {
+      showToast({ mode: "notice", message: "Requirements folded to make room for course details", knockOn: "" });
+    }
+  }, [measured, layout.autoFolded]);
+
   // The widest gap between a requirements grid and the sidebar's edge.
   function measureOverhead() {
     const aside = document.getElementById("requirements");
@@ -293,7 +320,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // Revealing a hidden sidebar is Planner's job; Sidebar does the rest
   // (expanding the section, scrolling, focus, highlight) from the request.
   function showInSidebar(kind: ShowRequest["kind"], id: string) {
-    if (prefs.reqsFolded) foldRequirements(false);
+    if (layout.reqsPx === "rail") unfoldRequirements();
     setShowRequest({ kind, id, token: Date.now() });
   }
 
@@ -563,10 +590,11 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     },
   });
 
-  // Docked, the panel is the panes' last grid column. Otherwise (for now
-  // the fixed drawer, and before the planner is measured) it stays outside
-  // the size container, whose containment would pin its fixed position.
-  const detailsInPanes = sideBySide && layout.details.mode === "docked";
+  // Docked, the panel is the panes' last grid column; as a drawer it lies
+  // over the timeline's end inside them. As the stacked sheet, and before
+  // the planner is measured, it stays outside the size container, whose
+  // containment would pin its fixed position.
+  const detailsInPanes = sideBySide && (layout.details.mode === "docked" || layout.details.mode === "drawer");
   const detailsPanel = details.code && (
     <CourseDetailsPanel
       view={view}
@@ -719,7 +747,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
             onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
             onHide={() => foldRequirements(true)}
-            onShow={() => foldRequirements(false)}
+            onShow={unfoldRequirements}
+            autoFolded={sideBySide && layout.autoFolded}
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void runAction({ kind: "remove", code })}
             showRequest={showRequest}
@@ -739,7 +768,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               onDragStart={measureOverhead}
               onPreview={setPreview}
               onCommit={(next, release) => (release === "fold" ? foldRequirements(true) : commitPrefs(next))}
-              onToggle={() => foldRequirements(layout.reqsPx !== "rail")}
+              onToggle={() => (layout.reqsPx === "rail" ? unfoldRequirements() : foldRequirements(true))}
               onReset={() => commitPrefs({ ...prefs, reqsFolded: false, reqsWidthPx: null })}
             />
           )}
@@ -797,11 +826,12 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             {toast.mode === "undone" ? "Undid: " : ""}
             {toast.message}.{toast.knockOn}
           </span>
-          {toast.mode === "edit" ? (
+          {toast.mode === "edit" && (
             <button type="button" disabled={busy > 0} onClick={() => void undo()}>
               {historyPending === "undo" ? "Undoing…" : "Undo"}
             </button>
-          ) : (
+          )}
+          {toast.mode === "undone" && (
             <button type="button" disabled={busy > 0} onClick={() => void redo()}>
               {historyPending === "redo" ? "Redoing…" : "Redo"}
             </button>

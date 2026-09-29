@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage, verticalOverflow } from "../browser";
-import { baseUrl, browser, planUrl, planWithPlacement, useBrowser, withPlan } from "./helpers";
+import { baseUrl, browser, planUrl, planWithPlacement, settle, useBrowser, withPlan } from "./helpers";
 
 useBrowser();
 
 describe("requirements sidebar collapse", { timeout: 30_000 }, () => {
   const desktop = { width: 1920, height: 1080 };
   const reqsCollapsed = { storage: { "panel-reqs": "collapsed" } };
-  const asideWidth = (page: Page) =>
-    page.evaluate(() => document.querySelector<HTMLElement>('aside[aria-label="requirements"]')!.offsetWidth);
-  const timelineWidth = (page: Page) =>
-    page.evaluate(() => document.querySelector<HTMLElement>(".planner-timeline-area")!.offsetWidth);
+  const asideWidth = async (page: Page) => {
+    await settle(page);
+    return page.evaluate(() => document.querySelector<HTMLElement>('aside[aria-label="requirements"]')!.offsetWidth);
+  };
+  const timelineWidth = async (page: Page) => {
+    await settle(page);
+    return page.evaluate(() => document.querySelector<HTMLElement>(".planner-timeline-area")!.offsetWidth);
+  };
   const focused = (page: Page, selector: string) =>
     page.evaluate((s) => document.activeElement === document.querySelector(s), selector);
 

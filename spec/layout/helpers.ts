@@ -24,6 +24,10 @@ export function useBrowser(): void {
 
 export const planUrl = () => new URL("/plan/example", baseUrl).href;
 
+// Side-by-side widths that a key, toggle, fold or details opening changes
+// ease over 200ms, so geometry is read once the transitions have finished.
+export const settle = (page: Page) => page.waitForFunction(() => document.getAnimations().length === 0);
+
 // The one details sidebar every Details entry point opens.
 export const detailsPanel = (page: Page) => page.locator('aside[aria-label="Course details"]');
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Locator, Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage, verticalOverflow } from "../browser";
-import { baseUrl, browser, detailsPanel, planUrl, planWithPlacement, useBrowser } from "./helpers";
+import { baseUrl, browser, detailsPanel, planUrl, planWithPlacement, settle, useBrowser } from "./helpers";
 
 useBrowser();
 
@@ -9,19 +9,27 @@ const desktop = { width: 1920, height: 1080 };
 const courseUrl = () => `${planUrl()}?course=COMP2100`;
 const reqsDivider = (page: Page) => page.getByRole("separator", { name: "Resize requirements" });
 const detailsDivider = (page: Page) => page.getByRole("separator", { name: "Resize course details" });
-const asideWidth = (page: Page) =>
-  page.evaluate(() => document.querySelector<HTMLElement>("#requirements")!.getBoundingClientRect().width);
-const panelWidth = (page: Page) => detailsPanel(page).evaluate((el) => el.getBoundingClientRect().width);
-const tracks = (page: Page, selector: string) =>
-  page.evaluate((s) => {
+const asideWidth = async (page: Page) => {
+  await settle(page);
+  return page.evaluate(() => document.querySelector<HTMLElement>("#requirements")!.getBoundingClientRect().width);
+};
+const panelWidth = async (page: Page) => {
+  await settle(page);
+  return detailsPanel(page).evaluate((el) => el.getBoundingClientRect().width);
+};
+const tracks = async (page: Page, selector: string) => {
+  await settle(page);
+  return page.evaluate((s) => {
     const el = document.querySelector(s);
     return el ? getComputedStyle(el).gridTemplateColumns.split(" ").length : null;
   }, selector);
+};
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 
 // Presses on the divider (below the Requirements chevron at its top) and
 // moves the pointer dx sideways, releasing unless told not to.
 async function dragBy(page: Page, divider: Locator, dx: number, release = true) {
+  await settle(page);
   const box = (await divider.boundingBox())!;
   const x = box.x + box.width / 2;
   const y = box.y + box.height * 0.6;
@@ -276,5 +284,150 @@ describe("workspace dividers", { timeout: 30_000 }, () => {
         await page.close();
       }
     }
+  });
+});
+
+describe("fold order and drawer", { timeout: 30_000 }, () => {
+  const laptop = { width: 1280, height: 800 };
+  const mid = { width: 1440, height: 900 };
+  const tablet = { width: 900, height: 800 };
+  const COLUMN_WIDTHS = [48, 280, 498, 715];
+  const timelineWidth = async (page: Page) => {
+    await settle(page);
+    return page.evaluate(() => document.querySelector(".planner-timeline-area")!.getBoundingClientRect().width);
+  };
+  const onAt = async (viewport: { width: number; height: number }, url: string, check: (page: Page) => Promise<void>) => {
+    const page = await openPage(browser, url, viewport);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  };
+  const openFromCard = (page: Page, code: string) =>
+    page.locator(`[data-placed="${code}"] button.course-card-title`).first().click();
+
+  it("at 1280×800 with details closed, requirements have two columns", async () => {
+    await onAt(laptop, planUrl(), async (page) => {
+      expect(Math.round(await asideWidth(page))).toBe(498);
+      expect(await tracks(page, '.available-courses[data-columns="3"]')).toBe(2);
+    });
+  });
+
+  it("opening details steps requirements down by whole columns until they fold, and closing restores them", async () => {
+    await onAt(mid, planUrl(), async (page) => {
+      expect(Math.round(await asideWidth(page))).toBe(498);
+      await openFromCard(page, "COMP2100");
+      await detailsPanel(page).waitFor();
+      await expect.poll(async () => Math.round(await asideWidth(page))).toBe(48);
+      expect(await timelineWidth(page)).toBeGreaterThanOrEqual(496);
+      // Narrowing details gives the columns back one whole column at a time.
+      await detailsDivider(page).focus();
+      await page.keyboard.press("Home");
+      await expect.poll(async () => Math.round(await asideWidth(page))).toBe(280);
+      expect(COLUMN_WIDTHS).toContain(Math.round(await asideWidth(page)));
+      expect(await timelineWidth(page)).toBeGreaterThanOrEqual(496);
+      await page.getByRole("button", { name: "Close details" }).click();
+      await expect.poll(async () => Math.round(await asideWidth(page))).toBe(498);
+    });
+  });
+
+  it("says when requirements fold to make room, in the toast and on the rail", async () => {
+    await onAt(mid, planUrl(), async (page) => {
+      await openFromCard(page, "COMP2100");
+      const toast = page.locator(".undo-toast");
+      await expect.poll(() => toast.textContent()).toContain("Requirements folded to make room for course details");
+      expect(await toast.getAttribute("role")).toBe("status");
+      expect(await toast.getByRole("button").count()).toBe(0);
+      const rail = page.getByRole("button", { name: /folded to make room for course details/ });
+      expect(await rail.evaluate((el) => el.classList.contains("reqs-rail"))).toBe(true);
+    });
+  });
+
+  it("doesn't announce a fold the page loaded with", async () => {
+    await onAt(mid, `${planUrl()}?course=COMP2100`, async (page) => {
+      await detailsPanel(page).waitFor();
+      await expect.poll(async () => Math.round(await asideWidth(page))).toBe(48);
+      expect(await page.locator(".undo-toast").count()).toBe(0);
+    });
+  });
+
+  it("rail recovery: unfolds at one column beside narrower details, or says why it can't", async () => {
+    await onAt(mid, `${planUrl()}?course=COMP2100`, async (page) => {
+      await detailsPanel(page).waitFor();
+      await page.locator(".reqs-rail").click();
+      await expect.poll(async () => Math.round(await asideWidth(page))).toBe(280);
+      await expect.poll(async () => Math.round(await panelWidth(page))).toBe(376);
+      expect(await page.locator(".requirements-scroll").isVisible()).toBe(true);
+      expect(await detailsPanel(page).isVisible()).toBe(true);
+      expect(await timelineWidth(page)).toBeGreaterThanOrEqual(496);
+    });
+    await onAt(laptop, `${planUrl()}?course=COMP2100`, async (page) => {
+      await detailsPanel(page).waitFor();
+      await expect.poll(async () => Math.round(await asideWidth(page))).toBe(48);
+      await page.locator(".reqs-rail").click();
+      await expect
+        .poll(() => page.locator("p[aria-live]").textContent())
+        .toBe("Not enough room for requirements and details together. Close details, or widen the window.");
+      expect(Math.round(await asideWidth(page))).toBe(48);
+    });
+  });
+
+  it("at mid widths details open as a drawer over the timeline, which stays usable", async () => {
+    await onAt(tablet, `${planUrl()}?course=COMP2100`, async (page) => {
+      const panel = detailsPanel(page);
+      await panel.waitFor();
+      await expect.poll(() => panel.getAttribute("data-mode")).toBe("drawer");
+      expect(await detailsDivider(page).count()).toBe(0);
+      const p = (await panel.boundingBox())!;
+      const t = (await page.locator(".planner-timeline-area").boundingBox())!;
+      expect(p.x).toBeLessThan(t.x + t.width);
+      expect(p.x + p.width).toBeGreaterThanOrEqual(t.x + t.width - 1);
+      // Over the panes, not the plan header above them.
+      expect(await panel.evaluate((el) => el.parentElement!.classList.contains("planner-panes"))).toBe(true);
+      expect(p.y).toBeGreaterThanOrEqual(t.y - 1);
+      expect(await horizontalOverflow(page)).toBe(0);
+      // A card to the left of the drawer still takes clicks.
+      await openFromCard(page, "COMP1130");
+      await expect.poll(() => panel.locator("h2").textContent()).toContain("COMP1130");
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
+  it("the two-column body follows the panel's own width", async () => {
+    const at = async (width: string, keys: string[], columns: number) => {
+      const page = await openPage(browser, courseUrl(), desktop, { storage: { "panel-details-w": width } });
+      try {
+        await detailsPanel(page).waitFor();
+        await detailsDivider(page).focus();
+        for (const key of keys) await page.keyboard.press(key);
+        await expect.poll(async () => Math.round(await panelWidth(page))).toBe(columns === 1 ? 679 : 680);
+        expect(await tracks(page, ".details-body")).toBe(columns);
+        expect(await detailsPanel(page).evaluate((el) => el.className)).not.toMatch(/wide|two/);
+      } finally {
+        await page.close();
+      }
+    };
+    await at("695", ["ArrowRight"], 1);
+    await at("664", ["ArrowLeft"], 2);
+  });
+
+  it("motion: widths ease over 200ms, and not at all under reduced motion", async () => {
+    const durations = (page: Page) =>
+      page.evaluate(() => [".planner-panes", ".details-panel"].map((s) => getComputedStyle(document.querySelector(s)!).transitionDuration));
+    await onAt(desktop, courseUrl(), async (page) => {
+      await detailsPanel(page).waitFor();
+      expect(await durations(page)).toEqual(["0.2s", "0.2s"]);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      expect(await durations(page)).toEqual(["0s", "0s"]);
+    });
+  });
+
+  it("passes axe docked at 1280×800", async () => {
+    await onAt(laptop, `${planUrl()}?course=COMP2100`, async (page) => {
+      await detailsPanel(page).waitFor();
+      await expect.poll(() => detailsPanel(page).getAttribute("data-mode")).toBe("docked");
+      expect(await axeViolations(page)).toEqual([]);
+    });
   });
 });

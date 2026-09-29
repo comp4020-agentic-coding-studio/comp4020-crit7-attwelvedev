@@ -38,6 +38,8 @@ interface Props {
   onHide: () => void;
   // Expands the sidebar from its rail back to its saved width.
   onShow: () => void;
+  // On the rail because open details needed the room, not by choice.
+  autoFolded: boolean;
   // True while a *placed* course is being dragged — the only drag the
   // sidebar accepts (dropping it here removes it from the plan).
   dropReady: boolean;
@@ -305,6 +307,7 @@ export default function Sidebar({
   onLocateCourse,
   onHide,
   onShow,
+  autoFolded,
   dropReady,
   onDropRemove,
   showRequest,
@@ -325,8 +328,10 @@ export default function Sidebar({
   const focusNext = useRef<RefObject<HTMLButtonElement> | null>(null);
   useLayoutEffect(() => {
     const target = focusNext.current?.current;
-    if (!target || target.offsetParent === null) return;
-    target.focus();
+    if (!target) return;
+    // Either way it's settled: shown now, or it isn't going to be (the
+    // rail can refuse to unfold beside details).
+    if (target.offsetParent !== null) target.focus();
     focusNext.current = null;
   });
   const { completedPct, plannedPct } = progressSegments(
@@ -434,6 +439,7 @@ export default function Sidebar({
           ref={railRef}
           aria-controls="requirements-content"
           aria-expanded="false"
+          title={autoFolded ? "Requirements, folded to make room for course details" : undefined}
           onClick={() => {
             focusNext.current = hideRef;
             onShow();
@@ -443,7 +449,8 @@ export default function Sidebar({
               child is blockified and the name algorithm would put a space
               between separate spans ("Show requirements : …"). */}
           <span class="visually-hidden">
-            Show requirements: {view.total.completed} completed, {view.total.planned} planned of {view.total.required}
+            Show requirements{autoFolded ? ", folded to make room for course details" : ""}: {view.total.completed}{" "}
+            completed, {view.total.planned} planned of {view.total.required}
           </span>
           <span class="reqs-rail-label" aria-hidden="true">
             Requirements

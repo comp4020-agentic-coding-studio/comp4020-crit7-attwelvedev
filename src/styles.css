@@ -583,8 +583,15 @@ body:has(.planner) {
   }
 }
 
+/* Clipped sideways: as details open, their column eases up from 0px while
+   the panel's own padding and gutter can't shrink below ~52px, and the
+   drawer slides in from past the edge, so for a few frames either pokes
+   out past the page. Clip, not hidden, so it's no scroller and the panes'
+   sticky layers still stick; the margin keeps focus rings at the edge. */
 .planner-layout {
   container: planner / inline-size;
+  overflow-x: clip;
+  overflow-clip-margin: 0.5rem;
 }
 
 .planner-panes {
@@ -1385,6 +1392,10 @@ section[aria-label="program checks"] > h3 {
    panel. */
 .details-panel::-webkit-scrollbar {
   background: var(--surface);
+  /* Chromium doesn't clip a scrollbar's background to its box's rounded
+     border, so the track's ends are rounded to the region's inner corners
+     themselves. */
+  border-radius: 0 calc(var(--r-region) - 1px) calc(var(--r-region) - 1px) 0;
 }
 
 /* Stays put while the sections scroll under it, frosted (.glass) so they
@@ -1411,6 +1422,27 @@ section[aria-label="program checks"] > h3 {
   max-height: calc(100vh - 2rem);
   z-index: auto;
   box-shadow: none;
+}
+
+/* At mid widths details can't dock beside the timeline's year, so they lie
+   over its end, inside the panes (their position: relative, below), with a
+   bright edge and a shadow to lift them off it. Everything left of the
+   drawer still takes clicks. It slides in as it opens. */
+.planner-panes > .details-panel[data-mode="drawer"] {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(440px, 100%);
+  z-index: 5;
+  border-inline-start-color: var(--glass-edge);
+  box-shadow: -18px 0 40px -20px rgb(23 24 26 / 0.45);
+  animation: drawer-in 0.2s ease-out;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
 }
 
 /* The drawer covers the timeline's end. Room past the last semester keeps
@@ -3026,6 +3058,7 @@ button.course-card-allocation:focus-visible {
    literals because `@container` conditions can't read `var()`. */
 @container planner (min-width: 49.5rem) {
   .planner-panes {
+    position: relative;
     display: grid;
     grid-template-columns: var(--reqs-col) 1rem minmax(0, 1fr) var(--div2-col) var(--details-col);
     align-items: start;
@@ -3176,6 +3209,34 @@ button.course-card-allocation:focus-visible {
       flex: 1 1 auto;
       min-height: 0;
     }
+  }
+}
+
+/* A width the student didn't drag (a key, a toggle, details opening or
+   closing) eases in. A drag follows the pointer, so .resizing turns it
+   off, and so does reduced motion. */
+@container planner (min-width: 49.5rem) {
+  .planner-panes {
+    transition: grid-template-columns 0.2s ease;
+  }
+
+  .planner-panes.resizing {
+    transition: none;
+  }
+}
+
+.details-panel {
+  transition: transform 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planner-panes,
+  .details-panel {
+    transition-duration: 0s;
+  }
+
+  .planner-panes > .details-panel[data-mode="drawer"] {
+    animation: none;
   }
 }
 

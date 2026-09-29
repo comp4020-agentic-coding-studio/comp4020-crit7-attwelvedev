@@ -594,6 +594,23 @@ Routine calls:
 
 ### Task 19: Fold order, the auto-fold notice and rail recovery, the mid-width drawer, and the two-column details container query
 
+- [x] **Done 2026-09-29.** The user accepted the human review ("it all
+  feels good"), including the "Requirements folds first" ruling and the
+  close/fold asymmetry: details close in their header, Requirements folds
+  on its divider (kept as designed).
+  - The review raised the details scroll track's square corners. It is now
+    rounded to the region's inner corners, checked with real scrollbars
+    (Playwright without `--hide-scrollbars`).
+  - The fold notice is a no-button toast (`mode: "notice"`), the only
+    announcement, per the Phase 03 ruling. It isn't shown for a page that
+    loads folded, or mid-drag.
+  - `.planner-layout` clips sideways (`overflow-x: clip`), because the
+    easing details column and the sliding drawer poked out for a frame.
+  - Specs read geometry after `settle()` (in `spec/layout/helpers.ts`),
+    now that widths ease.
+  - The review also found a Phase 05 bug, fixed in its own commit: wide
+    years, from the frosted strip sizing the year columns.
+
 - **Description:** WR35, WR42, and WR36's container query.
 - **Files touched:**
   - `Planner.tsx`, `Sidebar.tsx` (rail label and name),
