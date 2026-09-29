@@ -210,8 +210,9 @@ The steps:
      below it.
    - Otherwise set `reqs = RAIL`. Also set `autoFolded = open`: the fold is
      only "automatic" if details forced it.
-5. **Then shrink the sidebar**: `details = max(DETAILS_MIN, avail − reqs −
-   TL_MIN)`.
+5. **Then shrink the sidebar**: `details = min(details, max(DETAILS_MIN,
+   avail − reqs − TL_MIN))`. It only ever shrinks; without the `min` it
+   would widen a docked 440 to fill the room (review ruling 1).
 6. **Drawer fallback.** If it still doesn't fit and details are open,
    recompute steps 3–5 with details closed, then return `details: {mode:
    "drawer", px: min(DETAILS_DEFAULT, containerPx)}`.
@@ -247,6 +248,11 @@ export function unfoldPrefs(input: LayoutInput): { prefs: LayoutPrefs } | { erro
     TL_MIN]` and snap.
   - If the raw width passes the maximum by more than 8px, the label is "The
     timeline needs room for one year" and `warn` is true.
+  - When details are open and the new width leaves them less than
+    `detailsWidthPx`, the returned prefs also lower `detailsWidthPx` to
+    `avail − reqs − TL_MIN` (never below `DETAILS_MIN`). Otherwise
+    `computeLayout`'s fold order would step Requirements back down a whole
+    column mid-drag (review ruling 2).
 - Details: the raw width is `startWidth − dx`.
   - Below `DETAILS_MIN − 70`: `release: "close"` with the label "Release to
     close details".
@@ -296,9 +302,46 @@ export function unfoldPrefs(input: LayoutInput): { prefs: LayoutPrefs } | { erro
   `@container details (min-width: 680px)` puts the body in two columns. The
   header's toggle has `aria-pressed = layout.details.px >= 680`.
 
+### 4.3 Phase 1 review rulings (user, 2026-09-29)
+
+1. `computeLayout` step 5 only shrinks details (the `min` in §4.1).
+2. A Requirements drag squeezes `detailsWidthPx` rather than letting the
+   engine step Requirements down (§4.1 `dragPrefs`).
+3. There was no `.details-body` or wide toggle. Task 18 wraps every
+   section after `.details-head` in `div.details-body` (two-column
+   auto-flow grid at ≥ 680px) and adds the toggle to `.details-nav`.
+4. `.planner-layout`'s containment pins `position: fixed` descendants, so
+   the panel sits in `.planner-panes` only when docked or a drawer. In
+   `sheet` mode it stays after `.planner-layout`, as in Phase 02.
+5. `useContainerWidth` returns 0 before measuring. Planner treats 0 as
+   "unmeasured": it renders the side-by-side chrome, sets no inline column
+   properties (the CSS defaults lay it out), and nothing reads it as
+   stacked.
+6. Sidebar keeps rendering `button.reqs-hide`. Side by side, CSS places it
+   in the Requirements divider's grid column; stacked, it stays on the
+   stacked handle until Phase 07.
+7. `gridOverheadPx` is the largest overhead across all the aside's
+   `.available-courses`, not the first one's, so nested groups keep their
+   columns at a snap target.
+
+Routine calls:
+- The palette's `stacked` flag also moves off `fit`.
+- The new track formula is scoped to the Requirements aside (not the
+  palette's results), and its cards drop their fixed 13rem width.
+- The new browser describes live in `spec/layout/workspace-resize.test.ts`.
+- `.planner-panes[data-rail]` marks a rail from the layout (an auto-fold has
+  no root attribute).
+
 ## 5. Task breakdown
 
 ### Task 16: `workspace-layout.ts`, the pure layout engine
+
+- [x] **Done 2026-09-29.** Built with review rulings 1 and 2 (§4.3).
+  Divider-made widths are whole pixels, and a snapped width rounds up
+  (715.2 → 716) so its columns still fit. In a release zone the preview
+  holds at the minimum. The constants are exported (`DETAILS_MIN`,
+  `DETAILS_DEFAULT`, `DETAILS_TWO_COLUMN` 680, `DETAILS_WIDE` 760,
+  `DETAILS_MAX`, `SNAP_THRESHOLD`).
 
 - **Description:** Implement this file's §4.1 exactly.
 - **Files touched:**
@@ -475,14 +518,15 @@ export function unfoldPrefs(input: LayoutInput): { prefs: LayoutPrefs } | { erro
       `::after`.
   - The Requirements divider hosts the existing `button.reqs-hide` chevron
     (which Sidebar renders outside the aside today), per the
-    course-card-redesign ruling.
+    course-card-redesign ruling. Sidebar still renders it; CSS places it in
+    the divider's grid column (§4.3 ruling 6).
   - `Planner`:
     - `const containerPx = useContainerWidth(layoutRef)`
     - `const [prefs, setPrefs] = useState(DEFAULT)`, read in an effect from
       `loadLayoutPrefs()`
     - `const layout = computeLayout({...})`, with `gridOverheadPx`
-      measured once at drag start from the first `.available-courses` (the
-      aside width minus its `clientWidth`)
+      measured once at drag start as the largest aside-width-minus-
+      `clientWidth` across the aside's `.available-courses` (§4.3 ruling 7)
     - set the `--reqs-col`, `--div2-col` and `--details-col` properties
     - `onCommit` calls `saveLayoutPrefs`, and `release === "close"` calls
       `setDetails(closeDetails)`
@@ -498,7 +542,8 @@ export function unfoldPrefs(input: LayoutInput): { prefs: LayoutPrefs } | { erro
     - `mode: LayoutResult["details"]["mode"]`, rendered as `data-mode`.
   - `Planner` moves `<CourseDetailsPanel>` from after `.planner-layout`
     (Phase 02) into `.planner-panes`, after the details divider, so it
-    occupies the grid's last column.
+    occupies the grid's last column. It does so when docked or a drawer
+    only; in `sheet` mode it stays where it is (§4.3 ruling 4).
   - Add `.details-panel { container: details / inline-size }` and the
     `@container details (min-width: 680px)` rule that puts the body in two
     columns. Task 18's own tests use both.
