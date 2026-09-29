@@ -1557,10 +1557,15 @@ button.requisite-code:hover {
   left: 50%;
   bottom: 1.5rem;
   transform: translateX(-50%);
-  z-index: 10;
+  /* Above the details panel (40): a change made from the panel offers its
+     Undo there too, and on a phone the panel covers the whole screen. */
+  z-index: 45;
   display: flex;
   align-items: center;
   gap: 0.9rem;
+  /* Its own width, not the shrink-to-fit width left of 50% allows, so
+     wrapped text uses the whole screen on a phone. */
+  width: max-content;
   max-width: calc(100vw - 2rem);
   background: var(--ink);
   color: #fff;
@@ -1569,11 +1574,10 @@ button.requisite-code:hover {
   box-shadow: 0 12px 32px -12px rgb(23 24 26 / 0.45);
 }
 
+/* Wraps rather than truncating: the knock-on warning comes last, and it's
+   the part that must be read. */
 .undo-toast span {
   font-size: 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .undo-toast button {

@@ -4,9 +4,9 @@ import { AACOM_2027 } from "../data/aacom-2027";
 import { EXAMPLE_PLAN } from "../data/example-plan";
 import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/from-pandc";
 import { parseRequisites } from "../lib/domain/requisites";
-import type { Catalogue, CatalogueCourse } from "../lib/domain/types";
+import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
-import { actionFor, undoEntry } from "./plan-actions";
+import { actionFor, knockOnText, newlyBroken, undoEntry } from "./plan-actions";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -62,5 +62,63 @@ describe("undoEntry", () => {
       undo: { kind: "place", code: "COMP2100", term: 2 },
       restorePin: placement.countsToward,
     });
+  });
+});
+
+describe("newlyBroken", () => {
+  const at = (placements: [string, number][]) => {
+    const plan: PlanState = {
+      id: "p",
+      readOnly: false,
+      cutoff: 0,
+      choices: {},
+      placements: placements.map(([code, term]) => ({ code, term, pinnedGroupId: null })),
+    };
+    return buildPlanView(cat, AACOM_2027, plan);
+  };
+  const stateOf = (v: ReturnType<typeof at>, code: string) => v.placements.find((p) => p.code === code)!.state;
+
+  it("names a course that now misses a prerequisite", () => {
+    const before = at([["COMP2100", 2], ["COMP2120", 3]]);
+    const after = at([["COMP2100", 4], ["COMP2120", 3]]);
+    expect(["available", "check"]).toContain(stateOf(before, "COMP2120"));
+    expect(stateOf(after, "COMP2120")).toBe("soft");
+    expect(newlyBroken(before, after, "COMP2100")).toEqual(["COMP2120"]);
+  });
+
+  it("leaves out the course acted on", () => {
+    // Moving COMP2120 ahead of COMP2100 breaks COMP2120 itself.
+    const before = at([["COMP2100", 5], ["COMP2120", 5]]);
+    const after = at([["COMP2100", 5], ["COMP2120", 3]]);
+    expect(["available", "check"]).toContain(stateOf(before, "COMP2120"));
+    expect(stateOf(after, "COMP2120")).toBe("soft");
+    expect(newlyBroken(before, after, "COMP2120")).toEqual([]);
+  });
+
+  it("ignores courses already missing a prerequisite, or blocked", () => {
+    const soft = [at([["COMP2100", 4], ["COMP2120", 3]]), at([["COMP2100", 5], ["COMP2120", 3]])] as const;
+    expect(stateOf(soft[0], "COMP2120")).toBe("soft");
+    expect(newlyBroken(soft[0], soft[1], "COMP2100")).toEqual([]);
+
+    // COMP2120 doesn't run in S1 2029.
+    const hard = [at([["COMP2100", 2], ["COMP2120", 4]]), at([["COMP2100", 5], ["COMP2120", 4]])] as const;
+    expect(stateOf(hard[0], "COMP2120")).toBe("hard");
+    expect(newlyBroken(hard[0], hard[1], "COMP2100")).toEqual([]);
+  });
+});
+
+describe("knockOnText", () => {
+  it("names a single course", () => {
+    expect(knockOnText(["COMP2120"])).toBe(" COMP2120 now misses a prerequisite.");
+  });
+
+  it("counts several, naming the first", () => {
+    expect(knockOnText(["COMP2120", "COMP4528", "COMP3320"])).toBe(
+      " 3 courses now miss a prerequisite, including COMP2120.",
+    );
+  });
+
+  it("says nothing when nothing broke", () => {
+    expect(knockOnText([])).toBe("");
   });
 });

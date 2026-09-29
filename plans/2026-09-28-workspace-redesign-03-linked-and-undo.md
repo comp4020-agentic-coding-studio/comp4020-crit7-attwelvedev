@@ -293,7 +293,7 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
 
 ### Task 10: Knock-on warning in the undo toast
 
-- **Description:** WR47.
+- [x] **Description:** WR47.
 - **Files touched:**
   - `src/components/plan-actions.ts`
   - `src/components/plan-actions.test.ts`
@@ -326,6 +326,12 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
   2026-09-29).
 - **Refactor:** None expected.
 - **Acceptance criteria:** `pnpm check` passes.
+- **Added in execution (ruling, 2026-09-29):** at 390×844 the details
+  panel (z-index 40) covered the toast (10), hiding Undo and the warning
+  for any change made from the panel. The toast now sits at 45. Its text
+  also wrapped to half the screen or was truncated by an ellipsis, which
+  cut off the warning, so it now wraps at `max-content` width. The spec
+  "shows over the details panel on a phone" checks all three.
 - **Depends on:** Task 9.
 
 ## 6. Phase Definition of Done

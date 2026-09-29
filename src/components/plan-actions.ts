@@ -17,6 +17,24 @@ export interface UndoEntry {
   restorePin: string | null;
 }
 
+// The other placed courses a change left missing a prerequisite: fine (or
+// only asking for a check) before, "Needs prerequisites" after. One already
+// missing one, or blocked, isn't news; the course acted on has its own card.
+export function newlyBroken(before: PlanView, after: PlanView, actedOn: string): string[] {
+  const was = new Map(before.placements.map((p) => [p.code, p.state]));
+  return after.placements
+    .filter((p) => p.code !== actedOn && p.state === "soft")
+    .filter((p) => was.get(p.code) === "available" || was.get(p.code) === "check")
+    .map((p) => p.code);
+}
+
+// Appended to the toast's own sentence, so it starts with a space.
+export function knockOnText(codes: string[]): string {
+  if (codes.length === 0) return "";
+  if (codes.length === 1) return ` ${codes[0]} now misses a prerequisite.`;
+  return ` ${codes.length} courses now miss a prerequisite, including ${codes[0]}.`;
+}
+
 // Putting a course in a term is a move if it's already placed.
 export function actionFor(view: PlanView, code: string, term: number): PlanAction {
   const placed = view.placements.some((p) => p.code === code);

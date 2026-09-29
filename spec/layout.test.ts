@@ -4202,3 +4202,54 @@ describe("undo for every plan change", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("knock-on warning", { timeout: 30_000 }, () => {
+  it("says when a change leaves another course missing a prerequisite", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    const placed = await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP2120", term: 3 }),
+    });
+    expect(placed.status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, { width: 1920, height: 1080 });
+    try {
+      const card = page.locator('[data-placed="COMP2100"]');
+      await card.getByRole("button", { name: "More options for COMP2100" }).click();
+      await card.locator(".card-menu-terms").getByRole("button", { name: "S1 2029" }).click();
+      const toast = page.locator(".undo-toast");
+      await expect.poll(() => toast.count()).toBe(1);
+      expect(await toast.textContent()).toContain("Moved COMP2100 to S1 2029. COMP2120 now misses a prerequisite.");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("shows over the details panel on a phone, where the panel covers the screen", async () => {
+    const id = await planWithPlacement("COMP2100", 2);
+    await fetch(new URL(`/api/plans/${id}/placements`, baseUrl), {
+      method: "POST",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ code: "COMP2120", term: 3 }),
+    });
+    const page = await openPage(browser, new URL(`/plan/${id}?course=COMP2100`, baseUrl).href, { width: 390, height: 844 });
+    try {
+      await detailsPanel(page).getByRole("button", { name: "Move to S1 2029" }).click();
+      const toast = page.locator(".undo-toast");
+      await expect.poll(() => toast.count()).toBe(1);
+      const onTop = await toast.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+      });
+      expect(onTop).toBe(true);
+      // The warning is the end of the sentence: it wraps, never cut off.
+      const text = toast.locator("span");
+      expect(await text.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+      expect(await text.textContent()).toContain("now misses a prerequisite");
+      // As wide as the phone allows (390 less 1rem a side), not half of it.
+      expect((await toast.boundingBox())!.width).toBeGreaterThan(300);
+    } finally {
+      await page.close();
+    }
+  });
+});

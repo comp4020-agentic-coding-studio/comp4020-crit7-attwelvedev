@@ -25,7 +25,7 @@ import {
   saveSplit,
   type SplitStop,
 } from "./panel-state";
-import { actionFor, type PlanAction, type UndoEntry, undoEntry } from "./plan-actions";
+import { actionFor, knockOnText, newlyBroken, type PlanAction, type UndoEntry, undoEntry } from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
@@ -109,7 +109,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
   const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
-  const [undo, setUndo] = useState<{ entry: UndoEntry } | null>(null);
+  const [undo, setUndo] = useState<{ entry: UndoEntry; knockOn: string } | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
   const [undoPending, setUndoPending] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -207,7 +207,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     }
     setView(result);
     if (undoTimer.current) clearTimeout(undoTimer.current);
-    setUndo({ entry });
+    // The toast is role=status, so this is also what gets announced.
+    setUndo({ entry, knockOn: knockOnText(newlyBroken(view, result, action.code)) });
     undoTimer.current = setTimeout(() => setUndo(null), UNDO_TIMEOUT_MS);
   }
 
@@ -383,7 +384,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       )}
       {undo && (
         <div class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"} role="status">
-          <span>{undo.entry.message}.</span>
+          <span>
+            {undo.entry.message}.{undo.knockOn}
+          </span>
           <button type="button" disabled={undoPending} onClick={handleUndo}>
             {undoPending ? "Undoing…" : "Undo"}
           </button>
