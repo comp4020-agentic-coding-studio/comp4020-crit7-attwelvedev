@@ -1,18 +1,15 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import * as panelState from "./panel-state";
 import {
   applyLayoutPrefs,
-  applySplit,
   DETAILS_W_KEY,
   loadLayoutPrefs,
   NAV_KEY,
-  parseSplit,
   REQS_KEY,
   REQS_W_KEY,
   saveLayoutPrefs,
-  saveSplit,
   setNavHidden,
-  SPLIT_KEY,
   type StorageLike,
 } from "./panel-state";
 
@@ -59,45 +56,6 @@ describe("setNavHidden", () => {
     const root = host();
     expect(() => setNavHidden(root, true, throwingStorage)).not.toThrow();
     expect(root.dataset.nav).toBe("hidden");
-  });
-});
-
-describe("parseSplit", () => {
-  it.each([
-    ["30", 30],
-    ["70", 70],
-    ["50", 50],
-  ])("reads %j as %i", (raw, split) => {
-    expect(parseSplit(raw)).toBe(split);
-  });
-
-  it.each([null, undefined, "", "40", "abc"])("falls back to 50 for %j", (raw) => {
-    expect(parseSplit(raw)).toBe(50);
-  });
-});
-
-describe("applySplit", () => {
-  it("sets the attribute for a non-default split, then clears it for 50", () => {
-    const root = host();
-    applySplit(root, 30);
-    expect(root.dataset).toEqual({ split: "30" });
-    applySplit(root, 50);
-    expect(root.dataset).toEqual({});
-  });
-});
-
-describe("saveSplit", () => {
-  it("stores a non-default split, then removes the key for 50", () => {
-    const storage = fakeStorage();
-    saveSplit(70, storage);
-    expect(storage.map.get(SPLIT_KEY)).toBe("70");
-    saveSplit(50, storage);
-    expect(storage.map.has(SPLIT_KEY)).toBe(false);
-  });
-
-  it("doesn't throw when storage throws or is missing", () => {
-    expect(() => saveSplit(30, throwingStorage)).not.toThrow();
-    expect(() => saveSplit(30, null)).not.toThrow();
   });
 });
 
@@ -199,8 +157,12 @@ describe("the inline head script in Base.astro", () => {
     expect(base).toContain(`"--details-pref"`);
   });
 
-  it("uses the same split key", () => {
+  // Phones switch regions with tabs now, so the stacked split is gone
+  // (workspace-redesign WR40), and no saved split can resurface.
+  it("no longer reads a split", () => {
     const base = readFileSync("src/layouts/Base.astro", "utf-8");
-    expect(base).toContain(`"${SPLIT_KEY}"`);
+    expect(base).not.toContain("panel-split");
+    expect(base).not.toContain("dataset.split");
+    expect("SPLIT_KEY" in panelState).toBe(false);
   });
 });

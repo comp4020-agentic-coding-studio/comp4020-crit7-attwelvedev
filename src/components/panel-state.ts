@@ -10,11 +10,6 @@ import { DETAILS_DEFAULT, type LayoutPrefs } from "./workspace-layout";
 export const NAV_KEY = "panel-nav";
 export const REQS_KEY = "panel-reqs";
 
-// The stacked split handle's view of the fold (LayoutPrefs.reqsFolded).
-export interface ReqsState {
-  collapsed: boolean;
-}
-
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 export interface DatasetHost {
   dataset: DOMStringMap;
@@ -30,9 +25,8 @@ export function safeStorage(): StorageLike | null {
   }
 }
 
-// The side-by-side workspace's widths, in whole px. The fold shares
-// REQS_KEY with ReqsState.collapsed, so the stacked layout's collapse and
-// the side-by-side rail stay one preference.
+// The side-by-side workspace's widths, in whole px, and its fold (REQS_KEY).
+// A phone shows one region at a time instead, so none of these apply there.
 export const REQS_W_KEY = "panel-reqs-w";
 export const DETAILS_W_KEY = "panel-details-w";
 
@@ -82,28 +76,6 @@ export function applyLayoutPrefs(
   root.style.setProperty("--details-pref", `${prefs.detailsWidthPx}px`);
   if (prefs.reqsFolded) root.dataset.reqs = "collapsed";
   else delete root.dataset.reqs;
-}
-
-export const SPLIT_KEY = "panel-split";
-export type SplitStop = 30 | 50 | 70; // the timeline's share of the stacked planner, in %
-export const DEFAULT_SPLIT: SplitStop = 50;
-
-export function parseSplit(raw: string | null | undefined): SplitStop {
-  return raw === "30" ? 30 : raw === "70" ? 70 : 50;
-}
-
-export function applySplit(root: DatasetHost, split: SplitStop): void {
-  if (split === DEFAULT_SPLIT) delete root.dataset.split;
-  else root.dataset.split = String(split);
-}
-
-export function saveSplit(split: SplitStop, storage: StorageLike | null = safeStorage()): void {
-  try {
-    if (split === DEFAULT_SPLIT) storage?.removeItem(SPLIT_KEY);
-    else storage?.setItem(SPLIT_KEY, String(split));
-  } catch {
-    // Not persisting is fine — the split still applies for this page view.
-  }
 }
 
 export function setNavHidden(root: DatasetHost, hidden: boolean, storage: StorageLike | null = safeStorage()): void {

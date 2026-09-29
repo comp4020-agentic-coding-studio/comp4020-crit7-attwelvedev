@@ -405,6 +405,8 @@ describe("term drop-target outline", { timeout: 30_000 }, () => {
         return [box.x + box.width / 2, box.y + Math.min(box.height / 2, 40)] as const;
       };
 
+      // A requirement card, so the drag starts on the phone's Requirements tab.
+      await page.getByRole("navigation", { name: "Plan view" }).getByRole("button", { name: "Requirements" }).click();
       const card = page.locator('[data-drag-code="COMP3630"]').first();
       await card.scrollIntoViewIfNeeded();
       const [cx, cy] = await centre('[data-drag-code="COMP3630"]');

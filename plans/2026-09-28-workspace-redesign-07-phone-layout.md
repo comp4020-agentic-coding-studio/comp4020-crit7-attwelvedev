@@ -42,6 +42,27 @@ Below the phone threshold (a planner container under 49.5rem):
   fit again. Put back the assertion that Phase 05 removed from
   plan-header-and-fit's "card height budget" test, which now reads "the
   first card fits … (the second's code line returns in Phase 07)".
+  **Ruled 2026-09-29 (Phase 1 review):** the budget's bottom edge is
+  `min(.planner-timeline-area bottom, .tabbar top)`, because the floating
+  tab bar covers the region's foot.
+
+### 2.2a Execution rulings (Phase 1 review, 2026-09-29)
+
+- The browser specs are split by area. The new describes ("phone tabs"
+  and "details sheet") go in a new `spec/layout/phone-layout.test.ts`.
+  Retired cases leave `requirements-panel.test.ts`,
+  `plan-header-and-fit.test.ts` and `undo.test.ts`.
+- Other phone specs that use Requirements get a switch to the
+  Requirements tab where their guarantee still holds, and are deleted
+  where it's gone. No assertion is loosened.
+- The saved fold doesn't apply on phones. In stacked mode
+  `showInSidebar` switches tab and never unfolds the saved preference.
+- Only the explicit "Locate on timeline" callers (`onLocateCourse`)
+  switch to Timeline. The locate that `openDetails` fires doesn't.
+- `reqs-hide` and `reqs-rail` stay in `Sidebar` for side-by-side, and
+  aren't displayed in stacked mode.
+- The sheet's pill after Remove is the app's real text, "Not in your
+  plan" (Task 21's "Not planned" meant this).
 
 ### 2.3 Out of scope for this phase
 
@@ -201,6 +222,17 @@ export interface LayoutResult {
 ## 5. Task breakdown
 
 ### Task 20: Phone tab bar replaces the stacked split, handle and collapsed bar
+
+- [x] **Done 2026-09-29.** The specs are in `spec/layout/phone-layout.test.ts`
+  ("phone tabs"). `data-tab` is always rendered, and CSS reads it only
+  inside the `< 49.5rem` container query, so the server render already
+  shows only the timeline on a phone. The Requirements region's list
+  rules (vertical groups, 13rem card grid) are now the base rules, not
+  side-by-side only. Also ported: phone cases in `page-and-nav`,
+  `course-cards`, `timeline` and `timeline-years` (a Requirements-tab
+  step) and `sidebar-groups` (moved into "jumps switch tabs"). The
+  acceptance grep's only hit is `panel-state.test.ts`'s own
+  `not.toContain("panel-split")` guard.
 
 - **Description:** WR43, and WR40's `panel-split` retirement.
 - **Files touched:**

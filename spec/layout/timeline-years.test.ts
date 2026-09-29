@@ -339,6 +339,8 @@ describe("timeline years", { timeout: 30_000 }, () => {
       const cdp = await context.newCDPSession(page);
       const touch = (type: string, x = 0, y = 0) =>
         cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] } as never);
+      // A requirement card, so the drag starts on the phone's Requirements tab.
+      await page.getByRole("navigation", { name: "Plan view" }).getByRole("button", { name: "Requirements" }).click();
       const card = page.locator('[data-drag-code="COMP3630"]').first();
       await card.scrollIntoViewIfNeeded();
       const box = (await card.boundingBox())!;

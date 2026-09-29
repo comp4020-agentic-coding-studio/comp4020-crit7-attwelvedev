@@ -156,6 +156,8 @@ describe("placed rows", { timeout: 30_000 }, () => {
     ["fits on one line in the wide sidebar", desktop, false],
   ])("%s", async (_name, viewport, twoLines) => {
     await withPlan(viewport, async (page) => {
+      // A phone shows Requirements on its own tab.
+      if (viewport === phone) await page.getByRole("button", { name: "Requirements", exact: true }).click();
       const target = row(page);
       await target.scrollIntoViewIfNeeded();
       const code = (await target.locator(".placed-row-code").boundingBox())!;
@@ -242,6 +244,7 @@ describe("card header", { timeout: 30_000 }, () => {
     [390, 844],
   ])("at %i×%i a sidebar card has a grip, no Details button, and a title that opens its details", async (width, height) => {
     await withFreshPlan({ width, height }, async (page) => {
+      if (width < 800) await page.getByRole("button", { name: "Requirements", exact: true }).click();
       const card = page.locator(".course-card-unplaced").filter({ hasText: "COMP1100" });
       const grip = card.locator(".course-card-grip");
       expect(await grip.count()).toBe(1);

@@ -21,9 +21,6 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     [900, 800, { "panel-reqs": "collapsed" }],
     [390, 844, { "panel-reqs": "collapsed" }],
     [390, 844, { "panel-reqs": "collapsed", "panel-nav": "hidden" }],
-    [390, 844, { "panel-split": "30" }],
-    [390, 844, { "panel-split": "70" }],
-    [390, 844, { "panel-split": "70", "panel-nav": "hidden" }],
   ])("at %i×%i with %o the page doesn't scroll either way",async (width, height, storage) => {
     const page = await openPage(browser, planUrl(), { width, height }, { storage });
     try {
@@ -145,33 +142,6 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     }
   });
 
-  it.each([
-    ["shown", {}],
-    ["hidden", { "panel-nav": "hidden" }],
-  ])("on a phone with the nav %s the timeline and requirements split the height", async (_state, storage) => {
-    const page = await openPage(browser, planUrl(), { width: 390, height: 844 }, { storage });
-    try {
-      const split = await page.evaluate(() => {
-        const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
-        const p = rect(".planner-panes");
-        const t = rect(".planner-timeline-area");
-        const a = rect("aside");
-        return {
-          timelineAtMostHalf: t.height <= p.height / 2 + 1,
-          asideBelow: a.top >= t.bottom,
-          asideGap: Math.abs(a.bottom - p.bottom),
-          asideAtLeastHalf: a.height >= p.height / 2 - 17,
-        };
-      });
-      expect(split.timelineAtMostHalf).toBe(true);
-      expect(split.asideBelow).toBe(true);
-      expect(split.asideGap).toBeLessThanOrEqual(1);
-      expect(split.asideAtLeastHalf).toBe(true);
-    } finally {
-      await page.close();
-    }
-  });
-
   it("keeps the page scrolling with sticky panes on a landscape phone", async () => {
     const page = await openPage(browser, planUrl(), { width: 844, height: 390 });
     try {
@@ -201,24 +171,23 @@ describe("card height budget", { timeout: 30_000 }, () => {
     });
   });
 
-  // The phone pane has about 215px below its first term's header. Half the
-  // second card didn't fit even with every spacing lever at its floor (the
-  // first card's title and "Counts toward" wrap to three lines each, and card
-  // text is never clamped), so the budget is one full card plus the next
-  // one's code line: enough to show another course follows (ruled 2026-09-28).
-  // The sticky year band (workspace-redesign Task 15) took about 30px more,
-  // and the user relaxed the budget to the first card alone until Phase 07's
-  // tabs give the phone timeline the whole screen (ruled 2026-09-29). Phase
-  // 07 restores the second card's code line.
-  it("the first card fits in the timeline pane at 390×844 (the second's code line returns in Phase 07)", async () => {
+  // The budget is one full card plus the next one's code line: enough to
+  // show another course follows (ruled 2026-09-28; the stacked split's half
+  // screen had relaxed it to the first card alone). The Timeline tab has the
+  // whole planner, but the tab bar floats over its foot, so what counts is
+  // what's clear of the bar (ruled 2026-09-29).
+  it("the first card and the second's code line fit on the phone's Timeline tab at 390×844", async () => {
     await withPlan(phone, async (page) => {
+      await page.getByRole("navigation", { name: "Plan view" }).waitFor();
       const { area, cards } = await page.evaluate(() => {
         const rect = (el: Element) => {
           const { top, bottom } = el.getBoundingClientRect();
           return { top, bottom };
         };
+        const region = rect(document.querySelector(".planner-timeline-area")!);
+        const bar = rect(document.querySelector(".tabbar")!);
         return {
-          area: rect(document.querySelector(".planner-timeline-area")!),
+          area: { top: region.top, bottom: Math.min(region.bottom, bar.top) },
           cards: [...document.querySelectorAll('[data-term="0"] .term-cards .course-card')].map((card) => ({
             card: rect(card),
             head: rect(card.querySelector(".course-card-head")!),
@@ -231,6 +200,7 @@ describe("card height budget", { timeout: 30_000 }, () => {
       expect(a.card.top, detail).toBeGreaterThanOrEqual(area.top);
       expect(a.card.bottom, detail).toBeLessThanOrEqual(area.bottom);
       expect(b.head.top, detail).toBeGreaterThanOrEqual(a.card.bottom);
+      expect(b.head.bottom, detail).toBeLessThanOrEqual(area.bottom);
     });
   });
 });

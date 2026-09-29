@@ -63,8 +63,9 @@
   --reqs-w-3: 44.7rem;
   /* One academic year: two 15rem terms and their gap, rounded up. */
   --timeline-min: 31rem;
-  /* The collapsed stacked requirements bar. */
-  --reqs-bar-h: 2.75rem;
+  /* The phone's floating tab bar: a 2.75rem button row in a 0.25rem
+     padded pill, plus the home indicator's inset. */
+  --tabbar-h: calc(3.25rem + 2px + env(safe-area-inset-bottom));
 }
 
 /* Anything tagged with a family reads its colour through --family. */
@@ -619,6 +620,15 @@ body:has(.planner) {
   min-width: 0;
 }
 
+/* 13rem cards, like the timeline's, as many columns as the region's width
+   fits and never more than the group has courses (--cols), so no empty
+   track follows them. Between column widths the spare room sits at the
+   end, which the dividers' soft snaps keep rare. */
+#requirements .available-courses {
+  grid-template-columns: repeat(auto-fill, 13rem);
+  max-width: calc(var(--cols, 1) * 13rem + (var(--cols, 1) - 1) * 0.6rem);
+}
+
 /* The collapse controls are shown by the collapsed blocks at the end of the
    planner section, one per layout. */
 .reqs-hide,
@@ -848,25 +858,23 @@ body:has(.planner) {
   min-height: 2.75rem;
 }
 
-/* Mobile-first: a horizontal strip, so a course found here can be dragged
-   straight up onto the timeline above it without scrolling back.
-   The desktop media query below switches this to a vertical list once the
-   sidebar has its own wide column beside the timeline instead of above it. */
+/* One section above the next, in the side-by-side column and on a phone's
+   Requirements tab alike (the phone once had a sideways strip under the
+   timeline; its tab has the whole screen now). */
 .requirements-scroll {
   display: flex;
-  overflow-x: auto;
+  flex-direction: column;
   padding: 0 0 0.5rem;
   list-style: none;
   margin: 0;
 }
 
 /* Sections of the Requirements region split by hairlines, not cards
-   inside it: side by side in the stacked strip, one above the next in the
-   side-by-side column. */
+   inside it. */
 .requirement-group {
-  flex: 0 0 17rem;
-  min-width: 17rem;
-  border-inline-end: 1px solid var(--line);
+  flex: 0 0 auto;
+  min-width: 0;
+  border-block-end: 1px solid var(--line);
   /* Inline padding kept to 0.75rem a side, not the block padding's 0.9rem:
      the desktop aside is a fixed 44rem with its scrollbar gutter reserved
      (see that media query), sized for exactly three 13rem cards + two
@@ -2068,11 +2076,10 @@ button.requisite-code:hover {
   border-color: #a8790d;
 }
 
-/* 1.25rem is main's bottom padding on the plan page, so this clears the
-   collapsed stacked bar, the drop target just used, by 0.75rem. The class
-   comes from Planner, because no container query reaches the toast. */
-.undo-toast-above-bar {
-  bottom: calc(1.25rem + var(--reqs-bar-h) + 0.75rem);
+/* On a phone it rides above the tab bar, 0.75rem clear. Keyed off the
+   bar itself: no container query reaches the fixed toast. */
+.planner:has(.tabbar) .undo-toast {
+  bottom: calc(0.5rem + var(--tabbar-h) + 0.75rem);
 }
 
 /* No box of its own: the timeline region draws the only border around
@@ -3107,27 +3114,6 @@ button.course-card-allocation:focus-visible {
     max-height: calc(100vh - 2rem);
   }
 
-  .requirements-scroll {
-    flex-direction: column;
-    overflow-x: visible;
-  }
-
-  .requirement-group {
-    flex: 0 0 auto;
-    width: 100%;
-    min-width: 0;
-    border-inline-end: 0;
-    border-block-end: 1px solid var(--line);
-  }
-
-  /* 13rem cards, like the timeline's, as many columns as the sidebar's
-     width fits and never more than the group has courses (--cols), so no
-     empty track follows them. Between column widths the spare room sits
-     at the end, which the dividers' soft snaps keep rare. */
-  #requirements .available-courses {
-    grid-template-columns: repeat(auto-fill, 13rem);
-    max-width: calc(var(--cols, 1) * 13rem + (var(--cols, 1) - 1) * 0.6rem);
-  }
 }
 
 @container planner (min-width: 63.1rem) {
@@ -3176,21 +3162,16 @@ button.course-card-allocation:focus-visible {
     flex-direction: column;
   }
 
+  /* A phone's one region (its tab, below) takes the whole planner. */
   @container planner (width < 49.5rem) {
-    /* The saved split (after the resize handle, below) moves this 50%
-       default. The sticky layer's z-index goes too: on a flex item it makes
-       a stacking context even when static, which would paint the timeline
-       over the handle's hit area above the line. */
-    .planner-timeline-area {
-      position: static;
-      z-index: auto;
-      flex: 0 0 50%;
+    .planner-timeline-area,
+    .planner-panes > #requirements {
+      flex: 1 1 0;
+      min-height: 0;
       max-height: none;
     }
 
     .planner-panes > #requirements {
-      flex: 1 1 0;
-      min-height: 0;
       overflow-y: auto;
     }
   }
@@ -3229,6 +3210,56 @@ button.course-card-allocation:focus-visible {
   }
 }
 
+/* A phone shows one region at a time, picked from a floating tab bar
+   (WR43). Each scroller ends with room to bring its last row out from
+   under the bar. */
+@container planner (width < 49.5rem) {
+  .planner-layout[data-tab="timeline"] #requirements,
+  .planner-layout[data-tab="requirements"] .planner-timeline-area {
+    display: none;
+  }
+
+  .timeline-scroll {
+    padding-block-end: calc(var(--tabbar-h) + 1rem);
+  }
+
+  .requirements-scroll {
+    padding-block-end: calc(var(--tabbar-h) + 1rem);
+  }
+}
+
+/* Floats bottom centre over whichever region shows, frosted (.glass) so
+   it reads as a layer over the plan. Under details (40), so a sheet at
+   full height covers it. */
+.tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0.5rem;
+  z-index: 30;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem calc(0.25rem + env(safe-area-inset-bottom));
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+  box-shadow: 0 12px 32px -12px rgb(23 24 26 / 0.45);
+}
+
+.tabbar button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  background: none;
+  border-color: transparent;
+  border-radius: 999px;
+}
+
+.tabbar button[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
 /* A width the student didn't drag (a key, a toggle, details opening or
    closing) eases in. A drag follows the pointer, so .resizing turns it
    off, and so does reduced motion. */
@@ -3255,11 +3286,6 @@ button.course-card-allocation:focus-visible {
   .planner-panes > .details-panel[data-mode="drawer"] {
     animation: none;
   }
-}
-
-/* The stacked split handle; its fitted-page block below shows it. */
-.reqs-resize {
-  display: none;
 }
 
 /* The lines between the side-by-side regions, in the 1rem grid columns
@@ -3344,75 +3370,11 @@ button.course-card-allocation:focus-visible {
   }
 }
 
-/* In the fitted stacked page the same handle lies between the timeline
-   and the requirements and snaps their split instead. Below 30rem tall
-   the page isn't fitted, so there is no split and the handle stays
-   hidden. The collapsed blocks at the end still win over data-split. */
-@media (min-height: 30rem) {
-  @container planner (width < 49.5rem) {
-    .planner-panes {
-      gap: 0;
-    }
-
-    .reqs-resize {
-      display: block;
-      order: 1;
-      flex: 0 0 1rem;
-      position: relative;
-      cursor: row-resize;
-      touch-action: none;
-    }
-
-    .planner-panes > #requirements {
-      order: 2;
-    }
-
-    /* A zero-height item just before the handle: the margins pull its
-       2.75rem box back to no net height, centred on the handle's 1rem
-       line at its end. */
-    .reqs-hide {
-      order: 1;
-      margin-block: -0.875rem -1.875rem;
-      margin-inline-end: 0.25rem;
-    }
-
-    /* Drawn 1rem tall; the hit area is 2.75rem. */
-    .reqs-resize::before {
-      content: "";
-      position: absolute;
-      inset-inline: 0;
-      inset-block: -0.875rem;
-    }
-
-    .reqs-resize::after {
-      content: "";
-      position: absolute;
-      inset-inline: 0;
-      inset-block-start: calc(50% - 1px);
-      height: 2px;
-      border-radius: 1px;
-      background: var(--line);
-    }
-
-    .reqs-resize:hover::after,
-    .reqs-resize:focus-visible::after {
-      background: var(--gold);
-    }
-
-    :root[data-split="30"] .planner-timeline-area {
-      flex-basis: 30%;
-    }
-
-    :root[data-split="70"] .planner-timeline-area {
-      flex-basis: 70%;
-    }
-  }
-}
-
-/* Collapsed sidebar. The collapsed blocks must stay last in the planner
-   section, side-by-side first, then stacked: their rules have the same
-   specificity as the tier blocks above (and the preference caps that follow
-   them), and the collapsed state has to win over all of them. */
+/* Collapsed sidebar, side by side only (a phone has no fold, just its
+   tabs). The collapsed block must stay last in the planner section: its
+   rules have the same specificity as the tier blocks above (and the
+   preference caps that follow them), and the collapsed state has to win
+   over all of them. */
 @container planner (min-width: 49.5rem) {
   /* Shares the Requirements divider's grid cell: the margins pull its
      2.75rem box back over the 1rem column, centred on the line, near its
@@ -3463,89 +3425,6 @@ button.course-card-allocation:focus-visible {
     outline: 2px dashed var(--gold);
     outline-offset: -4px;
     background: var(--gold-tint);
-  }
-}
-
-/* The stacked requirements collapse to a bar along the bottom of the
-   planner. */
-@container planner (width < 49.5rem) {
-  /* A right-aligned row above the requirements; the fitted page moves it
-     onto the handle (with the handle, above). Below the unfitted page's
-     sticky timeline (z-index 2), so it scrolls under it like the
-     requirements do, and still above the handle. */
-  .reqs-hide {
-    display: flex;
-    align-self: flex-end;
-    z-index: 1;
-  }
-
-  /* Points down: the requirements tuck away toward the bottom. */
-  .reqs-hide .section-toggle-icon {
-    transform: rotate(-90deg);
-  }
-
-  :root[data-reqs="collapsed"] .planner-panes > #requirements {
-    flex: 0 0 auto;
-    min-height: 0;
-    overflow: visible;
-  }
-
-  :root[data-reqs="collapsed"] .requirements-scroll,
-  :root[data-reqs="collapsed"] .reqs-hide {
-    display: none;
-  }
-
-  :root[data-reqs="collapsed"] .reqs-rail {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: var(--reqs-bar-h);
-    padding: 0 1rem;
-  }
-
-  :root[data-reqs="collapsed"] .reqs-rail-label {
-    writing-mode: horizontal-tb;
-    transform: none;
-  }
-
-  :root[data-reqs="collapsed"] .reqs-rail-bar {
-    width: auto;
-    height: 0.5rem;
-    min-height: 0;
-  }
-
-  :root[data-reqs="collapsed"] .reqs-rail-completed,
-  :root[data-reqs="collapsed"] .reqs-rail-planned {
-    inset-block: 0;
-    inset-inline-end: auto;
-    height: auto;
-  }
-
-  :root[data-reqs="collapsed"] .reqs-rail-completed {
-    inset-inline-start: 0;
-    width: var(--completed);
-  }
-
-  :root[data-reqs="collapsed"] .reqs-rail-planned {
-    inset-inline-start: var(--completed);
-    width: var(--planned);
-  }
-
-  :root[data-reqs="collapsed"] .reqs-drop-ready .reqs-rail {
-    outline: 2px dashed var(--gold);
-    outline-offset: -4px;
-    background: var(--gold-tint);
-  }
-}
-
-/* In the fitted page, the timeline takes the height the requirements gave up. */
-@media (min-height: 30rem) {
-  @container planner (width < 49.5rem) {
-    :root[data-reqs="collapsed"] .planner-timeline-area {
-      flex: 1 1 auto;
-      max-height: none;
-    }
   }
 }
 

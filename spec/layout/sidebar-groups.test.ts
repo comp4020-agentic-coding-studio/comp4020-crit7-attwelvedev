@@ -82,22 +82,8 @@ describe("show a group in the sidebar", { timeout: 30_000 }, () => {
     }
   });
 
-  it("scrolls the stacked strip sideways to the group on a phone", async () => {
-    await withPlan({ width: 390, height: 844 }, async (page) => {
-      const button = countsToward(page, "COMP2620");
-      await button.scrollIntoViewIfNeeded();
-      await button.click();
-      await expect.poll(() => highlighted(page)).toEqual(["arin-a"]);
-      const intersects = () =>
-        page.evaluate(() => {
-          const t = document.querySelector('[data-group="arin-a"]')!.getBoundingClientRect();
-          const s = document.querySelector(".requirements-scroll")!.getBoundingClientRect();
-          return t.right > s.left && t.left < s.right;
-        });
-      await expect.poll(intersects).toBe(true);
-      expect(await horizontalOverflow(page)).toBe(0);
-    });
-  });
+  // On a phone the jump switches to the Requirements tab first
+  // (spec/layout/phone-layout.test.ts, "jumps switch tabs").
 
   it("leaves Not counting as plain text", async () => {
     const id = await planWithPlacement("COMP1100");

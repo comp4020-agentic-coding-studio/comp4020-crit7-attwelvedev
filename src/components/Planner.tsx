@@ -13,18 +13,7 @@ import {
   withCourseParam,
 } from "./details-state";
 import MoreOptions from "./MoreOptions";
-import {
-  applyLayoutPrefs,
-  applySplit,
-  DEFAULT_LAYOUT_PREFS,
-  DEFAULT_SPLIT,
-  loadLayoutPrefs,
-  parseSplit,
-  type ReqsState,
-  saveLayoutPrefs,
-  saveSplit,
-  type SplitStop,
-} from "./panel-state";
+import { applyLayoutPrefs, DEFAULT_LAYOUT_PREFS, loadLayoutPrefs, saveLayoutPrefs } from "./panel-state";
 import {
   actedOn,
   actionFor,
@@ -35,10 +24,8 @@ import {
   type PlanAction,
 } from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
-import ReqsResizeHandle from "./ReqsResizeHandle";
 import SearchPalette from "./SearchPalette";
 import Sidebar, { type ShowRequest } from "./Sidebar";
-import type { Panels } from "./split-resize";
 import Timeline, { type LocateRequest } from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
 import {
@@ -240,7 +227,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // on release).
   const [prefs, setPrefs] = useState<LayoutPrefs>(DEFAULT_LAYOUT_PREFS);
   const [preview, setPreview] = useState<LayoutPrefs | null>(null);
-  const [split, setSplit] = useState<SplitStop>(DEFAULT_SPLIT);
+  // The region a phone shows (WR43). Page state only: every visit starts
+  // on the timeline.
+  const [tab, setTab] = useState<"timeline" | "requirements">("timeline");
   const [remPx, setRemPx] = useState(16);
   // What the card grids take beyond their cards: never less than the
   // 4.5rem the column widths were budgeted with, but a deeper nesting
@@ -252,7 +241,6 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // render stay equal, as with Sidebar's compaction state).
   useEffect(() => {
     setPrefs(loadLayoutPrefs());
-    setSplit(parseSplit(document.documentElement.dataset.split));
     setRemPx(parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
   }, []);
 
@@ -270,7 +258,6 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const stacked = measured && layout.mode === "stacked";
   const sideBySide = measured && layout.mode === "side-by-side";
   const reqsTargets = reqsSnapTargets(remPx, layoutInput.gridOverheadPx);
-  const reqs: ReqsState = { collapsed: prefs.reqsFolded };
 
   function commitPrefs(next: LayoutPrefs) {
     setPreview(null);
@@ -325,21 +312,18 @@ export default function Planner({ view: initialView, title, initialDetails = nul
 
   // Revealing a hidden sidebar is Planner's job; Sidebar does the rest
   // (expanding the section, scrolling, focus, highlight) from the request.
+  // A phone has no fold (the saved one is for wider screens), just its tab.
   function showInSidebar(kind: ShowRequest["kind"], id: string) {
-    if (layout.reqsPx === "rail") unfoldRequirements();
+    if (stacked) setTab("requirements");
+    else if (layout.reqsPx === "rail") unfoldRequirements();
     setShowRequest({ kind, id, token: Date.now() });
   }
 
-  // The stacked split handle. The fold applies as it's previewed, since the
-  // stacked CSS reads it from <html>; it's saved on release.
-  function updatePanels(next: Panels, commit: boolean) {
-    const nextPrefs = { ...prefs, reqsFolded: next.reqs.collapsed };
-    setPrefs(nextPrefs);
-    applyLayoutPrefs(document.documentElement, nextPrefs);
-    if (commit) saveLayoutPrefs(nextPrefs);
-    setSplit(next.split);
-    applySplit(document.documentElement, next.split);
-    if (commit) saveSplit(next.split);
+  // "Locate on timeline", from anywhere: on a phone it shows the timeline
+  // first. (Opening details locates too, but leaves the tab alone.)
+  function locateCourse(code: string, part?: 2) {
+    if (stacked) setTab("timeline");
+    setLocateRequest({ code, part, token: Date.now() });
   }
 
   const detailsWidth = layout.details.mode === "docked" ? layout.details.px : 0;
@@ -581,6 +565,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     onDragStart: (code) => {
       setDraggingCode(code);
       if (searchOpenRef.current) setPaletteDragging(true);
+      // A course dragged from Requirements on a phone is headed for a
+      // semester, so the finger ends up over the terms (WR45).
+      if (stacked) setTab("timeline");
     },
     // Called just before the drop is resolved under the finger; the palette
     // only re-renders afterwards, so it's still hidden then.
@@ -704,7 +691,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         </div>
       </div>
       {/* Size container for the panes; the fixed undo toast stays outside it, since containment would pin it to the container. */}
-      <div class="planner-layout" ref={layoutRef}>
+      {/* data-tab only matters below the phone threshold (a container query
+          in CSS), so the server render already shows just the timeline there. */}
+      <div class="planner-layout" ref={layoutRef} data-tab={tab}>
         <div
           class="planner-panes"
           data-measured={measured || undefined}
@@ -736,7 +725,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               openMenuCode={openMenuCode}
               onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
               locateRequest={locateRequest}
-              onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
+              onLocateCourse={locateCourse}
               onShowGroup={(id) => showInSidebar("group", id)}
               focusGroupId={focusGroupId}
               onOpenDetails={openDetails}
@@ -751,7 +740,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onDragEnd={() => setDraggingCode(null)}
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
-            onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
+            onLocateCourse={locateCourse}
             onHide={() => foldRequirements(true)}
             onShow={unfoldRequirements}
             autoFolded={sideBySide && layout.autoFolded}
@@ -764,7 +753,6 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             openCode={details.code}
             linked={linked}
           />
-          {stacked && <ReqsResizeHandle reqs={reqs} split={split} onChange={updatePanels} />}
           {sideBySide && (
             <WorkspaceDivider
               which="reqs"
@@ -801,6 +789,17 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         </div>
       </div>
       {!detailsInPanes && detailsPanel}
+      {/* Outside the size container, whose containment would pin its fixed position. */}
+      {stacked && (
+        <nav class="tabbar glass" aria-label="Plan view">
+          <button type="button" aria-pressed={tab === "timeline"} onClick={() => setTab("timeline")}>
+            Timeline
+          </button>
+          <button type="button" aria-pressed={tab === "requirements"} onClick={() => setTab("requirements")}>
+            Requirements
+          </button>
+        </nav>
+      )}
       {/* Inside .planner, so the touch-drag root covers its results, but outside the size container, which would pin it. */}
       <SearchPalette
         view={view}
@@ -814,7 +813,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         onDragEnd={() => setDraggingCode(null)}
         openMenuCode={openMenuCode}
         onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
-        onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
+        onLocateCourse={locateCourse}
         onAction={runAction}
         openCode={details.code}
         dragging={paletteDragging}
@@ -822,7 +821,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       />
       {toast && (
         <div
-          class={stacked && reqs.collapsed ? "undo-toast glass undo-toast-above-bar" : "undo-toast glass"}
+          class="undo-toast glass"
           role="status"
           onMouseEnter={() => holdUndo("hover", true)}
           onMouseLeave={() => holdUndo("hover", false)}

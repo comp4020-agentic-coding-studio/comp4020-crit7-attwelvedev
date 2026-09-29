@@ -51,19 +51,21 @@ describe("layout", { timeout: 30_000 }, () => {
     [800, 800, "stacked", null],
     [390, 844, "stacked", null],
   ])("at %i×%i the planner is %s (sidebar %s px)", async (width, height, layout, asideWidth) => {
-    const geometry = await withPlan({ width, height }, (page) =>
-      page.evaluate(() => {
+    const geometry = await withPlan({ width, height }, async (page) => {
+      if (layout === "stacked") await page.locator(".tabbar").waitFor();
+      return page.evaluate(() => {
         const aside = document.querySelector<HTMLElement>('aside[aria-label="requirements"]')!;
         const timeline = document.querySelector<HTMLElement>(".planner-timeline-area")!;
         const a = aside.getBoundingClientRect();
         const t = timeline.getBoundingClientRect();
         return {
           sideBySide: a.right <= t.left && Math.abs(a.top - t.top) <= 1,
-          stacked: a.top >= t.bottom,
+          // Stacked is one region at a time, behind the phone's tabs.
+          stacked: document.querySelector(".tabbar") !== null && getComputedStyle(aside).display === "none",
           asideWidth: aside.offsetWidth,
         };
-      }),
-    );
+      });
+    });
     if (layout === "side-by-side") {
       expect(geometry.sideBySide).toBe(true);
       expect(geometry.asideWidth).toBe(asideWidth);
@@ -116,16 +118,18 @@ describe("layout", { timeout: 30_000 }, () => {
     [1100, 800],
     [390, 844],
   ])("at %i×%i every course card stays inside its group", async (width, height) => {
-    const escaped = await withPlan({ width, height }, (page) =>
-      page.evaluate(() =>
+    const escaped = await withPlan({ width, height }, async (page) => {
+      // A phone shows Requirements on its own tab.
+      if (width < 800) await page.getByRole("button", { name: "Requirements", exact: true }).click();
+      return page.evaluate(() =>
         [...document.querySelectorAll<HTMLElement>(".available-courses > *")]
           .filter((card) => {
             const group = card.parentElement!.closest("li");
             return !group || card.getBoundingClientRect().right > group.getBoundingClientRect().right - 1;
           })
           .map((card) => card.textContent?.trim().slice(0, 12)),
-      ),
-    );
+      );
+    });
     expect(escaped).toEqual([]);
   });
 });
