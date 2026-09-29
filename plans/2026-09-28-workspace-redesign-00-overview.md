@@ -287,7 +287,7 @@ through custom properties set by the head script and `Planner` (Task 17):
 | 02 | `…-02-details-sidebar.md` | 4–7 | 01 | Every Details entry point opens one docked sidebar with all WR9 sections; `?course=` SSR works; no `<dialog>` left. **Human review** (Task 7) | [x] |
 | 03 | `…-03-linked-and-undo.md` | 8–10 | 02 | Linked highlights while a course is open; every move, place and remove offers Undo with knock-on warnings | [x] |
 | 04 | `…-04-search-palette.md` | 11–12 | 02 | Header search and ⌘K palette with draggable results; inline Search section gone | [x] |
-| 05 | `…-05-region-restyle.md` | 13–15 | 02 | Regions, glass allowlist check, reordered Requirements, year-grouped timeline. **Human review** (Tasks 13, 15) | [ ] |
+| 05 | `…-05-region-restyle.md` | 13–15 | 02 | Regions, glass allowlist check, reordered Requirements, year-grouped timeline. **Human review** (Tasks 13, 15) | [x] |
 | 06 | `…-06-free-resizing.md` | 16–19 | 02, 05 | Free three-way resizing with soft snaps, fold order, saved widths and the mid-width drawer. **Human review** (Task 19) | [ ] |
 | 07 | `…-07-phone-layout.md` | 20–21 | 02, 06 | Phone tabs and bottom sheet; stacked split retired. **Human review** (Task 21) | [ ] |
 | 08 | `…-08-help-and-review.md` | 22–23 | 01–07 | Help rewritten; all-state axe sweep; final visual sign-off. **Human review** (Tasks 22, 23) | [ ] |

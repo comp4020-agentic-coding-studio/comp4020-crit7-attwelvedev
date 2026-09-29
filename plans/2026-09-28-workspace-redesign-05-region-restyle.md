@@ -417,11 +417,19 @@ harness, not just in a review.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 13–15 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] Task 13 and Task 15 human reviews accepted by the user
-- [ ] Tick Phase 05 in overview §5 and commit
+- [x] Tasks 13–15 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes (915 tests, 2026-09-29)
+- [x] Task 13 and Task 15 human reviews accepted by the user
+- [x] Tick Phase 05 in overview §5 and commit
+
+Closed 2026-09-29. axe with colour contrast was clean at 1920×1080 and
+390×844 in these states: the example plan, details open, the timeline
+scrolled, an empty plan, the palette open, and the undo toast. The shared
+`axeViolations` helper turns colour contrast off, so this sweep ran as a
+one-off and isn't in `spec/`. It found one violation, fixed in the
+"keyboard scroll" commit: an empty plan's timeline couldn't be scrolled
+from the keyboard.
 
 ## 7. Requirements coverage (this phase)
 
