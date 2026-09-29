@@ -173,6 +173,10 @@ asserts `axeViolations(page)` is empty:
 
 ### Task 23: All-states axe sweep, manual performance check, and final visual sign-off
 
+- [x] Done 2026-09-29; the whole feature signed off by the user. The sweep
+  lives in `spec/layout/workspace-states.test.ts` (13 states, all green on
+  first run). Glass check passed: longest Paint 0.3ms over ~11.5s.
+
 - **Description:** The overview §2.2 closing checks, and the feature-level
   Definition of Done.
 - **Files touched:** `spec/layout.test.ts` only (the new
