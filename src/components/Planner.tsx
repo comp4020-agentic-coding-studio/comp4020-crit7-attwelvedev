@@ -794,6 +794,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               onReset={() => commitPrefs({ ...prefs, detailsWidthPx: DETAILS_DEFAULT })}
             />
           )}
+          {/* The panel's white scrolls with its content (see styles.css), so
+              a fast scroll shows what's behind it for a moment: this. */}
+          {sideBySide && layout.details.mode === "docked" && <div class="details-backing" aria-hidden="true" />}
           {detailsInPanes && detailsPanel}
         </div>
       </div>

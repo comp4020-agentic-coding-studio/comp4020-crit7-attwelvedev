@@ -220,6 +220,34 @@ describe("regions and glass", { timeout: 30_000 }, () => {
     });
   });
 
+  // The panel paints its white with its scrolling content (local, above),
+  // so on a fast scroll Chromium shows whatever is behind the panel until
+  // the content catches up: that has to be white too, not the ground
+  // (Phase 06 review, 2026-09-29).
+  it.each([
+    ["docked", desktop],
+    ["drawer", { width: 900, height: 800 }],
+  ] as const)("the first thing behind the %s details panel is the region white", async (mode, viewport) => {
+    await onPlan("/plan/example?course=COMP2100", viewport, async (page) => {
+      const panel = page.locator(".details-panel");
+      await panel.waitFor();
+      await expect.poll(() => panel.getAttribute("data-mode")).toBe(mode);
+      await page.waitForFunction(() => document.getAnimations().length === 0);
+      const surface = await resolvedColour(page, "--surface");
+      const behind = await panel.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return [0.1, 0.5, 0.9].map((fy) => {
+          const under = document
+            .elementsFromPoint(r.left + r.width / 2, r.top + r.height * fy)
+            .filter((e) => e !== el && !el.contains(e))
+            .find((e) => getComputedStyle(e).backgroundColor !== "rgba(0, 0, 0, 0)");
+          return under ? getComputedStyle(under).backgroundColor : null;
+        });
+      });
+      expect(behind).toEqual([surface, surface, surface]);
+    });
+  });
+
   it("cards keep a smaller radius than regions", async () => {
     await onPlan("/plan/example", desktop, async (page) => {
       const radii = await page.evaluate(() => {

@@ -1413,6 +1413,12 @@ section[aria-label="program checks"] > h3 {
   border-block-end: 1px solid var(--line);
 }
 
+/* Shown behind a docked panel only in the fitted page (below), where the
+   panes fill the screen and the panel its whole column. */
+.details-backing {
+  display: none;
+}
+
 /* Docked beside the timeline, in the grid column Planner sizes. Sticky
    like Requirements when the page scrolls; the fitted page makes it static. */
 .planner-panes > .details-panel[data-mode="docked"] {
@@ -3200,6 +3206,19 @@ button.course-card-allocation:focus-visible {
     .planner-panes > .details-panel {
       position: static;
       max-height: none;
+    }
+
+    /* The region white behind a docked details panel. The panel paints its
+       own white with its scrolling content (background-attachment: local,
+       for its frosted head), so on a fast scroll Chromium shows whatever
+       is behind it until the content catches up; the other regions' white
+       stays put, so this makes the panel's do too. */
+    .details-backing {
+      display: block;
+      grid-column: 5;
+      grid-row: 1;
+      background: var(--surface);
+      border-radius: var(--r-region);
     }
 
     :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) .reqs-rail,
