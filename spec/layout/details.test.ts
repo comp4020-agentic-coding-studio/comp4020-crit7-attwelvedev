@@ -503,7 +503,7 @@ describe("details requisites", { timeout: 30_000 }, () => {
       expect(await link.count()).toBe(1);
       await link.click();
       await expect.poll(() => detailsPanel(page).locator("h2").textContent()).toContain("COMP2120");
-      await detailsPanel(page).getByRole("button", { name: "Previous course" }).click();
+      await detailsPanel(page).getByRole("button", { name: "Back" }).click();
       await expect.poll(() => detailsPanel(page).locator("h2").textContent()).toContain("COMP2100");
     } finally {
       await page.close();

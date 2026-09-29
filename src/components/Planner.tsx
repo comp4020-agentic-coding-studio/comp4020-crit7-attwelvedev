@@ -5,12 +5,13 @@ import CompletedMenu from "./CompletedMenu";
 import CourseDetailsPanel from "./CourseDetailsPanel";
 import {
   closeDetails,
+  courseCode,
   type DetailsFocus,
   type DetailsState,
   EMPTY_DETAILS,
-  openCourse,
+  openSubject,
   stepHistory,
-  withCourseParam,
+  withSubjectParam,
 } from "./details-state";
 import MoreOptions from "./MoreOptions";
 import { applyLayoutPrefs, DEFAULT_LAYOUT_PREFS, loadLayoutPrefs, saveLayoutPrefs } from "./panel-state";
@@ -125,15 +126,20 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // Token 0 marks the server-rendered open: the page just loaded on it, so
   // nothing asked for focus to move there.
   const [details, setDetails] = useState<DetailsState>(() =>
-    initialDetails ? { ...openCourse(EMPTY_DETAILS, initialDetails.course.code), token: 0 } : EMPTY_DETAILS,
+    initialDetails
+      ? { ...openSubject(EMPTY_DETAILS, { kind: "course", code: initialDetails.course.code }), token: 0 }
+      : EMPTY_DETAILS,
   );
-  // replaceState, not pushState: stepping through courses shouldn't fill
+  // replaceState, not pushState: stepping through the trail shouldn't fill
   // the browser's own history, and the URL only has to be shareable.
   // (window. because `history` below is the plan's undo history.)
   useEffect(() => {
-    window.history.replaceState(null, "", withCourseParam(location.href, details.code));
-  }, [details.code]);
-  const fetched = useCourseDetails(details.code, initialView.plan.id, initialDetails);
+    window.history.replaceState(null, "", withSubjectParam(location.href, details.subject));
+  }, [details.subject?.kind, details.subject?.code]);
+  // Everything course-specific follows the open course, and is idle while
+  // a specialisation is open.
+  const openCourseCode = courseCode(details);
+  const fetched = useCourseDetails(openCourseCode, initialView.plan.id, initialDetails);
   // Cards for courses outside view.courses (search results, or anything
   // fetched for the sidebar), so the sidebar can show them from the plan's
   // side too. Catalogue data, so an entry never goes stale.
@@ -147,18 +153,18 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // What had focus before the sidebar opened, so Close can hand it back.
   const openerRef = useRef<HTMLElement | null>(null);
   function openDetails(code: string, focus: DetailsFocus = "top") {
-    if (details.code === null && document.activeElement instanceof HTMLElement) {
+    if (details.subject === null && document.activeElement instanceof HTMLElement) {
       openerRef.current = document.activeElement;
     }
-    setDetails((s) => openCourse(s, code, focus));
+    setDetails((s) => openSubject(s, { kind: "course", code }, focus));
     // Show where a placed course sits, without taking focus from the panel.
     if (view.placements.some((p) => p.code === code)) setLocateRequest({ code, token: Date.now(), focus: false });
   }
   useEffect(() => {
-    if (details.code !== null || !openerRef.current) return;
+    if (details.subject !== null || !openerRef.current) return;
     if (openerRef.current.isConnected) openerRef.current.focus();
     openerRef.current = null;
-  }, [details.code]);
+  }, [details.subject === null]);
   const [announcement, setAnnouncement] = useState("");
   const [draggingCode, setDraggingCode] = useState<string | null>(null);
   // Hard-blocked terms of every course search has returned, by code: a
@@ -247,7 +253,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const layoutInput: LayoutInput = {
     containerPx,
     remPx,
-    detailsOpen: details.code !== null,
+    detailsOpen: details.subject !== null,
     prefs: preview ?? prefs,
     gridOverheadPx: Math.max(4.5 * remPx, measuredOverheadPx),
   };
@@ -559,7 +565,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   }, [toast]);
 
   const readout = completedReadout(view.plan.cutoff, view.terms);
-  const linked = details.code ? linkedHighlights(view, details.code, knownCards[details.code]) : null;
+  const linked = openCourseCode ? linkedHighlights(view, openCourseCode, knownCards[openCourseCode]) : null;
 
   useTouchDrag(plannerRef, {
     onDragStart: (code) => {
@@ -588,18 +594,18 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // the planner is measured, it stays outside the size container, whose
   // containment would pin its fixed position.
   const detailsInPanes = sideBySide && (layout.details.mode === "docked" || layout.details.mode === "drawer");
-  const detailsPanel = details.code && (
+  const detailsPanel = openCourseCode && (
     <CourseDetailsPanel
       view={view}
       details={details}
-      card={view.courses[details.code] ?? knownCards[details.code] ?? fetched.data?.course ?? null}
+      card={view.courses[openCourseCode] ?? knownCards[openCourseCode] ?? fetched.data?.course ?? null}
       fetched={fetched}
       onOpen={(code) => openDetails(code)}
       onBack={() => setDetails((s) => stepHistory(s, -1))}
       onForward={() => setDetails((s) => stepHistory(s, 1))}
       onClose={() => setDetails(closeDetails)}
-      onPlace={(term) => void runAction(actionFor(view, details.code!, term))}
-      onRemove={() => void runAction({ kind: "remove", code: details.code! })}
+      onPlace={(term) => void runAction(actionFor(view, openCourseCode, term))}
+      onRemove={() => void runAction({ kind: "remove", code: openCourseCode })}
       onAction={runAction}
       // Unmeasured, the layout reads as stacked (a 0px planner), so the
       // panel keeps the CSS's fixed drawer until Planner knows its width.
@@ -731,7 +737,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
               onShowGroup={(id) => showInSidebar("group", id)}
               focusGroupId={focusGroupId}
               onOpenDetails={openDetails}
-              openCode={details.code}
+              openCode={openCourseCode}
               linked={linked}
             />
           </div>
@@ -752,7 +758,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onShowInSidebar={showInSidebar}
             onFocusGroup={setFocusGroupId}
             onOpenDetails={openDetails}
-            openCode={details.code}
+            openCode={openCourseCode}
             linked={linked}
           />
           {sideBySide && (
@@ -817,7 +823,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
         onLocateCourse={locateCourse}
         onAction={runAction}
-        openCode={details.code}
+        openCode={openCourseCode}
         dragging={paletteDragging}
         stacked={stacked}
       />

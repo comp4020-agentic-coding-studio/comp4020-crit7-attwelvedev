@@ -3,7 +3,7 @@ import type { ComponentChildren } from "preact";
 import type { CheckAnswer } from "../lib/domain/types";
 import { type CourseCard, type CourseDetailsView, NORMAL_TERM_UNITS, type PlanView } from "../lib/domain/view";
 import ChoiceMenu from "./ChoiceMenu";
-import type { DetailsState } from "./details-state";
+import { courseCode, type DetailsState } from "./details-state";
 import type { PlanAction } from "./plan-actions";
 import {
   dependentsOf,
@@ -232,7 +232,7 @@ export default function CourseDetailsPanel({
   wide,
   onToggleWide,
 }: Props) {
-  const code = details.code!;
+  const code = courseCode(details)!;
   const placement = view.placements.find((p) => p.code === code) ?? null;
   const readOnly = view.plan.readOnly;
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -330,7 +330,7 @@ export default function CourseDetailsPanel({
           <button
             type="button"
             class="details-icon-button"
-            aria-label="Previous course"
+            aria-label="Back"
             disabled={details.index <= 0}
             onClick={onBack}
           >
@@ -339,7 +339,7 @@ export default function CourseDetailsPanel({
           <button
             type="button"
             class="details-icon-button"
-            aria-label="Next course"
+            aria-label="Forward"
             disabled={details.index >= details.history.length - 1}
             onClick={onForward}
           >

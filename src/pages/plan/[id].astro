@@ -1,5 +1,5 @@
 ---
-import { courseParam } from "../../components/details-state";
+import { subjectParam } from "../../components/details-state";
 import Planner from "../../components/Planner";
 import Base from "../../layouts/Base.astro";
 import { getCourseDetails, getView } from "../../lib/plan-service";
@@ -9,8 +9,8 @@ const view = getView(id);
 // ?course= opens the details sidebar in the server render, so a shared
 // link lands on the course without a loading flash. An unknown code is
 // ignored and the page renders as if the parameter weren't there.
-const courseCode = courseParam(Astro.url.search);
-const initialDetails = view && courseCode ? getCourseDetails(courseCode, id) : null;
+const subject = subjectParam(Astro.url.search);
+const initialDetails = view && subject?.kind === "course" ? getCourseDetails(subject.code, id) : null;
 
 if (!view) {
   Astro.response.status = 404;

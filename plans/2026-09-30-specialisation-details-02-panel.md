@@ -399,7 +399,7 @@ using only existing tokens:
 
 ### Task 3: Typed details subjects, `?spec=` parsing, Back/Forward
 
-- [ ] **Description.** Replace course-code state with `DetailsSubject`
+- [x] **Description.** Replace course-code state with `DetailsSubject`
   state (overview §4.2, this file's §4.1). Migrate Planner and
   CourseDetailsPanel to it. Rename the nav buttons. Spec subjects aren't
   opened by anything yet.
