@@ -212,12 +212,12 @@ asserts `axeViolations(page)` is empty:
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 22–23 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] Task 22 and Task 23 human reviews accepted by the user
-- [ ] Every box in overview §6 is ticked
-- [ ] Tick Phase 08 in overview §5 and commit
+- [x] Tasks 22–23 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes
+- [x] Task 22 and Task 23 human reviews accepted by the user
+- [x] Every box in overview §6 is ticked
+- [x] Tick Phase 08 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

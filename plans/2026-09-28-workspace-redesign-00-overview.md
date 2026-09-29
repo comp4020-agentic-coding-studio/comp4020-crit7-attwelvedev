@@ -290,18 +290,18 @@ through custom properties set by the head script and `Planner` (Task 17):
 | 05 | `…-05-region-restyle.md` | 13–15 | 02 | Regions, glass allowlist check, reordered Requirements, year-grouped timeline. **Human review** (Tasks 13, 15) | [x] |
 | 06 | `…-06-free-resizing.md` | 16–19 | 02, 05 | Free three-way resizing with soft snaps, fold order, saved widths and the mid-width drawer. **Human review** (Task 19) | [x] |
 | 07 | `…-07-phone-layout.md` | 20–21 | 02, 06 | Phone tabs and bottom sheet; stacked split retired. **Human review** (Task 21) | [x] |
-| 08 | `…-08-help-and-review.md` | 22–23 | 01–07 | Help rewritten; all-state axe sweep; final visual sign-off. **Human review** (Tasks 22, 23) | [ ] |
+| 08 | `…-08-help-and-review.md` | 22–23 | 01–07 | Help rewritten; all-state axe sweep; final visual sign-off. **Human review** (Tasks 22, 23) | [x] |
 
 Phases 03 and 04 depend only on 02 and may run in either order. Phase 05
 depends only on 02 (the sidebar exists to be styled as a region).
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and every task is complete with tests
+- [x] Every phase in §5 is ticked, and every task is complete with tests
   passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] Manually verified at 1920×1080, 1280×800, 900×800 and 390×844:
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes
+- [x] Manually verified at 1920×1080, 1280×800, 900×800 and 390×844:
   - open COMP2100 from a timeline card
   - move it with the strip, and undo
   - answer a check inside the tree
@@ -310,9 +310,9 @@ depends only on 02 (the sidebar exists to be styled as a region).
   - narrow the window to 1280 and see Requirements step down and then fold
   - at 900, see the drawer
   - on a phone, switch tabs and drag the sheet to full height
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Every `Human review:` task explicitly accepted by the user
-- [ ] No item remains in §8
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Every `Human review:` task explicitly accepted by the user
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 
