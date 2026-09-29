@@ -988,6 +988,15 @@ section[aria-label="program checks"] > h3 {
   gap: 0.6rem;
 }
 
+/* Where a check stands, in words, under its bar's figures (or alone, for
+   a check with no bar). */
+.check-note {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0.25rem 0 0;
+}
+
 .group-children > li {
   border-inline-start: 2px solid var(--line);
   padding-inline-start: 0.75rem;

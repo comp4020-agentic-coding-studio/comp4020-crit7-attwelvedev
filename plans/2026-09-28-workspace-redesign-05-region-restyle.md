@@ -286,6 +286,11 @@ harness, not just in a review.
 
 ### Task 14: Requirements order: "What's left" without TDP, Total, Checks with bars and plain notes
 
+- [x] **Done 2026-09-29.** A maximum reached exactly reads "At the limit",
+  a case the plan didn't name. Two sidebar-groups tests used the example
+  plan's TDP line to test jumping to a check. They now use a fresh plan's
+  failing 4000-level COMP check, with the same assertions.
+
 - **Description:** WR24 and WR25.
 - **Files touched:**
   - `src/components/planner-logic.ts`

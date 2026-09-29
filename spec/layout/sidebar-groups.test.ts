@@ -121,27 +121,35 @@ describe("show a group in the sidebar", { timeout: 30_000 }, () => {
     page.locator(".requirement-highlighted").evaluateAll((els) => els.map((el) => el.getAttribute("data-check")));
   const outstandingLink = (page: Page, text: RegExp) => page.locator(".outstanding-list button", { hasText: text });
 
+  // What's left lists only checks the plan fails (an untracked one says so
+  // under Checks instead, WR24), so these start from a fresh plan, where
+  // the 4000-level COMP minimum isn't met yet.
+  const freshPlanUrl = async () => new URL(`/plan/${await planWithPlacement("COMP1100")}`, baseUrl).href;
+
   it("jumps from a What's left check item to its check row", async () => {
-    await withPlan(desktop, async (page) => {
-      const link = outstandingLink(page, /^At least 12 units of TDP-tagged courses/);
+    const page = await openPage(browser, await freshPlanUrl(), desktop);
+    try {
+      const link = outstandingLink(page, /^At least 48 units of 4000-level COMP/);
       expect(await link.count()).toBe(1);
       await link.click();
-      await expect.poll(() => checksHighlighted(page)).toEqual(["tdp-min"]);
+      await expect.poll(() => checksHighlighted(page)).toEqual(["comp4000-min"]);
       expect(
-        await page.evaluate(() => document.activeElement === document.querySelector('[data-check="tdp-min"] > h4')),
+        await page.evaluate(() => document.activeElement === document.querySelector('[data-check="comp4000-min"] > h4')),
       ).toBe(true);
-    });
+    } finally {
+      await page.close();
+    }
   });
 
   it("expands a compacted Total before jumping to a check", async () => {
-    const page = await openPage(browser, planUrl(), desktop, { storage: { "sidebar-compact": '["total"]' } });
+    const page = await openPage(browser, await freshPlanUrl(), desktop, { storage: { "sidebar-compact": '["total"]' } });
     try {
       const toggle = page.locator('.section-toggle[aria-controls="sidebar-section-total"]');
       await expect.poll(() => toggle.getAttribute("aria-expanded")).toBe("false");
-      const link = outstandingLink(page, /^At least 12 units of TDP-tagged courses/);
+      const link = outstandingLink(page, /^At least 48 units of 4000-level COMP/);
       expect(await link.count()).toBe(1);
       await link.click();
-      await expect.poll(() => checksHighlighted(page)).toEqual(["tdp-min"]);
+      await expect.poll(() => checksHighlighted(page)).toEqual(["comp4000-min"]);
       expect(await toggle.getAttribute("aria-expanded")).toBe("true");
     } finally {
       await page.close();

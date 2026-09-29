@@ -5,8 +5,9 @@ import { EXAMPLE_PLAN } from "../data/example-plan";
 import { fromPandc, isUndergrad, type PandcCourseJson } from "../lib/catalogue/from-pandc";
 import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
-import { buildPlanView, type GroupView } from "../lib/domain/view";
+import { buildPlanView, type CheckView, type GroupView } from "../lib/domain/view";
 import {
+  checkNote,
   completedReadout,
   cutoffOptions,
   dependentsOf,
@@ -318,17 +319,57 @@ describe("outstandingItems", () => {
     expect(electives?.text).toMatch(/\d+ more units? needed/);
   });
 
-  it("reports a failing check as not yet satisfied, and an untracked one separately", () => {
+  // An untracked check isn't something left to do: it says so under
+  // Checks instead (WR24).
+  it("outstandingItems omits untracked checks", () => {
     const view = buildPlanView(cat, AACOM_2027, emptyPlan());
     const items = outstandingItems(view);
     expect(items).toContainEqual({
       id: "check-comp4000-min",
       text: "At least 48 units of 4000-level COMP: not yet satisfied",
     });
-    expect(items).toContainEqual({
-      id: "check-tdp-min",
-      text: "At least 12 units of TDP-tagged courses — not tracked, verify on P&C",
-    });
+    expect(items.filter((i) => i.text.includes("TDP"))).toEqual([]);
+  });
+});
+
+describe("checkNote", () => {
+  const check = (over: Partial<CheckView>): CheckView => ({
+    id: "c",
+    label: "A check",
+    bound: "min",
+    units: 48,
+    completed: 0,
+    planned: 0,
+    ok: true,
+    ...over,
+  });
+
+  it("gives a maximum's room left", () => {
+    expect(checkNote(check({ bound: "max", units: 60, completed: 48, planned: 0 }))).toBe("Room for 12 more units");
+  });
+
+  it("gives how far a maximum is exceeded", () => {
+    expect(checkNote(check({ bound: "max", units: 60, completed: 48, planned: 18, ok: false }))).toBe(
+      "6 units over the limit",
+    );
+  });
+
+  it("gives a covered minimum's spare units", () => {
+    expect(checkNote(check({ bound: "min", units: 48, completed: 0, planned: 60 }))).toBe("Covered, with 12 units to spare");
+  });
+
+  it("says a minimum met exactly is covered", () => {
+    expect(checkNote(check({ bound: "min", units: 48, completed: 18, planned: 30 }))).toBe("Covered");
+  });
+
+  it("gives a minimum's shortfall", () => {
+    expect(checkNote(check({ bound: "min", units: 48, completed: 0, planned: 30, ok: false }))).toBe(
+      "18 units still needed",
+    );
+  });
+
+  it("says an untracked check isn't tracked yet", () => {
+    expect(checkNote(check({ ok: null }))).toBe("Not tracked yet. Check it on Programs & Courses.");
   });
 });
 

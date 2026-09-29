@@ -740,3 +740,35 @@ describe("progress bars", { timeout: 30_000 }, () => {
     }
   });
 });
+
+// WR24–WR25: an untracked check isn't listed as left to do; every check
+// says in plain words where it stands, under its bar.
+describe("requirements order and check notes", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+
+  it("What's left has no TDP line", async () => {
+    await withPlan(desktop, async (page) => {
+      const text = await page.locator(".outstanding-panel").innerText();
+      expect(text).not.toContain("TDP");
+    });
+  });
+
+  it("Checks show bar and note", async () => {
+    await withPlan(desktop, async (page) => {
+      const checks = await page.evaluate(() =>
+        [...document.querySelectorAll("li[data-check]")].map((li) => ({
+          id: li.getAttribute("data-check"),
+          bars: li.querySelectorAll('[role="progressbar"]').length,
+          note: li.querySelector("p.check-note")?.textContent ?? null,
+        })),
+      );
+      // The example plan: 48 units at 1000-level against a 60 maximum, 60
+      // planned at 4000-level against a 48 minimum, and TDP untracked.
+      expect(checks).toEqual([
+        { id: "lvl1000-max", bars: 1, note: "Room for 12 more units" },
+        { id: "comp4000-min", bars: 1, note: "Covered, with 12 units to spare" },
+        { id: "tdp-min", bars: 0, note: "Not tracked yet. Check it on Programs & Courses." },
+      ]);
+    });
+  });
+});

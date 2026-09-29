@@ -312,14 +312,14 @@ describe("planner", () => {
     expect(example).toContain("Completed through S2 2027");
   });
 
-  it("program checks render with the two-segment bar, and the untracked TDP check shows as not tracked", async () => {
+  it("program checks render with the two-segment bar, and the untracked TDP check says it isn't tracked yet", async () => {
     const res = await fetch(new URL("/plan/example", baseUrl));
     const html = await res.text();
     const checksMatch = html.match(/<section aria-label="program checks">[\s\S]*?<\/section>/);
     expect(checksMatch).not.toBeNull();
     const checksHtml = checksMatch![0];
     expect(checksHtml).toMatch(/role="progressbar"/);
-    expect(checksHtml).toContain("not tracked — verify on P&amp;C");
+    expect(checksHtml).toContain("Not tracked yet. Check it on Programs &amp; Courses.");
   });
 
   it("the example page renders the verify badge on COMP4550", async () => {

@@ -3,6 +3,7 @@ import { matchesFilter } from "../lib/domain/filters";
 import { TERMS, termSpanLabel } from "../lib/domain/terms";
 import type { CheckAnswer, CourseFilter, Family, ReqExpr } from "../lib/domain/types";
 import {
+  type CheckView,
   type CourseCard,
   NORMAL_TERM_UNITS,
   type GroupView,
@@ -315,17 +316,37 @@ function collectGroupItems(groups: GroupView[], out: OutstandingItem[]): void {
 // "Choose your Specialisation", lands right next to that group's own unit
 // shortfall rather than separated from it), with plan-wide checks (a
 // 1000-level unit cap, say) last since they aren't about any one group.
+// An untracked check isn't listed: nothing in the plan can act on it, and
+// its own note under Checks says so (checkNote).
 export function outstandingItems(view: PlanView): OutstandingItem[] {
   const out: OutstandingItem[] = [];
   collectGroupItems(view.groups, out);
   for (const check of view.checks) {
     if (check.ok === false) {
       out.push({ id: `check-${check.id}`, text: `${check.label}: not yet satisfied` });
-    } else if (check.ok === null) {
-      out.push({ id: `check-${check.id}`, text: `${check.label} — not tracked, verify on P&C` });
     }
   }
   return out;
+}
+
+function units(n: number): string {
+  return `${n} unit${n === 1 ? "" : "s"}`;
+}
+
+// The plain-words line under a check's bar: where the plan stands against
+// its bound, counting planned units as well as completed ones, as the bar
+// does.
+export function checkNote(check: CheckView): string {
+  if (check.ok === null) return "Not tracked yet. Check it on Programs & Courses.";
+  const total = check.completed + check.planned;
+  if (check.bound === "max") {
+    if (total > check.units) return `${units(total - check.units)} over the limit`;
+    if (total === check.units) return "At the limit";
+    return `Room for ${check.units - total} more unit${check.units - total === 1 ? "" : "s"}`;
+  }
+  if (total < check.units) return `${units(check.units - total)} still needed`;
+  if (total === check.units) return "Covered";
+  return `Covered, with ${units(total - check.units)} to spare`;
 }
 
 // Where a "What's left" item jumps to, read off the id outstandingItems

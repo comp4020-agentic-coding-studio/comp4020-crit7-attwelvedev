@@ -8,6 +8,7 @@ import {
   groupBarTarget,
   groupPath,
   type LinkedHighlights,
+  checkNote,
   outstandingItems,
   outstandingTarget,
   progressSegments,
@@ -501,9 +502,7 @@ export default function Sidebar({
                 {view.checks.map((check) => (
                   <li key={check.id} data-check={check.id}>
                     <h4 tabIndex={-1}>{check.label}</h4>
-                    {check.ok === null ? (
-                      <p>not tracked — verify on P&C</p>
-                    ) : (
+                    {check.ok !== null && (
                       <ProgressBar
                         label={check.label}
                         completed={check.completed}
@@ -512,6 +511,7 @@ export default function Sidebar({
                         bound={check.bound}
                       />
                     )}
+                    <p class="check-note">{checkNote(check)}</p>
                   </li>
                 ))}
               </ul>
