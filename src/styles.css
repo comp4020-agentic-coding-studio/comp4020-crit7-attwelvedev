@@ -1054,10 +1054,14 @@ section[aria-label="program checks"] > h3 {
   container-type: inline-size;
 }
 
-/* The ‹ › buttons page the scroller sideways. Plain chevrons, floating
-   over the right end of the year band (so the band is as tall as they
-   are): the region is already the frame, and a row of their own would
-   cost the cards its height.
+/* The ‹ › buttons page the scroller sideways, in a frosted pill (.glass,
+   denser than the header it floats on) at the right end of the year
+   band: a row of their own would cost the cards its height. A pill
+   rather than a fade to white, so it reads as a control on the glass,
+   and a year label passing under it is frosted, not overlapped. The pill
+   is drawn 2rem tall, centred in the band, while each button keeps a
+   2.75rem target that overhangs it unseen. Clear of the scroller's own
+   scrollbar (--bar-w, set by Timeline), which stays on top.
 
    The timeline's layers stay under the card and header menus (3): in the
    fitted page the region is static and makes no stacking context, so
@@ -1065,20 +1069,21 @@ section[aria-label="program checks"] > h3 {
    sit over the prereq overlay's lines (1, earlier in the DOM) and the
    cards, and the buttons (2) sit over both. */
 .timeline-toolbar {
+  --glass: rgb(255 255 255 / 0.88);
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
+  inset-block-start: calc((2.75rem - 2rem) / 2);
+  inset-inline-end: calc(var(--bar-w, 0px) + 0.5rem);
   z-index: 2;
   display: flex;
-  gap: 0.25rem;
-  /* Solid behind the buttons, fading out toward the start like the edge
-     fade, so cards and year labels pass under them legibly. */
-  padding-inline: 2.5rem 0.25rem;
-  background: linear-gradient(to right, transparent, var(--surface) 2.5rem);
-  border-start-end-radius: var(--r-region);
+  align-items: center;
+  height: 2rem;
+  border-radius: 999px;
+  /* A hairline edge that takes no room. */
+  box-shadow: 0 0 0 1px var(--line);
 }
 
 .timeline-scroll-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1086,11 +1091,32 @@ section[aria-label="program checks"] > h3 {
   height: 2.75rem;
   padding: 0;
   background: none;
-  border-color: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
-.timeline-scroll-button:hover:not(:disabled) {
-  border-color: var(--line);
+/* The hover shade fills the button's half of the pill, not its whole
+   target. */
+.timeline-scroll-button::before {
+  content: "";
+  position: absolute;
+  inset: calc((2.75rem - 2rem) / 2) 0;
+  z-index: -1;
+  transition: background 0.12s ease;
+}
+
+.timeline-scroll-button:first-child::before {
+  border-start-start-radius: 999px;
+  border-end-start-radius: 999px;
+}
+
+.timeline-scroll-button:last-child::before {
+  border-start-end-radius: 999px;
+  border-end-end-radius: 999px;
+}
+
+.timeline-scroll-button:hover:not(:disabled)::before {
+  background: rgb(23 24 26 / 0.07);
 }
 
 /* The region's only scroller: one grid row of years, as tall as the
@@ -1226,13 +1252,14 @@ section[aria-label="program checks"] > h3 {
   }
 }
 
-/* Fades at an edge with more semesters past it. Not over the horizontal
-   scrollbar, and never in the way of a pointer. */
+/* Fades at an edge with more semesters past it. Clear of the scroller's
+   own scrollbars (--bar-w, --bar-h, set by Timeline), and never in the
+   way of a pointer. */
 .timeline-scroll-wrap::before,
 .timeline-scroll-wrap::after {
   content: "";
   position: absolute;
-  inset-block: 0 0.75rem;
+  inset-block: 0 var(--bar-h, 0px);
   z-index: 1;
   width: 2rem;
   pointer-events: none;
@@ -1245,7 +1272,7 @@ section[aria-label="program checks"] > h3 {
 }
 
 .timeline-scroll-wrap::after {
-  inset-inline-end: 0;
+  inset-inline-end: var(--bar-w, 0px);
   background: linear-gradient(to left, var(--surface), transparent);
 }
 

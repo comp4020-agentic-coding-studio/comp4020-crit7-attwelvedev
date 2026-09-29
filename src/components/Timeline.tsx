@@ -88,6 +88,7 @@ export default function Timeline({
   // Whether there are semesters off either end of the scroller: drives the
   // edge fades and disables the ‹ › buttons at the ends.
   const scrollRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ left: false, right: false });
   useEffect(() => {
     const scroller = scrollRef.current;
@@ -97,6 +98,11 @@ export default function Timeline({
       const left = el.scrollLeft > 1;
       const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
       setEdges((prev) => (prev.left === left && prev.right === right ? prev : { left, right }));
+      // The scroller's own scrollbars (none where the system overlays
+      // them), so the ‹ › and the edge fades sit clear of them.
+      const wrap = wrapRef.current;
+      wrap?.style.setProperty("--bar-w", `${el.offsetWidth - el.clientWidth}px`);
+      wrap?.style.setProperty("--bar-h", `${el.offsetHeight - el.clientHeight}px`);
     }
     update();
     scroller.addEventListener("scroll", update, { passive: true });
@@ -202,6 +208,7 @@ export default function Timeline({
       )}
       {showPrereqLinks && view.placements.length > 0 && <PrereqLegend />}
       <div
+        ref={wrapRef}
         class={["timeline-scroll-wrap", edges.left && "more-left", edges.right && "more-right"]
           .filter(Boolean)
           .join(" ")}
@@ -209,7 +216,7 @@ export default function Timeline({
         {/* Over the right end of the year band, rather than a row of its
             own above it: the budget tests hold the timeline's head to one
             band (Phase 05 review, 2026-09-29). */}
-        <div class="timeline-toolbar">
+        <div class="timeline-toolbar glass">
           <button
             type="button"
             class="timeline-scroll-button"

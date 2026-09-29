@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Page } from "playwright";
+import { chromium, type Page } from "playwright";
 import { axeViolations, openPage, type Viewport } from "../browser";
 import { baseUrl, browser, planWithPlacement, useBrowser, withPlan } from "./helpers";
 
@@ -105,7 +105,8 @@ describe("timeline years", { timeout: 30_000 }, () => {
           const areaEl = document.querySelector(".planner-timeline-area")!;
           const area = areaEl.getBoundingClientRect();
           const border = parseFloat(getComputedStyle(areaEl).borderLeftWidth);
-          const card = (t: number) => document.querySelector(`[data-term="${t}"] .course-card`)!.getBoundingClientRect();
+          const card = (t: number) =>
+            document.querySelector(`[data-term="${t}"] .course-card`)!.getBoundingClientRect();
           const year = document.querySelector(".timeline-year")!;
           const divider = year.getBoundingClientRect().right;
           const hairline = parseFloat(getComputedStyle(year).borderRightWidth);
@@ -159,22 +160,25 @@ describe("timeline years", { timeout: 30_000 }, () => {
   // phone there are no ‹ › buttons either: it's a focusable, labelled
   // region, so the keyboard can still scroll it (found by axe at the
   // Phase 05 close, 2026-09-29).
-  it.each([desktop, phone])("an empty plan's timeline can be scrolled from the keyboard at $width", async (viewport) => {
-    const created = await fetch(new URL("/api/plans", baseUrl), {
-      method: "POST",
-      headers: { origin: baseUrl },
-      redirect: "manual",
-    });
-    const id = created.headers.get("location")!.split("/").pop()!;
-    await onPlan(id, viewport, async (page) => {
-      const scroller = page.getByRole("region", { name: "Timeline" });
-      expect(await scroller.evaluate((el) => el.classList.contains("timeline-scroll"))).toBe(true);
-      expect(await axeViolations(page)).toEqual([]);
-      await scroller.focus();
-      await page.keyboard.press("ArrowRight");
-      await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
-    });
-  });
+  it.each([desktop, phone])(
+    "an empty plan's timeline can be scrolled from the keyboard at $width",
+    async (viewport) => {
+      const created = await fetch(new URL("/api/plans", baseUrl), {
+        method: "POST",
+        headers: { origin: baseUrl },
+        redirect: "manual",
+      });
+      const id = created.headers.get("location")!.split("/").pop()!;
+      await onPlan(id, viewport, async (page) => {
+        const scroller = page.getByRole("region", { name: "Timeline" });
+        expect(await scroller.evaluate((el) => el.classList.contains("timeline-scroll"))).toBe(true);
+        expect(await axeViolations(page)).toEqual([]);
+        await scroller.focus();
+        await page.keyboard.press("ArrowRight");
+        await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+      });
+    },
+  );
 
   // The frosted header is one glass surface across every year, edge to
   // edge of the region, with the years' labels, term headings and
@@ -219,6 +223,41 @@ describe("timeline years", { timeout: 30_000 }, () => {
       expect(new Set(drawn).size).toBe(1);
       expect(drawn[0]).not.toBe("rgba(0, 0, 0, 0)");
     });
+  });
+
+  // The ‹ › and the edge fades sit clear of the scroller's own scrollbars,
+  // which stay visible and grabbable (Task 15 review, 2026-09-29). The
+  // suite's browser hides scrollbars, so this launches one that draws them.
+  it("keeps the ‹ › and the edge fades off the scrollbars", async () => {
+    const withBars = await chromium.launch({ ignoreDefaultArgs: ["--hide-scrollbars"] });
+    try {
+      const page = await withBars.newPage({ viewport: { width: 1920, height: 800 } });
+      await page.goto(new URL("/plan/example", baseUrl).href, { waitUntil: "networkidle" });
+      const result = await page.evaluate(() => {
+        const scroller = document.querySelector<HTMLElement>(".timeline-scroll")!;
+        const box = scroller.getBoundingClientRect();
+        const style = getComputedStyle(scroller);
+        const contentRight = box.left + parseFloat(style.borderLeftWidth) + scroller.clientWidth;
+        const contentBottom = box.top + parseFloat(style.borderTopWidth) + scroller.clientHeight;
+        const wrap = document.querySelector(".timeline-scroll-wrap")!;
+        const fade = getComputedStyle(wrap, "::after");
+        const wrapBox = wrap.getBoundingClientRect();
+        return {
+          bar: scroller.offsetWidth - scroller.clientWidth,
+          toolbarRight: document.querySelector(".timeline-toolbar")!.getBoundingClientRect().right,
+          fadeRight: wrapBox.right - parseFloat(fade.right),
+          fadeBottom: wrapBox.bottom - parseFloat(fade.bottom),
+          contentRight,
+          contentBottom,
+        };
+      });
+      expect(result.bar).toBeGreaterThan(0);
+      expect(result.toolbarRight).toBeLessThanOrEqual(result.contentRight + 0.5);
+      expect(result.fadeRight).toBeLessThanOrEqual(result.contentRight + 0.5);
+      expect(result.fadeBottom).toBeLessThanOrEqual(result.contentBottom + 0.5);
+    } finally {
+      await withBars.close();
+    }
   });
 
   it("scroll buttons", async () => {

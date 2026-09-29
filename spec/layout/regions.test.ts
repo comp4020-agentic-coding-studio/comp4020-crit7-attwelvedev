@@ -13,6 +13,7 @@ const desktop = { width: 1920, height: 1080 };
 // anywhere else fails here rather than in a review.
 const GLASS_ALLOWLIST = [
   ".timeline-glass",
+  ".timeline-toolbar",
   ".details-head",
   ".palette",
   ".undo-toast",
