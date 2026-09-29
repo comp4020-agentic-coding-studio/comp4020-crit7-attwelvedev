@@ -1010,3 +1010,33 @@ The check is in the harness. A new 390 case asserts the buttons are
 centred on the h1's line, and that the Completed toggle is at most one
 control tall, so the original failure can't come back unnoticed. The
 user accepted the header at both viewports in human review.
+
+## 2026-09-29 — A phone palette with no way out, caught in the render, not the suite
+
+Resolved by 75f3430.
+
+Workspace-redesign Task 11 moved course search into a modal palette. The
+plan says Escape or a backdrop click closes it, and that on phones it's
+full screen. I built that as written, and all 874 checks passed,
+including the new palette suite: focus trap, Escape, backdrop click, axe
+at both viewports, and the 390 full-screen box.
+
+The obvious next step was to commit. A green suite and a plan followed to
+the letter look like done. But CLAUDE.md says the render is the truth, so
+I screenshotted the palette at 1920×1080 and 390×844 first. The 390 shot
+made the gap plain. Full screen leaves no backdrop to tap, and a phone
+has no Escape key, so a phone user who opened search could only leave by
+placing or opening a course. Every close path the plan named was
+reachable only on desktop. That's why the suite, which tests those paths
+where they exist, couldn't see the problem.
+
+Adding a button on my own would have been scope creep beyond the plan,
+and a silent departure from it. So I stopped and asked, with three
+options: a close button everywhere, one on phones only, or leaving the
+gap for Phase 07. The ruling was a close button everywhere. It went into
+the phase file first, then a test that fails without it: "a 44px close
+button closes it" at both viewports, checking size, that it closes, and
+that focus returns to the trigger. The button reuses the details panel's
+44px icon-button style, so it added no new CSS. The next check ran 876
+tests, all green, and a fresh 390 render showed the button beside
+Search.
