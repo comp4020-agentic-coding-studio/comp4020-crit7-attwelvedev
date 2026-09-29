@@ -41,7 +41,15 @@ import Sidebar, { type ShowRequest } from "./Sidebar";
 import type { Panels } from "./split-resize";
 import Timeline, { type LocateRequest } from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
-import { EMPTY_HISTORY, type History, recordStep, redoStep, undoStep } from "./undo-history";
+import {
+  EMPTY_HISTORY,
+  type History,
+  historyShortcut,
+  isTextEntry,
+  recordStep,
+  redoStep,
+  undoStep,
+} from "./undo-history";
 import { useCourseDetails } from "./use-course-details";
 
 // How long "Undo" stays offered after a change — long enough to notice and
@@ -190,6 +198,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const viewRef = useRef(view);
   const historyRef = useRef(history);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
+  // busy, for the keyboard listener, which is registered once.
+  const busyRef = useRef(0);
   function commitView(next: PlanView) {
     viewRef.current = next;
     setView(next);
@@ -309,8 +319,12 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // One plan change in flight at a time, in the order asked for: an undo
   // pressed during an edit applies to that edit, not to the one before.
   function enqueue(work: () => Promise<void>): Promise<void> {
+    busyRef.current++;
     setBusy((n) => n + 1);
-    const run = queueRef.current.then(work).finally(() => setBusy((n) => n - 1));
+    const run = queueRef.current.then(work).finally(() => {
+      busyRef.current--;
+      setBusy((n) => n - 1);
+    });
     queueRef.current = run.catch(() => {});
     return run;
   }
@@ -372,6 +386,24 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       }
     });
   }
+
+  // Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z (or Ctrl+Y) anywhere on the page, except
+  // where they already undo typing. Registered once: undo and redo read
+  // everything that changes through refs, so the first render's copies
+  // stay correct.
+  useEffect(() => {
+    if (readOnly) return;
+    const mac = /Mac|iP/.test(navigator.platform);
+    function onKeyDown(event: KeyboardEvent) {
+      const which = historyShortcut(event, mac);
+      if (!which || isTextEntry(event.target as HTMLElement | null)) return;
+      event.preventDefault();
+      if (busyRef.current > 0) return;
+      void (which === "undo" ? undo() : redo());
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [readOnly]);
 
   // The toast is role=status, so what it says is also what gets announced.
   function showToast(next: NonNullable<typeof toast>) {

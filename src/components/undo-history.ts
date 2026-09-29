@@ -28,3 +28,33 @@ export function redoStep(history: History): History {
   if (!step) return history;
   return { past: [...history.past, step], future: history.future.slice(0, -1) };
 }
+
+export interface ShortcutKeys {
+  key: string;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+}
+
+// Each platform's own convention: Cmd+Z / Cmd+Shift+Z on a Mac; Ctrl+Z and
+// Ctrl+Shift+Z or Ctrl+Y elsewhere. Alt combinations belong to other things.
+export function historyShortcut(keys: ShortcutKeys, mac: boolean): "undo" | "redo" | null {
+  const primary = mac ? keys.metaKey && !keys.ctrlKey : keys.ctrlKey && !keys.metaKey;
+  if (!primary || keys.altKey) return null;
+  const key = keys.key.toLowerCase();
+  if (key === "z") return keys.shiftKey ? "redo" : "undo";
+  if (key === "y" && !mac && !keys.shiftKey) return "redo";
+  return null;
+}
+
+const NON_TEXT_INPUTS = new Set(["button", "checkbox", "color", "file", "image", "radio", "range", "reset", "submit"]);
+
+// Where the browser's own undo belongs to what's being typed, so the plan's
+// history stays out of the way.
+export function isTextEntry(el: { tagName: string; type?: string; isContentEditable?: boolean } | null): boolean {
+  if (!el) return false;
+  if (el.isContentEditable) return true;
+  if (el.tagName === "TEXTAREA" || el.tagName === "SELECT") return true;
+  return el.tagName === "INPUT" && !NON_TEXT_INPUTS.has((el.type ?? "text").toLowerCase());
+}

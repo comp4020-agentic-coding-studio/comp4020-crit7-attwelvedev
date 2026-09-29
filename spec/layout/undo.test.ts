@@ -488,3 +488,83 @@ describe("history buttons", { timeout: 30_000 }, () => {
     });
   });
 });
+
+describe("history shortcuts", { timeout: 30_000 }, () => {
+  const desktop = { width: 1920, height: 1080 };
+  const toast = (page: Page) => page.locator(".undo-toast");
+  const inTerm = (page: Page, term: number) => page.locator(`[data-term="${term}"] [data-placed="COMP1130"]`);
+  // Cmd on a Mac, Ctrl elsewhere, as the page itself decides.
+  const modifier = async (page: Page) =>
+    (await page.evaluate(() => /Mac|iP/.test(navigator.platform))) ? "Meta" : "Control";
+
+  async function onFreshPlan(path: string, check: (page: Page) => Promise<void>): Promise<void> {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}${path}`, baseUrl).href, desktop);
+    try {
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+
+  async function moveToS1_2028(page: Page) {
+    await page.locator('[data-placed="COMP1130"]').getByRole("button", { name: "More options for COMP1130" }).click();
+    await page.locator('[data-placed="COMP1130"] .card-menu-terms').getByRole("button", { name: "S1 2028" }).click();
+    await expect.poll(() => inTerm(page, 2).count()).toBe(1);
+    await expect.poll(() => toast(page).count()).toBe(1);
+  }
+
+  it("undo and redo from anywhere on the page", async () => {
+    await onFreshPlan("", async (page) => {
+      const mod = await modifier(page);
+      await moveToS1_2028(page);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      await page.keyboard.press(`${mod}+z`);
+      await expect.poll(() => inTerm(page, 0).count()).toBe(1);
+      await expect.poll(() => toast(page).textContent()).toContain("Undid: Moved COMP1130 to S1 2028.");
+      await page.keyboard.press(`${mod}+Shift+z`);
+      await expect.poll(() => inTerm(page, 2).count()).toBe(1);
+    });
+  });
+
+  it("leave the search box its own text undo", async () => {
+    await onFreshPlan("", async (page) => {
+      const mod = await modifier(page);
+      await moveToS1_2028(page);
+      const search = page.locator(".course-search input");
+      await search.fill("COMP");
+      await search.press(`${mod}+z`);
+      // Long enough for the plan to have changed if the shortcut undid it.
+      await page.waitForTimeout(1000);
+      expect(await inTerm(page, 2).count()).toBe(1);
+    });
+  });
+
+  it("work inside the details panel", async () => {
+    await onFreshPlan("?course=COMP1130", async (page) => {
+      const mod = await modifier(page);
+      await detailsPanel(page).getByRole("button", { name: "Move to S1 2028" }).click();
+      await expect.poll(() => inTerm(page, 2).count()).toBe(1);
+      await expect.poll(() => toast(page).count()).toBe(1);
+      await detailsPanel(page).locator("h2").focus();
+      await page.keyboard.press(`${mod}+z`);
+      await expect.poll(() => inTerm(page, 0).count()).toBe(1);
+    });
+  });
+
+  it("do nothing on the read-only example", async () => {
+    const page = await openPage(browser, new URL("/plan/example", baseUrl).href, desktop);
+    try {
+      const mod = await modifier(page);
+      const before = await page.locator("[data-placed]").evaluateAll((els) => els.map((el) => el.outerHTML).join());
+      await page.keyboard.press(`${mod}+z`);
+      await page.waitForTimeout(1000);
+      expect(await toast(page).count()).toBe(0);
+      expect(await page.locator("[data-placed]").evaluateAll((els) => els.map((el) => el.outerHTML).join())).toBe(
+        before,
+      );
+    } finally {
+      await page.close();
+    }
+  });
+});
