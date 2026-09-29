@@ -130,7 +130,10 @@ None.
   - *2026-09-30, at execution:* the live re-check couldn't be done, because
     P&C kept returning "500 - The request timed out". With the user's
     agreement, the supplement was committed from the SD1 reference text
-    (seen 2026-09-29) without that check.
+    (seen 2026-09-29) without that check. After the commit, the SYAR page
+    came through, and its topics, Other Information and Relevant Degrees
+    matched the supplement exactly. ARIN, HCCC and THCS are still
+    unverified live.
 - **Paragraphs.** THCS's Other Information is two paragraphs: the MATH4343
   permission code, then COMP4011's special topics. The others are one each.
 - **Types**, in `src/data/specialisation-types.ts`:
