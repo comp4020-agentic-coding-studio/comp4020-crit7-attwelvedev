@@ -325,13 +325,13 @@ A failure names the spec, the list heading, and the missing or extra codes.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 1 and 2 are complete and their tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] `data/2027/specialisations.json` regenerates identically, and the
+- [x] Tasks 1 and 2 are complete and their tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] `data/2027/specialisations.json` regenerates identically, and the
   drift test goes red on a deliberate course-list edit (then reverted)
-- [ ] The PROCESS_LOG.md entry is committed and cites real commits
-- [ ] Tick Phase 01 in overview §5 and commit
+- [x] The PROCESS_LOG.md entry is committed and cites real commits
+- [x] Tick Phase 01 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

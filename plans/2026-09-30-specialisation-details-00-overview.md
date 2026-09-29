@@ -353,7 +353,7 @@ It works on read-only plans too; it reads and never writes.
 
 | Phase | File | Tasks | Needs | Ends with | Done |
 | --- | --- | --- | --- | --- | --- |
-| 01 | `…-01-data.md` | 1–2 | — | Supplement, merge script and merged JSON committed. `SPECIALISATIONS` module and drift test green. PROCESS_LOG entry. | [ ] |
+| 01 | `…-01-data.md` | 1–2 | — | Supplement, merge script and merged JSON committed. `SPECIALISATIONS` module and drift test green. PROCESS_LOG entry. | [x] |
 | 02 | `…-02-panel.md` | 3–5 | 01 | `?spec=ARIN-SPEC` renders the full P&C content in the panel. Chosen block, Back/Forward, shared frame. **Human review (Task 5).** | [ ] |
 | 03 | `…-03-what-if.md` | 6–8 | 01, 02 | What-if endpoint, Fit block in every state, Choose/Switch with the switch toast. **Human review (Task 8).** | [ ] |
 | 04 | `…-04-entry-points.md` | 9–11 | 01, 02 | Sidebar Details buttons, heading link and tint; search results; the course panel's "On the lists of" line. **Human review (Task 9).** | [ ] |
