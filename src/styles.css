@@ -1181,9 +1181,13 @@ section[aria-label="program checks"] > h3 {
   z-index: 1;
   width: 100cqi;
   height: calc(var(--year-band) + var(--term-top));
-  /* Negative both ends, so its sticky range reaches the scroller's padded
-     ends, not just the years' grid area. */
-  margin-inline: calc(-1 * var(--edge));
+  /* Negative at the start, so its sticky range reaches the scroller's
+     padded start, not just the years' grid area. At the end, minus its
+     whole width: its margin box is then nothing wide, so it never sizes
+     the year columns it spans (when every year fits on screen it used to
+     widen them, leaving each year's terms huddled at its start), and
+     nothing stops it sticking all the way to the end. */
+  margin-inline: calc(-1 * var(--edge)) calc(var(--edge) - 100cqi);
   pointer-events: none;
 }
 

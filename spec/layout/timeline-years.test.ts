@@ -225,6 +225,45 @@ describe("timeline years", { timeout: 30_000 }, () => {
     });
   });
 
+  // Where every year fits on screen, the frosted strip (as wide as the
+  // scroller) mustn't widen the years it spans, which left each year's two
+  // terms huddled at its start (Task 19 review, 2026-09-29).
+  it("a year is two terms wide even when every year fits, and the header still runs edge to edge", async () => {
+    const page = await openPage(browser, new URL("/plan/example", baseUrl).href, { width: 2560, height: 1440 }, {
+      storage: { "panel-reqs": "collapsed" },
+    });
+    try {
+      const r = await page.evaluate(() => {
+        const scroller = document.querySelector(".timeline-scroll")!;
+        const areaEl = document.querySelector(".planner-timeline-area")!;
+        const area = areaEl.getBoundingClientRect();
+        const border = parseFloat(getComputedStyle(areaEl).borderLeftWidth);
+        const glass = document.querySelector(".timeline-glass")!.getBoundingClientRect();
+        return {
+          fits: scroller.scrollWidth <= scroller.clientWidth,
+          slack: [...document.querySelectorAll<HTMLElement>(".timeline-year")].map((year) => {
+            const style = getComputedStyle(year);
+            const terms = [...year.querySelectorAll(":scope > section.term")].reduce(
+              (sum, term) => sum + term.getBoundingClientRect().width,
+              0,
+            );
+            return Math.round(
+              year.getBoundingClientRect().width - terms - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth),
+            );
+          }),
+          startGap: glass.left - (area.left + border),
+          endGap: area.right - border - glass.right,
+        };
+      });
+      expect(r.fits).toBe(true);
+      expect(r.slack).toEqual(r.slack.map(() => 0));
+      expect(r.startGap).toBeLessThanOrEqual(0.5);
+      expect(r.endGap).toBeLessThanOrEqual(0.5);
+    } finally {
+      await page.close();
+    }
+  });
+
   // The ‹ › and the edge fades sit clear of the scroller's own scrollbars,
   // which stay visible and grabbable (Task 15 review, 2026-09-29). The
   // suite's browser hides scrollbars, so this launches one that draws them.
