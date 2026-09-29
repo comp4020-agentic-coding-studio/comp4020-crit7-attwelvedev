@@ -1129,3 +1129,37 @@ scroller also gained end padding of `--tabbar-h + 1rem`, so the last card
 of any column can be scrolled out from under the bar. That keeps "the bar
 never hides something you need" a property of the layout, not a lucky
 screenshot.
+
+## 2026-09-29 — Turning a see-through header into a check that fails
+
+Resolved by 5791174..da70fba.
+
+In Task 21's review, the phone sheet at full height showed a grey smudge
+down the right of its frosted header. The obvious read was the Chromium
+glass bug from Phase 05, a backdrop blur that doesn't repaint after a
+resize. The obvious fix would have been to stop animating the sheet's width
+between heights.
+
+I tested that read before acting on it. The smudge survived an instant,
+reduced-motion jump and a forced repaint. It also stayed with the shadow
+removed and, crucially, with the glass removed: the strip underneath was
+simply see-through, and exactly the header's inline-end padding. So the
+panel's `local` white wasn't reaching it. Switching the attachment to
+`scroll` cleared the strip but brought back the older bug, where the glass
+frosts the page behind the panel. Toggling one property at a time found the
+cause: `scrollbar-gutter: stable`. The sheet never needs it (it only steadies
+the two-column query at 628px), so the sheet drops it. That also removed the
+5px handle offset the reserved gutter had caused on touch.
+
+A fix I could only see in a screenshot would regress silently, so I put
+the check in the harness. `pixelAt` (`spec/layout/helpers.ts`) reads the
+rendered colour back from a screenshot through a canvas, with no new
+dependency. `detailsHeadEnd` samples 40px into the header's end padding.
+Its first sample point, mid-header, passed even with the bug, because at
+full height that point sits below the dark nav. I only found out because
+I reverted the fix and watched the test pass. The moved point fails red
+at rgb(195,195,196) and passes at white.
+
+The user then asked for the same fix in the Phase 06 drawer. The same
+check, with the timeline painted black behind it, failed red there
+first, and it now guards both.
