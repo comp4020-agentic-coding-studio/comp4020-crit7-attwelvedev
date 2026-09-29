@@ -1,11 +1,19 @@
-// The stacked counterpart of reqs-resize.ts: the same snapping model on the
-// other axis. The handle between the stacked timeline and requirements only
-// ever lands on a 30%, 50% or 70% timeline share, or Collapsed, which counts
+// The handle between the stacked timeline and requirements only ever lands
+// on a 30%, 50% or 70% timeline share, or Collapsed, which counts
 // as a 100% timeline so a drag snaps to it past the 85% midpoint. Everything
 // here is pure, so it runs in node without a DOM.
 
 import type { ReqsState, SplitStop } from "./panel-state";
-import { nearestIndex } from "./reqs-resize";
+
+// Index of the position nearest `value`; positions ascend. A tie (within
+// 1e-9, since float midpoints aren't exact) goes to the later, larger one.
+export function nearestIndex(value: number, positions: readonly number[]): number {
+  let best = 0;
+  for (let i = 1; i < positions.length; i++) {
+    if (Math.abs(value - positions[i]) - Math.abs(value - positions[best]) <= 1e-9) best = i;
+  }
+  return best;
+}
 
 export type SplitSize = SplitStop | 100; // 100 = requirements collapsed to the bar
 

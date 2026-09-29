@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { panelsFor, snapSplit, type SplitSize, splitLabel, splitSizeOf, stepSplit } from "./split-resize";
+import { nearestIndex, panelsFor, snapSplit, type SplitSize, splitLabel, splitSizeOf, stepSplit } from "./split-resize";
+
+describe("nearestIndex", () => {
+  it.each([
+    [10.2, [3, 17.5], 0],
+    [10.25, [3, 17.5], 1],
+    [37.9, [3, 17.5, 31.1, 44.7], 3],
+    [-5, [1, 2], 0],
+    [99, [1, 2], 1],
+  ])("puts %d nearest %j at index %i", (value, positions, index) => {
+    expect(nearestIndex(value, positions)).toBe(index);
+  });
+});
 
 describe("snapSplit", () => {
   it.each([
@@ -46,25 +58,25 @@ describe("splitLabel", () => {
 
 describe("splitSizeOf", () => {
   it("is 100 when collapsed, whatever the split", () => {
-    expect(splitSizeOf({ reqs: { collapsed: true, columns: 2 }, split: 30 })).toBe(100);
+    expect(splitSizeOf({ reqs: { collapsed: true }, split: 30 })).toBe(100);
   });
 
   it("is the split when expanded", () => {
-    expect(splitSizeOf({ reqs: { collapsed: false, columns: 2 }, split: 70 })).toBe(70);
+    expect(splitSizeOf({ reqs: { collapsed: false }, split: 70 })).toBe(70);
   });
 });
 
 describe("panelsFor", () => {
   it("collapses while keeping the split", () => {
-    expect(panelsFor(100, { reqs: { collapsed: false, columns: 2 }, split: 30 })).toEqual({
-      reqs: { collapsed: true, columns: 2 },
+    expect(panelsFor(100, { reqs: { collapsed: false }, split: 30 })).toEqual({
+      reqs: { collapsed: true },
       split: 30,
     });
   });
 
-  it("expands to the given split, keeping the columns", () => {
-    expect(panelsFor(50, { reqs: { collapsed: true, columns: 1 }, split: 30 })).toEqual({
-      reqs: { collapsed: false, columns: 1 },
+  it("expands to the given split", () => {
+    expect(panelsFor(50, { reqs: { collapsed: true }, split: 30 })).toEqual({
+      reqs: { collapsed: false },
       split: 50,
     });
   });

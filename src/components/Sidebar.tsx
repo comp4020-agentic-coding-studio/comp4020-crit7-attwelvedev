@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import type { RefObject } from "preact";
 import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import type { DetailsFocus } from "./details-state";
@@ -35,7 +36,7 @@ interface Props {
   onLocateCourse: (code: string, part?: 2) => void;
   // Collapses the sidebar to its rail.
   onHide: () => void;
-  // Expands the sidebar from its rail back to the preferred column count.
+  // Expands the sidebar from its rail back to its saved width.
   onShow: () => void;
   // True while a *placed* course is being dragged — the only drag the
   // sidebar accepts (dropping it here removes it from the plan).
@@ -79,11 +80,10 @@ interface GroupProps {
   onToggleCompact?: () => void;
 }
 
-// A group never shows more card columns than it has courses: an empty
-// trailing grid track would throw off `justify-content: center` for a group
-// with fewer courses than the sidebar has room for. The list carries this
-// count as `data-columns`, and CSS picks the grid's actual tracks from it
-// and the sidebar's width tier, so each grid stays as wide as its own content.
+// A group never shows more card columns than it has courses. The list
+// carries that count as `data-columns` (and `--cols`, for the track
+// formula), and CSS fits as many 13rem columns as the sidebar's width
+// allows up to it, stretching the cards to fill the width in between.
 const MAX_COLUMNS = 3;
 
 // Per-viewer convenience only: which sections this browser has compacted.
@@ -180,7 +180,7 @@ function Group({
         </fieldset>
       )}
       {unplaced.length > 0 && (
-        <ul class="available-courses" data-columns={columns}>
+        <ul class="available-courses" data-columns={columns} style={`--cols: ${columns}`}>
           {unplaced.map((code) => (
             <AvailableCourseCard
               key={code}
@@ -318,6 +318,17 @@ export default function Sidebar({
   const outstanding = outstandingItems(view);
   const hideRef = useRef<HTMLButtonElement>(null);
   const railRef = useRef<HTMLButtonElement>(null);
+  // Hiding hands focus to the rail and showing hands it back, but the
+  // control only appears once Planner has re-rendered with the new layout,
+  // so the move waits for a render that shows it (a layout effect, so it
+  // lands before anything else can see focus on the hidden control).
+  const focusNext = useRef<RefObject<HTMLButtonElement> | null>(null);
+  useLayoutEffect(() => {
+    const target = focusNext.current?.current;
+    if (!target || target.offsetParent === null) return;
+    target.focus();
+    focusNext.current = null;
+  });
   const { completedPct, plannedPct } = progressSegments(
     view.total.completed,
     view.total.planned,
@@ -394,8 +405,8 @@ export default function Sidebar({
         aria-expanded="true"
         title="Hide requirements"
         onClick={() => {
+          focusNext.current = railRef;
           onHide();
-          railRef.current?.focus();
         }}
       >
         <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -424,8 +435,8 @@ export default function Sidebar({
           aria-controls="requirements-content"
           aria-expanded="false"
           onClick={() => {
+            focusNext.current = hideRef;
             onShow();
-            hideRef.current?.focus();
           }}
         >
           {/* One span for the whole name: the rail is a flex container, so each

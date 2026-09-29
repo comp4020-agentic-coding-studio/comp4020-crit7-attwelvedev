@@ -121,7 +121,9 @@ describe("layout", { timeout: 30_000 }, () => {
         [...document.querySelectorAll<HTMLElement>(".available-courses > *")]
           .filter((card) => {
             const group = card.parentElement!.closest("li");
-            return !group || card.getBoundingClientRect().right > group.getBoundingClientRect().right - 1;
+            // Flush is fine: stretched cards in a nested group end on its
+            // edge, as its placed rows do (user ruling, 2026-09-29). Past it isn't.
+            return !group || card.getBoundingClientRect().right > group.getBoundingClientRect().right + 0.5;
           })
           .map((card) => card.textContent?.trim().slice(0, 12)),
       ),

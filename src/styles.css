@@ -591,7 +591,6 @@ body:has(.planner) {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  --reqs-fit: 0;
 }
 
 /* No gutter inside the region's border, so the frosted year header can
@@ -609,7 +608,7 @@ body:has(.planner) {
   overflow: hidden;
 }
 
-.planner-panes > aside {
+.planner-panes > #requirements {
   min-width: 0;
 }
 
@@ -1355,11 +1354,15 @@ section[aria-label="program checks"] > h3 {
   z-index: 1;
 }
 
-/* The course details sidebar. For now a fixed drawer on the right edge,
-   over the panes, so it can't disturb their snapping-resize layout. A
-   region like the others (.region), inset from the viewport's edges so
-   its corners read. */
+/* The course details sidebar. Docked, it's the panes' last grid column
+   (below); otherwise a fixed drawer on the right edge, over the panes. A
+   region like the others (.region), inset from the viewport's edges so its
+   corners read. Its own width decides its body's columns, so it's a size
+   container; the gutter is always reserved, so the width the query sees
+   doesn't jump when the sections start to scroll. */
 .details-panel {
+  container: details / inline-size;
+  scrollbar-gutter: stable;
   position: fixed;
   inset-block: 0.5rem;
   inset-inline-end: 0.5rem;
@@ -1395,10 +1398,25 @@ section[aria-label="program checks"] > h3 {
   border-block-end: 1px solid var(--line);
 }
 
+/* Docked beside the timeline, in the grid column Planner sizes. Sticky
+   like Requirements when the page scrolls; the fitted page makes it static. */
+.planner-panes > .details-panel[data-mode="docked"] {
+  grid-column: 5;
+  grid-row: 1;
+  position: sticky;
+  top: 1rem;
+  inset: auto;
+  width: auto;
+  min-width: 0;
+  max-height: calc(100vh - 2rem);
+  z-index: auto;
+  box-shadow: none;
+}
+
 /* The drawer covers the timeline's end. Room past the last semester keeps
    every card scrollable out from under it, and locating a card from Details
    aims at the part still showing. */
-.planner:has(.details-panel) .timeline-scroll {
+.planner:has(.details-panel:not([data-mode="docked"])) .timeline-scroll {
   padding-inline-end: min(440px, 100vw);
   scroll-padding-inline-end: min(440px, 100vw);
 }
@@ -1503,8 +1521,28 @@ section[aria-label="program checks"] > h3 {
 }
 
 /* The head's own hairline already divides it from the first section. */
-.details-head + .details-section {
+.details-body > .details-section:first-child {
   border-block-start: 0;
+}
+
+.details-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 1.5rem;
+}
+
+/* Two columns once the panel is 680px wide: 628px is that less its 1px
+   borders, 1.25rem padding either side and 10px scrollbar gutter (the
+   query measures the content box, and can't do the arithmetic itself).
+   The second column's first section gets no rule above it either. */
+@container details (min-width: 628px) {
+  .details-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .details-body > .details-section:nth-child(2) {
+    border-block-start: 0;
+  }
 }
 
 .details-section h3 {
@@ -2978,24 +3016,31 @@ button.course-card-allocation:focus-visible {
 
 /* The planner lays itself out from its own width, not the viewport's, so
    the site nav (or anything else beside it) can never push it wider than the
-   page. Each tier's threshold is that tier's sidebar width + the 1rem
-   resize handle between the panes + --timeline-min, written as literals because `@container` conditions
-   can't read `var()`. The widths budget for course grids nested two groups
-   deep, the deepest the example plan goes. */
+   page. Side by side, the panes are one grid row: Requirements, its divider,
+   the timeline, then (when docked) the details divider and details. Planner
+   sets the three column widths from workspace-layout.ts once it has measured
+   the planner; until then (the server render, or no script) these defaults
+   stand in: the saved width, or as many columns as today's tiers fit, never
+   leaving the timeline less than its year. Each tier's threshold is that
+   tier's sidebar width + the 1rem divider + --timeline-min, written as
+   literals because `@container` conditions can't read `var()`. */
 @container planner (min-width: 49.5rem) {
   .planner-panes {
-    flex-direction: row;
-    align-items: flex-start;
-    --reqs-fit: 1;
+    display: grid;
+    grid-template-columns: var(--reqs-col) 1rem minmax(0, 1fr) var(--div2-col) var(--details-col);
+    align-items: start;
+    gap: 0;
+    --reqs-tier: var(--reqs-w-1);
+    --reqs-col: min(var(--reqs-pref, var(--reqs-tier)), 100cqi - var(--timeline-min) - 1rem);
+    --div2-col: 0px;
+    --details-col: 0px;
   }
 
-  /* -3, so the hide button (-2) sits between it and the handle (-1). */
-  .planner-panes > aside {
-    order: -3;
+  .planner-panes > #requirements {
+    grid-column: 1;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
-    flex: 0 0 var(--reqs-w-1);
-    width: var(--reqs-w-1);
     position: sticky;
     top: 1rem;
     max-height: calc(100vh - 2rem);
@@ -3012,7 +3057,8 @@ button.course-card-allocation:focus-visible {
   }
 
   .planner-timeline-area {
-    flex: 1 1 auto;
+    grid-column: 3;
+    grid-row: 1;
     min-width: 0;
     top: 1rem;
     max-height: calc(100vh - 2rem);
@@ -3030,35 +3076,32 @@ button.course-card-allocation:focus-visible {
     border-inline-end: 0;
     border-block-end: 1px solid var(--line);
   }
+
+  /* As many 13rem columns as the sidebar's width fits, up to the group's
+     own count (--cols), with the cards stretched to fill the width between
+     column widths. The 1px keeps rounding from dropping a column at a
+     width that fits it exactly. */
+  #requirements .available-courses {
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(max(13rem, calc((100% - (var(--cols, 1) - 1) * 0.6rem) / var(--cols, 1) - 1px)), 1fr)
+    );
+  }
+
+  #requirements .available-courses .course-card {
+    width: auto;
+  }
 }
 
 @container planner (min-width: 63.1rem) {
   .planner-panes {
-    --reqs-fit: 2;
-  }
-
-  .planner-panes > aside {
-    flex-basis: var(--reqs-w-2);
-    width: var(--reqs-w-2);
-  }
-
-  .available-courses:not([data-columns="1"]) {
-    grid-template-columns: repeat(2, 13rem);
+    --reqs-tier: var(--reqs-w-2);
   }
 }
 
 @container planner (min-width: 76.7rem) {
   .planner-panes {
-    --reqs-fit: 3;
-  }
-
-  .planner-panes > aside {
-    flex-basis: var(--reqs-w-3);
-    width: var(--reqs-w-3);
-  }
-
-  .available-courses[data-columns="3"] {
-    grid-template-columns: repeat(3, 13rem);
+    --reqs-tier: var(--reqs-w-3);
   }
 }
 
@@ -3108,7 +3151,7 @@ button.course-card-allocation:focus-visible {
       max-height: none;
     }
 
-    .planner-panes > aside {
+    .planner-panes > #requirements {
       flex: 1 1 0;
       min-height: 0;
       overflow-y: auto;
@@ -3117,77 +3160,104 @@ button.course-card-allocation:focus-visible {
 
   @container planner (min-width: 49.5rem) {
     .planner-panes {
+      grid-template-rows: minmax(0, 1fr);
       align-items: stretch;
     }
 
     .planner-timeline-area,
-    .planner-panes > aside {
+    .planner-panes > #requirements,
+    .planner-panes > .details-panel {
       position: static;
       max-height: none;
     }
 
-    :root[data-reqs="collapsed"] .reqs-rail {
+    :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) .reqs-rail,
+    .planner-panes[data-rail] .reqs-rail {
       flex: 1 1 auto;
       min-height: 0;
     }
   }
 }
 
-/* The resize handle between the sidebar and the timeline. In side-by-side
-   it takes the place of the 1rem pane gap, so every tier's threshold and
-   width above still adds up. */
+/* The stacked split handle; its fitted-page block below shows it. */
 .reqs-resize {
   display: none;
 }
 
-@container planner (min-width: 49.5rem) {
-  .planner-panes {
-    gap: 0;
-  }
-
-  .reqs-resize {
-    display: block;
-    order: -1;
-    flex: 0 0 1rem;
-    align-self: flex-start;
-    position: sticky;
-    top: 1rem;
-    height: calc(100vh - 2rem);
-    cursor: col-resize;
-    touch-action: none;
-  }
-
-  /* The handle is drawn 1rem wide, but its hit area is 2.75rem so it's a
-     comfortable pointer and touch target. */
-  .reqs-resize::before {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    inset-inline: -0.875rem;
-  }
-
-  .reqs-resize::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: calc(50% - 1px);
-    width: 2px;
-    border-radius: 1px;
-    background: var(--line);
-  }
-
-  .reqs-resize:hover::after,
-  .reqs-resize:focus-visible::after {
-    background: var(--gold);
-  }
+/* The lines between the side-by-side regions, in the 1rem grid columns
+   between them. Drawn as a 2px line; the hit area is 2.75rem, overlapping
+   the neighbours, and painted above them so the divider wins there. */
+.workspace-divider {
+  position: sticky;
+  top: 1rem;
+  z-index: 3;
+  align-self: start;
+  height: calc(100vh - 2rem);
+  cursor: col-resize;
+  touch-action: none;
 }
 
-/* In the fitted page, the handle spans the panes like the aside and the
-   timeline do. position: relative keeps it the containing block for its
-   ::before and ::after. */
+.workspace-divider-reqs {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.workspace-divider-details {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.workspace-divider::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(50% - 1px);
+  width: 2px;
+  border-radius: 1px;
+  background: var(--line);
+}
+
+.workspace-divider::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline: -0.875rem;
+}
+
+.workspace-divider:hover::before,
+.workspace-divider:focus-visible::before {
+  background: var(--gold);
+}
+
+/* The size a drag will land on, floating over the divider's top, clear of
+   the Requirements chevron. */
+.size-tip {
+  position: absolute;
+  top: 3.5rem;
+  left: 50%;
+  z-index: 5;
+  transform: translateX(-50%);
+  padding: 0.3rem 0.6rem;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-control);
+  box-shadow: 0 6px 20px -8px rgb(23 24 26 / 0.35);
+  pointer-events: none;
+}
+
+.size-tip[data-warn] {
+  color: var(--amber);
+}
+
+/* In the fitted page, the dividers span the panes like the regions do.
+   position: relative keeps each the containing block for its line and
+   hit area. */
 @media (min-height: 30rem) {
   @container planner (min-width: 49.5rem) {
-    .reqs-resize {
+    .workspace-divider {
       align-self: stretch;
       position: relative;
       top: auto;
@@ -3215,7 +3285,7 @@ button.course-card-allocation:focus-visible {
       touch-action: none;
     }
 
-    .planner-panes > aside {
+    .planner-panes > #requirements {
       order: 2;
     }
 
@@ -3261,69 +3331,57 @@ button.course-card-allocation:focus-visible {
   }
 }
 
-/* The preferred column count only ever narrows the width a tier allows:
-   these caps sit inside the tier that would otherwise show more columns.
-   They must come after the fit group and before the collapsed block, which
-   has the same specificity and must win over them. */
-@container planner (min-width: 63.1rem) {
-  :root[data-reqs-cols="1"] .planner-panes > aside {
-    flex-basis: var(--reqs-w-1);
-    width: var(--reqs-w-1);
-  }
-
-  :root[data-reqs-cols="1"] .available-courses {
-    grid-template-columns: 13rem;
-  }
-}
-
-@container planner (min-width: 76.7rem) {
-  :root[data-reqs-cols="2"] .planner-panes > aside {
-    flex-basis: var(--reqs-w-2);
-    width: var(--reqs-w-2);
-  }
-
-  :root[data-reqs-cols="2"] .available-courses[data-columns="3"] {
-    grid-template-columns: repeat(2, 13rem);
-  }
-}
-
 /* Collapsed sidebar. The collapsed blocks must stay last in the planner
    section, side-by-side first, then stacked: their rules have the same
    specificity as the tier blocks above (and the preference caps that follow
    them), and the collapsed state has to win over all of them. */
 @container planner (min-width: 49.5rem) {
-  /* A zero-width item between the aside and the handle: the margins pull
-     its 2.75rem box back to no net width, centred on the handle's 1rem
-     line, near its top. Sticky like the handle when the page scrolls. */
+  /* Shares the Requirements divider's grid cell: the margins pull its
+     2.75rem box back over the 1rem column, centred on the line, near its
+     top, and it paints above the divider so the button wins where they
+     overlap. Sticky like the divider when the page scrolls. */
   .reqs-hide {
     display: flex;
-    order: -2;
-    align-self: flex-start;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    justify-self: start;
     position: sticky;
     top: 1.5rem;
+    z-index: 4;
     margin-block-start: 0.5rem;
-    margin-inline: -0.875rem -1.875rem;
+    margin-inline: -0.875rem;
   }
 
-  :root[data-reqs="collapsed"] .planner-panes > aside {
-    flex-basis: var(--reqs-w-rail);
-    width: var(--reqs-w-rail);
+  /* On the rail: the saved fold before Planner has measured the planner,
+     then whatever the layout decided (a fold details forced has no saved
+     attribute to key off). */
+  :root[data-reqs="collapsed"] .planner-panes {
+    --reqs-col: var(--reqs-w-rail);
+  }
+
+  :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) > #requirements,
+  .planner-panes[data-rail] > #requirements {
     overflow: visible;
     scrollbar-gutter: auto;
   }
 
-  :root[data-reqs="collapsed"] .requirements-scroll,
-  :root[data-reqs="collapsed"] .reqs-hide {
+  :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) .requirements-scroll,
+  :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) .reqs-hide,
+  .planner-panes[data-rail] .requirements-scroll,
+  .planner-panes[data-rail] .reqs-hide {
     display: none;
   }
 
-  :root[data-reqs="collapsed"] .reqs-rail {
+  :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) .reqs-rail,
+  .planner-panes[data-rail] .reqs-rail {
     display: flex;
   }
 
   /* A 3rem rail is otherwise easy to miss as the place to drop a course to
      remove it. Touch hover is still covered by aside.drag-hover-target. */
-  :root[data-reqs="collapsed"] .reqs-drop-ready .reqs-rail {
+  :root[data-reqs="collapsed"] .planner-panes:not([data-measured]) .reqs-drop-ready .reqs-rail,
+  .planner-panes[data-rail] .reqs-drop-ready .reqs-rail {
     outline: 2px dashed var(--gold);
     outline-offset: -4px;
     background: var(--gold-tint);
@@ -3348,7 +3406,7 @@ button.course-card-allocation:focus-visible {
     transform: rotate(-90deg);
   }
 
-  :root[data-reqs="collapsed"] .planner-panes > aside {
+  :root[data-reqs="collapsed"] .planner-panes > #requirements {
     flex: 0 0 auto;
     min-height: 0;
     overflow: visible;

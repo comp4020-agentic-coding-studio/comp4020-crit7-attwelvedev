@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeLayout,
   DETAILS_SNAPS,
+  dividerValue,
   dragPrefs,
   keyPrefs,
   type LayoutInput,
@@ -236,6 +237,37 @@ describe("keyPrefs", () => {
   it("ignores other keys", () => {
     const i = input(1664);
     expect(keyPrefs("reqs", "a", false, at(i), i.prefs, i)).toBeNull();
+  });
+});
+
+describe("dividerValue", () => {
+  const targets = reqsSnapTargets(REM, OVERHEAD);
+
+  it("names a width on a target by its label, and any other by its px", () => {
+    const i = input(1664);
+    expect(dividerValue("reqs", computeLayout(i), i, targets)).toEqual({
+      now: 715,
+      min: 48,
+      max: 1152,
+      text: "Three card columns",
+    });
+    const free = input(1664, false, { reqsWidthPx: 600 });
+    expect(dividerValue("reqs", computeLayout(free), free, targets).text).toBe("600 px");
+  });
+
+  it("says Folded on the rail", () => {
+    const i = input(1664, false, { reqsFolded: true });
+    expect(dividerValue("reqs", computeLayout(i), i, targets)).toMatchObject({ now: 48, text: "Folded" });
+  });
+
+  it("measures details within their own range", () => {
+    const i = input(1664, true);
+    expect(dividerValue("details", computeLayout(i), i, DETAILS_SNAPS)).toEqual({
+      now: 440,
+      min: 360,
+      max: 960,
+      text: "Default width",
+    });
   });
 });
 

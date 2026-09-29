@@ -439,6 +439,30 @@ Routine calls:
 
 ### Task 18: `WorkspaceDivider`s: live resize, soft snaps, fold and close, reset, keyboard, size label; docked details column
 
+- [x] **Done 2026-09-29.** The specs are in `spec/layout/workspace-resize.test.ts`.
+  What was built, where it goes past or differs from the steps:
+  - Dividers render once the planner is measured (§4.3 ruling 5). They
+    carry an optional `onDragStart` prop for the overhead measurement.
+  - `gridOverheadPx` is `max(4.5rem, the largest measured)`, so today's
+    default widths hold.
+  - `workspace-layout.ts` gained `dividerValue` for the aria values.
+  - Before measurement, the CSS `--reqs-col` default keeps the old tiers
+    (`--reqs-tier`), so a 1440 window doesn't jump on hydration.
+  - `.planner-panes[data-measured]` / `[data-rail]` drive the rail once
+    measured.
+  - The drawer stays the Phase 02 fixed drawer outside the panes until
+    Task 19 styles it; only a docked panel moves into the grid.
+  - The two-column query is `628px`: 680px less its borders, padding and a
+    reserved 10px gutter (`scrollbar-gutter: stable`).
+  - Hide and show hand focus over in a layout effect.
+  - `ReqsState` keeps `collapsed` only, backed by `LayoutPrefs.reqsFolded`.
+    Its dataset and storage helpers were removed with the column
+    preference. `saveLayoutPrefs` no longer clears `panel-reqs-cols`
+    (the acceptance grep forbids the string, and nothing reads it).
+  - User ruling: "every course card stays inside its group" now fails only
+    on a card *past* its group's edge. Stretched nested cards end flush,
+    as their placed rows do.
+
 - **Description:** WR32–WR34, WR37–WR39, WR41, and the WR36 toggle.
 - **Files touched:**
   - new `src/components/WorkspaceDivider.tsx`

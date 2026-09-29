@@ -278,6 +278,25 @@ function sizeLabel(snapped: { target: SnapTarget | null }, px: number, folds: bo
   return folds ? `${base}, requirements fold` : base;
 }
 
+// What a divider announces: the width of the region it sizes, the range
+// its keys and drags can reach, and a name for the width (a snap target's
+// label when it's on one, else its px, or "Folded" on the rail).
+export function dividerValue(
+  which: "reqs" | "details",
+  layout: LayoutResult,
+  input: LayoutInput,
+  targets: SnapTarget[],
+): { now: number; min: number; max: number; text: string } {
+  const s = sizes(input.remPx);
+  const docked = isDocked(layout);
+  const now = Math.round(which === "reqs" ? reqsWidthOf(layout, input.remPx) : detailsWidthOf(layout, input.prefs));
+  const min = which === "reqs" ? s.rail : DETAILS_MIN;
+  const max = Math.floor(which === "reqs" ? reqsMax(input, docked) : detailsMax(input));
+  if (which === "reqs" && layout.reqsPx === "rail") return { now, min, max, text: "Folded" };
+  const target = targets.find((t) => Math.abs(t.px - now) < 1);
+  return { now, min, max, text: target ? target.label : `${now} px` };
+}
+
 // ← and → move the divider, so → widens Requirements and narrows details.
 // Enter asks the caller to toggle: fold or unfold Requirements, or switch
 // details between their default and wide widths.

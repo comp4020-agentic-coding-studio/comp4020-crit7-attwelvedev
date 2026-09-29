@@ -14,14 +14,14 @@ import {
 } from "./details-state";
 import MoreOptions from "./MoreOptions";
 import {
-  applyReqsState,
+  applyLayoutPrefs,
   applySplit,
-  DEFAULT_REQS,
+  DEFAULT_LAYOUT_PREFS,
   DEFAULT_SPLIT,
+  loadLayoutPrefs,
   parseSplit,
   type ReqsState,
-  reqsStateFromDataset,
-  saveReqsState,
+  saveLayoutPrefs,
   saveSplit,
   type SplitStop,
 } from "./panel-state";
@@ -35,7 +35,6 @@ import {
   type PlanAction,
 } from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
-import { useReqsFit } from "./reqs-fit";
 import ReqsResizeHandle from "./ReqsResizeHandle";
 import SearchPalette from "./SearchPalette";
 import Sidebar, { type ShowRequest } from "./Sidebar";
@@ -51,7 +50,19 @@ import {
   redoStep,
   undoStep,
 } from "./undo-history";
+import { useContainerWidth } from "./use-container-width";
 import { useCourseDetails } from "./use-course-details";
+import WorkspaceDivider from "./WorkspaceDivider";
+import {
+  computeLayout,
+  DETAILS_DEFAULT,
+  DETAILS_SNAPS,
+  DETAILS_TWO_COLUMN,
+  DETAILS_WIDE,
+  type LayoutInput,
+  type LayoutPrefs,
+  reqsSnapTargets,
+} from "./workspace-layout";
 
 // How long "Undo" stays offered after a change — long enough to notice and
 // act on without thinking, short enough that it isn't still sitting there
@@ -202,8 +213,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // it (WCAG 2.2.1), so reading it and reaching Undo can't be cut short.
   const undoHeld = useRef({ hover: false, focus: false });
   const plannerRef = useRef<HTMLDivElement>(null);
-  const panesRef = useRef<HTMLDivElement>(null);
-  const fit = useReqsFit(panesRef);
+  const layoutRef = useRef<HTMLDivElement>(null);
+  const containerPx = useContainerWidth(layoutRef);
   const readOnly = view.plan.readOnly;
   // Queued work runs after renders it wasn't called from, so it reads the
   // latest view and history from these rather than from its own closure.
@@ -221,33 +232,86 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     setHistory(next);
   }
 
-  const [reqs, setReqs] = useState<ReqsState>(DEFAULT_REQS);
+  // The saved widths, and a divider drag's preview of new ones (saved only
+  // on release).
+  const [prefs, setPrefs] = useState<LayoutPrefs>(DEFAULT_LAYOUT_PREFS);
+  const [preview, setPreview] = useState<LayoutPrefs | null>(null);
   const [split, setSplit] = useState<SplitStop>(DEFAULT_SPLIT);
+  const [remPx, setRemPx] = useState(16);
+  // What the card grids take beyond their cards: never less than the
+  // 4.5rem the column widths were budgeted with, but a deeper nesting
+  // measured at a drag's start can raise it, so its grid keeps its columns
+  // at a snap target.
+  const [measuredOverheadPx, setMeasuredOverheadPx] = useState(0);
   // The <head> script already painted the stored state; this just brings
   // Preact's copy in line after hydration (server render + first client
   // render stay equal, as with Sidebar's compaction state).
   useEffect(() => {
-    setReqs(reqsStateFromDataset(document.documentElement.dataset));
+    setPrefs(loadLayoutPrefs());
     setSplit(parseSplit(document.documentElement.dataset.split));
+    setRemPx(parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
   }, []);
-  function updateReqs(next: ReqsState, commit: boolean) {
-    setReqs(next);
-    applyReqsState(document.documentElement, next);
-    if (commit) saveReqsState(next);
+
+  const layoutInput: LayoutInput = {
+    containerPx,
+    remPx,
+    detailsOpen: details.code !== null,
+    prefs: preview ?? prefs,
+    gridOverheadPx: Math.max(4.5 * remPx, measuredOverheadPx),
+  };
+  const layout = computeLayout(layoutInput);
+  // Until the planner is measured nothing is known about its width, so the
+  // CSS defaults lay the panes out and nothing treats them as stacked.
+  const measured = containerPx > 0;
+  const stacked = measured && layout.mode === "stacked";
+  const sideBySide = measured && layout.mode === "side-by-side";
+  const reqsTargets = reqsSnapTargets(remPx, layoutInput.gridOverheadPx);
+  const reqs: ReqsState = { collapsed: prefs.reqsFolded };
+
+  function commitPrefs(next: LayoutPrefs) {
+    setPreview(null);
+    setPrefs(next);
+    applyLayoutPrefs(document.documentElement, next);
+    saveLayoutPrefs(next);
+  }
+
+  function foldRequirements(folded: boolean) {
+    commitPrefs({ ...prefs, reqsFolded: folded });
+  }
+
+  // The widest gap between a requirements grid and the sidebar's edge.
+  function measureOverhead() {
+    const aside = document.getElementById("requirements");
+    if (!aside || layout.reqsPx === "rail") return;
+    const width = aside.getBoundingClientRect().width;
+    const gaps = [...aside.querySelectorAll<HTMLElement>(".available-courses")]
+      .filter((grid) => grid.clientWidth > 0)
+      .map((grid) => width - grid.clientWidth);
+    if (gaps.length > 0) setMeasuredOverheadPx(Math.max(...gaps));
   }
 
   // Revealing a hidden sidebar is Planner's job; Sidebar does the rest
   // (expanding the section, scrolling, focus, highlight) from the request.
   function showInSidebar(kind: ShowRequest["kind"], id: string) {
-    if (reqs.collapsed) updateReqs({ ...reqs, collapsed: false }, true);
+    if (prefs.reqsFolded) foldRequirements(false);
     setShowRequest({ kind, id, token: Date.now() });
   }
 
+  // The stacked split handle. The fold applies as it's previewed, since the
+  // stacked CSS reads it from <html>; it's saved on release.
   function updatePanels(next: Panels, commit: boolean) {
-    updateReqs(next.reqs, commit);
+    const nextPrefs = { ...prefs, reqsFolded: next.reqs.collapsed };
+    setPrefs(nextPrefs);
+    applyLayoutPrefs(document.documentElement, nextPrefs);
+    if (commit) saveLayoutPrefs(nextPrefs);
     setSplit(next.split);
     applySplit(document.documentElement, next.split);
     if (commit) saveSplit(next.split);
+  }
+
+  const detailsWidth = layout.details.mode === "docked" ? layout.details.px : 0;
+  function toggleWideDetails() {
+    commitPrefs({ ...prefs, detailsWidthPx: detailsWidth >= DETAILS_TWO_COLUMN ? DETAILS_DEFAULT : DETAILS_WIDE });
   }
 
   async function changeCutoff(next: number) {
@@ -499,6 +563,29 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     },
   });
 
+  // Docked, the panel is the panes' last grid column. Otherwise (for now
+  // the fixed drawer, and before the planner is measured) it stays outside
+  // the size container, whose containment would pin its fixed position.
+  const detailsInPanes = sideBySide && layout.details.mode === "docked";
+  const detailsPanel = details.code && (
+    <CourseDetailsPanel
+      view={view}
+      details={details}
+      card={view.courses[details.code] ?? knownCards[details.code] ?? fetched.data?.course ?? null}
+      fetched={fetched}
+      onOpen={(code) => openDetails(code)}
+      onBack={() => setDetails((s) => stepHistory(s, -1))}
+      onForward={() => setDetails((s) => stepHistory(s, 1))}
+      onClose={() => setDetails(closeDetails)}
+      onPlace={(term) => void runAction(actionFor(view, details.code!, term))}
+      onRemove={() => void runAction({ kind: "remove", code: details.code! })}
+      onAction={runAction}
+      mode={layout.details.mode}
+      wide={detailsWidth >= DETAILS_TWO_COLUMN}
+      onToggleWide={toggleWideDetails}
+    />
+  );
+
   return (
     <div class="planner" data-cutoff={view.plan.cutoff} ref={plannerRef}>
       <p aria-live="polite" class="visually-hidden">
@@ -583,8 +670,21 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         </div>
       </div>
       {/* Size container for the panes; the fixed undo toast stays outside it, since containment would pin it to the container. */}
-      <div class="planner-layout">
-        <div class="planner-panes" ref={panesRef}>
+      <div class="planner-layout" ref={layoutRef}>
+        <div
+          class="planner-panes"
+          data-measured={measured || undefined}
+          data-rail={(sideBySide && layout.reqsPx === "rail") || undefined}
+          style={
+            sideBySide
+              ? {
+                  "--reqs-col": `${layout.reqsPx === "rail" ? 3 * remPx : layout.reqsPx}px`,
+                  "--div2-col": detailsWidth ? `${remPx}px` : "0px",
+                  "--details-col": `${detailsWidth}px`,
+                }
+              : undefined
+          }
+        >
           <div class="planner-timeline-area region">
             <Timeline
               view={view}
@@ -618,8 +718,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             openMenuCode={openMenuCode}
             onMenuOpenChange={(code, next) => setOpenMenuCode(next ? code : null)}
             onLocateCourse={(code, part) => setLocateRequest({ code, part, token: Date.now() })}
-            onHide={() => updateReqs({ ...reqs, collapsed: true }, true)}
-            onShow={() => updateReqs({ ...reqs, collapsed: false }, true)}
+            onHide={() => foldRequirements(true)}
+            onShow={() => foldRequirements(false)}
             dropReady={draggingCode !== null && view.placements.some((p) => p.code === draggingCode)}
             onDropRemove={(code) => void runAction({ kind: "remove", code })}
             showRequest={showRequest}
@@ -629,24 +729,40 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             openCode={details.code}
             linked={linked}
           />
-          <ReqsResizeHandle reqs={reqs} split={split} fit={fit} onChange={updatePanels} />
+          {stacked && <ReqsResizeHandle reqs={reqs} split={split} onChange={updatePanels} />}
+          {sideBySide && (
+            <WorkspaceDivider
+              which="reqs"
+              layout={layout}
+              input={layoutInput}
+              targets={reqsTargets}
+              onDragStart={measureOverhead}
+              onPreview={setPreview}
+              onCommit={(next, release) => (release === "fold" ? foldRequirements(true) : commitPrefs(next))}
+              onToggle={() => foldRequirements(layout.reqsPx !== "rail")}
+              onReset={() => commitPrefs({ ...prefs, reqsFolded: false, reqsWidthPx: null })}
+            />
+          )}
+          {sideBySide && layout.details.mode === "docked" && (
+            <WorkspaceDivider
+              which="details"
+              layout={layout}
+              input={layoutInput}
+              targets={DETAILS_SNAPS}
+              onPreview={setPreview}
+              onCommit={(next, release) => {
+                if (release !== "close") return commitPrefs(next);
+                setPreview(null);
+                setDetails(closeDetails);
+              }}
+              onToggle={toggleWideDetails}
+              onReset={() => commitPrefs({ ...prefs, detailsWidthPx: DETAILS_DEFAULT })}
+            />
+          )}
+          {detailsInPanes && detailsPanel}
         </div>
       </div>
-      {details.code && (
-        <CourseDetailsPanel
-          view={view}
-          details={details}
-          card={view.courses[details.code] ?? knownCards[details.code] ?? fetched.data?.course ?? null}
-          fetched={fetched}
-          onOpen={(code) => openDetails(code)}
-          onBack={() => setDetails((s) => stepHistory(s, -1))}
-          onForward={() => setDetails((s) => stepHistory(s, 1))}
-          onClose={() => setDetails(closeDetails)}
-          onPlace={(term) => void runAction(actionFor(view, details.code!, term))}
-          onRemove={() => void runAction({ kind: "remove", code: details.code! })}
-          onAction={runAction}
-        />
-      )}
+      {!detailsInPanes && detailsPanel}
       {/* Inside .planner, so the touch-drag root covers its results, but outside the size container, which would pin it. */}
       <SearchPalette
         view={view}
@@ -664,11 +780,11 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         onAction={runAction}
         openCode={details.code}
         dragging={paletteDragging}
-        stacked={fit === 0}
+        stacked={stacked}
       />
       {toast && (
         <div
-          class={fit === 0 && reqs.collapsed ? "undo-toast glass undo-toast-above-bar" : "undo-toast glass"}
+          class={stacked && reqs.collapsed ? "undo-toast glass undo-toast-above-bar" : "undo-toast glass"}
           role="status"
           onMouseEnter={() => holdUndo("hover", true)}
           onMouseLeave={() => holdUndo("hover", false)}

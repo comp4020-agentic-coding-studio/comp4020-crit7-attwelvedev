@@ -9,14 +9,11 @@ import { DETAILS_DEFAULT, type LayoutPrefs } from "./workspace-layout";
 
 export const NAV_KEY = "panel-nav";
 export const REQS_KEY = "panel-reqs";
-export const REQS_COLS_KEY = "panel-reqs-cols";
 
-export type ReqsColumns = 1 | 2 | 3;
+// The stacked split handle's view of the fold (LayoutPrefs.reqsFolded).
 export interface ReqsState {
   collapsed: boolean;
-  columns: ReqsColumns;
 }
-export const DEFAULT_REQS: ReqsState = { collapsed: false, columns: 3 };
 
 export type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 export interface DatasetHost {
@@ -30,33 +27,6 @@ export function safeStorage(): StorageLike | null {
     return window.localStorage;
   } catch {
     return null;
-  }
-}
-
-export function parseColumns(raw: string | null | undefined): ReqsColumns {
-  return raw === "1" ? 1 : raw === "2" ? 2 : 3;
-}
-
-export function reqsStateFromDataset(dataset: DOMStringMap): ReqsState {
-  return { collapsed: dataset.reqs === "collapsed", columns: parseColumns(dataset.reqsCols) };
-}
-
-// The defaults are the absence of an attribute, so CSS only has to key off
-// the states that differ from them.
-export function applyReqsState(root: DatasetHost, state: ReqsState): void {
-  if (state.collapsed) root.dataset.reqs = "collapsed";
-  else delete root.dataset.reqs;
-  if (state.columns === 3) delete root.dataset.reqsCols;
-  else root.dataset.reqsCols = String(state.columns);
-}
-
-export function saveReqsState(state: ReqsState, storage: StorageLike | null = safeStorage()): void {
-  try {
-    if (state.collapsed) storage?.setItem(REQS_KEY, "collapsed");
-    else storage?.removeItem(REQS_KEY);
-    storage?.setItem(REQS_COLS_KEY, String(state.columns));
-  } catch {
-    // Not persisting is fine — the sidebar still resizes for this page view.
   }
 }
 
@@ -96,8 +66,6 @@ export function saveLayoutPrefs(prefs: LayoutPrefs, storage: StorageLike | null 
     storage?.setItem(DETAILS_W_KEY, String(Math.round(prefs.detailsWidthPx)));
     if (prefs.reqsFolded) storage?.setItem(REQS_KEY, "collapsed");
     else storage?.removeItem(REQS_KEY);
-    // Retired: widths replaced the column count.
-    storage?.removeItem(REQS_COLS_KEY);
   } catch {
     // Not persisting is fine — the widths still apply for this page view.
   }
