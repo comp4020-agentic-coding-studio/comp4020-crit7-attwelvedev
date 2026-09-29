@@ -4192,6 +4192,42 @@ describe("undo for every plan change", { timeout: 30_000 }, () => {
     });
   });
 
+  // Removes COMP1130 from its card menu, with the page's timers faked so
+  // the 8-second timeout can be stepped through.
+  async function removeWithFakeClock(page: Page) {
+    await page.clock.install();
+    await page.locator('[data-placed="COMP1130"]').getByRole("button", { name: "More options for COMP1130" }).click();
+    await page.locator('[data-placed="COMP1130"] .course-card-menu').getByRole("button", { name: "Remove" }).click();
+    await expect.poll(() => toast(page).count()).toBe(1);
+  }
+
+  it("the toast stays while the pointer is over it, then times out once it leaves", async () => {
+    await withFreshPlan(async (page) => {
+      await removeWithFakeClock(page);
+      await toast(page).hover();
+      await page.clock.runFor(20_000);
+      expect(await toast(page).count()).toBe(1);
+      await page.mouse.move(5, 5);
+      await page.clock.runFor(7_000);
+      expect(await toast(page).count()).toBe(1);
+      await page.clock.runFor(2_000);
+      expect(await toast(page).count()).toBe(0);
+    });
+  });
+
+  it("the toast stays while its Undo has keyboard focus", async () => {
+    await withFreshPlan(async (page) => {
+      await removeWithFakeClock(page);
+      await page.mouse.move(5, 5);
+      await toast(page).getByRole("button", { name: "Undo" }).focus();
+      await page.clock.runFor(20_000);
+      expect(await toast(page).count()).toBe(1);
+      await page.locator("h1").click();
+      await page.clock.runFor(9_000);
+      expect(await toast(page).count()).toBe(0);
+    });
+  });
+
   it("dropping a course back on its own semester changes nothing and offers no Undo", async () => {
     await withFreshPlan(async (page) => {
       const card = page.locator('[data-term="0"] [data-placed="COMP1130"]');

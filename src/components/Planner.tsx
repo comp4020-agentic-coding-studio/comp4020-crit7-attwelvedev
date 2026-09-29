@@ -114,6 +114,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const [undoPending, setUndoPending] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The toast's timeout waits while the pointer is over it or focus is in
+  // it (WCAG 2.2.1), so reading it and reaching Undo can't be cut short.
+  const undoHeld = useRef({ hover: false, focus: false });
   const plannerRef = useRef<HTMLDivElement>(null);
   const panesRef = useRef<HTMLDivElement>(null);
   const fit = useReqsFit(panesRef);
@@ -207,11 +210,29 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       return;
     }
     setView(result);
-    if (undoTimer.current) clearTimeout(undoTimer.current);
     // The toast is role=status, so this is also what gets announced.
     setUndo({ entry, knockOn: knockOnText(newlyBroken(view, result, action.code)) });
+    startUndoTimer();
+  }
+
+  // A fresh full timeout each time, unless the toast is being held.
+  function startUndoTimer() {
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    undoTimer.current = null;
+    if (undoHeld.current.hover || undoHeld.current.focus) return;
     undoTimer.current = setTimeout(() => setUndo(null), UNDO_TIMEOUT_MS);
   }
+
+  function holdUndo(kind: "hover" | "focus", held: boolean) {
+    undoHeld.current[kind] = held;
+    startUndoTimer();
+  }
+
+  // A toast that goes while hovered or focused fires no leave event, so
+  // the next one mustn't inherit the hold.
+  useEffect(() => {
+    if (!undo) undoHeld.current = { hover: false, focus: false };
+  }, [undo]);
 
   // Undoing offers no undo of its own: the toast just goes.
   async function handleUndo() {
@@ -384,7 +405,16 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         />
       )}
       {undo && (
-        <div class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"} role="status">
+        <div
+          class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"}
+          role="status"
+          onMouseEnter={() => holdUndo("hover", true)}
+          onMouseLeave={() => holdUndo("hover", false)}
+          onFocusIn={() => holdUndo("focus", true)}
+          onFocusOut={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) holdUndo("focus", false);
+          }}
+        >
           <span>
             {undo.entry.message}.{undo.knockOn}
           </span>
