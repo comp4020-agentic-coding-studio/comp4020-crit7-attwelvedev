@@ -1452,6 +1452,12 @@ section[aria-label="program checks"] > h3 {
   inset-inline-end: 0;
   width: min(440px, 100%);
   z-index: 5;
+  /* Its white is a local background, as the sheet's is (below), with
+     nothing behind it but the timeline: no reserved gutter, so the white
+     reaches the frosted header's end, and no rubber-band to pull it off.
+     At 440px it never needs the gutter's steady two-column query. */
+  scrollbar-gutter: auto;
+  overscroll-behavior-y: none;
   border-inline-start-color: var(--glass-edge);
   box-shadow: -18px 0 40px -20px rgb(23 24 26 / 0.45);
   animation: drawer-in 0.2s ease-out;

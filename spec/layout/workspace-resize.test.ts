@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Locator, Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage, verticalOverflow } from "../browser";
-import { baseUrl, browser, detailsPanel, planUrl, planWithPlacement, settle, useBrowser } from "./helpers";
+import { baseUrl, browser, detailsHeadEnd, detailsPanel, planUrl, planWithPlacement, settle, useBrowser } from "./helpers";
 
 useBrowser();
 
@@ -405,6 +405,22 @@ describe("fold order and drawer", { timeout: 30_000 }, () => {
       await openFromCard(page, "COMP1130");
       await expect.poll(() => panel.locator("h2").textContent()).toContain("COMP1130");
       expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
+  // Like the phone sheet, the drawer's white is a local background (for
+  // its frosted header), so it has to reach the header's end, and can't
+  // be pulled off the timeline by an elastic overscroll. The timeline is
+  // painted black here so anything showing through can't pass for white.
+  it("the drawer backs its frosted header with its own white, and doesn't rubber-band", async () => {
+    await onAt(tablet, `${planUrl()}?course=COMP2100`, async (page) => {
+      const panel = detailsPanel(page);
+      await expect.poll(() => panel.getAttribute("data-mode")).toBe("drawer");
+      await page.addStyleTag({ content: ".planner-timeline-area, .planner-timeline-area * { background: #000 !important; }" });
+      await settle(page);
+      const [r, g, b] = await detailsHeadEnd(page);
+      expect(Math.min(r, g, b), `rgb(${r}, ${g}, ${b})`).toBeGreaterThan(230);
+      expect(await panel.evaluate((el) => getComputedStyle(el).overscrollBehaviorY)).toBe("none");
     });
   });
 
