@@ -126,6 +126,9 @@ asserts `axeViolations(page)` is empty:
 
 ### Task 22: Rewrite Help for the details sidebar, search, resizing and phones
 
+- [x] Done 2026-09-29; wording accepted by the user. The Help tests
+  live in `spec/layout/timeline.test.ts` since the split.
+
 - **Description:** WR48.
 - **Files touched:**
   - `src/pages/help.astro`

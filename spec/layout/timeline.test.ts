@@ -666,9 +666,22 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
         "Place in…",
         "Counts toward",
         "Verify on P&C",
-        "Your checks",
         "Completed",
         "Planned",
+        "When it runs",
+        "Met",
+        "Not sure",
+        "⌘K",
+        "Search courses",
+        "double-click",
+        "fold",
+        "Timeline",
+        "Requirements",
+        "Programs & Courses",
+        "Undo",
+        "Redo",
+        "⌘Z",
+        "Ctrl+Y",
       ]) {
         expect(text).toContain(name);
       }
@@ -676,8 +689,33 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
       // The chevrons and the card's own "Move to…" button are gone.
       // The gold cutoff line went in workspace-redesign Task 15 (user ruling,
       // 2026-09-29): each completed semester's heading says so instead.
-      for (const gone of ["One more semester completed", "One fewer semester completed", "‹", "Move to…", "gold line"]) {
+      // The Details dialog, its "Your checks" list and its "Pin to" option
+      // became the details sidebar (workspace-redesign Task 22).
+      for (const gone of [
+        "One more semester completed",
+        "One fewer semester completed",
+        "‹",
+        "Move to…",
+        "gold line",
+        "Your checks",
+        "Details dialog",
+        "Pin to",
+      ]) {
         expect(text).not.toContain(gone);
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("Help has a section for each new area", async () => {
+    const page = await openPage(browser, new URL("/help/", baseUrl).href, desktop);
+    try {
+      const headings = await page.evaluate(() =>
+        [...document.querySelectorAll("h2")].map((h2) => h2.textContent?.trim()),
+      );
+      for (const heading of ["Course details", "Arranging the workspace", "On a phone"]) {
+        expect(headings).toContain(heading);
       }
     } finally {
       await page.close();

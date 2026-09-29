@@ -14,8 +14,14 @@ import Base from "../layouts/Base.astro";
     Courses live in two places: the <strong>requirements list</strong> (what your degree needs) and the <strong>timeline</strong> (the semesters you'll actually take them in). To put a course on the timeline, drag it by its
     grip (⋮⋮) onto a semester, or use the "Place in…" button on its card in the requirements list. Once it's there,
     the course's own "More options" (⋯) button moves it to another semester or removes it. Click a course's title to
-    open its Details. A <strong>unit</strong> is ANU's measure of course weight — most courses are 6 units, and a normal
-    full-time semester is around 24 units (four courses).
+    open its details beside the plan — the plan stays usable while they're open. A <strong>unit</strong> is ANU's
+    measure of course weight — most courses are 6 units, and a normal full-time semester is around 24 units (four
+    courses).
+  </p>
+  <p>
+    To find a course that isn't in the requirements list, use the "Search courses" button (the magnifying glass)
+    beside the plan's title, or press ⌘K on a Mac (Ctrl+K elsewhere). Search by code or title, then drag a result onto
+    a semester, use its "Place in…" button, or click its title to open its details.
   </p>
   <p>
     Each family of requirements has its own colour: it's the strip down the side of a timeline card, the dot beside
@@ -32,6 +38,59 @@ import Base from "../layouts/Base.astro";
     a course counting toward "6 units of 1000-level MATH". With the links on, hover a course to pick out its own.
   </p>
 
+  <h2>Undoing a change</h2>
+  <p>
+    Every change you make to the plan can be undone and redone: placing, moving and removing a course, changing what
+    it counts toward, answering a check, making a choice in a requirement, and moving "Completed through". After each
+    change a message at the bottom of the screen says what happened, with an Undo button (and, once you've undone
+    something, a Redo button). If the change leaves another course missing a prerequisite, the message says so. The
+    Undo and Redo buttons beside "Completed through" work at any time — hover one to see which change it will undo or
+    redo.
+  </p>
+  <p>
+    You can also use the keyboard: ⌘Z to undo and ⌘⇧Z to redo on a Mac, or Ctrl+Z to undo and Ctrl+Shift+Z or Ctrl+Y
+    to redo elsewhere. These don't act on the plan while you're typing in a text field, such as the search box. The
+    history lasts while the page is open, and is gone once you reload or leave it.
+  </p>
+
+  <h2>Course details</h2>
+  <p>
+    A course's details open beside the timeline, and while they're open, the rest of the workspace shows how that
+    course connects to your plan: the requirement it counts toward is tinted and labelled "counts here" (any other it
+    could count toward, "could count here"), and on the timeline its prerequisites are marked — "Prerequisite, planned
+    too late" if one comes after it — as are the courses that need it. The arrows at the top step back and forward
+    through the courses you've opened. The details are in sections:
+  </p>
+  <dl>
+    <dt>In your plan</dt>
+    <dd>
+      For a course you've placed: "Counts toward", to choose which requirement it counts toward
+      (see <a href="#pinning">Pinning a course</a>), and a button to remove it.
+    </dd>
+    <dt>When it runs</dt>
+    <dd>
+      One cell for each semester of your plan, saying whether the course is offered then, projected from past years,
+      or not offered, and how many units that semester already has. Click a cell to place the course there, or to move
+      it there if it's already planned. A cell you can't use says why. The table below lists the published offerings,
+      with how they're delivered and their class numbers.
+    </dd>
+    <dt>Requisites</dt>
+    <dd>
+      The course's prerequisites as a tree, with each part marked as met or not by your plan. Click a course in it to
+      open that course's details. Anything the planner can't check for itself has its own Met, Not met and Not sure
+      buttons. Under the tree is the rule as written on Programs &amp; Courses, and any courses it can't be taken with.
+    </dd>
+    <dt>Courses in your plan that need it</dt>
+    <dd>The placed courses that list this one as a prerequisite, so you can see what moving it would affect.</dd>
+    <dt>About the course</dt>
+    <dd>Its description, learning outcomes and assessment, where Programs &amp; Courses publishes them.</dd>
+  </dl>
+  <p>
+    Everything here comes from Programs &amp; Courses. The bottom of the details links to the course's own page there,
+    and says which year's edition the details are from and when they were last updated — check that page before
+    relying on anything that matters to you.
+  </p>
+
   <h2>What a course card is telling you</h2>
   <dl>
     <dt>Available</dt>
@@ -45,8 +104,9 @@ import Base from "../layouts/Base.astro";
     <dd>
       Everything the planner can check is in place, but the course also asks for something it can't see — a
       permission code, a minimum mark or average, or a project supervisor. The card's "Verify on P&amp;C" badge says how
-      many of these there are; click it to open the course's Details at "Your checks", which lists each one. Confirm
-      them with the course's Programs and Courses page or the school, then mark each item Met, Not met or Not sure.
+      many of these there are; click it to open the course's details at its requisites, where each one has its own
+      Met, Not met and Not sure buttons. Confirm them with the course's Programs &amp; Courses page or the school, then
+      answer each one.
       When what you've marked Met covers what the course needs, it shows as Available and the badge goes; marking one
       Not met flags it as needing prerequisites, with the item as the reason.
     </dd>
@@ -94,11 +154,43 @@ import Base from "../layouts/Base.astro";
     course qualifies.
   </p>
 
-  <h2>Pinning a course</h2>
+  <h2 id="pinning">Pinning a course</h2>
   <p>
-    Some courses could count toward more than one requirement. By default the plan chooses whichever placement
-    satisfies the most of your degree overall — a course's "Pin to" option (in its Details dialog) lets you override
-    that and lock it to one requirement instead.
+    Some courses could count toward more than one requirement. By default ("Automatic") the plan chooses whichever
+    placement satisfies the most of your degree overall. To lock a course to one requirement instead, open its details
+    and choose that requirement from "Counts toward", under "In your plan".
+  </p>
+
+  <h2>Arranging the workspace</h2>
+  <p>
+    The requirements list, the timeline and the course details sit side by side, and you can resize them: drag the
+    line between two of them. As you drag, a label says what the width will be, and the line catches gently at the
+    widths worth landing on — one, two or three columns of requirement cards, or the default and two-column widths for
+    details. Drag the requirements list narrow enough and the label says "Release to fold requirements": let go and it
+    folds to a thin strip at the side, which you click to unfold. Dragging details narrow enough closes them the same
+    way ("Release to close details"). To reset a line's width, double-click it. Widths are remembered in this browser,
+    for all your plans.
+  </p>
+  <p>
+    The button with two arrows at the top of the details switches them between their default width and a wider,
+    two-column one ("Widen details" / "Narrow details"). With the keyboard, focus a line and use the left and right
+    arrow keys to resize, with Shift for bigger steps; Enter folds and unfolds the requirements list, or widens and
+    narrows the details.
+  </p>
+  <p>
+    The timeline always keeps room for at least one year. On a smaller screen, or once details are open, the
+    requirements list gives way first by dropping to fewer card columns. If details are open and that still isn't
+    enough, it folds, and a message says "Requirements folded to make room for course details". Next the details
+    narrow, and where even that isn't enough room, they open as a drawer over the timeline instead of beside it; close
+    them to see the timeline again.
+  </p>
+
+  <h2>On a phone</h2>
+  <p>
+    On a phone the plan shows one part at a time: switch between them with the "Timeline" and "Requirements" tabs at
+    the bottom of the screen. Course details slide up from the bottom, starting at half height. Drag the handle at the
+    top of them (or tap it) to change their height: full height to read everything, or down to just the course's
+    name so you can see the plan behind. Search fills the screen, and you can still drag a result onto a semester.
   </p>
 
   <h2>Keeping your plan</h2>
