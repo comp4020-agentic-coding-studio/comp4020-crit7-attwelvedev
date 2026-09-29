@@ -67,7 +67,46 @@ describe("undo for every plan change", { timeout: 30_000 }, () => {
       expect(await toast(page).textContent()).toContain("Moved COMP1130 to S1 2028.");
       await toast(page).getByRole("button", { name: "Undo" }).click();
       await expect.poll(() => page.locator('[data-term="0"] [data-placed="COMP1130"]').count()).toBe(1);
-      expect(await toast(page).count()).toBe(0);
+      // Undoing now says what it undid and offers Redo (UR12), superseding
+      // Phase 03's rule that the toast just goes.
+      await expect.poll(() => toast(page).textContent()).toContain("Undid: Moved COMP1130 to S1 2028.");
+      expect(await toast(page).getByRole("button", { name: "Redo" }).count()).toBe(1);
+    });
+  });
+
+  it("Redo re-applies an undone move and offers Undo again", async () => {
+    await withFreshPlan(async (page) => {
+      await page.locator('[data-placed="COMP1130"]').getByRole("button", { name: "More options for COMP1130" }).click();
+      await page.locator('[data-placed="COMP1130"] .card-menu-terms').getByRole("button", { name: "S1 2028" }).click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      await toast(page).getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => page.locator('[data-term="0"] [data-placed="COMP1130"]').count()).toBe(1);
+      await toast(page).getByRole("button", { name: "Redo" }).click();
+      await expect.poll(() => page.locator('[data-term="2"] [data-placed="COMP1130"]').count()).toBe(1);
+      await expect.poll(() => toast(page).textContent()).not.toContain("Undid:");
+      expect(await toast(page).textContent()).toContain("Moved COMP1130 to S1 2028.");
+      expect(await toast(page).getByRole("button", { name: "Undo" }).count()).toBe(1);
+    });
+  });
+
+  it("a failed undo keeps its step", async () => {
+    await withFreshPlan(async (page) => {
+      await page.locator('[data-placed="COMP1130"]').getByRole("button", { name: "More options for COMP1130" }).click();
+      await page.locator('[data-placed="COMP1130"] .card-menu-terms').getByRole("button", { name: "S1 2028" }).click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      // The undo is a move back, which POSTs to placements.
+      const placements = "**/api/plans/*/placements";
+      await page.route(placements, (route) =>
+        route.request().method() === "POST"
+          ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: "boom" }) })
+          : route.continue(),
+      );
+      await toast(page).getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => page.locator("p[aria-live=polite]").textContent()).toContain("boom");
+      expect(await page.locator('[data-term="2"] [data-placed="COMP1130"]').count()).toBe(1);
+      await page.unroute(placements);
+      await toast(page).getByRole("button", { name: "Undo" }).click();
+      await expect.poll(() => page.locator('[data-term="0"] [data-placed="COMP1130"]').count()).toBe(1);
     });
   });
 

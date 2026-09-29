@@ -29,7 +29,6 @@ import {
   actedOn,
   actionFor,
   changesNothing,
-  type HistoryStep,
   historyStep,
   knockOnText,
   newlyBroken,
@@ -42,6 +41,7 @@ import Sidebar, { type ShowRequest } from "./Sidebar";
 import type { Panels } from "./split-resize";
 import Timeline, { type LocateRequest } from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
+import { EMPTY_HISTORY, type History, recordStep, redoStep, undoStep } from "./undo-history";
 import { useCourseDetails } from "./use-course-details";
 
 // How long "Undo" stays offered after a change — long enough to notice and
@@ -72,8 +72,9 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   );
   // replaceState, not pushState: stepping through courses shouldn't fill
   // the browser's own history, and the URL only has to be shareable.
+  // (window. because `history` below is the plan's undo history.)
   useEffect(() => {
-    history.replaceState(null, "", withCourseParam(location.href, details.code));
+    window.history.replaceState(null, "", withCourseParam(location.href, details.code));
   }, [details.code]);
   const fetched = useCourseDetails(details.code, initialView.plan.id, initialDetails);
   // Cards for courses outside view.courses (search results, or anything
@@ -118,9 +119,14 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // The sidebar group whose heading is under hover or focus; the timeline
   // recedes every card outside it.
   const [focusGroupId, setFocusGroupId] = useState<string | null>(null);
-  const [undo, setUndo] = useState<{ step: HistoryStep; knockOn: string } | null>(null);
+  // The one toast: the latest edit or redo ("edit", offering Undo), or the
+  // latest undo ("undone", offering Redo).
+  const [toast, setToast] = useState<{ mode: "edit" | "undone"; message: string; knockOn: string } | null>(null);
+  const [history, setHistory] = useState<History>(EMPTY_HISTORY);
+  // Edits, undos and redos queued or running; Undo and Redo wait for none.
+  const [busy, setBusy] = useState(0);
+  const [historyPending, setHistoryPending] = useState<"undo" | "redo" | null>(null);
   const [cutoffPending, setCutoffPending] = useState(false);
-  const [undoPending, setUndoPending] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The toast's timeout waits while the pointer is over it or focus is in
@@ -130,6 +136,19 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   const panesRef = useRef<HTMLDivElement>(null);
   const fit = useReqsFit(panesRef);
   const readOnly = view.plan.readOnly;
+  // Queued work runs after renders it wasn't called from, so it reads the
+  // latest view and history from these rather than from its own closure.
+  const viewRef = useRef(view);
+  const historyRef = useRef(history);
+  const queueRef = useRef<Promise<void>>(Promise.resolve());
+  function commitView(next: PlanView) {
+    viewRef.current = next;
+    setView(next);
+  }
+  function commitHistory(next: History) {
+    historyRef.current = next;
+    setHistory(next);
+  }
 
   const [reqs, setReqs] = useState<ReqsState>(DEFAULT_REQS);
   const [split, setSplit] = useState<SplitStop>(DEFAULT_SPLIT);
@@ -209,30 +228,105 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // menu, suggestion, Place in…, the details sidebar, a choice, the
   // Completed menu — so a place or move is refused by the same rule as
   // dragging, and every change offers the same Undo.
-  async function runAction(action: PlanAction): Promise<void> {
-    if (changesNothing(view, action)) return;
-    if (action.kind === "remove") {
-      if (!view.placements.some((p) => p.code === action.code)) return;
-    } else if (action.kind === "place" || action.kind === "move") {
-      // A search result has no view.courses entry, so its blocked terms
-      // come from the card search (or the sidebar) fetched.
-      const blocked = knownCards[action.code]?.hardBlocked ?? searchBlocked[action.code];
-      const target = dropTargets(view, action.code, blocked).find((t) => t.term === action.term);
-      if (target && !target.allowed) {
-        if (target.reason) setAnnouncement(target.reason);
+  function runAction(action: PlanAction): Promise<void> {
+    return enqueue(async () => {
+      const before = viewRef.current;
+      if (changesNothing(before, action)) return;
+      if (action.kind === "remove") {
+        if (!before.placements.some((p) => p.code === action.code)) return;
+      } else if (action.kind === "place" || action.kind === "move") {
+        // A search result has no view.courses entry, so its blocked terms
+        // come from the card search (or the sidebar) fetched.
+        const blocked = knownCards[action.code]?.hardBlocked ?? searchBlocked[action.code];
+        const target = dropTargets(before, action.code, blocked).find((t) => t.term === action.term);
+        if (target && !target.allowed) {
+          if (target.reason) setAnnouncement(target.reason);
+          return;
+        }
+      }
+      // From the view before the change: it still knows where the course was.
+      const step = historyStep(before, action);
+      const result = await apply(action);
+      if (isError(result)) {
+        setAnnouncement(result.error);
         return;
       }
+      commitView(result);
+      commitHistory(recordStep(historyRef.current, step));
+      showToast({ mode: "edit", message: step.message, knockOn: knockOnText(newlyBroken(before, result, actedOn(action))) });
+    });
+  }
+
+  // One plan change in flight at a time, in the order asked for: an undo
+  // pressed during an edit applies to that edit, not to the one before.
+  function enqueue(work: () => Promise<void>): Promise<void> {
+    setBusy((n) => n + 1);
+    const run = queueRef.current.then(work).finally(() => setBusy((n) => n - 1));
+    queueRef.current = run.catch(() => {});
+    return run;
+  }
+
+  // Applies each action in order, keeping every one that lands. On a
+  // failure the view stays at the last good result; placing is an upsert
+  // and the rest set a value, so trying the whole list again is safe.
+  async function applyInOrder(actions: PlanAction[]): Promise<string | null> {
+    for (const action of actions) {
+      const result = await apply(action);
+      if (isError(result)) return result.error;
+      commitView(result);
     }
-    // From the view before the change: it still knows where the course was.
-    const step = historyStep(view, action);
-    const result = await apply(action);
-    if (isError(result)) {
-      setAnnouncement(result.error);
-      return;
-    }
-    setView(result);
-    // The toast is role=status, so this is also what gets announced.
-    setUndo({ step, knockOn: knockOnText(newlyBroken(view, result, actedOn(action))) });
+    return null;
+  }
+
+  // The header buttons, the toast and the shortcuts all come here. A step
+  // that fails stays where it was, and its toast comes back to retry from.
+  function undo(): Promise<void> {
+    return enqueue(async () => {
+      const step = historyRef.current.past.at(-1);
+      if (!step) return;
+      const before = viewRef.current;
+      setHistoryPending("undo");
+      try {
+        const error = await applyInOrder(step.undo);
+        if (error) {
+          setAnnouncement(error);
+          showToast({ mode: "edit", message: step.message, knockOn: "" });
+          return;
+        }
+        commitHistory(undoStep(historyRef.current));
+        const knockOn = knockOnText(newlyBroken(before, viewRef.current, actedOn(step.redo)));
+        showToast({ mode: "undone", message: step.message, knockOn });
+      } finally {
+        setHistoryPending(null);
+      }
+    });
+  }
+
+  function redo(): Promise<void> {
+    return enqueue(async () => {
+      const step = historyRef.current.future.at(-1);
+      if (!step) return;
+      const before = viewRef.current;
+      setHistoryPending("redo");
+      try {
+        const error = await applyInOrder([step.redo]);
+        if (error) {
+          setAnnouncement(error);
+          showToast({ mode: "undone", message: step.message, knockOn: "" });
+          return;
+        }
+        commitHistory(redoStep(historyRef.current));
+        const knockOn = knockOnText(newlyBroken(before, viewRef.current, actedOn(step.redo)));
+        showToast({ mode: "edit", message: step.message, knockOn });
+      } finally {
+        setHistoryPending(null);
+      }
+    });
+  }
+
+  // The toast is role=status, so what it says is also what gets announced.
+  function showToast(next: NonNullable<typeof toast>) {
+    setToast(next);
     startUndoTimer();
   }
 
@@ -241,7 +335,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     if (undoTimer.current) clearTimeout(undoTimer.current);
     undoTimer.current = null;
     if (undoHeld.current.hover || undoHeld.current.focus) return;
-    undoTimer.current = setTimeout(() => setUndo(null), UNDO_TIMEOUT_MS);
+    undoTimer.current = setTimeout(() => setToast(null), UNDO_TIMEOUT_MS);
   }
 
   function holdUndo(kind: "hover" | "focus", held: boolean) {
@@ -252,31 +346,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // A toast that goes while hovered or focused fires no leave event, so
   // the next one mustn't inherit the hold.
   useEffect(() => {
-    if (!undo) undoHeld.current = { hover: false, focus: false };
-  }, [undo]);
-
-  // Undoing offers no undo of its own: the toast just goes.
-  async function handleUndo() {
-    if (!undo || undoPending) return;
-    if (undoTimer.current) clearTimeout(undoTimer.current);
-    const { step } = undo;
-    setUndoPending(true);
-    setUndo(null);
-    try {
-      // In order: a removed course is placed back before its pin returns.
-      for (const action of step.undo) {
-        const undone = await apply(action);
-        if (isError(undone)) {
-          setAnnouncement(undone.error);
-          return;
-        }
-        setView(undone);
-      }
-      setAnnouncement(`Undone: ${step.message}`);
-    } finally {
-      setUndoPending(false);
-    }
-  }
+    if (!toast) undoHeld.current = { hover: false, focus: false };
+  }, [toast]);
 
   const readout = completedReadout(view.plan.cutoff, view.terms);
   const linked = details.code ? linkedHighlights(view, details.code, knownCards[details.code]) : null;
@@ -421,7 +492,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           onAction={runAction}
         />
       )}
-      {undo && (
+      {toast && (
         <div
           class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"}
           role="status"
@@ -433,11 +504,18 @@ export default function Planner({ view: initialView, title, initialDetails = nul
           }}
         >
           <span>
-            {undo.step.message}.{undo.knockOn}
+            {toast.mode === "undone" ? "Undid: " : ""}
+            {toast.message}.{toast.knockOn}
           </span>
-          <button type="button" disabled={undoPending} onClick={handleUndo}>
-            {undoPending ? "Undoing…" : "Undo"}
-          </button>
+          {toast.mode === "edit" ? (
+            <button type="button" disabled={busy > 0} onClick={() => void undo()}>
+              {historyPending === "undo" ? "Undoing…" : "Undo"}
+            </button>
+          ) : (
+            <button type="button" disabled={busy > 0} onClick={() => void redo()}>
+              {historyPending === "redo" ? "Redoing…" : "Redo"}
+            </button>
+          )}
         </div>
       )}
     </div>
