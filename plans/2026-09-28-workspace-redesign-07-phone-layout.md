@@ -405,11 +405,11 @@ export interface LayoutResult {
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 20–21 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] Task 21 human review accepted by the user
-- [ ] Tick Phase 07 in overview §5 and commit
+- [x] Tasks 20–21 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes (912 tests, 2026-09-29)
+- [x] Task 21 human review accepted by the user
+- [x] Tick Phase 07 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
