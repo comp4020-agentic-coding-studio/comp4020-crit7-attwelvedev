@@ -1,5 +1,6 @@
-import { useEffect, useState } from "preact/hooks";
-import { NORMAL_TERM_UNITS, type PlacementView, type PlanView } from "../lib/domain/view";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { TERMS } from "../lib/domain/terms";
+import { NORMAL_TERM_UNITS, type PlacementView, type PlanView, type TermView } from "../lib/domain/view";
 import CourseCard from "./CourseCard";
 import type { DetailsFocus } from "./details-state";
 import PartTwoStub from "./PartTwoStub";
@@ -84,6 +85,37 @@ export default function Timeline({
   linked,
 }: Props) {
   const [hoveredCode, setHoveredCode] = useState<string | null>(null);
+  // Whether there are semesters off either end of the scroller: drives the
+  // edge fades and disables the ‹ › buttons at the ends.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    function update() {
+      const el = scrollRef.current!;
+      const left = el.scrollLeft > 1;
+      const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+      setEdges((prev) => (prev.left === left && prev.right === right ? prev : { left, right }));
+    }
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(scroller);
+    return () => {
+      scroller.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, []);
+
+  function scrollByPage(dir: -1 | 1) {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({
+      left: dir * el.clientWidth * 0.8,
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }
   // The term a mouse drag is currently over — the same gold outline
   // touch-drag.ts paints for a finger, since the browser's native drag
   // shows no drop-target feedback of its own. Read off document-level
@@ -153,6 +185,16 @@ export default function Timeline({
     void onAction(actionFor(view, code, term));
   }
 
+  // Terms in pairs by calendar year, each pair under one sticky head.
+  const years: { year: number; terms: TermView[] }[] = [];
+  for (const term of view.terms) {
+    const year = TERMS[term.index].year;
+    const last = years[years.length - 1];
+    if (last?.year === year) last.terms.push(term);
+    else years.push({ year, terms: [term] });
+  }
+  const hoverAllowed = dragOverTerm !== null && !dragTargets?.some((t) => t.term === dragOverTerm && !t.allowed);
+
   return (
     <div class="timeline">
       {view.placements.length === 0 && (
@@ -160,110 +202,170 @@ export default function Timeline({
       )}
       {showPrereqLinks && view.placements.length > 0 && <PrereqLegend />}
       <div
-        class="timeline-scroll"
-        data-drag-span={draggingCode !== null && draggingTwoSemester ? "2" : undefined}
-        onMouseOver={(event) => {
-          const card = (event.target as Element).closest("[data-placed]");
-          if (card) setHoveredCode(card.getAttribute("data-placed"));
-        }}
-        onMouseOut={(event) => {
-          const related = event.relatedTarget as Element | null;
-          if (!related?.closest("[data-placed]")) setHoveredCode(null);
-        }}
+        class={["timeline-scroll-wrap", edges.left && "more-left", edges.right && "more-right"]
+          .filter(Boolean)
+          .join(" ")}
       >
-        <PrereqOverlay view={view} show={showPrereqLinks} hoveredCode={hoveredCode} />
-        {view.terms.map((term) => {
-          const target = dragTargets?.find((t) => t.term === term.index) ?? null;
-          const greyed = draggingCode !== null && target !== null && !target.allowed;
-          const dragOver = draggingCode !== null && dragOverTerm === term.index;
-          const segments = termFamilyUnits(view, term.index);
-          const widths = termBarWidths(segments, term.units);
-          return (
-            <section
-              key={term.index}
-              data-term={term.index}
-              aria-label={term.label}
-              class={[
-                "term",
-                term.index >= view.plan.cutoff && "term-planned",
-                greyed && "term-disallowed",
-                dragOver && "drag-hover-target",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              onDragOver={(event) => {
-                if (draggingCode === null) return;
-                event.preventDefault();
-              }}
-              onDrop={(event) => {
-                event.preventDefault();
-                const code = event.dataTransfer?.getData("text/plain") || draggingCode;
-                if (code) handleDrop(term.index, code);
-              }}
-            >
-              <div class="term-head">
-                <h2>{term.label}</h2>
-                {/* Abbreviated like the cards' "6u", which leaves room for "Completed" beside the heading in a 15rem column. */}
-                <p class="term-units">
-                  <span aria-hidden="true">
-                    {term.units}/{NORMAL_TERM_UNITS}u
-                  </span>
-                  <span class="visually-hidden">
-                    {term.units} of {NORMAL_TERM_UNITS} units
-                  </span>
-                  {term.index < view.plan.cutoff && <span class="term-completed">Completed</span>}
-                </p>
+        {/* Over the right end of the year band, rather than a row of its
+            own above it: the budget tests hold the timeline's head to one
+            band (Phase 05 review, 2026-09-29). */}
+        <div class="timeline-toolbar">
+          <button
+            type="button"
+            class="timeline-scroll-button"
+            aria-label="Scroll to earlier semesters"
+            title="Scroll to earlier semesters"
+            disabled={!edges.left}
+            onClick={() => scrollByPage(-1)}
+          >
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m15 6-6 6 6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="timeline-scroll-button"
+            aria-label="Scroll to later semesters"
+            title="Scroll to later semesters"
+            disabled={!edges.right}
+            onClick={() => scrollByPage(1)}
+          >
+            <svg class="section-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m9 6 6 6-6 6" />
+            </svg>
+          </button>
+        </div>
+        <div
+          class="timeline-scroll"
+          ref={scrollRef}
+          onMouseOver={(event) => {
+            const card = (event.target as Element).closest("[data-placed]");
+            if (card) setHoveredCode(card.getAttribute("data-placed"));
+          }}
+          onMouseOut={(event) => {
+            const related = event.relatedTarget as Element | null;
+            if (!related?.closest("[data-placed]")) setHoveredCode(null);
+          }}
+        >
+          <PrereqOverlay view={view} show={showPrereqLinks} hoveredCode={hoveredCode} />
+          {years.map(({ year, terms }) => (
+            <div key={year} class="timeline-year" data-year={year}>
+              {/* The term headings already say the year, so this is for the eye only. */}
+              <div class="timeline-year-head glass">
+                <span class="timeline-year-label" aria-hidden="true">
+                  {year}
+                </span>
               </div>
-              <div class="term-bar" role="img" aria-label={termBarLabel(segments)}>
-                {segments.map((s, i) => (
-                  <span
-                    key={s.key}
-                    class="term-bar-segment"
-                    data-family={s.key === "none" ? "neutral" : s.key}
-                    style={{ width: `${widths[i]}%` }}
-                  />
-                ))}
-              </div>
-              {term.overload && (
-                <p role="status" class="badge badge-overload">
-                  Heavier load than usual for one semester
-                </p>
-              )}
-              {greyed && target?.reason && <p class="term-reason">{target.reason}</p>}
-              <ul class="term-cards">
-                {(placementsByTerm.get(term.index) ?? []).map((placement) => (
-                  <CourseCard
-                    key={placement.code}
-                    view={view}
-                    placement={placement}
-                    onAction={onAction}
-                    onDragStart={onDragStart}
-                    onDragEnd={onDragEnd}
-                    openMenuCode={openMenuCode}
-                    onMenuOpenChange={onMenuOpenChange}
-                    onShowGroup={onShowGroup}
-                    onLocateCourse={onLocateCourse}
-                    receded={recededFor(placement)}
-                    onOpenDetails={onOpenDetails}
-                    current={openCode === placement.code}
-                    linked={linked}
-                  />
-                ))}
-                {partTwoPlacements(view, term.index).map((p) => (
-                  <PartTwoStub
-                    key={`${p.code}-2`}
-                    code={p.code}
-                    part1={placedStatus(view, p).parts[0]}
-                    units={view.courses[p.code]?.units ?? 0}
-                    family={p.countsToward ? familyOf(view, p.countsToward) : null}
-                    receded={recededFor(p)}
-                    onLocate={() => onLocateCourse(p.code)}
-                  />
-                ))}
-              </ul>
-            </section>
-          );
-        })}
+              {terms.map((term) => {
+                const target = dragTargets?.find((t) => t.term === term.index) ?? null;
+                const greyed = draggingCode !== null && target !== null && !target.allowed;
+                const dragOver = draggingCode !== null && dragOverTerm === term.index;
+                // A two-semester course takes the hovered term and the next, so
+                // the drop outline covers both, whichever year each is in.
+                const dragNext =
+                  draggingCode !== null && draggingTwoSemester && hoverAllowed && dragOverTerm === term.index - 1;
+                const segments = termFamilyUnits(view, term.index);
+                const widths = termBarWidths(segments, term.units);
+                return (
+                  <section
+                    key={term.index}
+                    data-term={term.index}
+                    aria-label={term.label}
+                    class={[
+                      "term",
+                      term.index >= view.plan.cutoff && "term-planned",
+                      greyed && "term-disallowed",
+                      dragOver && "drag-hover-target",
+                      dragNext && "drag-hover-next",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onDragOver={(event) => {
+                      if (draggingCode === null) return;
+                      event.preventDefault();
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const code = event.dataTransfer?.getData("text/plain") || draggingCode;
+                      if (code) handleDrop(term.index, code);
+                    }}
+                  >
+                    {/* Sticks under the year label while the cards scroll, so a
+                        column scrolled down still says which semester it is. The
+                        year band's glass runs down behind it. */}
+                    <div class="term-top">
+                      <div class="term-head">
+                        {/* The year band shows the year, so the heading shows the
+                          session; the year stays in its name. */}
+                        <h2>
+                          {TERMS[term.index].session}
+                          <span class="visually-hidden"> {TERMS[term.index].year}</span>
+                        </h2>
+                        {/* Abbreviated like the cards' "6u", which leaves room for "Completed" beside the heading in a term's column. */}
+                        <p class="term-units">
+                          <span aria-hidden="true">
+                            {term.units}/{NORMAL_TERM_UNITS}u
+                          </span>
+                          <span class="visually-hidden">
+                            {term.units} of {NORMAL_TERM_UNITS} units
+                          </span>
+                          {term.index < view.plan.cutoff && <span class="term-completed">Completed</span>}
+                        </p>
+                      </div>
+                      <div class="term-bar" role="img" aria-label={termBarLabel(segments)}>
+                        {segments.map((s, i) => (
+                          <span
+                            key={s.key}
+                            class="term-bar-segment"
+                            data-family={s.key === "none" ? "neutral" : s.key}
+                            style={{ width: `${widths[i]}%` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {term.overload && (
+                      <p role="status" class="badge badge-overload">
+                        Heavier load than usual for one semester
+                      </p>
+                    )}
+                    {greyed && target?.reason && <p class="term-reason">{target.reason}</p>}
+                    <ul class="term-cards">
+                      {(placementsByTerm.get(term.index) ?? []).map((placement) => (
+                        <CourseCard
+                          key={placement.code}
+                          view={view}
+                          placement={placement}
+                          onAction={onAction}
+                          onDragStart={onDragStart}
+                          onDragEnd={onDragEnd}
+                          openMenuCode={openMenuCode}
+                          onMenuOpenChange={onMenuOpenChange}
+                          onShowGroup={onShowGroup}
+                          onLocateCourse={onLocateCourse}
+                          receded={recededFor(placement)}
+                          onOpenDetails={onOpenDetails}
+                          current={openCode === placement.code}
+                          linked={linked}
+                        />
+                      ))}
+                      {partTwoPlacements(view, term.index).map((p) => (
+                        <PartTwoStub
+                          key={`${p.code}-2`}
+                          code={p.code}
+                          part1={placedStatus(view, p).parts[0]}
+                          units={view.courses[p.code]?.units ?? 0}
+                          family={p.countsToward ? familyOf(view, p.countsToward) : null}
+                          receded={recededFor(p)}
+                          onLocate={() => onLocateCourse(p.code)}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -35,7 +35,13 @@ Below the phone threshold (a planner container under 49.5rem):
 - Motion: height changes animate over 250ms, and are instant under reduced
   motion.
 - The card-height budget's phone rule still passes, measured on the
-  Timeline tab.
+  Timeline tab. **Restore it in full here.** Phase 05 (Task 15, ruled
+  2026-09-29) relaxed it to "the first card fits" while the stacked split
+  held the timeline to half the screen under a 30px sticky year band. On
+  the full-height Timeline tab, the second card's `.course-card-head` must
+  fit again. Put back the assertion that Phase 05 removed from
+  plan-header-and-fit's "card height budget" test, which now reads "the
+  first card fits … (the second's code line returns in Phase 07)".
 
 ### 2.3 Out of scope for this phase
 
@@ -112,6 +118,25 @@ From Phase 02:
 From Phase 05:
 - The `.glass` utility, and the panel's sticky header `.details-head.glass`
   (Task 13). The allowlist already includes `.tabbar` and `.sheet-head`.
+- The timeline (Task 15, as built after its review on 2026-09-29):
+  - `.timeline-scroll` is the timeline's only scroller, in both axes.
+    `.planner-timeline-area` is a region that doesn't scroll (a flex
+    column with `overflow: hidden`), and the toolbar and legend sit fixed
+    above the scroller.
+  - It's a one-row grid of `div.timeline-year[data-year]`. Each year is a
+    sticky frosted `.timeline-year-head.glass`, which runs down behind its
+    terms' sticky `.term-top` rows, then two `section.term[data-term]`.
+  - A term is a 13rem card plus `--term-pad` (0.5rem) either side. The
+    scroller's ends are padded by `--edge` (0.35rem), and `--year-band`
+    is 2.75rem, or 1.9rem below the 49.5rem container.
+  - `--timeline-min` (31rem) is unchanged. Two terms and their padding
+    now come to about 28rem, so it has slack.
+  - The ‹ › buttons (`.timeline-toolbar`) float over the band's right end,
+    and are hidden below 49.5rem.
+  - The gold cutoff line is gone. Completed terms say "Completed" in their
+    headings.
+- The phone card-height budget is relaxed to "the first card fits"
+  (plan-header-and-fit). §2.2 says to restore it here.
 
 From Phase 06, Tasks 16–18:
 
@@ -193,8 +218,9 @@ export interface LayoutResult {
     term places the course.
   - "fitted page": `verticalOverflow(page) === 0` on both tabs.
   - "axe on each tab".
-  - "card height budget on the Timeline tab": the existing phone rule
-    passes.
+  - "card height budget on the Timeline tab": the phone rule as it was
+    before Phase 05 (first card plus the second card's code line), with
+    the relaxed test restored, per §2.2.
   - "undo toast sits above the tab bar": after a remove, the toast's bottom
     is at or above the tab bar's top.
   - `panel-state.test.ts`: the head script no longer mentions

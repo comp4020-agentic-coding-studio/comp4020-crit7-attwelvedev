@@ -569,9 +569,9 @@ export interface CompletedReadout {
 
 // The short form is the completed-semesters menu's visible label (or plain
 // text on a read-only plan); the full sentence is its description, so it also
-// says where planning starts and names the gold line.
+// says where planning starts and how the timeline marks it.
 export function completedReadout(cutoff: number, terms: readonly { label: string }[]): CompletedReadout {
-  const boundary = " The gold line on the timeline marks that boundary.";
+  const boundary = " Each completed semester says so beside its heading.";
   if (cutoff <= 0) {
     return { short: "Nothing completed yet", full: `Nothing on the timeline counts as completed yet.${boundary}` };
   }

@@ -200,6 +200,25 @@ describe("regions and glass", { timeout: 30_000 }, () => {
     });
   });
 
+  // A local background (what the sticky head's glass frosts: without it the
+  // site nav bled through on a phone) doesn't reach the scrollbar, which
+  // sits outside the scrolling content, so the clear track showed the
+  // ground behind the panel (Task 15 review, 2026-09-29). The scrollbar
+  // paints the panel's white itself. Headless Chromium draws no
+  // scrollbars, so this reads the styles rather than the pixels.
+  it("the details panel's scrollbar track shows the panel's own white", async () => {
+    await onPlan("/plan/example?course=COMP2100", desktop, async (page) => {
+      await page.locator(".details-panel").waitFor();
+      const surface = await resolvedColour(page, "--surface");
+      const styles = await page.locator(".details-panel").evaluate((el) => ({
+        panel: getComputedStyle(el).backgroundColor,
+        attachment: getComputedStyle(el).backgroundAttachment,
+        bar: getComputedStyle(el, "::-webkit-scrollbar").backgroundColor,
+      }));
+      expect(styles).toEqual({ panel: surface, attachment: "local", bar: surface });
+    });
+  });
+
   it("cards keep a smaller radius than regions", async () => {
     await onPlan("/plan/example", desktop, async (page) => {
       const radii = await page.evaluate(() => {

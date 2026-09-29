@@ -596,14 +596,19 @@ body:has(.planner) {
 
 /* A hairline gutter inside the region's border, no more: the timeline
    starts right under the title row (plan-header-and-fit "leaves nothing
-   above the timeline"), and the phone's card budget has no slack. */
+   above the timeline"), and the phone's card budget has no slack. The
+   region itself doesn't scroll. .timeline-scroll inside it scrolls both
+   ways, so the year heads have a scroller to stick to, and the toolbar
+   and legend above it stay put. */
 .planner-timeline-area {
   position: sticky;
   top: 0;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
   padding: 0.15rem;
   max-height: 50vh;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .planner-panes > aside {
@@ -1033,15 +1038,169 @@ section[aria-label="program checks"] > h3 {
   color: var(--unigrey);
 }
 
-/* overflow-y is set explicitly: overflow-x: auto alone computes it to auto
-   too, a second vertical scrollbar inside the pane that already scrolls. */
-.timeline-scroll {
-  position: relative;
+/* Every box from the region down to the scroller flexes, so the scroller
+   gets whatever height the toolbar and legend leave, and scrolls in it. */
+.timeline,
+.timeline-scroll-wrap {
   display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-block-end: 0.5rem;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.timeline-scroll-wrap {
+  position: relative;
+}
+
+/* The ‹ › buttons page the scroller sideways. Plain chevrons, floating
+   over the right end of the year band (so the band is as tall as they
+   are): the region is already the frame, and a row of their own would
+   cost the cards its height.
+
+   The timeline's layers stay under the card and header menus (3): in the
+   fitted page the region is static and makes no stacking context, so
+   these compete with the page's own layers. The band and the fades (1)
+   sit over the prereq overlay's lines (1, earlier in the DOM) and the
+   cards, and the buttons (2) sit over both. */
+.timeline-toolbar {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  z-index: 2;
+  display: flex;
+  gap: 0.25rem;
+  /* Solid behind the buttons, fading out toward the start like the edge
+     fade, so cards and year labels pass under them legibly. */
+  padding-inline: 2.5rem 0.25rem;
+  background: linear-gradient(to right, transparent, var(--surface) 2.5rem);
+  border-start-end-radius: var(--r-region);
+}
+
+.timeline-scroll-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  background: none;
+  border-color: transparent;
+}
+
+.timeline-scroll-button:hover:not(:disabled) {
+  border-color: var(--line);
+}
+
+/* The region's only scroller: one grid row of years, as tall as the
+   tallest year (and at least the scroller), so every year's hairline and
+   sticky heads run its full height. The top scroll padding keeps a
+   located card clear of the sticky year band and term tops.
+
+   --year-band is the year label's row, which the term tops stick under;
+   --term-top is a term top's height, which the band runs down behind.
+   --term-pad is a term's inline padding: a term is a 13rem card plus
+   that padding either side, so tightening the spacing never resizes a
+   card. --edge pads the scroller's ends, so the first and last cards sit
+   as far from the region's edge (with its 0.15rem gutter) as every card
+   sits from a year's hairline: 1rem all round. */
+.timeline-scroll {
+  --year-band: 2.75rem;
+  --term-top: 2.35rem;
+  --term-pad: 0.5rem;
+  --edge: 0.35rem;
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  grid-template-rows: minmax(max-content, 1fr);
+  column-gap: 0.5rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 var(--edge) 0.5rem;
+  scroll-padding-block-start: calc(var(--year-band) + 3rem);
+}
+
+/* One calendar year: its head spans both terms. */
+.timeline-year {
+  display: grid;
+  grid-template-columns: repeat(2, calc(13rem + 2 * var(--term-pad)));
+  grid-template-rows: auto 1fr;
+  padding-inline-end: 0.5rem;
+  border-inline-end: 1px solid var(--line);
+}
+
+.timeline-year:last-child {
+  padding-inline-end: 0;
+  border-inline-end: 0;
+}
+
+/* Sticks to the scroller's top while the cards scroll under it, frosted
+   (.glass) so they pass beneath softly. One surface for the whole year's
+   header: it runs down behind its terms' tops (.term-top, transparent),
+   and the negative margin gives that height back, so the terms still
+   start under the label's row. */
+.timeline-year-head {
+  grid-column: 1 / -1;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  height: calc(var(--year-band) + var(--term-top));
+  margin-block-end: calc(-1 * var(--term-top));
+  padding-block-start: calc((var(--year-band) - 1.2rem) / 2);
+  padding-inline: var(--term-pad);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--unigrey);
+}
+
+/* Holds at the scroller's start edge while any of its year is on screen,
+   so a band scrolled half out of view still says which year it is. */
+.timeline-year-label {
+  position: sticky;
+  inset-inline-start: calc(var(--edge) + var(--term-pad));
+}
+
+/* A phone swipes the timeline, and its short pane can't spare a band as
+   tall as the buttons. */
+@container planner (width < 49.5rem) {
+  .timeline-toolbar {
+    display: none;
+  }
+
+  .timeline-scroll {
+    --year-band: 1.9rem;
+  }
+}
+
+/* Fades at an edge with more semesters past it. Not over the horizontal
+   scrollbar, and never in the way of a pointer. */
+.timeline-scroll-wrap::before,
+.timeline-scroll-wrap::after {
+  content: "";
+  position: absolute;
+  inset-block: 0 0.75rem;
+  z-index: 1;
+  width: 2rem;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.timeline-scroll-wrap::before {
+  inset-inline-start: 0;
+  background: linear-gradient(to right, var(--surface), transparent);
+}
+
+.timeline-scroll-wrap::after {
+  inset-inline-end: 0;
+  background: linear-gradient(to left, var(--surface), transparent);
+}
+
+.timeline-scroll-wrap.more-left::before,
+.timeline-scroll-wrap.more-right::after {
+  visibility: visible;
 }
 
 /* Shared with .prereq-legend's samples, so the key is drawn by the very
@@ -1061,28 +1220,16 @@ section[aria-label="program checks"] > h3 {
   stroke-dasharray: 6 4;
 }
 
-/* Sticky inside the timeline pane (its vertical scroller), so the key
-   stays in view while you follow a line down a long column. Pinned 1px
-   above the pane's edge, with the pixel given back as padding: the pane
-   starts at a fractional y on a phone, and the sticky layer and the
-   content scrolling under it can round to different device pixels,
-   leaving a hairline of cards showing above the key. The pane clips the
-   overhang, so the background just always covers the seam.
-   z-index 2 is just enough to sit over the overlay's lines (1, later in
-   the DOM) and no more: on a phone the pane makes no stacking context
-   (see the min-height: 30rem block), so this competes with the page's own
-   layers, and the More options and card menus (3) must still open over it. */
+/* Above the timeline's scroller, not in it, so the key stays in view
+   while you follow a line down a long column. */
 .prereq-legend {
-  position: sticky;
-  top: -1px;
-  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 1rem;
-  padding-block: calc(0.35rem + 1px) 0.35rem;
+  padding-block: 0.35rem;
   margin-block-end: 0.35rem;
-  background: var(--paper);
+  padding-inline: 0.5rem;
   color: var(--unigrey);
   font-size: 0.8rem;
 }
@@ -1147,8 +1294,16 @@ section[aria-label="program checks"] > h3 {
   /* Paints the white with the scrolling sections, not in a layer of its
      own: without it Chromium's glass on the sticky head (.details-head)
      frosts the page behind the panel, and the dark site nav bleeds
-     through on a phone. */
+     through on a phone. Every layer has to be local for that, so the
+     scrollbar paints its own white (below). */
   background-attachment: local;
+}
+
+/* The white a local background doesn't reach: the scrollbar sits outside
+   the scrolling content, so its clear track showed the ground behind the
+   panel. */
+.details-panel::-webkit-scrollbar {
+  background: var(--surface);
 }
 
 /* Stays put while the sections scroll under it, frosted (.glass) so they
@@ -1762,32 +1917,57 @@ button.requisite-code:hover {
   bottom: calc(1.25rem + var(--reqs-bar-h) + 0.75rem);
 }
 
-/* A gold rule marks where the plan's completion cutoff sits: everything to
-   its left counts as completed, everything from here on is still planned.
-   Written per exact cutoff/term-position pair rather than computed, since
-   CSS has no way to compare a parent's data-cutoff value against a
-   sibling's position — nine cutoff values (0-8, see Planner.tsx's clamp)
-   against up to eight terms is a short, fixed list. */
-.planner[data-cutoff="0"] .term:nth-of-type(1),
-.planner[data-cutoff="1"] .term:nth-of-type(2),
-.planner[data-cutoff="2"] .term:nth-of-type(3),
-.planner[data-cutoff="3"] .term:nth-of-type(4),
-.planner[data-cutoff="4"] .term:nth-of-type(5),
-.planner[data-cutoff="5"] .term:nth-of-type(6),
-.planner[data-cutoff="6"] .term:nth-of-type(7),
-.planner[data-cutoff="7"] .term:nth-of-type(8) {
-  border-inline-start: 3px solid var(--gold);
-  padding-inline-start: calc(0.9rem - 3px);
+/* No box of its own: the timeline region draws the only border around
+   the semesters, hairlines divide the years (.timeline-year), and the
+   cards inside keep theirs. The radius shapes the drop outline. Which
+   semesters are completed, each term's heading says. */
+.term {
+  min-width: 0;
+  border-radius: var(--r-card);
+  padding: 0 var(--term-pad) var(--term-pad);
 }
 
-/* A lane, not a box: the timeline region draws the only border around
-   the semesters, and the cards inside keep theirs. */
-.term {
-  flex: 0 0 15rem;
-  min-width: 15rem;
+/* The heading row and family bar, stuck under the year label while the
+   cards scroll. No surface of its own: it sits on the year band's glass
+   (.timeline-year-head), which runs down behind it, so a year has one
+   header, not three. A fixed height, because the band is sized to it.
+   Edge to edge of the term, so its drag states (below) line up with the
+   term's own. */
+.term-top {
+  position: sticky;
+  top: var(--year-band);
+  z-index: 1;
+  height: var(--term-top);
+  margin-inline: calc(-1 * var(--term-pad));
+  /* Room for a first card's rings, drawn outside it (the locate flash is
+     3px, 2px out): the band paints over cards, so it ends above them. */
+  margin-block-end: 0.55rem;
+  padding: 0.35rem var(--term-pad) 0;
+  border-start-start-radius: var(--r-card);
+  border-start-end-radius: var(--r-card);
+}
+
+/* The band's glass lies over the top of every term, hiding what the term
+   itself draws there mid-drag. So its heading row, which sits above the
+   band, repeats the term's drag states: a blocked term's grey, and the
+   drop outline's top and sides, meeting the term's own outline below. */
+.term-disallowed .term-top {
   background: var(--paper);
-  border-radius: var(--r-card);
-  padding: 0.9rem;
+}
+
+.term.drag-hover-target:not(.term-disallowed) .term-top,
+.term.drag-hover-next .term-top {
+  box-shadow:
+    inset 2px 0 var(--gold),
+    inset -2px 0 var(--gold),
+    inset 0 2px var(--gold);
+}
+
+/* Its own padding, not the bar's margin, ends the sticky block: a margin
+   would collapse out of it, and cards would scroll in flush against the
+   bar. */
+.term-top .term-bar {
+  margin-block-end: 0;
 }
 
 .term h2 {
@@ -1857,7 +2037,7 @@ button.requisite-code:hover {
 }
 
 .term-disallowed {
-  background: var(--ground);
+  background: var(--paper);
   color: var(--unigrey);
 }
 
@@ -1894,8 +2074,9 @@ body > .drag-ghost {
 }
 
 /* A two-semester course takes the hovered term and the next, so the
-   drop outline covers both (sections are adjacent siblings). */
-.timeline-scroll[data-drag-span="2"] .term.drag-hover-target:not(.term-disallowed) + .term {
+   drop outline covers both. The next is marked by class (Timeline for a
+   mouse, touch-drag.ts for a finger): it may be in the next year's group. */
+.term.drag-hover-next {
   outline: 2px solid var(--gold);
   outline-offset: -2px;
 }
@@ -2757,7 +2938,6 @@ button.course-card-allocation:focus-visible {
     min-width: 0;
     top: 1rem;
     max-height: calc(100vh - 2rem);
-    overflow-y: auto;
   }
 
   .requirements-scroll {

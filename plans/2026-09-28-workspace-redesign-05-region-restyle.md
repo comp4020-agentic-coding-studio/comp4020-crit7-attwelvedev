@@ -336,6 +336,35 @@ harness, not just in a review.
 
 ### Task 15: Year-grouped timeline, sticky frosted year headers, edge fades and scroll buttons
 
+- [x] **Done 2026-09-29.** The user accepted it after several review
+  rounds, which ruled:
+  - **Scroll buttons:** ‹ › float over the right end of the 44px year band,
+    on a backing that fades out toward the start. They're hidden below
+    49.5rem, where the band is 30px.
+  - **Budgets:** "leaves nothing above the timeline" now measures to the
+    year band. The "gives the height back" limits rise by the band (+44
+    desktop, +30 phone). The phone card budget is relaxed to "the first
+    card fits" until Phase 07 restores it (noted in the Phase 07 file).
+  - **Columns:** no lane rectangles. Hairlines divide the years. A term's
+    heading shows only its session, with the year visually hidden.
+  - **Sticky headers:** term headings are sticky too, merged into one
+    frosted header per year: the band runs down behind the transparent
+    `.term-top` rows. Those rows repeat a term's drag states (the grey,
+    and the outline's top and sides), which the band would otherwise
+    cover.
+  - **Spacing:** tighter, with the cards unchanged. Every card sits 1rem
+    from each column edge, and the header ends clear of a first card's
+    5px ring.
+  - **Cutoff line:** the gold cutoff line is removed. The Completed
+    control's description and Help now say each completed semester is
+    marked in its heading. `.term.term-cutoff` replaced the
+    `nth-of-type` rule while it existed.
+  - **Details scrollbar:** the panel's scrollbar paints its own white. Its
+    `local` background doesn't reach the track.
+
+  Two test changes the user ruled on. The scroller tests now target
+  `.timeline-scroll`. The Help test forbids "gold line".
+
 - **Description:** WR23. This also replaces the sibling-dependent
   two-semester outline rule.
 - **Files touched:**

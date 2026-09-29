@@ -493,6 +493,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       setPaletteDragging(false);
       closeSearch();
     },
+    spanOf: (code) => ((view.courses[code]?.twoSemester ?? searchTwoSemester[code]) ? 2 : 1),
     onDrop: (target, code) => {
       void runAction(target.kind === "term" ? actionFor(view, code, target.term) : { kind: "remove", code });
     },

@@ -396,7 +396,7 @@ describe("completedReadout", () => {
   it("reads as nothing completed at 0", () => {
     expect(completedReadout(0, terms)).toEqual({
       short: "Nothing completed yet",
-      full: "Nothing on the timeline counts as completed yet. The gold line on the timeline marks that boundary.",
+      full: "Nothing on the timeline counts as completed yet. Each completed semester says so beside its heading.",
     });
   });
 
@@ -407,7 +407,7 @@ describe("completedReadout", () => {
   it("reads as all completed at or past the last term", () => {
     const all = {
       short: "All semesters completed",
-      full: "Every semester on the timeline counts as completed. The gold line on the timeline marks that boundary.",
+      full: "Every semester on the timeline counts as completed. Each completed semester says so beside its heading.",
     };
     expect(completedReadout(3, terms)).toEqual(all);
     expect(completedReadout(9, terms)).toEqual(all);
@@ -416,7 +416,7 @@ describe("completedReadout", () => {
   it("names the last completed term inside the timeline", () => {
     expect(completedReadout(2, terms)).toEqual({
       short: "Completed through S2 2027",
-      full: "Completed through S2 2027 — planned from S1 2028 onward. The gold line on the timeline marks that boundary.",
+      full: "Completed through S2 2027 — planned from S1 2028 onward. Each completed semester says so beside its heading.",
     });
   });
 });

@@ -58,30 +58,36 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
     expect(geometry.panesGap).toBeLessThanOrEqual(1);
   });
 
-  // The pane is the timeline's only vertical scroller, and it ends at the
-  // bottom of the tallest semester column — the prereq overlay mustn't pad
-  // it out (it used to size itself from a scrollHeight it was part of).
+  // .timeline-scroll is the timeline's only vertical scroller (the region
+  // around it doesn't scroll, so its sticky year heads have one scroller to
+  // stick to), and it ends at the bottom of the tallest semester column —
+  // the prereq overlay mustn't pad it out (it used to size itself from a
+  // scrollHeight it was part of).
   it.each([
     [1920, 1080],
     [390, 844],
   ])("at %i×%i the timeline scrolls vertically once, to the bottom of the columns", async (width, height) => {
     const result = await withPlan({ width, height }, (page) =>
       page.evaluate(() => {
+        const area = document.querySelector<HTMLElement>(".planner-timeline-area")!;
         const scroll = document.querySelector<HTMLElement>(".timeline-scroll")!;
         const svg = document.querySelector(".prereq-overlay")!;
         const top = scroll.getBoundingClientRect().top;
         const columnsBottom = Math.max(
           ...[...scroll.querySelectorAll(".term")].map((t) => t.getBoundingClientRect().bottom - top),
         );
+        const padding = parseFloat(getComputedStyle(scroll).paddingBottom);
         return {
-          innerOverflowY: getComputedStyle(scroll).overflowY,
-          innerExtra: scroll.scrollHeight - scroll.clientHeight,
-          svgExtra: svg.getBoundingClientRect().height - columnsBottom - parseFloat(getComputedStyle(scroll).paddingBottom),
+          outerOverflowY: getComputedStyle(area).overflowY,
+          outerExtra: area.scrollHeight - area.clientHeight,
+          scrollExtra: scroll.scrollHeight - columnsBottom - padding,
+          svgExtra: svg.getBoundingClientRect().height - columnsBottom - padding,
         };
       }),
     );
-    expect(result.innerOverflowY).toBe("hidden");
-    expect(result.innerExtra).toBeLessThanOrEqual(0);
+    expect(result.outerOverflowY).toBe("hidden");
+    expect(result.outerExtra).toBeLessThanOrEqual(0);
+    expect(result.scrollExtra).toBeLessThanOrEqual(1);
     expect(result.svgExtra).toBeLessThanOrEqual(1);
   });
 
@@ -93,7 +99,7 @@ describe("plan page fits the screen", { timeout: 30_000 }, () => {
       page.evaluate(() => {
         const rect = (s: string) => document.querySelector(s)!.getBoundingClientRect();
         const aside = document.querySelector<HTMLElement>("aside")!;
-        const timeline = document.querySelector<HTMLElement>(".planner-timeline-area")!;
+        const timeline = document.querySelector<HTMLElement>(".timeline-scroll")!;
         const overflows = {
           aside: aside.scrollHeight > aside.clientHeight,
           timeline: timeline.scrollHeight > timeline.clientHeight,
@@ -200,7 +206,11 @@ describe("card height budget", { timeout: 30_000 }, () => {
   // first card's title and "Counts toward" wrap to three lines each, and card
   // text is never clamped), so the budget is one full card plus the next
   // one's code line: enough to show another course follows (ruled 2026-09-28).
-  it("the first card and the second's code line fit in the timeline pane at 390×844", async () => {
+  // The sticky year band (workspace-redesign Task 15) took about 30px more,
+  // and the user relaxed the budget to the first card alone until Phase 07's
+  // tabs give the phone timeline the whole screen (ruled 2026-09-29). Phase
+  // 07 restores the second card's code line.
+  it("the first card fits in the timeline pane at 390×844 (the second's code line returns in Phase 07)", async () => {
     await withPlan(phone, async (page) => {
       const { area, cards } = await page.evaluate(() => {
         const rect = (el: Element) => {
@@ -220,8 +230,7 @@ describe("card height budget", { timeout: 30_000 }, () => {
       const detail = `area ${JSON.stringify(area)}, first ${JSON.stringify(a.card)}, second head ${JSON.stringify(b.head)}`;
       expect(a.card.top, detail).toBeGreaterThanOrEqual(area.top);
       expect(a.card.bottom, detail).toBeLessThanOrEqual(area.bottom);
-      expect(b.head.top, detail).toBeGreaterThanOrEqual(area.top);
-      expect(b.head.bottom, detail).toBeLessThanOrEqual(area.bottom);
+      expect(b.head.top, detail).toBeGreaterThanOrEqual(a.card.bottom);
     });
   });
 });
@@ -261,6 +270,7 @@ describe("plan title row", { timeout: 60_000 }, () => {
         actions: box(document.querySelector(".plan-actions")),
         area: box(document.querySelector(".planner-timeline-area"))!,
         term: box(document.querySelector(".term"))!,
+        band: box(document.querySelector(".timeline-year-head"))!,
         tab: box(document.querySelector("button.nav-show")),
       };
     });
@@ -294,26 +304,32 @@ describe("plan title row", { timeout: 60_000 }, () => {
     });
   });
 
+  // The year band is the timeline's own head, so it's what starts at the
+  // region's top, with the first term right under it (ruled 2026-09-29).
   it("leaves nothing above the timeline", async () => {
     const id = await planWithPlacement("COMP1130");
     for (const viewport of [desktop, phone]) {
       for (const path of ["/plan/example", `/plan/${id}`]) {
         await onPlan(path, viewport, async (page) => {
           const r = await rowRects(page);
-          expect(r.term.top - r.area.top, `${path} at ${viewport.width}`).toBeLessThanOrEqual(4);
+          expect(r.band.top - r.area.top, `${path} at ${viewport.width}`).toBeLessThanOrEqual(4);
+          expect(r.term.top - r.band.bottom, `${path} at ${viewport.width}`).toBeLessThanOrEqual(1);
           expect(await page.locator(".cutoff-controls").count()).toBe(0);
         });
       }
     }
   });
 
+  // Each limit is the one ruled before the year band, plus the band: 44px
+  // where the ‹ › buttons ride it, 30px on a phone, which has none
+  // (ruled 2026-09-29).
   it("gives the height back to the timeline", async () => {
     const id = await planWithPlacement("COMP1130");
     const limits = [
-      [desktop, "/plan/example", 64],
-      [desktop, `/plan/${id}`, 64],
-      [phone, "/plan/example", 125],
-      [phone, `/plan/${id}`, 100],
+      [desktop, "/plan/example", 64 + 44],
+      [desktop, `/plan/${id}`, 64 + 44],
+      [phone, "/plan/example", 125 + 30],
+      [phone, `/plan/${id}`, 100 + 30],
     ] as const;
     for (const [viewport, path, limit] of limits) {
       await onPlan(path, viewport, async (page) => {

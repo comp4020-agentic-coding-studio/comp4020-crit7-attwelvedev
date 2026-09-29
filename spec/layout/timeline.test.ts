@@ -600,7 +600,7 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
         (el) => document.getElementById(el.getAttribute("aria-describedby") ?? "")?.textContent ?? null,
       );
       expect(description).toBe(
-        "Nothing on the timeline counts as completed yet. The gold line on the timeline marks that boundary.",
+        "Nothing on the timeline counts as completed yet. Each completed semester says so beside its heading.",
       );
     });
   });
@@ -660,7 +660,6 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
       const text = await page.evaluate(() => document.body.innerText);
       for (const name of [
         "Completed through",
-        "gold line",
         "More options",
         "Place in…",
         "Counts toward",
@@ -673,7 +672,9 @@ describe("completed-semesters row", { timeout: 30_000 }, () => {
       }
       expect(text).toMatch(/colou?r/i);
       // The chevrons and the card's own "Move to…" button are gone.
-      for (const gone of ["One more semester completed", "One fewer semester completed", "‹", "Move to…"]) {
+      // The gold cutoff line went in workspace-redesign Task 15 (user ruling,
+      // 2026-09-29): each completed semester's heading says so instead.
+      for (const gone of ["One more semester completed", "One fewer semester completed", "‹", "Move to…", "gold line"]) {
         expect(text).not.toContain(gone);
       }
     } finally {
@@ -798,7 +799,8 @@ describe("prerequisite links", { timeout: 30_000 }, () => {
       const inView = () =>
         page.evaluate(() => {
           const area = document.querySelector(".planner-timeline-area")!;
-          area.scrollTop = area.scrollHeight;
+          const scroller = document.querySelector(".timeline-scroll")!;
+          scroller.scrollTop = scroller.scrollHeight;
           const legend = document.querySelector(".prereq-legend")!.getBoundingClientRect();
           const box = area.getBoundingClientRect();
           return legend.top >= box.top - 1 && legend.bottom <= box.bottom + 1;

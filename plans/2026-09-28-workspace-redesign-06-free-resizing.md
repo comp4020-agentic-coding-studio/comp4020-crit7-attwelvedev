@@ -154,6 +154,23 @@ From Phase 05:
   `--glass*`.
 - `.details-head.glass`.
 - The glass allowlist includes `.size-tip`.
+- The timeline (Task 15, as built after its review on 2026-09-29):
+  - `.timeline-scroll` is the timeline's only scroller, in both axes.
+    `.planner-timeline-area` is a region that doesn't scroll (a flex
+    column with `overflow: hidden`), and the toolbar and legend sit fixed
+    above the scroller.
+  - It's a one-row grid of `div.timeline-year[data-year]`. Each year is a
+    sticky frosted `.timeline-year-head.glass`, which runs down behind its
+    terms' sticky `.term-top` rows, then two `section.term[data-term]`.
+  - A term is a 13rem card plus `--term-pad` (0.5rem) either side. The
+    scroller's ends are padded by `--edge` (0.35rem), and `--year-band`
+    is 2.75rem, or 1.9rem below the 49.5rem container.
+  - `--timeline-min` (31rem) is unchanged. Two terms and their padding
+    now come to about 28rem, so it has slack.
+  - The ‹ › buttons (`.timeline-toolbar`) float over the band's right end,
+    and are hidden below 49.5rem.
+  - The gold cutoff line is gone. Completed terms say "Completed" in their
+    headings.
 
 ## 4. Approach
 

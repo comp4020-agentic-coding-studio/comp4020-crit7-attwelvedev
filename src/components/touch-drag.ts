@@ -6,6 +6,10 @@ interface TouchDragCallbacks {
   onDragStart: (code: string) => void;
   onDragEnd: () => void;
   onDrop: (target: TouchDropTarget, code: string) => void;
+  // How many terms the dragged course takes. A two-semester course's
+  // outline also covers the next term, which may sit in the next year's
+  // group, so it's marked by class rather than by a sibling selector.
+  spanOf?: (code: string) => 1 | 2;
 }
 
 // Native HTML5 drag-and-drop (`draggable`, dragstart/dragover/drop) never
@@ -76,6 +80,18 @@ export function useTouchDrag(rootRef: { current: HTMLElement | null }, callbacks
 
     function clearHoverHighlight() {
       root!.querySelectorAll(".drag-hover-target").forEach((el) => el.classList.remove("drag-hover-target"));
+      root!.querySelectorAll(".drag-hover-next").forEach((el) => el.classList.remove("drag-hover-next"));
+    }
+
+    // A blocked term keeps its greying, not an outline, and so does the
+    // term after it.
+    function highlightHover(target: Element | null, code: string) {
+      if (!target) return;
+      target.classList.add("drag-hover-target");
+      const term = target.getAttribute("data-term");
+      if (term === null || target.classList.contains("term-disallowed")) return;
+      if (callbacksRef.current.spanOf?.(code) !== 2) return;
+      root!.querySelector(`[data-term="${Number(term) + 1}"]`)?.classList.add("drag-hover-next");
     }
 
     function cleanup() {
@@ -134,7 +150,7 @@ export function useTouchDrag(rootRef: { current: HTMLElement | null }, callbacks
       event.preventDefault();
       if (state.ghost) positionGhost(state.ghost, event.clientX, event.clientY);
       clearHoverHighlight();
-      findHoverTarget(event.clientX, event.clientY)?.classList.add("drag-hover-target");
+      highlightHover(findHoverTarget(event.clientX, event.clientY), state.code);
     }
 
     function onPointerUp(event: PointerEvent) {

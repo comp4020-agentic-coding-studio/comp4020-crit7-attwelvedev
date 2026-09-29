@@ -131,13 +131,17 @@ asserts `axeViolations(page)` is empty:
   - `src/pages/help.astro`
   - `spec/layout.test.ts` (the :1811-1836 test)
 - **Tests first (red):** update "Help describes the new controls by name":
-  - Required: "Completed through", "gold line", "More options", "Place in…",
+  - Required: "Completed through", "More options", "Place in…",
     "Counts toward", "Verify on P&C", "Completed", "Planned", "When it
     runs", "Met", "Not sure", "⌘K", "Search courses", "double-click",
     "fold", "Timeline", "Requirements", "Programs & Courses", "Undo",
     "Redo", "⌘Z" and "Ctrl+Y".
-  - Forbidden: the existing four, plus "Your checks", "Details dialog" and
-    "Pin to".
+  - Forbidden: the existing four, plus "gold line" (already forbidden,
+    since Phase 05 Task 15 removed the line), "Your checks", "Details
+    dialog" and "Pin to". The existing "‹" ban is left over from the old
+    completed-semester chevrons. If Help describes the timeline's scroll
+    buttons, name them in words ("Scroll to later semesters"), or change
+    that ban deliberately.
 
   Add "Help has a section for each new area": h2s "Course details",
   "Arranging the workspace" and "On a phone" exist. Keep the :1838 and
