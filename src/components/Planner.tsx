@@ -306,14 +306,20 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     }
   }, [measured, layout.autoFolded]);
 
-  // The widest gap between a requirements grid and the sidebar's edge.
+  // The widest gap between the room a requirements grid has and the
+  // sidebar's edge. The room is its parent's content box: the grid itself
+  // is only as wide as its own courses need.
   function measureOverhead() {
     const aside = document.getElementById("requirements");
     if (!aside || layout.reqsPx === "rail") return;
     const width = aside.getBoundingClientRect().width;
     const gaps = [...aside.querySelectorAll<HTMLElement>(".available-courses")]
-      .filter((grid) => grid.clientWidth > 0)
-      .map((grid) => width - grid.clientWidth);
+      .filter((grid) => grid.clientWidth > 0 && grid.parentElement)
+      .map((grid) => {
+        const parent = grid.parentElement!;
+        const style = getComputedStyle(parent);
+        return width - (parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight));
+      });
     if (gaps.length > 0) setMeasuredOverheadPx(Math.max(...gaps));
   }
 

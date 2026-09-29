@@ -8,7 +8,7 @@
 // it runs in node without a DOM.
 
 export interface LayoutPrefs {
-  reqsWidthPx: number | null; // null = three card columns (or as many as fit)
+  reqsWidthPx: number | null; // null = three card columns (or fewer, if they don't fit)
   reqsFolded: boolean;
   detailsWidthPx: number;
 }
@@ -71,20 +71,23 @@ function sizes(remPx: number) {
   };
 }
 
+// Requirements shows as many 13rem card columns as its width fits; twelve
+// is past what any screen leaves beside the timeline's year.
+const MAX_COLUMNS = 12;
+const COUNT_WORDS = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+
 // n cards and their gaps, plus the groups' padding, borders, nesting and
-// scrollbar gutter around the grid.
+// scrollbar gutter around the grid, for n = 1 to MAX_COLUMNS.
 function columnWidths(remPx: number, gridOverheadPx: number): number[] {
   const s = sizes(remPx);
-  return [1, 2, 3].map((n) => gridOverheadPx + n * s.card + (n - 1) * s.gap);
+  return Array.from({ length: MAX_COLUMNS }, (_, i) => gridOverheadPx + (i + 1) * s.card + i * s.gap);
 }
 
 export function reqsSnapTargets(remPx: number, gridOverheadPx: number): SnapTarget[] {
-  const [one, two, three] = columnWidths(remPx, gridOverheadPx);
-  return [
-    { px: one, label: "One card column" },
-    { px: two, label: "Two card columns" },
-    { px: three, label: "Three card columns" },
-  ];
+  return columnWidths(remPx, gridOverheadPx).map((px, i) => ({
+    px,
+    label: `${COUNT_WORDS[i]} card column${i === 0 ? "" : "s"}`,
+  }));
 }
 
 export function snap(

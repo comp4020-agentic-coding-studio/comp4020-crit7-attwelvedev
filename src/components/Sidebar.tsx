@@ -83,10 +83,9 @@ interface GroupProps {
 }
 
 // A group never shows more card columns than it has courses. The list
-// carries that count as `data-columns` (and `--cols`, for the track
-// formula), and CSS fits as many 13rem columns as the sidebar's width
-// allows up to it, stretching the cards to fill the width in between.
-const MAX_COLUMNS = 3;
+// carries its count as `data-columns` (and `--cols`, which caps the grid's
+// width), and CSS fits as many 13rem columns as the sidebar's width allows
+// up to it.
 
 // Per-viewer convenience only: which sections this browser has compacted.
 // Storage can be missing or throw (private windows, blocked site data), in
@@ -148,7 +147,7 @@ function Group({
   const courses = group.children.length === 0 ? group.courses : [];
   const unplaced = courses.filter((c) => !placedByCode.has(c));
   const placed = courses.filter((c) => placedByCode.has(c));
-  const columns = Math.min(unplaced.length, MAX_COLUMNS) || 1;
+  const columns = unplaced.length || 1;
 
   const target = groupBarTarget(group);
   const progress = (

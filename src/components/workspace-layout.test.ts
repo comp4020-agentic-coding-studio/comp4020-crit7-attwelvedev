@@ -107,10 +107,29 @@ describe("computeLayout", () => {
 });
 
 describe("reqsSnapTargets", () => {
-  it("gives the one-, two- and three-column widths", () => {
+  it("gives a width for every whole number of columns, not just up to three", () => {
     const targets = reqsSnapTargets(REM, OVERHEAD);
-    expect(targets.map((t) => Number(t.px.toFixed(1)))).toEqual([280, 497.6, 715.2]);
-    expect(targets.map((t) => t.label)).toEqual(["One card column", "Two card columns", "Three card columns"]);
+    expect(targets.slice(0, 5).map((t) => Number(t.px.toFixed(1)))).toEqual([280, 497.6, 715.2, 932.8, 1150.4]);
+    expect(targets.slice(0, 5).map((t) => t.label)).toEqual([
+      "One card column",
+      "Two card columns",
+      "Three card columns",
+      "Four card columns",
+      "Five card columns",
+    ]);
+    expect(targets).toHaveLength(12);
+  });
+
+  it("steps a width that doesn't fit down to the whole column below, past three", () => {
+    const layout = computeLayout(input(1450, false, { reqsWidthPx: 1100 }));
+    // 1100 doesn't leave the timeline its year in 1450; four columns do.
+    expect(px(layout.reqsPx)).toBe(932.8);
+  });
+
+  it("snaps a drag near four columns to four", () => {
+    const i = input(1664);
+    const outcome = dragPrefs("reqs", i.prefs, computeLayout(i), 940 - 715.2, reqsSnapTargets(REM, OVERHEAD), i);
+    expect(outcome).toMatchObject({ prefs: { reqsWidthPx: 933 }, label: "Four card columns", snapped: true });
   });
 });
 

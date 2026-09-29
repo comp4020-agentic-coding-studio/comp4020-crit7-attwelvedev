@@ -3114,19 +3114,13 @@ button.course-card-allocation:focus-visible {
     border-block-end: 1px solid var(--line);
   }
 
-  /* As many 13rem columns as the sidebar's width fits, up to the group's
-     own count (--cols), with the cards stretched to fill the width between
-     column widths. The 1px keeps rounding from dropping a column at a
-     width that fits it exactly. */
+  /* 13rem cards, like the timeline's, as many columns as the sidebar's
+     width fits and never more than the group has courses (--cols), so no
+     empty track follows them. Between column widths the spare room sits
+     at the end, which the dividers' soft snaps keep rare. */
   #requirements .available-courses {
-    grid-template-columns: repeat(
-      auto-fill,
-      minmax(max(13rem, calc((100% - (var(--cols, 1) - 1) * 0.6rem) / var(--cols, 1) - 1px)), 1fr)
-    );
-  }
-
-  #requirements .available-courses .course-card {
-    width: auto;
+    grid-template-columns: repeat(auto-fill, 13rem);
+    max-width: calc(var(--cols, 1) * 13rem + (var(--cols, 1) - 1) * 0.6rem);
   }
 }
 

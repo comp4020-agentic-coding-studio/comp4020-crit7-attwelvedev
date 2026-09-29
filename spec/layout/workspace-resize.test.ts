@@ -24,6 +24,8 @@ const tracks = async (page: Page, selector: string) => {
     return el ? getComputedStyle(el).gridTemplateColumns.split(" ").length : null;
   }, selector);
 };
+// The elective group: more courses than any width here shows columns.
+const MANY = "#requirements .available-courses:has(> :nth-child(4))";
 const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.getItem(k), key);
 
 // Presses on the divider (below the Requirements chevron at its top) and
@@ -82,11 +84,23 @@ describe("workspace dividers", { timeout: 30_000 }, () => {
     });
   });
 
+  it("fixed 13rem cards, as many columns as fit, past three", async () => {
+    await onPage(planUrl(), async (page) => {
+      await dragBy(page, reqsDivider(page), 940 - (await asideWidth(page)));
+      expect(await reqsDivider(page).getAttribute("aria-valuetext")).toBe("Four card columns");
+      expect(await tracks(page, MANY)).toBe(4);
+      const widths = await page.evaluate(() =>
+        [...new Set([...document.querySelectorAll("#requirements .available-courses .course-card")].map((c) => Math.round(c.getBoundingClientRect().width)))],
+      );
+      expect(widths).toEqual([208]);
+    });
+  });
+
   it("soft snap: releasing near the two-column width lands on it", async () => {
     await onPage(planUrl(), async (page) => {
       await dragBy(page, reqsDivider(page), 510 - (await asideWidth(page)));
       expect(Math.round(await asideWidth(page))).toBe(498);
-      expect(await tracks(page, '.available-courses[data-columns="3"]')).toBe(2);
+      expect(await tracks(page, MANY)).toBe(2);
       expect(await reqsDivider(page).getAttribute("aria-valuetext")).toBe("Two card columns");
     });
   });
@@ -310,7 +324,7 @@ describe("fold order and drawer", { timeout: 30_000 }, () => {
   it("at 1280×800 with details closed, requirements have two columns", async () => {
     await onAt(laptop, planUrl(), async (page) => {
       expect(Math.round(await asideWidth(page))).toBe(498);
-      expect(await tracks(page, '.available-courses[data-columns="3"]')).toBe(2);
+      expect(await tracks(page, MANY)).toBe(2);
     });
   });
 

@@ -332,6 +332,27 @@ Routine calls:
 - `.planner-panes[data-rail]` marks a rail from the layout (an auto-fold has
   no root attribute).
 
+### 4.4 Post-review amendment (user, 2026-09-29): fixed cards, uncapped columns
+
+This supersedes §4.2's stretching track formula. After Phase 06 closed,
+the user ruled against stretched cards. A lone course stretched to the
+region's width read as a different object from the 13rem cards around it,
+and from the timeline's cards.
+
+- Requirements cards stay 13rem: `repeat(auto-fill, 13rem)`, left-aligned.
+  A group's grid is capped at its own course count (`--cols`, now the true
+  count, with no three-column cap), so it never shows empty tracks.
+- Columns aren't capped at three. As many as the width fits, so free
+  resizing is useful across its whole range.
+- `reqsSnapTargets` returns a target for every whole column that could
+  fit (up to 12), labelled "Four card columns" and so on. The default
+  width stays three columns, and the fold order still steps down whole
+  columns.
+- The "stays inside its group" spec returns to its original check (at
+  least 1px inside), since fixed cards no longer end flush with a nested
+  group. The column specs select the many-course group by
+  `:has(> :nth-child(4))`, not the old capped `data-columns="3"`.
+
 ## 5. Task breakdown
 
 ### Task 16: `workspace-layout.ts`, the pure layout engine

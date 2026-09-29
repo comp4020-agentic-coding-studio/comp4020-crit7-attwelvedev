@@ -76,10 +76,10 @@ describe("layout", { timeout: 30_000 }, () => {
     [1920, 1080, 3],
     [1440, 900, 2],
     [1100, 800, 1],
-  ])("at %i×%i a three-course group renders %i card columns", async (width, height, columns) => {
+  ])("at %i×%i a group of many courses renders %i card columns", async (width, height, columns) => {
     const tracks = await withPlan({ width, height }, (page) =>
       page.evaluate(() => {
-        const list = document.querySelector('.available-courses[data-columns="3"]');
+        const list = document.querySelector("#requirements .available-courses:has(> :nth-child(4))");
         return list ? getComputedStyle(list).gridTemplateColumns.split(" ").length : null;
       }),
     );
@@ -121,9 +121,7 @@ describe("layout", { timeout: 30_000 }, () => {
         [...document.querySelectorAll<HTMLElement>(".available-courses > *")]
           .filter((card) => {
             const group = card.parentElement!.closest("li");
-            // Flush is fine: stretched cards in a nested group end on its
-            // edge, as its placed rows do (user ruling, 2026-09-29). Past it isn't.
-            return !group || card.getBoundingClientRect().right > group.getBoundingClientRect().right + 0.5;
+            return !group || card.getBoundingClientRect().right > group.getBoundingClientRect().right - 1;
           })
           .map((card) => card.textContent?.trim().slice(0, 12)),
       ),
