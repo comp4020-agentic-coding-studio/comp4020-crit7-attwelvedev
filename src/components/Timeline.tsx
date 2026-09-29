@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { TERMS } from "../lib/domain/terms";
 import { NORMAL_TERM_UNITS, type PlacementView, type PlanView, type TermView } from "../lib/domain/view";
 import CourseCard from "./CourseCard";
+import { edgeStep } from "./drag-autoscroll";
 import type { DetailsFocus } from "./details-state";
 import PartTwoStub from "./PartTwoStub";
 import { actionFor, type PlanAction } from "./plan-actions";
@@ -141,6 +142,45 @@ export default function Timeline({
     }
     document.addEventListener("dragover", onDragOver);
     return () => document.removeEventListener("dragover", onDragOver);
+  }, [draggingCode]);
+
+  // A drag held near the scroller's edge scrolls it (drag-autoscroll.ts).
+  // A mouse drag's position comes from drag (fired on the dragged card the
+  // whole time; dragover only fires over drop targets) and dragover, a
+  // finger's from pointermove. It keeps
+  // going frame by frame while the pointer rests there, and stops once it
+  // leaves the edge, the scroller can't go further, or the drag ends.
+  useEffect(() => {
+    if (draggingCode === null) return;
+    let pointer: { x: number; y: number } | null = null;
+    let frame = 0;
+    function step() {
+      frame = 0;
+      const el = scrollRef.current;
+      if (!el || !pointer) return;
+      const r = el.getBoundingClientRect();
+      const dx = edgeStep(pointer.x, r.left, r.right);
+      const dy = edgeStep(pointer.y, r.top, r.bottom);
+      if (dx === 0 && dy === 0) return;
+      const before = [el.scrollLeft, el.scrollTop];
+      el.scrollBy(dx, dy);
+      if (el.scrollLeft !== before[0] || el.scrollTop !== before[1]) frame = requestAnimationFrame(step);
+    }
+    function track(event: DragEvent | PointerEvent) {
+      // Firefox reports drag events at 0,0: no position, not the corner.
+      if (event.clientX === 0 && event.clientY === 0) return;
+      pointer = { x: event.clientX, y: event.clientY };
+      if (!frame) frame = requestAnimationFrame(step);
+    }
+    document.addEventListener("drag", track);
+    document.addEventListener("dragover", track);
+    document.addEventListener("pointermove", track);
+    return () => {
+      document.removeEventListener("drag", track);
+      document.removeEventListener("dragover", track);
+      document.removeEventListener("pointermove", track);
+      cancelAnimationFrame(frame);
+    };
   }, [draggingCode]);
 
   useEffect(() => {

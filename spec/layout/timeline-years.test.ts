@@ -299,6 +299,62 @@ describe("timeline years", { timeout: 30_000 }, () => {
     }
   });
 
+  // A drag held near the timeline's edge scrolls it, for a mouse and a
+  // finger alike, so a far term can be reached without letting go (Phase
+  // 06 review, 2026-09-29): the browser's own autoscroll never started
+  // under the dividers' hit areas, and touch drags had none.
+  const scrollLeft = (page: Page) => page.locator(".timeline-scroll").evaluate((el) => el.scrollLeft);
+
+  it("a mouse drag held at the timeline's edge scrolls it, and back", async () => {
+    const id = await planWithPlacement("COMP1130");
+    await onPlan(id, desktop, async (page) => {
+      const grip = page.locator('.course-card-unplaced[data-drag-code="COMP3630"] .course-card-grip').first();
+      await grip.scrollIntoViewIfNeeded();
+      await grip.hover();
+      await page.mouse.down();
+      const start = (await grip.boundingBox())!;
+      await page.mouse.move(start.x + 30, start.y, { steps: 4 });
+      const t = (await page.locator(".timeline-scroll").boundingBox())!;
+      const y = t.y + t.height / 2;
+      await page.mouse.move(t.x + t.width - 8, y, { steps: 6 });
+      await expect.poll(() => scrollLeft(page)).toBeGreaterThan(150);
+      const far = await scrollLeft(page);
+      await page.mouse.move(t.x + 8, y, { steps: 6 });
+      await expect.poll(() => scrollLeft(page)).toBeLessThan(far - 150);
+      // Parked mid-timeline, it stops.
+      await page.mouse.move(t.x + t.width / 2, y, { steps: 4 });
+      const parked = await scrollLeft(page);
+      await page.waitForTimeout(300);
+      expect(await scrollLeft(page)).toBe(parked);
+      await page.mouse.up();
+    });
+  });
+
+  it("a touch drag held at the timeline's edge scrolls it", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const context = await browser.newContext({ viewport: phone, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    try {
+      await page.goto(new URL(`/plan/${id}`, baseUrl).href, { waitUntil: "networkidle" });
+      const cdp = await context.newCDPSession(page);
+      const touch = (type: string, x = 0, y = 0) =>
+        cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] } as never);
+      const card = page.locator('[data-drag-code="COMP3630"]').first();
+      await card.scrollIntoViewIfNeeded();
+      const box = (await card.boundingBox())!;
+      await touch("touchStart", box.x + box.width / 2, box.y + 20);
+      await page.waitForTimeout(450); // past touch-drag.ts's HOLD_MS
+      await expect.poll(() => page.locator(".drag-ghost").count()).toBe(1);
+      const t = (await page.locator(".timeline-scroll").boundingBox())!;
+      await touch("touchMove", t.x + t.width - 6, t.y + t.height / 2);
+      await touch("touchMove", t.x + t.width - 5, t.y + t.height / 2);
+      await expect.poll(() => scrollLeft(page)).toBeGreaterThan(150);
+      await touch("touchEnd");
+    } finally {
+      await context.close();
+    }
+  });
+
   it("scroll buttons", async () => {
     await withPlan(desktop, async (page) => {
       const scrollLeft = () => page.locator(".timeline-scroll").evaluate((el) => el.scrollLeft);
