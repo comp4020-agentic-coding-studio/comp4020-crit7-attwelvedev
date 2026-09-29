@@ -336,12 +336,12 @@ export function stripCells(view: PlanView, code: string, card: CourseCard): Stri
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 8–10 complete, with tests passing
-- [ ] `pnpm test` passes
-- [ ] `pnpm check` passes
-- [ ] Opening COMP2100 shows its tinted group and chips, and moving it
+- [x] Tasks 8–10 complete, with tests passing
+- [x] `pnpm test` passes
+- [x] `pnpm check` passes
+- [x] Opening COMP2100 shows its tinted group and chips, and moving it
   offers Undo with the knock-on text
-- [ ] Tick Phase 03 in overview §5 and commit
+- [x] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
