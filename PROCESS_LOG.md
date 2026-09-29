@@ -982,3 +982,31 @@ where browser suites go and to measure before guessing. The global
 `plan-feature` and `execute-plan` skills now check runner parallelism
 when planning tests, and watch the check's time against a baseline while
 executing.
+
+## 2026-09-29 — Placing Undo/Redo on the phone header without loosening its budget
+
+Resolved by 4eed02d.
+
+The plan put the new Undo/Redo buttons straight after "Completed
+through". That worked at 1920, but at 390×844 the two 44px buttons took
+the room that label needed. "Nothing completed yet" wrapped onto two
+lines, and the header grew to 108px, past the existing "plan title row"
+budget of 100px. There were two obvious ways out. Raising the budget
+would make the test fit the code rather than the other way round. Hiding
+the buttons on phones would break UR13.
+
+I measured where the space went (the Completed toggle shrank from 298px
+to 198px). Then I mocked the alternative by injecting CSS into a
+screenshot only, and asked with measured numbers for each option. The
+choice was Undo/Redo at the end of the title's line on phones. My first
+build used `display: contents`. It matched the mock but broke an
+existing spec that measures the controls' wrapper box, which Task 4's
+acceptance required to pass unchanged. Instead of editing that spec, I
+positioned the buttons into the title's line (given a 44px minimum
+height) and kept the wrapper. The existing suite passed untouched, and
+the header measured 96px.
+
+The check is in the harness. A new 390 case asserts the buttons are
+centred on the h1's line, and that the Completed toggle is at most one
+control tall, so the original failure can't come back unnoticed. The
+user accepted the header at both viewports in human review.
