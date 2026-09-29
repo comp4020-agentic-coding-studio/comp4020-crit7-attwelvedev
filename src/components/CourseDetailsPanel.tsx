@@ -198,13 +198,13 @@ export default function CourseDetailsPanel({
 
   return (
     <aside
-      class="details-panel"
+      class="details-panel region"
       aria-label="Course details"
       onKeyDown={(event) => {
         if (event.key === "Escape") onClose();
       }}
     >
-      <div class="details-head">
+      <div class="details-head glass">
         <div class="details-nav">
           <button
             type="button"

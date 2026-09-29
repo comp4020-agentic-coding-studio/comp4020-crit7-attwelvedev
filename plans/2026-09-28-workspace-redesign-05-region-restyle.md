@@ -118,6 +118,40 @@ From the undo-redo plan (`plans/2026-09-29-undo-redo.md`):
   (Undo, Redo), editable plans only, after `.completed-control`. Below
   `44rem` it's absolutely positioned at the end of the title's line.
 
+### Execution review rulings (2026-09-29)
+
+These were settled with the user before implementation. They override the
+text below where the two differ.
+
+1. **Scroller.** Today `.planner-timeline-area` scrolls vertically and
+   `.timeline-scroll` scrolls sideways, so a sticky year head inside the
+   latter can never stick. `.timeline-scroll` becomes the timeline
+   region's only scroller, in both axes. The region itself doesn't scroll,
+   and the toolbar, legend and hint sit fixed above the scroller as the
+   region head. The tests that set `.planner-timeline-area.scrollTop`
+   (plan-header-and-fit "scrolls each pane on its own", and the timeline
+   prereq-legend in-view test) switch to the new scroller. Their
+   assertions don't change.
+2. **Requirements region.** `aside#requirements` stays its own scroller
+   and takes the radius and border directly. There's no inner scroll div.
+3. **Figures.** Not monospaced. Every figure (units, weights, class
+   numbers, dates) uses `font-variant-numeric: tabular-nums` through one
+   shared rule. This is done in Task 13.
+4. **Year source.** `Timeline` groups by `TERMS[term.index].year` from
+   `src/lib/domain/terms.ts`. `TermView` is unchanged, so the payload is
+   too.
+
+Routine calls made in the same review:
+- The new browser describes go in new files, because `timeline.test.ts`
+  is at 876 of its 1000 lines: `spec/layout/regions.test.ts` (Task 13)
+  and `spec/layout/timeline-years.test.ts` (Task 15). Task 14's browser
+  tests go in `requirements-panel.test.ts`.
+- `.details-head` isn't sticky yet. Task 13 makes it sticky so that its
+  glass shows anything.
+- "The page behind the planner" means `body:has(.planner)`.
+- Sidebar's section order is already What's left, then Total (holding
+  Checks), then the groups. So Task 14 only adds the notes.
+
 ## 4. Approach
 
 **Tokens.** Add these to `:root`:
@@ -178,6 +212,14 @@ harness, not just in a review.
 ## 5. Task breakdown
 
 ### Task 13: Region tokens, radius hierarchy, `.glass` with fallback, and the glass allowlist check
+
+- [x] **Done 2026-09-29.** The user accepted it after one review round,
+  which added thin, clear-track scrollbars inset from the regions'
+  corners, like the mockup's. Also: the terms became `--paper` lanes, the
+  title's h1 keeps proportional digits, and `.details-panel` uses
+  `background-attachment: local` so the head's glass frosts only the
+  panel. Task 15's year heads are likely to need the same fix on their
+  scroller.
 
 - **Description:** WR20–WR22.
 - **Files touched:**

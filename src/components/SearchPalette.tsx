@@ -162,7 +162,7 @@ export default function SearchPalette({
       }}
     >
       <div
-        class="course-search palette"
+        class="course-search palette glass"
         role="dialog"
         aria-modal="true"
         aria-label="Search courses"

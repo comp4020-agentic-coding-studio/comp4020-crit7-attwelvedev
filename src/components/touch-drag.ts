@@ -88,7 +88,7 @@ export function useTouchDrag(rootRef: { current: HTMLElement | null }, callbacks
       s.armed = true;
       const rect = s.sourceCard.getBoundingClientRect();
       const ghost = s.sourceCard.cloneNode(true) as HTMLElement;
-      ghost.classList.add("drag-ghost");
+      ghost.classList.add("drag-ghost", "glass");
       ghost.style.width = `${rect.width}px`;
       ghost.removeAttribute("data-drag-code");
       document.body.appendChild(ghost);

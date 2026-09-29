@@ -405,7 +405,7 @@ export default function Sidebar({
       <aside
         id="requirements"
         aria-label="requirements"
-        class={dropReady ? "reqs-drop-ready" : undefined}
+        class={dropReady ? "region reqs-drop-ready" : "region"}
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();

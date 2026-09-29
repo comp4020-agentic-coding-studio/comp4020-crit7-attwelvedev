@@ -584,7 +584,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       {/* Size container for the panes; the fixed undo toast stays outside it, since containment would pin it to the container. */}
       <div class="planner-layout">
         <div class="planner-panes" ref={panesRef}>
-          <div class="planner-timeline-area">
+          <div class="planner-timeline-area region">
             <Timeline
               view={view}
               draggingCode={draggingCode}
@@ -667,7 +667,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       />
       {toast && (
         <div
-          class={fit === 0 && reqs.collapsed ? "undo-toast undo-toast-above-bar" : "undo-toast"}
+          class={fit === 0 && reqs.collapsed ? "undo-toast glass undo-toast-above-bar" : "undo-toast glass"}
           role="status"
           onMouseEnter={() => holdUndo("hover", true)}
           onMouseLeave={() => holdUndo("hover", false)}
