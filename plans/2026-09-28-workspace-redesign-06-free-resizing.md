@@ -391,6 +391,9 @@ Routine calls:
 
 ### Task 17: Saved widths: storage keys and the head script; retire the column preference
 
+- [x] **Done 2026-09-29.** Also exports `DEFAULT_LAYOUT_PREFS`. The head
+  script applies the same 48–4000 integer check as `loadLayoutPrefs`.
+
 - **Description:** WR40, except `panel-split`.
 - **Files touched:**
   - `src/components/panel-state.ts`
