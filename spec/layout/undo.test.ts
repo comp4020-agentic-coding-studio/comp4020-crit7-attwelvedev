@@ -280,7 +280,7 @@ describe("every edit toasts", { timeout: 30_000 }, () => {
       const fieldset = page.getByRole("group", { name: "Choose Specialisation" });
       // click, not check: the radio is controlled by the plan, so it only
       // turns checked once the server's view comes back.
-      await fieldset.getByLabel("Human-Centred & Creative Computing").click();
+      await fieldset.getByRole("radio", { name: "Human-Centred & Creative Computing" }).click();
       await expect.poll(() => toast(page).count()).toBe(1);
       expect(await toast(page).textContent()).toContain(
         "Chose Human-Centred & Creative Computing for Specialisation.",

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { RefObject } from "preact";
+import { specialisationByCode, specialisationByGroup } from "../data/specialisations";
 import type { GroupView, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import type { DetailsFocus } from "./details-state";
@@ -58,6 +59,10 @@ interface Props {
   openCode: string | null;
   // What the open course links to, so its groups can say so.
   linked: LinkedHighlights | null;
+  // Opens a specialisation in the details sidebar.
+  onOpenSpec: (code: string) => void;
+  // The specialisation open in the details sidebar, whose group says so.
+  openSpecCode: string | null;
 }
 
 interface GroupProps {
@@ -77,6 +82,8 @@ interface GroupProps {
   // The course open in the details sidebar, whose titles say so.
   openCode: string | null;
   linked: LinkedHighlights | null;
+  onOpenSpec: (code: string) => void;
+  openSpecCode: string | null;
   // Only top-level groups are compactable; nested ones go with their parent.
   compact?: boolean;
   onToggleCompact?: () => void;
@@ -125,6 +132,8 @@ function Group({
   onOpenDetails,
   openCode,
   linked,
+  onOpenSpec,
+  openSpecCode,
   compact = false,
   onToggleCompact,
 }: GroupProps) {
@@ -166,18 +175,36 @@ function Group({
       {group.selectable && (
         <fieldset aria-busy={choicePending}>
           <legend>Choose {group.label}</legend>
-          {group.options.map((option) => (
-            <label key={option.id}>
-              <input
-                type="radio"
-                name={`choice-${group.id}`}
-                checked={group.chosenId === option.id}
-                disabled={readOnly || choicePending}
-                onChange={() => choose(option.id)}
-              />
-              {option.label}
-            </label>
-          ))}
+          {group.options.map((option) => {
+            // Outside the label, so it reads a spec without choosing it (and
+            // works on read-only plans).
+            const spec = specialisationByGroup(option.id);
+            return (
+              <div class="choice-option" key={option.id}>
+                <label>
+                  <input
+                    type="radio"
+                    name={`choice-${group.id}`}
+                    checked={group.chosenId === option.id}
+                    disabled={readOnly || choicePending}
+                    onChange={() => choose(option.id)}
+                  />
+                  {option.label}
+                </label>
+                {spec && (
+                  <button
+                    type="button"
+                    class="choice-details"
+                    aria-label={`Details: ${option.label}`}
+                    aria-current={openSpecCode === spec.code ? "true" : undefined}
+                    onClick={() => onOpenSpec(spec.code)}
+                  >
+                    Details
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </fieldset>
       )}
       {unplaced.length > 0 && (
@@ -232,6 +259,8 @@ function Group({
               onOpenDetails={onOpenDetails}
               openCode={openCode}
               linked={linked}
+              onOpenSpec={onOpenSpec}
+              openSpecCode={openSpecCode}
             />
           ))}
         </ul>
@@ -239,7 +268,10 @@ function Group({
     </>
   );
 
-  const isHome = linked !== null && linked.home === group.id;
+  // An open spec tints its own group, as an open course tints where it
+  // counts, but only a course gets the "counts here" tag.
+  const specHome = openSpecCode !== null && specialisationByCode(openSpecCode)?.groupId === group.id;
+  const isHome = (linked !== null && linked.home === group.id) || specHome;
   const tag =
     linked === null ? null : isHome ? (
       <span class="group-tag">{linked.code} counts here</span>
@@ -273,6 +305,7 @@ function Group({
   // list — every level renders its own fixed tag, so the sequence never
   // skips a level.
   const Heading = `h${Math.min(depth + 2, 6)}` as "h3" | "h4" | "h5" | "h6";
+  const headingSpec = specialisationByGroup(group.id);
 
   return (
     <li
@@ -287,7 +320,13 @@ function Group({
         onMouseEnter={() => onFocusGroup(group.id)}
         onMouseLeave={() => onFocusGroup(null)}
       >
-        {group.label}
+        {headingSpec ? (
+          <button type="button" class="requisite-code choice-heading-link" onClick={() => onOpenSpec(headingSpec.code)}>
+            {group.label}
+          </button>
+        ) : (
+          group.label
+        )}
       </Heading>
       {tag}
       {progress}
@@ -315,6 +354,8 @@ export default function Sidebar({
   onOpenDetails,
   openCode,
   linked,
+  onOpenSpec,
+  openSpecCode,
 }: Props) {
   const readOnly = view.plan.readOnly;
   const outstanding = outstandingItems(view);
@@ -552,6 +593,8 @@ export default function Sidebar({
               onOpenDetails={onOpenDetails}
               openCode={openCode}
               linked={linked}
+              onOpenSpec={onOpenSpec}
+              openSpecCode={openSpecCode}
               compact={compact.has(`group-${group.id}`)}
               onToggleCompact={() => setSectionCompact(`group-${group.id}`, !compact.has(`group-${group.id}`))}
             />

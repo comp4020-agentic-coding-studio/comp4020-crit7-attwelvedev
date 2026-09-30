@@ -134,7 +134,8 @@ through `DetailsFrame`, with its body as
   `fieldset.getByLabel("Human-Centred & Creative Computing")`. Playwright's
   `getByLabel` also matches `aria-label` by substring, so the new button
   named "Details: Human-Centred & Creative Computing" would make it match
-  two elements.
+  two elements. Phase 03's `specialisation-details.test.ts` "says Switched
+  when the radio changes an existing choice" does the same.
 - `spec/layout/search-palette.test.ts` covers the palette (298 lines). This
   phase's new cases go in `specialisation-details.test.ts`.
 - `spec/layout/helpers.ts`:
@@ -203,7 +204,9 @@ From Task 5:
   The "counts here" tag stays only for `linked`.
 - **CSS:**
   - `.choice-option`: flex, align-items center.
-  - `.choice-details`: margin-inline-start auto, no border or background,
+  - `.choice-details`: right after its label (*amended at Task 9's review,
+    2026-09-30:* not `margin-inline-start: auto`, which pushed it about
+    1000px from its label in a three-column region), no border or background,
     `var(--muted)`, min-height 2.75rem, padding-inline 0.5rem. Underline on
     hover and focus-visible, as `.placed-row-title` does.
     `[aria-current="true"]` is `var(--gold-ink)`, weight 600.
@@ -307,7 +310,7 @@ In `SearchPalette.tsx`:
 
 ### Task 9: Sidebar Details buttons, chosen-heading link and tint
 
-- [ ] **Description.** This file's §4.1.
+- [x] **Description.** This file's §4.1.
 - **Files touched:**
   - `src/components/Sidebar.tsx`
   - `src/components/Planner.tsx`
@@ -316,7 +319,10 @@ In `SearchPalette.tsx`:
     `fieldset.getByRole("radio", { name: "Human-Centred & Creative Computing" })`.
     That's the same radio, now found unambiguously; the change is in the
     commit message.
-  - `spec/layout/specialisation-details.test.ts`
+  - `spec/layout/specialisation-details.test.ts`, including the same fix
+    to Phase 03's "says Switched when the radio changes an existing
+    choice" (its `getByLabel("Human-Centred & Creative Computing")`, found
+    at execution on 2026-09-30).
 - **Tests first (red),** at 1920:
   1. On `/plan/example`, the "Choose Specialisation" group has four buttons
      named `Details: <label>`: Artificial Intelligence, Human-Centred &
@@ -351,6 +357,9 @@ In `SearchPalette.tsx`:
     course tint.
 
   The task isn't done until the user says so explicitly.
+
+  *Accepted 2026-09-30,* with Details kept beside its label rather than at
+  the row's end (§4.1 amended).
 - **Depends on:** Task 5.
 
 ### Task 10: Specialisation results in the search palette

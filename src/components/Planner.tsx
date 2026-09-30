@@ -793,6 +793,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
             onOpenDetails={openDetails}
             openCode={openCourseCode}
             linked={linked}
+            onOpenSpec={openSpec}
+            openSpecCode={specCode(details)}
           />
           {sideBySide && (
             <WorkspaceDivider

@@ -298,7 +298,10 @@ describe("specialisation details", { timeout: 30_000 }, () => {
     expect((await choose(id, "arin")).status).toBe(200);
     const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
     try {
-      await page.getByRole("group", { name: "Choose Specialisation" }).getByLabel("Human-Centred & Creative Computing").click();
+      await page
+        .getByRole("group", { name: "Choose Specialisation" })
+        .getByRole("radio", { name: "Human-Centred & Creative Computing" })
+        .click();
       await expect.poll(() => toast(page).count()).toBe(1);
       expect(await toast(page).textContent()).toContain("Switched Specialisation from");
     } finally {
@@ -317,6 +320,80 @@ describe("specialisation details", { timeout: 30_000 }, () => {
         expect(seen).toEqual([]);
       },
     );
+  });
+
+  const specFieldset = (page: Page) => page.getByRole("group", { name: "Choose Specialisation" });
+
+  it("puts a Details button beside each specialisation option, and none beside a capstone", async () => {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      expect(await specFieldset(page).getByRole("button").evaluateAll((els) => els.map((el) => el.getAttribute("aria-label")))).toEqual([
+        "Details: Artificial Intelligence",
+        "Details: Human-Centred & Creative Computing",
+        "Details: Systems & Architecture",
+        "Details: Theoretical Computer Science",
+      ]);
+      expect(await page.getByRole("group", { name: "Choose Capstone" }).getByRole("button").count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("opens a spec from its Details button without choosing it", async () => {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      const details = specFieldset(page).getByRole("button", { name: "Details: Systems & Architecture" });
+      await details.click();
+      await specPanel(page).locator("h2").filter({ hasText: "SYAR-SPEC" }).waitFor();
+      await expect.poll(() => param(page, "spec")).toBe("SYAR-SPEC");
+      expect(await details.getAttribute("aria-current")).toBe("true");
+      expect(await specFieldset(page).getByRole("radio", { name: "Artificial Intelligence" }).isChecked()).toBe(true);
+      expect(await specFieldset(page).getByRole("radio", { name: "Systems & Architecture" }).isChecked()).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("still chooses an option from its label's text", async () => {
+    const id = await planWithPlacement("COMP1130");
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await specFieldset(page).getByText("Artificial Intelligence", { exact: true }).click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Chose Artificial Intelligence for Specialisation.");
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("opens the chosen spec from its sidebar heading, tinting the group while open", async () => {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      const group = page.locator('[data-group="arin"]');
+      const tinted = () => group.evaluate((el) => el.classList.contains("group-linked"));
+      expect(await tinted()).toBe(false);
+      await group.locator("> h3 button").click();
+      await specPanel(page).locator("h2").filter({ hasText: "ARIN-SPEC" }).waitFor();
+      await expect.poll(tinted).toBe(true);
+      await specPanel(page).getByRole("button", { name: "Close details" }).click();
+      await expect.poll(tinted).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("is axe-clean with a spec opened from its Details button", async () => {
+    for (const viewport of [desktop, phone]) {
+      const page = await openPage(browser, example(""), viewport);
+      try {
+        if (viewport === phone) await page.getByRole("button", { name: "Requirements", exact: true }).click();
+        await specFieldset(page).getByRole("button", { name: "Details: Human-Centred & Creative Computing" }).click();
+        await specPanel(page).locator("h2").filter({ hasText: "HCCC-SPEC" }).waitFor();
+        expect(await axeViolations(page)).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
   });
 });
 

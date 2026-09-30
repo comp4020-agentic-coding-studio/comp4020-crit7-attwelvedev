@@ -1047,6 +1047,48 @@ section[aria-label="program checks"] > h3 {
   min-width: 0;
 }
 
+/* The option's label wraps rather than pushing its Details off the row. */
+.choice-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.choice-option label {
+  min-width: 0;
+}
+
+/* A quiet secondary action beside the radio, so it reads as "about this"
+   rather than as a second way to choose. */
+.choice-details,
+.choice-details:hover {
+  border: 0;
+}
+
+/* Beside its label, not pushed to the row's end: in a wide requirements
+   region that end is too far away to read as belonging to the option. */
+.choice-details {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.choice-details:hover,
+.choice-details:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.choice-details[aria-current="true"] {
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+
 .timeline-hint {
   margin: 0;
   padding: 0.75rem 1rem 0;
