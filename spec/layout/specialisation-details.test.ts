@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage } from "../browser";
-import { baseUrl, browser, useBrowser } from "./helpers";
+import { baseUrl, browser, planWithPlacement, useBrowser } from "./helpers";
 
 useBrowser();
 
@@ -155,5 +155,24 @@ describe("specialisation details", { timeout: 30_000 }, () => {
       await expect.poll(() => specPanel(page).getAttribute("data-detent")).toBe("full");
       expect(await specPanel(page).locator(".spec-group-tag").count()).toBe(2);
     });
+  });
+});
+
+describe("the what-if endpoint", () => {
+  const whatIf = (planId: string, query: string) => fetch(new URL(`/api/plans/${planId}/what-if?${query}`, baseUrl));
+
+  it("answers for a real option, and rejects anything else", async () => {
+    const id = await planWithPlacement("COMP3670", 5);
+    const ok = await whatIf(id, "group=spec&option=arin");
+    expect(ok.status).toBe(200);
+    expect((await ok.json()).optionId).toBe("arin");
+    expect((await whatIf(id, "group=spec&option=nope")).status).toBe(400);
+    expect((await whatIf(id, "group=electives&option=arin")).status).toBe(400);
+    expect((await whatIf(id, "group=spec")).status).toBe(400);
+    expect((await whatIf("no-such-plan", "group=spec&option=arin")).status).toBe(404);
+  });
+
+  it("reads a read-only plan too", async () => {
+    expect((await whatIf("example", "group=spec&option=syar")).status).toBe(200);
   });
 });

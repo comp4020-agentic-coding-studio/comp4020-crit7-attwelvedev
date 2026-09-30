@@ -133,6 +133,12 @@ case "choice": {
 - `planWithPlacement(code: string, term = 0): Promise<string>`, which
   creates an editable plan (POST `/api/plans` with
   `headers: { origin: baseUrl }`), places one course and returns its id.
+- *Amended during execution, 2026-09-30:* the placement is hard-block
+  checked (409), and COMP3670 is S2-only with its prereqs unreachable before
+  S2 2028, so it's placeable only in terms 3, 5 and 7. The browser fixtures
+  use term 5 (S2 2029), which stays planned under Task 7's "S2 2027" cutoff.
+  The unit fixtures in Task 6 go through `buildPlanView`, which doesn't
+  hard-block, so they keep their terms.
 
 The API needs the same `origin` header for any other change, e.g. to
 choose a spec before opening a page:
@@ -359,7 +365,7 @@ The undo list is unchanged. It applies to the radio and the panel alike.
 
 ### Task 6: `whatIfChoice` domain function, service and GET endpoint
 
-- [ ] **Description.** Add this file's §4.1 and the service and route of
+- [x] **Description.** Add this file's §4.1 and the service and route of
   §4.2 (the overview §4.3 contract).
 - **Files touched:**
   - `src/lib/domain/what-if.ts` (new)
@@ -397,7 +403,7 @@ The undo list is unchanged. It applies to the radio and the panel alike.
        swapped one, computed independently in the test.
     5. **Purity:** the input `plan.choices` is unchanged afterwards.
   - Endpoint (spec project), against a plan from
-    `planWithPlacement("COMP3670", 4)`:
+    `planWithPlacement("COMP3670", 5)`:
     - `?group=spec&option=arin` gives 200 with `optionId` "arin".
     - `option=nope` gives 400.
     - `group=electives` gives 400.
@@ -434,7 +440,7 @@ The undo list is unchanged. It applies to the radio and the panel alike.
      plan." and a "Try again" button. After un-routing, selecting Try again
      shows no error.
   3. **Refetch on a plan change:**
-     - Take a plan from `planWithPlacement("COMP3670", 4)`, and open
+     - Take a plan from `planWithPlacement("COMP3670", 5)`, and open
        `/plan/{id}?spec=ARIN-SPEC` (unchosen).
      - Count `what-if` requests with `page.on("request")`, and wait for the
        first to finish.
@@ -493,7 +499,7 @@ The undo list is unchanged. It applies to the radio and the panel alike.
        - The text matches `/would (move|count) here|None of your courses/`.
        - axe is `[]`.
     2. **Editable, nothing chosen:** a plan from
-       `planWithPlacement("COMP3670", 4)`, open `?spec=ARIN-SPEC`.
+       `planWithPlacement("COMP3670", 5)`, open `?spec=ARIN-SPEC`.
        - "Choose this specialisation" has the class `details-choose`.
        - The "Your courses that would count" list contains COMP3670, and a
          `.spec-move`.

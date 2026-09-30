@@ -3,6 +3,7 @@ import { activeEligibleLeaves } from "./domain/allocation";
 import { createFeasibility } from "./domain/feasibility";
 import { buildPlanView, courseDetailsView, type CourseDetailsView, type PlanView } from "./domain/view";
 import { TERMS } from "./domain/terms";
+import { whatIfChoice, type WhatIfView } from "./domain/what-if";
 import type { Catalogue, CheckAnswer, GroupDef } from "./domain/types";
 import {
   deletePlacement,
@@ -128,6 +129,25 @@ export function setChoice(planId: string, groupId: string, childId: string | nul
     }
   });
   return { status: 200, view: buildPlanView(catalogue, program, getPlan(db, planId)!) };
+}
+
+export type WhatIfResult = { status: 200; whatIf: WhatIfView } | { status: 400 | 404; error: string };
+
+// A preview, so a read-only plan can ask too: nothing is written.
+export function getWhatIf(planId: string, groupId: string, optionId: string): WhatIfResult {
+  const plan = getPlan(db, planId);
+  if (!plan) return { status: 404, error: "plan not found" };
+
+  const program = loadProgram(db);
+  const group = findGroup(program.groups, groupId);
+  if (!group || !group.selectable) {
+    return { status: 400, error: `${groupId} is not a selectable group` };
+  }
+  if (!(group.children ?? []).some((c) => c.id === optionId)) {
+    return { status: 400, error: `${optionId} is not an option of ${groupId}` };
+  }
+
+  return { status: 200, whatIf: whatIfChoice(loadCatalogue(db), program, plan, groupId, optionId) };
 }
 
 export function setPin(planId: string, code: string, groupId: string | null): ServiceResult {

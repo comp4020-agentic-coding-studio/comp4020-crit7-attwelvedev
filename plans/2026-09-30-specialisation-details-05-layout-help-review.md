@@ -147,7 +147,7 @@ CSS:
 | --- | --- |
 | A. chosen | `/plan/example?spec=ARIN-SPEC` |
 | B. unchosen, read-only | `/plan/example?spec=SYAR-SPEC` |
-| C. none chosen, editable | `planWithPlacement("COMP3670", 4)` then `?spec=ARIN-SPEC` |
+| C. none chosen, editable | `planWithPlacement("COMP3670", 5)` then `?spec=ARIN-SPEC` |
 | D. switch, editable | as C, after choosing ARIN, then `?spec=HCCC-SPEC` |
 | E. what-if loading | B, with the route delayed 3s |
 | F. what-if error | B, with the route fulfilling 500 |
