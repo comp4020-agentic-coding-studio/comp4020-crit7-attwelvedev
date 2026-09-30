@@ -156,6 +156,92 @@ describe("specialisation details", { timeout: 30_000 }, () => {
       expect(await specPanel(page).locator(".spec-group-tag").count()).toBe(2);
     });
   });
+
+  // Opens `url` with `setup` (routes, request listeners) already in place
+  // for the panel's first what-if, which it sends as soon as it mounts.
+  async function openPrepared(url: string, setup: (page: Page) => Promise<void>, check: (page: Page) => Promise<void>) {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      await setup(page);
+      await page.goto(url, { waitUntil: "networkidle" });
+      await check(page);
+    } finally {
+      await page.close();
+    }
+  }
+  const whatIfRequests = (page: Page) => {
+    const seen: string[] = [];
+    page.on("request", (r) => {
+      if (r.url().includes("/what-if")) seen.push(r.url());
+    });
+    return seen;
+  };
+  const fitText = (page: Page, text: string) => specPanel(page).getByText(text, { exact: true });
+
+  it("shows a loading line while the what-if is on its way", async () => {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      await page.route("**/what-if*", async (route) => {
+        await new Promise((r) => setTimeout(r, 1000));
+        await route.continue();
+      });
+      await page.goto(example("spec=SYAR-SPEC"), { waitUntil: "domcontentloaded" });
+      const loading = fitText(page, "Working out how this would fit your plan…");
+      await expect.poll(() => loading.count()).toBe(1);
+      await expect.poll(() => loading.count(), { timeout: 5000 }).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("offers Try again when the what-if fails", async () => {
+    await openPrepared(
+      example("spec=SYAR-SPEC"),
+      async (page) => {
+        await page.route("**/what-if*", (route) => route.fulfill({ status: 500, json: { error: "boom" } }));
+      },
+      async (page) => {
+        const error = fitText(page, "Couldn't work out how this fits your plan.");
+        await expect.poll(() => error.count()).toBe(1);
+        await page.unroute("**/what-if*");
+        await specPanel(page).getByRole("button", { name: "Try again" }).click();
+        await expect.poll(() => error.count()).toBe(0);
+      },
+    );
+  });
+
+  it("asks again when the plan changes under an open panel", async () => {
+    const id = await planWithPlacement("COMP3670", 5);
+    let seen: string[] = [];
+    await openPrepared(
+      new URL(`/plan/${id}?spec=ARIN-SPEC`, baseUrl).href,
+      async (page) => {
+        seen = whatIfRequests(page);
+      },
+      async (page) => {
+        // Settled at load, where the panel's move into the measured layout
+        // can already have asked twice; the plan change must ask once more.
+        const settled = seen.length;
+        expect(settled).toBeGreaterThan(0);
+        await page.locator("button.completed-toggle").click();
+        await page.locator(".completed-panel").getByRole("button", { name: "S2 2027" }).click();
+        await expect.poll(() => seen.length).toBe(settled + 1);
+      },
+    );
+  });
+
+  it("asks nothing for the chosen spec", async () => {
+    let seen: string[] = [];
+    await openPrepared(
+      example("spec=ARIN-SPEC"),
+      async (page) => {
+        seen = whatIfRequests(page);
+      },
+      async () => {
+        expect(seen).toEqual([]);
+      },
+    );
+  });
 });
 
 describe("the what-if endpoint", () => {

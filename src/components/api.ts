@@ -1,5 +1,6 @@
 import type { CheckAnswer } from "../lib/domain/types";
 import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
+import type { WhatIfView } from "../lib/domain/what-if";
 
 export type ApiResult = PlanView | { error: string };
 
@@ -62,6 +63,14 @@ export async function fetchCourseDetails(code: string, planId?: string): Promise
   if (planId) params.set("plan", planId);
   const res = await fetch(`/api/courses/${encodeURIComponent(code)}?${params.toString()}`);
   const body = (await res.json()) as CourseDetailsView | { error: string };
+  if (!res.ok) return { error: "error" in body ? body.error : "Request failed" };
+  return body;
+}
+
+export async function fetchWhatIf(planId: string, groupId: string, optionId: string): Promise<WhatIfView | { error: string }> {
+  const params = new URLSearchParams({ group: groupId, option: optionId });
+  const res = await fetch(`/api/plans/${encodeURIComponent(planId)}/what-if?${params.toString()}`);
+  const body = (await res.json()) as WhatIfView | { error: string };
   if (!res.ok) return { error: "error" in body ? body.error : "Request failed" };
   return body;
 }

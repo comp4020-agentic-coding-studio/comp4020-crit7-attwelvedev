@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import type { SpecialisationInfo } from "../data/specialisations";
+import { SPEC_CHOICE_GROUP, type SpecialisationInfo } from "../data/specialisations";
 import type { PlanView } from "../lib/domain/view";
 import DetailsFrame, { dateLabel, ExternalLink } from "./DetailsFrame";
 import type { DetailsState } from "./details-state";
 import type { PlanAction } from "./plan-actions";
 import { unitsLabel } from "./planner-logic";
 import { chosenSpecGroup, courseLineStatus, linkCodes } from "./spec-logic";
+import { useWhatIf } from "./use-what-if";
 import type { LayoutResult } from "./workspace-layout";
 
 interface Props {
@@ -47,6 +48,7 @@ export default function SpecialisationDetailsPanel({
   const [clamped, setClamped] = useState(false);
   const chosen = chosenSpecGroup(view) === spec.groupId;
   const canOpen = (code: string) => code in view.courses;
+  const whatIf = useWhatIf(view.plan.id, SPEC_CHOICE_GROUP, chosen ? null : spec.groupId, view);
 
   useEffect(() => {
     if (details.token === 0) return;
@@ -132,6 +134,27 @@ export default function SpecialisationDetailsPanel({
               >
                 See your progress in Requirements
               </button>
+            </section>
+          )}
+
+          {!chosen && (
+            <section class="details-section spec-fit">
+              <h3>Fit with your plan</h3>
+              {!whatIf.data && (
+                <div class="spec-fit-status">
+                  {whatIf.status === "loading" && (
+                    <p class="details-loading">Working out how this would fit your plan…</p>
+                  )}
+                  {whatIf.status === "error" && (
+                    <>
+                      <p>Couldn't work out how this fits your plan.</p>
+                      <button type="button" onClick={whatIf.retry}>
+                        Try again
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </section>
           )}
 

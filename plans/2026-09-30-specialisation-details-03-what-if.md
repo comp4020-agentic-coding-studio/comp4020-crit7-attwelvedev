@@ -423,7 +423,7 @@ The undo list is unchanged. It applies to the radio and the panel alike.
 
 ### Task 7: `fetchWhatIf` and the `useWhatIf` hook
 
-- [ ] **Description.** Add the client function and hook of this file's
+- [x] **Description.** Add the client function and hook of this file's
   §4.2, and mount the hook in `SpecialisationDetailsPanel` with
   `optionId = chosen ? null : spec.groupId`. Render only the loading and
   error shells for now, so the tests can see them.
@@ -449,6 +449,13 @@ The undo list is unchanged. It applies to the radio and the panel alike.
        button (as `spec/layout/undo.test.ts` does).
      - The count reaches 2. Task 8 has no move rows yet at this point, so
        this test asserts only the request.
+     - *Amended during execution, 2026-09-30:* the count asserted is "one
+       more than once the load settles", not a literal 2. Planner moves the
+       panel into the panes grid once it has measured itself
+       (`detailsInPanes`), which remounts it, so a fresh load already asks
+       twice (the first answer is dropped as stale). A literal 2 would pass
+       with no refetch at all; checked by removing `view` from the hook's
+       deps, which fails the amended test.
   4. On `?spec=ARIN-SPEC` (chosen), no what-if request is made.
 - **Implementation (green).** Per this file's §4.2.
 - **Refactor.** None.
