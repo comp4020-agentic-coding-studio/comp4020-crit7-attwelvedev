@@ -1229,3 +1229,28 @@ sheet reaches full with both tags still drawn. I ran it against the broken
 build first. It failed, with "full" expected and "peek" received. After the
 fix it passed, the screenshots showed the lines aligned and the handle
 working, and the user accepted the review.
+
+## 2026-09-30 — A refetch test that would have passed with no refetch
+
+Resolved by 5b7c50a.
+
+Phase 03's Task 7 wanted a browser test that the what-if refetches when
+the plan changes. It said to open an unchosen spec, count `what-if`
+requests, change "Completed through", and check the count reaches 2. My
+first version also asserted that the count starts at 1, and that failed:
+a fresh load already sent 2. The obvious move was to drop my extra
+assertion and keep the plan's literal "reaches 2", which then passed.
+
+I didn't take it, because a count that starts at 2 and must "reach 2"
+passes whether or not a refetch ever happens. I traced the second load
+request to Planner: once it has measured itself it moves the panel into
+the panes grid (`detailsInPanes`), which remounts it, so the hook fires
+again and drops the first answer as stale. That's an existing layout
+behaviour and outside the task, so I noted it and didn't "fix" it.
+
+Instead the test now reads the count once the load settles and expects
+exactly one more after the plan change. To check the new test could
+catch the fault at all, I took `view` out of the hook's dependency list,
+rebuilt, and ran it: it failed. With `view` back it passed, and so did
+`pnpm check`. The plan file records the amendment and why, so the next
+reader doesn't restore the literal 2.
