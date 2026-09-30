@@ -1335,3 +1335,30 @@ wrote the rule into the plan's §4.2 before the code, and its comment says
 why. After that, all 462 unit tests passed, as did the 49 palette and spec
 browser tests, with `search-palette.test.ts` untouched. The 390 and 1920
 renders showed "computing" still finding HCCC.
+
+## 2026-09-30 — Giving the specialisation sweep its own file, against the plan's line rule
+
+Resolved by 1b65e3d.
+
+Task 12's plan put the all-states sweep (7 states × 3 viewports, each
+opened fresh and run through axe) in `specialisation-details.test.ts`,
+unless that file would pass the 1000-line budget. It stood at 525 lines,
+and the sweep came to about 250 more. So by the plan's own rule, the
+sweep went into the existing file. The line budget exists to guard test
+speed, though, and CLAUDE.md's test-speed rule is the reason behind it:
+vitest runs one file's tests serially, so the slowest file sets
+`pnpm check`'s time. Line count is only a proxy for that. Twenty-one
+page opens in 250 lines is far heavier per line than the file's other
+tests.
+
+Before writing anything I stopped and put the choice to the user: follow
+the rule as written, or use a new `specialisation-states.test.ts` shaped
+like the workspace redesign's own states file. They chose the new file,
+and I amended the plan's §4.2 to say why.
+
+The numbers backed it up. Timed with the JSON reporter, the new file took
+46.4s and `specialisation-details.test.ts` took 43.6s. The slowest
+existing file, `details.test.ts`, took 56.1s. Merged, the two would have
+run about 90s serially, longer than the whole check's 75s test phase
+before the change. Split, `pnpm check` went from an 83s baseline to 84s
+once the Help test landed, with 1048 tests passing.
