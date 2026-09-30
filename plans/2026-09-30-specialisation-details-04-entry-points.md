@@ -450,13 +450,13 @@ In `SearchPalette.tsx`:
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 9–11 are complete and their tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] A specialisation opens from all three places, and each opening joins
+- [x] Tasks 9–11 are complete and their tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] A specialisation opens from all three places, and each opening joins
   the one back/forward trail
-- [ ] Task 9's human review is explicitly accepted by the user
-- [ ] Tick Phase 04 in overview §5 and commit
+- [x] Task 9's human review is explicitly accepted by the user
+- [x] Tick Phase 04 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
