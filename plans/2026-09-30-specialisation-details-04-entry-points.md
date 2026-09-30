@@ -224,6 +224,11 @@ export function matchSpecialisations(query: string): SpecialisationInfo[];
 It returns SPECIALISATIONS order.
 
 - An empty query matches nothing.
+- *Amended at Task 10, 2026-09-30:* a query containing any digit matches
+  nothing. It's a course search. Split on non-letters, "COMP1100" left the
+  word "comp", which prefixes "Computing" and "Computer", so it listed HCCC
+  and THCS. That broke this task's own "COMP1100" case and two unchanged
+  `search-palette.test.ts` cases ("COMP9999", "COMP11").
 - **Code match:** the trimmed, upper-cased query matching
   `/^[A-Z]{4}(-SPEC)?$/`, where the spec's code starts with its first four
   letters followed by "-".
@@ -364,7 +369,7 @@ In `SearchPalette.tsx`:
 
 ### Task 10: Specialisation results in the search palette
 
-- [ ] **Description.** This file's §4.2.
+- [x] **Description.** This file's §4.2.
 - **Files touched:**
   - `src/components/spec-logic.ts`
   - `src/components/spec-logic.test.ts`

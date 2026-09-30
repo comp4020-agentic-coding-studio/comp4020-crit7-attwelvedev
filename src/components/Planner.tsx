@@ -859,6 +859,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
         onLocateCourse={locateCourse}
         onAction={runAction}
         openCode={openCourseCode}
+        onOpenSpec={openSpec}
+        openSpecCode={specCode(details)}
         dragging={paletteDragging}
         stacked={stacked}
       />

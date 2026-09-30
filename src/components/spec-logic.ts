@@ -1,4 +1,4 @@
-import { SPEC_CHOICE_GROUP, type SpecialisationInfo } from "../data/specialisations";
+import { SPEC_CHOICE_GROUP, SPECIALISATIONS, type SpecialisationInfo } from "../data/specialisations";
 import type { PlanView } from "../lib/domain/view";
 import type { WhatIfView } from "../lib/domain/what-if";
 import { groupLabel, groupPath, placedStatus } from "./planner-logic";
@@ -6,6 +6,28 @@ import { groupLabel, groupPath, placedStatus } from "./planner-logic";
 // The specialisation option the plan has chosen, as its group id, or null.
 export function chosenSpecGroup(view: PlanView): string | null {
   return groupPath(view, SPEC_CHOICE_GROUP)[0]?.chosenId ?? null;
+}
+
+const words = (text: string) => text.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+
+// The palette's specialisation results, in SPECIALISATIONS order: a code
+// ("ARIN" or "ARIN-SPEC"), or else every query word of 3+ letters starting
+// some word of P&C's title or the app's label. Shorter words are skipped
+// so "ai" or "of" doesn't match everything. A digit means a course search
+// ("COMP1100", "COMP11"), and any four letters read as a code: either way
+// "comp" would otherwise prefix the "Computing" specs' words.
+export function matchSpecialisations(query: string): SpecialisationInfo[] {
+  if (/\d/.test(query)) return [];
+  const code = query.trim().toUpperCase();
+  if (/^[A-Z]{4}(-SPEC)?$/.test(code)) {
+    return SPECIALISATIONS.filter((s) => s.code.startsWith(`${code.slice(0, 4)}-`));
+  }
+  const wanted = words(query).filter((w) => w.length >= 3);
+  if (wanted.length === 0) return [];
+  return SPECIALISATIONS.filter((s) => {
+    const have = [...words(s.title), ...words(s.label)];
+    return wanted.every((w) => have.some((h) => h.startsWith(w)));
+  });
 }
 
 export type ProseSegment = string | { code: string };

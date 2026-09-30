@@ -2769,6 +2769,81 @@ fieldset[aria-busy="true"] {
   margin-top: 0.6rem;
 }
 
+.palette-specs h3 {
+  margin: 0.6rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--unigrey);
+}
+
+/* A container like .placed-rows, so a row goes to one line at the same
+   width a placed row does. */
+.palette-spec-rows {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  container-type: inline-size;
+}
+
+/* A placed row's grid, with the family's edge a course card carries, so a
+   spec reads as one more kind of result rather than a separate widget. */
+.palette-spec-row {
+  display: grid;
+  grid-template-areas: "title title" "meta status";
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.15rem 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.6rem 0.35rem calc(0.6rem + 4px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: inset 4px 0 0 var(--family);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@container (min-width: 24rem) {
+  .palette-spec-row {
+    grid-template-areas: "title meta status";
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}
+
+.palette-spec-title,
+.palette-spec-title:hover {
+  border: 0;
+}
+
+.palette-spec-title {
+  grid-area: title;
+  min-height: 2.75rem;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 400;
+  color: var(--ink);
+  text-align: start;
+  cursor: pointer;
+}
+
+.palette-spec-title:hover,
+.palette-spec-title:focus-visible,
+.palette-spec-title[aria-current="true"] {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.palette-spec-meta {
+  grid-area: meta;
+}
+
+.palette-spec-status {
+  grid-area: status;
+  color: var(--ink);
+  font-weight: 600;
+}
+
 /* An icon button, with its shortcut beside the icon where there's a
    keyboard to press it on. */
 .search-trigger {

@@ -3,7 +3,17 @@ import type { SearchResult } from "./api";
 // Same shape the search endpoint uses to decide whether to fetch from P&C.
 const COURSE_CODE = /^[A-Z]{4}\d{4}$/;
 
-export function outcomeMessage(result: SearchResult, query: string): string {
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+// specCount: the specialisations the palette matched itself, client-side,
+// which the one status line counts alongside the courses.
+export function outcomeMessage(result: SearchResult, query: string, specCount = 0): string {
+  if (specCount > 0 && result.status === "found") {
+    return `Found ${plural(result.courses.length, "course")} and ${plural(specCount, "specialisation")} matching "${query}"`;
+  }
+  if (specCount > 0 && result.status === "not_found") {
+    return `Found ${plural(specCount, "specialisation")} matching "${query}"`;
+  }
   switch (result.status) {
     case "found": {
       const count = result.courses.length;

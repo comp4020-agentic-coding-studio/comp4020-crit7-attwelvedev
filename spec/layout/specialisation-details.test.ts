@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Page } from "playwright";
 import { axeViolations, horizontalOverflow, openPage } from "../browser";
-import { baseUrl, browser, planWithPlacement, useBrowser } from "./helpers";
+import { baseUrl, browser, openSearch, planWithPlacement, useBrowser } from "./helpers";
 
 useBrowser();
 
@@ -389,6 +389,63 @@ describe("specialisation details", { timeout: 30_000 }, () => {
         if (viewport === phone) await page.getByRole("button", { name: "Requirements", exact: true }).click();
         await specFieldset(page).getByRole("button", { name: "Details: Human-Centred & Creative Computing" }).click();
         await specPanel(page).locator("h2").filter({ hasText: "HCCC-SPEC" }).waitFor();
+        expect(await axeViolations(page)).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
+  });
+
+  async function search(page: Page, query: string) {
+    await openSearch(page);
+    await page.locator(".palette input").fill(query);
+    await page.locator(".palette input").press("Enter");
+    await page.locator(".palette .course-search-status").filter({ hasText: "Searching" }).waitFor({ state: "detached" });
+  }
+  const palette = (page: Page) => page.locator(".palette");
+
+  it("finds a specialisation by its code in search, and opens it from the keyboard", async () => {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      await search(page, "ARIN");
+      await expect.poll(() => palette(page).locator(".palette-spec-row").count()).toBe(1);
+      expect(await palette(page).getByRole("heading", { level: 3, name: "Specialisations" }).count()).toBe(1);
+      const row = await palette(page).locator(".palette-spec-row").textContent();
+      for (const text of ["ARIN-SPEC", "Artificial Intelligence", "24 units, Specialisation", "Chosen"]) expect(row).toContain(text);
+      expect(await palette(page).locator(".course-search-status").count()).toBe(0);
+
+      await palette(page).locator("input").press("ArrowDown");
+      expect(await page.evaluate(() => document.activeElement?.classList.contains("palette-spec-title"))).toBe(true);
+      await page.keyboard.press("Enter");
+      await specPanel(page).locator("h2").filter({ hasText: "ARIN-SPEC" }).waitFor();
+      expect(await palette(page).count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("lists a title match above the course results", async () => {
+    const page = await openPage(browser, example(""), desktop);
+    try {
+      await search(page, "artificial intelligence");
+      await expect.poll(() => palette(page).locator(".palette-spec-row").count()).toBe(1);
+      const courses = palette(page).locator(".course-search-results, .course-search-placed");
+      await expect.poll(() => courses.filter({ hasText: "COMP3620" }).count()).toBe(1);
+      const specTop = (await palette(page).locator(".palette-specs").boundingBox())!.y;
+      for (const box of await courses.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().top))) {
+        expect(box).toBeGreaterThan(specTop);
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("is axe-clean with specialisation results shown", async () => {
+    for (const viewport of [desktop, phone]) {
+      const page = await openPage(browser, example(""), viewport);
+      try {
+        await search(page, "ARIN");
+        await expect.poll(() => palette(page).locator(".palette-spec-row").count()).toBe(1);
         expect(await axeViolations(page)).toEqual([]);
       } finally {
         await page.close();

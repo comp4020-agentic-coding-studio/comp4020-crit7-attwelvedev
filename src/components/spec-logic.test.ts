@@ -8,7 +8,15 @@ import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types"
 import { buildPlanView } from "../lib/domain/view";
 import { groupLabel, placedStatus } from "./planner-logic";
 import type { WhatIfView } from "../lib/domain/what-if";
-import { chosenSpecGroup, courseLineStatus, fitFigures, fitSummary, linkCodes, shortfallText } from "./spec-logic";
+import {
+  chosenSpecGroup,
+  courseLineStatus,
+  fitFigures,
+  fitSummary,
+  linkCodes,
+  matchSpecialisations,
+  shortfallText,
+} from "./spec-logic";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -191,5 +199,24 @@ describe("courseLineStatus with a what-if", () => {
       lists: [{ groupId: list.groupId, completed: 0, planned: 6, unitsMax: 12 }],
     });
     expect(courseLineStatus(view, "COMP3670", arin, list.groupId, room)).toBe(`${base}, wouldn't count here`);
+  });
+});
+
+describe("matchSpecialisations", () => {
+  const codes = (query: string) => matchSpecialisations(query).map((s) => s.code);
+
+  it("matches a code, with or without -SPEC, in any case", () => {
+    for (const q of ["arin", "ARIN", "arin-spec"]) expect(codes(q)).toEqual(["ARIN-SPEC"]);
+  });
+
+  it("matches title and label words by prefix", () => {
+    expect(codes("theoretical")).toEqual(["THCS-SPEC"]);
+    expect(codes("systems")).toEqual(["SYAR-SPEC"]);
+    expect(codes("human centred")).toEqual(["HCCC-SPEC"]);
+    expect(codes("artificial intelligence")).toEqual(["ARIN-SPEC"]);
+  });
+
+  it("matches nothing for a course code, an empty query or words under 3 letters", () => {
+    for (const q of ["COMP1100", "", "ai"]) expect(codes(q)).toEqual([]);
   });
 });

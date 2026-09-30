@@ -1,10 +1,12 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
+import type { SpecialisationInfo } from "../data/specialisations";
 import type { CourseCard as CourseCardData, PlanView } from "../lib/domain/view";
 import AvailableCourseCard from "./AvailableCourseCard";
 import { searchCourses } from "./api";
 import type { PlanAction } from "./plan-actions";
 import PlacedCourseRow from "./PlacedCourseRow";
 import { outcomeMessage } from "./search-message";
+import { chosenSpecGroup, matchSpecialisations } from "./spec-logic";
 
 interface Props {
   view: PlanView;
@@ -24,6 +26,10 @@ interface Props {
   onAction: (action: PlanAction) => Promise<void>;
   // The course open in the details sidebar, whose titles say so.
   openCode: string | null;
+  // Opens a specialisation in the details sidebar.
+  onOpenSpec: (code: string) => void;
+  // The specialisation open in the details sidebar, whose result says so.
+  openSpecCode: string | null;
   // A touch drag from a result is under way (Planner's touch-drag hook
   // reports it); a native one the palette sees for itself.
   dragging: boolean;
@@ -32,7 +38,7 @@ interface Props {
   stacked: boolean;
 }
 
-const TITLES = ".course-card-title, .placed-row-title";
+const TITLES = ".palette-spec-title, .course-card-title, .placed-row-title";
 const FOCUSABLE = "button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex='-1'])";
 
 // The one sanctioned modal: a transient chooser. It stays mounted while
@@ -52,11 +58,14 @@ export default function SearchPalette({
   onLocateCourse,
   onAction,
   openCode,
+  onOpenSpec,
+  openSpecCode,
   dragging,
   stacked,
 }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CourseCardData[]>([]);
+  const [specResults, setSpecResults] = useState<SpecialisationInfo[]>([]);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState<{ query: string; message: string } | null>(null);
   const [nativeDrag, setNativeDrag] = useState(false);
@@ -81,11 +90,15 @@ export default function SearchPalette({
     if (!q || pending) return;
     setPending(true);
     setStatus(null);
+    // Matched here rather than by the endpoint: four static pages, no reason
+    // to ask the server.
+    const specs = matchSpecialisations(q);
+    setSpecResults(specs);
     try {
       const result = await searchCourses(q, planId);
       setResults(result.courses);
       onResults(result.courses);
-      const message = outcomeMessage(result, q);
+      const message = outcomeMessage(result, q, specs.length);
       setStatus({ query: q, message });
       onAnnounce(message);
     } finally {
@@ -99,6 +112,10 @@ export default function SearchPalette({
   function openDetails(code: string) {
     onClose();
     onOpenDetails(code);
+  }
+  function openSpec(code: string) {
+    onClose();
+    onOpenSpec(code);
   }
   function locate(code: string, part?: 2) {
     onClose();
@@ -201,7 +218,30 @@ export default function SearchPalette({
         </form>
         <div class="palette-results">
           {pending && <p class="course-search-status">Searching…</p>}
-          {!pending && status && results.length === 0 && <p class="course-search-status">{status.message}</p>}
+          {!pending && status && results.length === 0 && specResults.length === 0 && (
+            <p class="course-search-status">{status.message}</p>
+          )}
+          {specResults.length > 0 && (
+            <section class="palette-specs" aria-label="Specialisations">
+              <h3>Specialisations</h3>
+              <ul class="palette-spec-rows">
+                {specResults.map((s) => (
+                  <li key={s.code} class="palette-spec-row" data-family="specialisation">
+                    <button
+                      type="button"
+                      class="palette-spec-title"
+                      aria-current={openSpecCode === s.code ? "true" : undefined}
+                      onClick={() => openSpec(s.code)}
+                    >
+                      <strong>{s.code}</strong> {s.title}
+                    </button>
+                    <span class="palette-spec-meta">{s.minUnits} units, Specialisation</span>
+                    {chosenSpecGroup(view) === s.groupId && <span class="palette-spec-status">Chosen</span>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {/* The requirement groups' own card and row, so a result — placed or not — looks and behaves exactly like one. */}
           {unplacedResults.length > 0 && (
             <ul class="available-courses course-search-results" data-columns={Math.min(unplacedResults.length, 3) || 1}>
