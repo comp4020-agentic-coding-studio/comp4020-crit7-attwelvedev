@@ -480,7 +480,7 @@ using only existing tokens:
 
 ### Task 5: `SpecialisationDetailsPanel` with P&C content, served by `?spec=`
 
-- [ ] **Description.** Build the panel of this file's §4.3 and the
+- [x] **Description.** Build the panel of this file's §4.3 and the
   `spec-logic.ts` helpers.
   - Wire Planner's `openSpec` and the `?spec=` server render.
   - Add `/plan/example?spec=ARIN-SPEC` and `/plan/example?spec=HCCC-SPEC`

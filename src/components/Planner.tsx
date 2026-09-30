@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { CourseCard, CourseDetailsView, PlanView } from "../lib/domain/view";
 import { isError, placeCourse, removeCourse, setCheck, setChoice, setCutoff, setPin } from "./api";
 import CompletedMenu from "./CompletedMenu";
+import { specialisationByCode } from "../data/specialisations";
 import CourseDetailsPanel from "./CourseDetailsPanel";
 import {
   closeDetails,
@@ -10,6 +11,7 @@ import {
   type DetailsState,
   EMPTY_DETAILS,
   openSubject,
+  specCode,
   stepHistory,
   withSubjectParam,
 } from "./details-state";
@@ -26,6 +28,7 @@ import {
 } from "./plan-actions";
 import { completedReadout, dropTargets, linkedHighlights } from "./planner-logic";
 import SearchPalette from "./SearchPalette";
+import SpecialisationDetailsPanel from "./SpecialisationDetailsPanel";
 import Sidebar, { type ShowRequest } from "./Sidebar";
 import Timeline, { type LocateRequest } from "./Timeline";
 import { useTouchDrag } from "./touch-drag";
@@ -119,16 +122,21 @@ interface Props {
   // The ?course= course, rendered on the server so the sidebar is there
   // from the first paint.
   initialDetails?: CourseDetailsView | null;
+  // The ?spec= specialisation, when there's no ?course=; the page has
+  // already checked it's one we know.
+  initialSpec?: string | null;
 }
 
-export default function Planner({ view: initialView, title, initialDetails = null }: Props) {
+export default function Planner({ view: initialView, title, initialDetails = null, initialSpec = null }: Props) {
   const [view, setView] = useState(initialView);
   // Token 0 marks the server-rendered open: the page just loaded on it, so
   // nothing asked for focus to move there.
   const [details, setDetails] = useState<DetailsState>(() =>
     initialDetails
       ? { ...openSubject(EMPTY_DETAILS, { kind: "course", code: initialDetails.course.code }), token: 0 }
-      : EMPTY_DETAILS,
+      : initialSpec
+        ? { ...openSubject(EMPTY_DETAILS, { kind: "spec", code: initialSpec }), token: 0 }
+        : EMPTY_DETAILS,
   );
   // replaceState, not pushState: stepping through the trail shouldn't fill
   // the browser's own history, and the URL only has to be shareable.
@@ -159,6 +167,13 @@ export default function Planner({ view: initialView, title, initialDetails = nul
     setDetails((s) => openSubject(s, { kind: "course", code }, focus));
     // Show where a placed course sits, without taking focus from the panel.
     if (view.placements.some((p) => p.code === code)) setLocateRequest({ code, token: Date.now(), focus: false });
+  }
+  // Phase 04's entry points (the sidebar, search, a course's lists) call this.
+  function openSpec(code: string) {
+    if (details.subject === null && document.activeElement instanceof HTMLElement) {
+      openerRef.current = document.activeElement;
+    }
+    setDetails((s) => openSubject(s, { kind: "spec", code }));
   }
   useEffect(() => {
     if (details.subject !== null || !openerRef.current) return;
@@ -594,7 +609,8 @@ export default function Planner({ view: initialView, title, initialDetails = nul
   // the planner is measured, it stays outside the size container, whose
   // containment would pin its fixed position.
   const detailsInPanes = sideBySide && (layout.details.mode === "docked" || layout.details.mode === "drawer");
-  const detailsPanel = openCourseCode && (
+  const openSpecInfo = specialisationByCode(specCode(details) ?? "");
+  const detailsPanel = openCourseCode ? (
     <CourseDetailsPanel
       view={view}
       details={details}
@@ -613,6 +629,23 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       wide={detailsWidth >= DETAILS_TWO_COLUMN}
       onToggleWide={toggleWideDetails}
     />
+  ) : (
+    openSpecInfo && (
+      <SpecialisationDetailsPanel
+        view={view}
+        details={details}
+        spec={openSpecInfo}
+        onOpenCourse={(code) => openDetails(code)}
+        onBack={() => setDetails((s) => stepHistory(s, -1))}
+        onForward={() => setDetails((s) => stepHistory(s, 1))}
+        onClose={() => setDetails(closeDetails)}
+        onShowInSidebar={(id) => showInSidebar("group", id)}
+        onAction={runAction}
+        mode={measured ? layout.details.mode : "drawer"}
+        wide={detailsWidth >= DETAILS_TWO_COLUMN}
+        onToggleWide={toggleWideDetails}
+      />
+    )
   );
 
   return (
