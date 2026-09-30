@@ -144,8 +144,16 @@ describe("historyStep", () => {
 
   it("undoes a choice by choosing the previous option back", () => {
     const step = historyStep(view, { kind: "choice", groupId: "spec", childId: otherSpec.id });
-    expect(step.message).toBe(`Chose ${otherSpec.label} for Specialisation`);
+    expect(step.message).toBe(`Switched Specialisation from Artificial Intelligence to ${otherSpec.label}`);
     expect(step.undo).toEqual([{ kind: "choice", groupId: "spec", childId: "arin" }]);
+  });
+
+  it("a first choice says Chose", () => {
+    const fresh = buildPlanView(cat, AACOM_2027, { ...EXAMPLE_PLAN, choices: {} });
+    const option = groupPath(fresh, "spec").at(-1)!.options.find((o) => o.id === otherSpec.id)!;
+    const step = historyStep(fresh, { kind: "choice", groupId: "spec", childId: option.id });
+    expect(step.message).toBe(`Chose ${option.label} for Specialisation`);
+    expect(step.undo).toEqual([{ kind: "choice", groupId: "spec", childId: null }]);
   });
 
   it("undoes a cutoff by setting the previous one back", () => {

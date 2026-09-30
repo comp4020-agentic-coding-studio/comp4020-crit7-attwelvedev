@@ -7,7 +7,8 @@ import { parseRequisites } from "../lib/domain/requisites";
 import type { Catalogue, CatalogueCourse, PlanState } from "../lib/domain/types";
 import { buildPlanView } from "../lib/domain/view";
 import { groupLabel, placedStatus } from "./planner-logic";
-import { chosenSpecGroup, courseLineStatus, linkCodes } from "./spec-logic";
+import type { WhatIfView } from "../lib/domain/what-if";
+import { chosenSpecGroup, courseLineStatus, fitFigures, fitSummary, linkCodes, shortfallText } from "./spec-logic";
 
 function loadRealCatalogue(): Catalogue {
   const files = readdirSync("data/2027/courses").filter((f) => f.endsWith(".json"));
@@ -95,5 +96,100 @@ describe("courseLineStatus", () => {
     expect(courseLineStatus(view, "COMP3670", hccc, hccc.lists[2].groupId)).toBe(
       `${status.word} ${status.parts[0].termLabel}`,
     );
+  });
+});
+
+function whatIf(overrides: Partial<WhatIfView>): WhatIfView {
+  return {
+    groupId: "spec",
+    optionId: "arin",
+    completed: 0,
+    planned: 0,
+    required: 24,
+    moves: [],
+    leaving: [],
+    shortfalls: [],
+    countsToward: {},
+    lists: [],
+    ...overrides,
+  };
+}
+
+const ref = (id: string, label: string) => ({ id, label, family: "specialisation" as const });
+const to = ref("arin-a", "Artificial Intelligence — foundations (max 12)");
+
+describe("fitFigures", () => {
+  // The bar above it already prints the figures, so this says only what's left.
+  it("says what's left, or that it's covered", () => {
+    expect(fitFigures(whatIf({ completed: 12, planned: 6 }))).toBe("6 units to go.");
+    expect(fitFigures(whatIf({ completed: 18, planned: 6 }))).toBe("Covered.");
+  });
+});
+
+describe("fitSummary", () => {
+  it("has a sentence for no moves, fresh courses, and moved ones", () => {
+    expect(fitSummary(whatIf({}))).toBe(
+      "None of your courses would count toward it yet, so all 24 units are still to go.",
+    );
+    expect(
+      fitSummary(
+        whatIf({
+          moves: [
+            { code: "COMP3620", from: null, to },
+            { code: "COMP3670", from: null, to },
+          ],
+        }),
+      ),
+    ).toBe("2 of your courses would count here.");
+    const electives = ref("electives", "Electives");
+    const syar = ref("syar-a", "Systems & Architecture — foundations (max 12)");
+    expect(
+      fitSummary(
+        whatIf({
+          moves: [
+            { code: "COMP3620", from: electives, to },
+            { code: "COMP3670", from: electives, to },
+            { code: "COMP4620", from: syar, to },
+          ],
+        }),
+      ),
+    ).toBe("3 of your courses would move here, from Electives and Systems & Architecture — foundations (max 12).");
+  });
+});
+
+describe("shortfallText", () => {
+  it("names the requirement and where it would drop to", () => {
+    expect(shortfallText({ groupId: "electives", label: "Electives", completed: 30, planned: 6, required: 48 })).toBe(
+      "Electives would drop to 36 of 48",
+    );
+  });
+});
+
+describe("courseLineStatus with a what-if", () => {
+  const arin = specialisationByCode("ARIN-SPEC")!;
+  const view = buildPlanView(cat, AACOM_2027, withComp3670({}));
+  const placement = view.placements.find((p) => p.code === "COMP3670")!;
+  const status = placedStatus(view, placement);
+  const base = `${status.word} ${status.parts[0].termLabel}`;
+  const list = arin.lists[0];
+
+  it("says a course would count toward the list it would land in", () => {
+    const w = whatIf({ countsToward: { COMP3670: list.groupId } });
+    expect(courseLineStatus(view, "COMP3670", arin, list.groupId, w)).toBe(`${base}, would count`);
+  });
+
+  it("says it wouldn't, and why when the list is full", () => {
+    const full = whatIf({
+      countsToward: { COMP3670: "comp-upper" },
+      lists: [{ groupId: list.groupId, completed: 6, planned: 6, unitsMax: 12 }],
+    });
+    expect(courseLineStatus(view, "COMP3670", arin, list.groupId, full)).toBe(
+      `${base}, wouldn't count here, over the 12-unit limit`,
+    );
+    const room = whatIf({
+      countsToward: { COMP3670: "comp-upper" },
+      lists: [{ groupId: list.groupId, completed: 0, planned: 6, unitsMax: 12 }],
+    });
+    expect(courseLineStatus(view, "COMP3670", arin, list.groupId, room)).toBe(`${base}, wouldn't count here`);
   });
 });

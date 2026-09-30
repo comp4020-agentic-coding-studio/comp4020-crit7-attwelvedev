@@ -134,12 +134,14 @@ export function historyStep(view: PlanView, action: PlanAction): HistoryStep {
       ]);
     }
     case "choice": {
-      const option = groupPath(view, action.groupId)
-        .at(-1)
-        ?.options.find((o) => o.id === action.childId);
-      return step(`Chose ${option?.label ?? action.childId} for ${groupLabel(view, action.groupId)}`, [
-        { kind: "choice", groupId: action.groupId, childId: currentChoice(view, action.groupId) },
-      ]);
+      const group = groupPath(view, action.groupId).at(-1);
+      const labelOf = (id: string | null) => group?.options.find((o) => o.id === id)?.label ?? id;
+      const current = currentChoice(view, action.groupId);
+      const message =
+        current !== null && action.childId !== null
+          ? `Switched ${groupLabel(view, action.groupId)} from ${labelOf(current)} to ${labelOf(action.childId)}`
+          : `Chose ${labelOf(action.childId)} for ${groupLabel(view, action.groupId)}`;
+      return step(message, [{ kind: "choice", groupId: action.groupId, childId: current }]);
     }
     case "cutoff":
       return step(completedReadout(action.cutoff, view.terms).short, [

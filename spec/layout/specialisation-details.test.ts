@@ -230,6 +230,82 @@ describe("specialisation details", { timeout: 30_000 }, () => {
     );
   });
 
+  const choose = (id: string, childId: string) =>
+    fetch(new URL(`/api/plans/${id}/choices`, baseUrl), {
+      method: "PUT",
+      headers: { origin: baseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ groupId: "spec", childId }),
+    });
+  const toast = (page: Page) => page.locator(".undo-toast");
+  const fit = (page: Page) => section(page, "Fit with your plan");
+
+  it("shows a read-only plan the fit, with no button", async () => {
+    await withSpec("SYAR-SPEC", desktop, async (page) => {
+      const bar = specPanel(page).getByRole("progressbar", { name: "If you chose this" });
+      await expect.poll(() => bar.count()).toBe(1);
+      expect(await specPanel(page).getByRole("button", { name: /^(Choose|Switch)/ }).count()).toBe(0);
+      expect(await fit(page).textContent()).toMatch(/would (move|count) here|None of your courses/);
+      expect(await axeViolations(page)).toEqual([]);
+    });
+  });
+
+  it("chooses and then switches from the panel, with undo", async () => {
+    const id = await planWithPlacement("COMP3670", 5);
+    const page = await openPage(browser, new URL(`/plan/${id}?spec=ARIN-SPEC`, baseUrl).href, desktop);
+    try {
+      const panel = specPanel(page);
+      const line = section(page, "Requirements").locator(".spec-courses li").filter({ hasText: "COMP3670" }).first();
+      await expect.poll(() => line.locator(".requisite-where").textContent()).toContain("would count");
+
+      const moves = fit(page)
+        .getByRole("heading", { level: 4, name: "Your courses that would count" })
+        .locator("xpath=following-sibling::ul[1]");
+      await expect.poll(() => moves.locator("li").filter({ hasText: "COMP3670" }).count()).toBe(1);
+      expect(await moves.locator(".spec-move").count()).toBeGreaterThan(0);
+
+      const chooseButton = panel.getByRole("button", { name: "Choose this specialisation" });
+      expect(await chooseButton.getAttribute("class")).toContain("details-choose");
+      await chooseButton.click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Chose Artificial Intelligence for Specialisation.");
+      await expect.poll(() => panel.locator(".details-pills li").allTextContents()).toContain("Chosen");
+      expect(await panel.getByRole("heading", { level: 3, name: "In your plan" }).count()).toBe(1);
+      expect(await panel.getByRole("heading", { level: 3, name: "Fit with your plan" }).count()).toBe(0);
+
+      await page.goto(new URL(`/plan/${id}?spec=HCCC-SPEC`, baseUrl).href, { waitUntil: "networkidle" });
+      const switchButton = panel.getByRole("button", { name: "Switch to this specialisation" });
+      expect((await switchButton.getAttribute("class")) ?? "").not.toContain("details-choose");
+      const leaving = fit(page)
+        .getByRole("heading", { level: 4, name: "Would stop counting toward Artificial Intelligence" })
+        .locator("xpath=following-sibling::ul[1]");
+      await expect.poll(() => leaving.locator("li").filter({ hasText: "COMP3670" }).count()).toBe(1);
+      await switchButton.click();
+      await expect.poll(() => toast(page).textContent()).toContain(
+        "Switched Specialisation from Artificial Intelligence to Human-Centred & Creative Computing.",
+      );
+      await toast(page).getByRole("button", { name: "Undo" }).click();
+      const fieldset = page.getByRole("group", { name: "Choose Specialisation" });
+      await expect
+        .poll(() => fieldset.getByRole("radio", { name: "Artificial Intelligence", exact: true }).isChecked())
+        .toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("says Switched when the radio changes an existing choice", async () => {
+    const id = await planWithPlacement("COMP3670", 5);
+    expect((await choose(id, "arin")).status).toBe(200);
+    const page = await openPage(browser, new URL(`/plan/${id}`, baseUrl).href, desktop);
+    try {
+      await page.getByRole("group", { name: "Choose Specialisation" }).getByLabel("Human-Centred & Creative Computing").click();
+      await expect.poll(() => toast(page).count()).toBe(1);
+      expect(await toast(page).textContent()).toContain("Switched Specialisation from");
+    } finally {
+      await page.close();
+    }
+  });
+
   it("asks nothing for the chosen spec", async () => {
     let seen: string[] = [];
     await openPrepared(

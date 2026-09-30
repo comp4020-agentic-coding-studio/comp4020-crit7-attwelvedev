@@ -1,5 +1,6 @@
 import { SPEC_CHOICE_GROUP, type SpecialisationInfo } from "../data/specialisations";
 import type { PlanView } from "../lib/domain/view";
+import type { WhatIfView } from "../lib/domain/what-if";
 import { groupLabel, groupPath, placedStatus } from "./planner-logic";
 
 // The specialisation option the plan has chosen, as its group id, or null.
@@ -28,19 +29,49 @@ export function linkCodes(text: string, canOpen: (code: string) => boolean): Pro
 
 // A spec list's course line: where the course sits in the plan and, for
 // the chosen spec, whether it counts toward this list or somewhere else.
-// (An unchosen spec's what-if suffix is Phase 03's.)
+// For an unchosen spec, the what-if says whether it would.
 export function courseLineStatus(
   view: PlanView,
   code: string,
   spec: SpecialisationInfo,
   listGroupId: string,
+  whatIf?: WhatIfView | null,
 ): string {
   const placement = view.placements.find((p) => p.code === code);
   if (!placement) return "Not in your plan";
   const status = placedStatus(view, placement);
   const base = `${status.word} ${status.parts[0].termLabel}`;
-  if (chosenSpecGroup(view) !== spec.groupId) return base;
+  if (chosenSpecGroup(view) !== spec.groupId) {
+    if (!whatIf) return base;
+    if (whatIf.countsToward[code] === listGroupId) return `${base}, would count`;
+    const list = whatIf.lists.find((l) => l.groupId === listGroupId);
+    const full = list && list.unitsMax !== null && list.completed + list.planned >= list.unitsMax;
+    return full ? `${base}, wouldn't count here, over the ${list.unitsMax}-unit limit` : `${base}, wouldn't count here`;
+  }
   if (placement.countsToward === listGroupId) return `${base}, counts here`;
   if (placement.countsToward) return `${base}, counts toward ${groupLabel(view, placement.countsToward)}`;
   return `${base}, not counting toward anything`;
+}
+
+// What's left of the option after the swap. The bar above it already
+// prints the completed and planned figures.
+export function fitFigures(w: WhatIfView): string {
+  const toGo = w.required - w.completed - w.planned;
+  return toGo > 0 ? `${toGo} units to go.` : "Covered.";
+}
+
+function joinAnd(items: string[]): string {
+  return items.length < 2 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+}
+
+export function fitSummary(w: WhatIfView): string {
+  const n = w.moves.length;
+  if (n === 0) return `None of your courses would count toward it yet, so all ${w.required} units are still to go.`;
+  const from = [...new Set(w.moves.flatMap((m) => (m.from ? [m.from.label] : [])))];
+  if (from.length === 0) return `${n} of your courses would count here.`;
+  return `${n} of your courses would move here, from ${joinAnd(from)}.`;
+}
+
+export function shortfallText(s: WhatIfView["shortfalls"][number]): string {
+  return `${s.label} would drop to ${s.completed + s.planned} of ${s.required}`;
 }

@@ -309,14 +309,16 @@ button:disabled {
    into general chrome. Black text on gold, not white — white fails
    WCAG AA text contrast against ANU gold at this size, black clears it. */
 form button[type="submit"],
-form button:not([type]) {
+form button:not([type]),
+.details-choose {
   background: var(--gold);
   border-color: var(--gold);
   color: #17130a;
 }
 
 form button[type="submit"]:hover:not(:disabled),
-form button:not([type]):hover:not(:disabled) {
+form button:not([type]):hover:not(:disabled),
+.details-choose:hover:not(:disabled) {
   background: #a8790d;
   border-color: #a8790d;
 }
@@ -2207,8 +2209,29 @@ button.requisite-code:hover {
   padding-inline-start: 1.1rem;
 }
 
-.details-progress-jump {
+.details-progress-jump,
+.details-choose {
   min-height: 2.75rem;
+}
+
+/* Held open while the what-if loads or fails, so the answer landing
+   doesn't shove the button and the rest of the panel down. */
+.spec-fit-status {
+  min-height: 7rem;
+}
+
+/* A move row's "● from › ● to", on its own line under the status. */
+.spec-move {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.spec-move-parts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .undo-toast {

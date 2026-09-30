@@ -286,7 +286,10 @@ Pure text helpers in `spec-logic.ts`:
 
 ```ts
 export function fitFigures(w: WhatIfView): string;
-// "12 completed, 6 planned of 24. 6 units to go." | "… of 24. Covered." when completed+planned >= required
+// "6 units to go." | "Covered." when completed+planned >= required
+// (Amended at Task 8's review, 2026-09-30: the ProgressBar already prints
+// "12 completed, 6 planned of 24", so repeating it cost a line, and on a
+// phone with a shortfall pushed the button 6px under the tab bar.)
 export function fitSummary(w: WhatIfView): string;
 // moves.length === 0: `None of your courses would count toward it yet, so all ${w.required} units are still to go.`
 // every from null: `${n} of your courses would count here.`
@@ -466,7 +469,7 @@ The undo list is unchanged. It applies to the radio and the panel alike.
 
 ### Task 8: The Fit block, Choose/Switch, line suffixes and the switch toast
 
-- [ ] **Description.** Render this file's §4.3 in full, add the helpers to
+- [x] **Description.** Render this file's §4.3 in full, add the helpers to
   `spec-logic.ts`, and change the toast per §4.4.
 - **Files touched:**
   - `src/components/spec-logic.ts`
@@ -478,9 +481,8 @@ The undo list is unchanged. It applies to the radio and the panel alike.
   - `spec/layout/specialisation-details.test.ts`
 - **Tests first (red):**
   - `spec-logic.test.ts`, with hand-built `WhatIfView` literals:
-    1. `fitFigures` for 12/6/24 gives "12 completed, 6 planned of 24. 6
-       units to go.", and for 18/6/24 gives "18 completed, 6 planned of 24.
-       Covered."
+    1. `fitFigures` for 12/6/24 gives "6 units to go.", and for 18/6/24
+       gives "Covered." (amended at review; see §4.3)
     2. `fitSummary`:
        - With no moves, the zero sentence with 24.
        - Two moves both from null: "2 of your courses would count here."
@@ -548,17 +550,22 @@ The undo list is unchanged. It applies to the radio and the panel alike.
   - Loading and error don't make the layout jump.
 
   The task isn't done until the user says so explicitly.
+- *Reviewed 2026-09-30:* accepted, with one ruling: the figures line says
+  only what's left ("6 units to go." / "Covered."), since the bar already
+  prints the figures (§4.3 amended). Measured at 390×844 with a shortfall:
+  the Choose button's bottom at 769px against the tab bar's top at 787px
+  (it was 793px, under the bar, before the ruling).
 - **Depends on:** Task 7.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 6–8 are complete and their tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] The what-if endpoint follows overview §4.3
-- [ ] Choosing and switching from the panel toast correctly and undo
-- [ ] Task 8's human review is explicitly accepted by the user
-- [ ] Tick Phase 03 in overview §5 and commit
+- [x] Tasks 6–8 are complete and their tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] The what-if endpoint follows overview §4.3
+- [x] Choosing and switching from the panel toast correctly and undo
+- [x] Task 8's human review is explicitly accepted by the user
+- [x] Tick Phase 03 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

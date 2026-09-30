@@ -173,7 +173,9 @@ Numbering is local to this spec (SD = specialisation details).
   from a **true what-if**: the plan re-evaluated on the server with this
   specialisation as the Specialisation choice. It shows:
   - A `ProgressBar` (specialisation family) labelled "If you chose this",
-    with a sentence such as "12 completed, 6 planned of 24. 6 units to go."
+    whose own text gives the figures ("12 completed, 6 planned of 24"),
+    then what's left: "6 units to go." or "Covered." *(Amended at Task 8's
+    review, 2026-09-30: the sentence first repeated the bar's figures.)*
   - A summary such as "3 of your courses would move here, from Electives and
     Systems and Architecture."
   - **Move rows.** For each course that would count, a line reading "●
@@ -387,7 +389,8 @@ ready**
 │ Fit with your plan                          h3  │
 │ If you chose this                               │ ProgressBar family=specialisation
 │ ████████████▒▒▒▒▒▒░░░░░░░░░░░░                  │
-│ 12 completed, 6 planned of 24. 6 units to go.   │
+│ 12 completed, 6 planned of 24                   │ the bar's own text
+│ 6 units to go.                                  │
 │ 3 of your courses would move here, from         │
 │ Electives and Systems and Architecture.         │
 │ Electives would drop to 36 of 48.               │ shortfall line
