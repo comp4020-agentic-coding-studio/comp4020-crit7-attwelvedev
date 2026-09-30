@@ -302,7 +302,12 @@ In `SearchPalette.tsx`:
   It uses P&C's `title`, which matches the spec panel's own heading.
 - **CSS:**
   - `.details-lists`: `grid-column: 1 / -1`, 0.9rem, and margin-block
-    0.25rem 0.75rem.
+    0.85rem 0.75rem. *Amended at Task 11, 2026-09-30, from the render:* the
+    top was 0.25rem, which sat the line tight under the head's hairline
+    while every section starts 0.85rem clear of it. Each dot and its button
+    are wrapped in a `span.details-lists-item` (`white-space: nowrap`, with
+    the button back to `normal`), because at 440px a wrap had stranded the
+    dot at a line's end, away from its name.
   - The rule-less first section has to survive the new first child:
     - `.details-body > .details-lists + .details-section { border-block-start: 0 }`
     - in the container query,
@@ -415,7 +420,7 @@ In `SearchPalette.tsx`:
 
 ### Task 11: "On the lists of" line in a course's details
 
-- [ ] **Description.** This file's §4.3.
+- [x] **Description.** This file's §4.3.
 - **Files touched:**
   - `src/components/CourseDetailsPanel.tsx`
   - `src/components/Planner.tsx`

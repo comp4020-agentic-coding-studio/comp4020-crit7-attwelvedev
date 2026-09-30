@@ -623,6 +623,7 @@ export default function Planner({ view: initialView, title, initialDetails = nul
       onPlace={(term) => void runAction(actionFor(view, openCourseCode, term))}
       onRemove={() => void runAction({ kind: "remove", code: openCourseCode })}
       onAction={runAction}
+      onOpenSpec={openSpec}
       // Unmeasured, the layout reads as stacked (a 0px planner), so the
       // panel keeps the CSS's fixed drawer until Planner knows its width.
       mode={measured ? layout.details.mode : "drawer"}

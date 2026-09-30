@@ -452,6 +452,57 @@ describe("specialisation details", { timeout: 30_000 }, () => {
       }
     }
   });
+
+  const coursePanel = (page: Page) => page.locator('aside[aria-label="Course details"]');
+
+  it("names the specs that list a course, and opens one from there", async () => {
+    const page = await openPage(browser, example("course=COMP3670"), desktop);
+    try {
+      const line = coursePanel(page).locator(".details-body > :first-child");
+      expect(await line.evaluate((el) => `${el.tagName} ${el.className}`)).toBe("P details-lists");
+      expect((await line.textContent())?.replace(/\s+/g, " ").trim()).toBe(
+        "On the lists of: Artificial Intelligence (your specialisation) and Human-Centred and Creative Computing",
+      );
+      for (const name of ["Artificial Intelligence", "Human-Centred and Creative Computing"]) {
+        expect(await line.getByRole("button", { name, exact: true }).count()).toBe(1);
+      }
+      expect(await axeViolations(page)).toEqual([]);
+
+      await line.getByRole("button", { name: "Human-Centred and Creative Computing" }).click();
+      await specPanel(page).locator("h2").filter({ hasText: "HCCC-SPEC" }).waitFor();
+      await specPanel(page).getByRole("button", { name: "Back" }).click();
+      await coursePanel(page).locator("h2").filter({ hasText: "COMP3670" }).waitFor();
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("leaves the line out for a course on no list", async () => {
+    const page = await openPage(browser, example("course=COMP1100"), desktop);
+    try {
+      await coursePanel(page).locator("h2").filter({ hasText: "COMP1100" }).waitFor();
+      expect(await coursePanel(page).locator(".details-lists").count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it("keeps each column's first section free of a rule above the line", async () => {
+    const page = await openPage(browser, example("course=COMP3670"), desktop);
+    try {
+      const rules = () =>
+        coursePanel(page)
+          .locator(".details-body > .details-section")
+          .evaluateAll((els) => els.slice(0, 3).map((el) => getComputedStyle(el).borderTopWidth));
+      expect((await rules())[0]).toBe("0px");
+      expect((await rules())[1]).not.toBe("0px");
+      await page.getByRole("button", { name: "Widen details" }).click();
+      await expect.poll(async () => (await rules()).slice(0, 2)).toEqual(["0px", "0px"]);
+      expect((await rules())[2]).not.toBe("0px");
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("the what-if endpoint", () => {

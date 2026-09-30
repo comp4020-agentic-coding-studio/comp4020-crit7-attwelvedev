@@ -1,4 +1,6 @@
+import { Fragment } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { specialisationsListing } from "../data/specialisations";
 import type { CheckAnswer } from "../lib/domain/types";
 import { type CourseCard, type CourseDetailsView, NORMAL_TERM_UNITS, type PlanView } from "../lib/domain/view";
 import ChoiceMenu from "./ChoiceMenu";
@@ -18,6 +20,7 @@ import {
   weightLabel,
 } from "./planner-logic";
 import RequisiteTree from "./RequisiteTree";
+import { chosenSpecGroup } from "./spec-logic";
 import type { LayoutResult } from "./workspace-layout";
 
 interface Props {
@@ -32,6 +35,8 @@ interface Props {
   onPlace: (term: number) => void;
   onRemove: () => void;
   onAction: (action: PlanAction) => Promise<void>;
+  // Opens a specialisation that lists this course.
+  onOpenSpec: (code: string) => void;
   // Docked beside the timeline, a drawer over it, or (stacked) a sheet.
   mode: LayoutResult["details"]["mode"];
   // Whether the panel is wide enough for its two-column body.
@@ -96,6 +101,7 @@ export default function CourseDetailsPanel({
   onPlace,
   onRemove,
   onAction,
+  onOpenSpec,
   mode,
   wide,
   onToggleWide,
@@ -174,6 +180,8 @@ export default function CourseDetailsPanel({
   const classes = extras?.classes ?? [];
   const edition = url?.match(/\/(\d{4})\/course\//)?.[1] ?? null;
   const updated = fetched.data ? dateLabel(fetched.data.scrapedAt) : null;
+  const listings = specialisationsListing(code);
+  const chosenSpec = chosenSpecGroup(view);
 
   return (
     <DetailsFrame
@@ -228,6 +236,24 @@ export default function CourseDetailsPanel({
     >
       {() => (
         <>
+          {listings.length > 0 && (
+            <p class="details-lists">
+              On the lists of:{" "}
+              {listings.map((s, i) => (
+                <Fragment key={s.code}>
+                  {i > 0 && (i === listings.length - 1 ? " and " : ", ")}
+                  {/* One unit, so a wrap never strands the dot from its name. */}
+                  <span class="details-lists-item">
+                    <span class="family-dot" data-family="specialisation" aria-hidden="true" />
+                    <button type="button" class="requisite-code details-lists-link" onClick={() => onOpenSpec(s.code)}>
+                      {s.title}
+                    </button>
+                  </span>
+                  {chosenSpec === s.groupId && " (your specialisation)"}
+                </Fragment>
+              ))}
+            </p>
+          )}
           {/* Only a placed course has anything to pin or remove; the pills
               above already say when it's planned. */}
           {placement && (

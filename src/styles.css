@@ -1736,9 +1736,27 @@ section[aria-label="program checks"] > h3 {
   border-block-start: 1px solid var(--line);
 }
 
-/* The head's own hairline already divides it from the first section. */
-.details-body > .details-section:first-child {
+/* The head's own hairline already divides it from the first section,
+   which the lists line (when there is one) sits above. */
+.details-body > .details-section:first-child,
+.details-body > .details-lists + .details-section {
   border-block-start: 0;
+}
+
+/* As far below the head's hairline as a section's heading would be. */
+.details-lists {
+  grid-column: 1 / -1;
+  margin-block: 0.85rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.details-lists-item {
+  white-space: nowrap;
+}
+
+.details-lists-link {
+  white-space: normal;
+  text-align: start;
 }
 
 .details-body {
@@ -1756,7 +1774,8 @@ section[aria-label="program checks"] > h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .details-body > .details-section:nth-child(2) {
+  .details-body:not(:has(> .details-lists)) > .details-section:nth-child(2),
+  .details-body > .details-lists ~ .details-section:nth-child(3) {
     border-block-start: 0;
   }
 }
