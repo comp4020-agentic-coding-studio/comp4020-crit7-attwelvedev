@@ -1254,3 +1254,28 @@ catch the fault at all, I took `view` out of the hook's dependency list,
 rebuilt, and ran it: it failed. With `view` back it passed, and so did
 `pnpm check`. The plan file records the amendment and why, so the next
 reader doesn't restore the literal 2.
+
+## 2026-09-30 — Measuring the fold instead of eyeballing it
+
+Resolved by 75fd46f.
+
+Task 8's Fit block passed every test, axe included, and my desktop
+screenshots looked right. One of the review's pass conditions was that
+the Choose button sits above the fold with the phone sheet at half
+height. The obvious move was to look at the phone screenshot, see the
+button, and hand it over. It did look visible.
+
+Instead I measured it. I read the button's and the floating tab bar's
+bounding boxes at 390×844 after the sheet settled, on the case with a
+shortfall line. The button's bottom was at 793px and the tab bar's top at
+787px, so 6px of it sat under the bar. The screenshot hid that because the
+bar is a centred pill and the button's left edge showed past it. My first
+measurement, taken before the sheet settled, had said 636px, which is why
+I waited for it to settle before trusting a reading.
+
+The render also showed why the button was that low: the plan's figures
+sentence repeated the progress bar's own text word for word. I put the
+choice to the user rather than trimming it myself, since it changed an
+approved sentence. They ruled that the line should say only what's left.
+After the change the button's bottom measured 769px, 18px clear, and
+`pnpm check` passed. I amended the plan and spec so the wording matches.
