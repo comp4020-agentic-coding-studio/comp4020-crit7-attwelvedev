@@ -579,13 +579,13 @@ using only existing tokens:
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 3–5 are complete and their tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` passes
-- [ ] `/plan/example?spec=ARIN-SPEC` renders every P&C section on the
+- [x] Tasks 3–5 are complete and their tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` passes
+- [x] `/plan/example?spec=ARIN-SPEC` renders every P&C section on the
   server
-- [ ] Task 5's human review is explicitly accepted by the user
-- [ ] Tick Phase 02 in overview §5 and commit
+- [x] Task 5's human review is explicitly accepted by the user
+- [x] Tick Phase 02 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 

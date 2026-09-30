@@ -1198,3 +1198,34 @@ heading and the missing code. Both edits were then reverted, and the suite
 went green. One gap stays open: the live re-check of the supplement text on
 2026-09-30 couldn't run, because P&C kept timing out. The text is the
 reference text copied on 2026-09-29.
+
+## 2026-09-30 — A green suite hid a crash only the rendered sheet showed
+
+Resolved by 8216940.
+
+The specialisation panel passed all eleven of its planned browser tests,
+axe at both viewports and `pnpm check`. The obvious move was to call Task 5
+done and hand it to review. CLAUDE.md says the render is the truth, so I
+screenshotted the panel at 1920 and 390 first, with the phone sheet at
+half and full, before asking for sign-off.
+
+That showed two faults the tests couldn't. First, a
+`.requisite-line > span` grid rule also caught the line's `mark-dot` span.
+That pushed every course name halfway across the panel and hid its dot.
+Second, and worse, on a phone the sheet handle did nothing. The course
+panel's handle still worked through the same frame, which narrowed it to
+the spec side. The page log then showed a `TypeError` reading `shortLabel`.
+The cause was a list counter declared in the panel's body. The new
+`DetailsFrame` re-runs the body render prop on its own when the sheet
+height changes, so the counter ran past the last list and the render
+threw. No test had changed the height without also re-rendering the
+panel, so nothing had exercised that path.
+
+The fix works out each block's list index from its position, so a
+re-render can't drift. I narrowed the grid rule to the line's last span.
+I didn't just fix it and move on: I added a step to the phone test that
+changes the height on its own after the progress jump, then checks the
+sheet reaches full with both tags still drawn. I ran it against the broken
+build first. It failed, with "full" expected and "peek" received. After the
+fix it passed, the screenshots showed the lines aligned and the handle
+working, and the user accepted the review.
