@@ -1306,3 +1306,32 @@ now sits just past its label (491–608px at 1920, not 912 or 1347). There's
 still no horizontal overflow, the 2.75rem targets hold, and a long label
 wraps at 390 with Details still on its row. `pnpm check` passed, and I
 amended the plan's §4.1 to match.
+
+## 2026-09-30 — Letting the unchanged palette tests overrule the plan's matcher
+
+Resolved by 7e40917.
+
+Task 10's plan specified the spec search exactly. A four-letter code
+matches a code. Otherwise every query word of 3+ letters, split on
+non-letters, must prefix a word of the spec's title or label. It also
+listed "COMP1100 gives []" as a test case, and said `search-palette.test.ts`
+must pass unchanged. I implemented the matcher as written, and three tests
+failed. The unit case returned HCCC and THCS, and two old palette tests
+("COMP9999", "COMP11") now showed spec rows above the courses. Splitting
+on non-letters leaves the word "comp", which prefixes "Computing" and
+"Computer".
+
+The plan contradicted its own acceptance criteria, so something had to
+give. The easy ways out were to delete the COMP1100 case as a plan typo,
+or to update the palette tests to expect spec rows. Both would have made
+the check green by weakening it. The failing tests described what a
+student expects: a course code is a course search. So they were right, and
+the algorithm was wrong.
+
+I stopped and put two amendments to the user: no match at all for a query
+with a digit, or dropping only the digit-bearing tokens. The second would
+still list the Computing specs for "comp 1100". They chose the first. I
+wrote the rule into the plan's §4.2 before the code, and its comment says
+why. After that, all 462 unit tests passed, as did the 49 palette and spec
+browser tests, with `search-palette.test.ts` untouched. The 390 and 1920
+renders showed "computing" still finding HCCC.
