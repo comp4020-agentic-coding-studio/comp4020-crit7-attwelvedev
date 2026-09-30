@@ -178,189 +178,195 @@ export default function SpecialisationDetailsPanel({
     >
       {(sheet) => (
         <>
-          {chosen && (
+          {/* Two columns in the body's grid: planning beside the page's own
+              prose once the panel is wide, one after the other when not. */}
+          <div class="details-column">
+            {chosen && (
+              <section class="details-section">
+                <h3>In your plan</h3>
+                <p>You chose this specialisation.</p>
+                <button
+                  type="button"
+                  class="details-progress-jump"
+                  onClick={() => {
+                    onShowInSidebar(spec.groupId);
+                    // On a phone the sidebar is behind the sheet; drop it out of the way.
+                    if (mode === "sheet") sheet.peek();
+                  }}
+                >
+                  See your progress in Requirements
+                </button>
+              </section>
+            )}
+
+            {!chosen && (
+              <section class="details-section spec-fit">
+                <h3>Fit with your plan</h3>
+                {whatIf.data ? (
+                  <>
+                    <ProgressBar
+                      label="If you chose this"
+                      completed={whatIf.data.completed}
+                      planned={whatIf.data.planned}
+                      required={whatIf.data.required}
+                      family="specialisation"
+                    />
+                    {whatIf.data.moves.length > 0 && <p>{fitFigures(whatIf.data)}</p>}
+                    <p>{fitSummary(whatIf.data)}</p>
+                    {whatIf.data.shortfalls.map((s) => (
+                      <p key={s.groupId} class="details-warning">
+                        {shortfallText(s)}.
+                      </p>
+                    ))}
+                  </>
+                ) : (
+                  <div class="spec-fit-status">
+                    {whatIf.status === "loading" && (
+                      <p class="details-loading">Working out how this would fit your plan…</p>
+                    )}
+                    {whatIf.status === "error" && (
+                      <>
+                        <p>Couldn't work out how this fits your plan.</p>
+                        <button type="button" onClick={whatIf.retry}>
+                          Try again
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+                {!view.plan.readOnly && <ChooseButton spec={spec} switching={chosenGroup !== null} onAction={onAction} />}
+                {whatIf.data && whatIf.data.moves.length > 0 && (
+                  <>
+                    <h4 class="spec-list-heading">Your courses that would count</h4>
+                    <ul class="requisite-tree spec-courses">
+                      {whatIf.data.moves.map((m) => {
+                        const from = m.from ? m.from.label : "not counting toward anything now";
+                        const to = shortLabel(m.to.id, m.to.label);
+                        return courseLine(
+                          m.code,
+                          placedWhere(m.code),
+                          <span class="spec-move">
+                            <span aria-hidden="true" class="spec-move-parts">
+                              {m.from && <span class="family-dot" data-family={m.from.family} />}
+                              {from}
+                              <svg class="details-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7" />
+                              </svg>
+                              <span class="family-dot" data-family={m.to.family} />
+                              {to}
+                            </span>
+                            <span class="visually-hidden">
+                              moves from {from} to {to}
+                            </span>
+                          </span>,
+                        );
+                      })}
+                    </ul>
+                  </>
+                )}
+                {whatIf.data && current && whatIf.data.leaving.length > 0 && (
+                  <>
+                    <h4 class="spec-list-heading">Would stop counting toward {current.label}</h4>
+                    <ul class="requisite-tree spec-courses">
+                      {whatIf.data.leaving.map((l) =>
+                        courseLine(l.code, l.to ? `now counts toward ${l.to.label}` : "wouldn't count toward anything"),
+                      )}
+                    </ul>
+                  </>
+                )}
+              </section>
+            )}
+
             <section class="details-section">
-              <h3>In your plan</h3>
-              <p>You chose this specialisation.</p>
-              <button
-                type="button"
-                class="details-progress-jump"
-                onClick={() => {
-                  onShowInSidebar(spec.groupId);
-                  // On a phone the sidebar is behind the sheet; drop it out of the way.
-                  if (mode === "sheet") sheet.peek();
-                }}
-              >
-                See your progress in Requirements
-              </button>
-            </section>
-          )}
-
-          {!chosen && (
-            <section class="details-section spec-fit">
-              <h3>Fit with your plan</h3>
-              {whatIf.data ? (
-                <>
-                  <ProgressBar
-                    label="If you chose this"
-                    completed={whatIf.data.completed}
-                    planned={whatIf.data.planned}
-                    required={whatIf.data.required}
-                    family="specialisation"
-                  />
-                  {whatIf.data.moves.length > 0 && <p>{fitFigures(whatIf.data)}</p>}
-                  <p>{fitSummary(whatIf.data)}</p>
-                  {whatIf.data.shortfalls.map((s) => (
-                    <p key={s.groupId} class="details-warning">
-                      {shortfallText(s)}.
+              <h3>Requirements</h3>
+              {spec.requirements.map((block, i) => {
+                if (block.type === "text") return <p key={i}>{prose(block.content)}</p>;
+                if (block.type === "heading")
+                  return (
+                    <h4 key={i} class="spec-list-heading">
+                      {block.content}
+                    </h4>
+                  );
+                if (block.type === "and")
+                  return (
+                    <p key={i} class="spec-and">
+                      AND
                     </p>
-                  ))}
-                </>
-              ) : (
-                <div class="spec-fit-status">
-                  {whatIf.status === "loading" && (
-                    <p class="details-loading">Working out how this would fit your plan…</p>
-                  )}
-                  {whatIf.status === "error" && (
-                    <>
-                      <p>Couldn't work out how this fits your plan.</p>
-                      <button type="button" onClick={whatIf.retry}>
-                        Try again
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-              {!view.plan.readOnly && <ChooseButton spec={spec} switching={chosenGroup !== null} onAction={onAction} />}
-              {whatIf.data && whatIf.data.moves.length > 0 && (
-                <>
-                  <h4 class="spec-list-heading">Your courses that would count</h4>
-                  <ul class="requisite-tree spec-courses">
-                    {whatIf.data.moves.map((m) => {
-                      const from = m.from ? m.from.label : "not counting toward anything now";
-                      const to = shortLabel(m.to.id, m.to.label);
-                      return courseLine(
-                        m.code,
-                        placedWhere(m.code),
-                        <span class="spec-move">
-                          <span aria-hidden="true" class="spec-move-parts">
-                            {m.from && <span class="family-dot" data-family={m.from.family} />}
-                            {from}
-                            <svg class="details-icon" viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M9 5l7 7-7 7" />
-                            </svg>
-                            <span class="family-dot" data-family={m.to.family} />
-                            {to}
-                          </span>
-                          <span class="visually-hidden">
-                            moves from {from} to {to}
-                          </span>
-                        </span>,
-                      );
-                    })}
-                  </ul>
-                </>
-              )}
-              {whatIf.data && current && whatIf.data.leaving.length > 0 && (
-                <>
-                  <h4 class="spec-list-heading">Would stop counting toward {current.label}</h4>
-                  <ul class="requisite-tree spec-courses">
-                    {whatIf.data.leaving.map((l) =>
-                      courseLine(l.code, l.to ? `now counts toward ${l.to.label}` : "wouldn't count toward anything"),
-                    )}
-                  </ul>
-                </>
-              )}
+                  );
+                const list = spec.lists[listOf[i]];
+                return (
+                  <div key={i}>
+                    <h4 class="spec-list-heading">{block.heading}</h4>
+                    <p class="spec-group-tag">
+                      <span class="family-dot" data-family="specialisation" aria-hidden="true" />
+                      {chosen ? (
+                        <button type="button" class="requisite-code" onClick={() => onShowInSidebar(list.groupId)}>
+                          {list.shortLabel}
+                        </button>
+                      ) : (
+                        list.shortLabel
+                      )}
+                    </p>
+                    <ul class="requisite-tree spec-courses">
+                      {block.courses.map((code) =>
+                        courseLine(code, courseLineStatus(view, code, spec, list.groupId, chosen ? null : whatIf.data)),
+                      )}
+                    </ul>
+                  </div>
+                );
+              })}
             </section>
-          )}
+          </div>
 
-          <section class="details-section">
-            <h3>Requirements</h3>
-            {spec.requirements.map((block, i) => {
-              if (block.type === "text") return <p key={i}>{prose(block.content)}</p>;
-              if (block.type === "heading")
-                return (
-                  <h4 key={i} class="spec-list-heading">
-                    {block.content}
-                  </h4>
-                );
-              if (block.type === "and")
-                return (
-                  <p key={i} class="spec-and">
-                    AND
-                  </p>
-                );
-              const list = spec.lists[listOf[i]];
-              return (
-                <div key={i}>
-                  <h4 class="spec-list-heading">{block.heading}</h4>
-                  <p class="spec-group-tag">
-                    <span class="family-dot" data-family="specialisation" aria-hidden="true" />
-                    {chosen ? (
-                      <button type="button" class="requisite-code" onClick={() => onShowInSidebar(list.groupId)}>
-                        {list.shortLabel}
-                      </button>
-                    ) : (
-                      list.shortLabel
-                    )}
-                  </p>
-                  <ul class="requisite-tree spec-courses">
-                    {block.courses.map((code) =>
-                      courseLine(code, courseLineStatus(view, code, spec, list.groupId, chosen ? null : whatIf.data)),
-                    )}
+          <div class="details-column">
+            <section class="details-section">
+              <h3>About the specialisation</h3>
+              <div ref={aboutRef} class={expanded ? "spec-about" : "spec-about details-clamped"}>
+                {spec.introduction.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+                {spec.topics.length > 0 && (
+                  <ul class="spec-topics">
+                    {spec.topics.map((topic, i) => (
+                      <li key={i}>{topic}</li>
+                    ))}
                   </ul>
-                </div>
-              );
-            })}
-          </section>
+                )}
+              </div>
+              {(clamped || expanded) && (
+                <button type="button" class="details-more" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
+                  {expanded ? "Show less" : "Read the full description"}
+                </button>
+              )}
+              <h3>Learning outcomes</h3>
+              <ol class="details-outcomes">
+                {spec.learningOutcomes.map((outcome, i) => (
+                  <li key={i}>{outcome}</li>
+                ))}
+              </ol>
+            </section>
 
-          <section class="details-section">
-            <h3>About the specialisation</h3>
-            <div ref={aboutRef} class={expanded ? "spec-about" : "spec-about details-clamped"}>
-              {spec.introduction.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
+            <section class="details-section">
+              <h3>Other information</h3>
+              {spec.otherInformation.map((paragraph, i) => (
+                <p key={i}>{prose(paragraph)}</p>
               ))}
-              {spec.topics.length > 0 && (
-                <ul class="spec-topics">
-                  {spec.topics.map((topic, i) => (
-                    <li key={i}>{topic}</li>
+            </section>
+
+            <section class="details-section">
+              <h3>Relevant degrees</h3>
+              <div class="details-related">
+                <ul>
+                  {spec.relevantDegrees.map((degree) => (
+                    <li key={degree}>
+                      {degree}
+                      {degree.includes("(AACOM)") && ", your degree"}
+                    </li>
                   ))}
                 </ul>
-              )}
-            </div>
-            {(clamped || expanded) && (
-              <button type="button" class="details-more" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
-                {expanded ? "Show less" : "Read the full description"}
-              </button>
-            )}
-            <h3>Learning outcomes</h3>
-            <ol class="details-outcomes">
-              {spec.learningOutcomes.map((outcome, i) => (
-                <li key={i}>{outcome}</li>
-              ))}
-            </ol>
-          </section>
-
-          <section class="details-section">
-            <h3>Other information</h3>
-            {spec.otherInformation.map((paragraph, i) => (
-              <p key={i}>{prose(paragraph)}</p>
-            ))}
-          </section>
-
-          <section class="details-section">
-            <h3>Relevant degrees</h3>
-            <div class="details-related">
-              <ul>
-                {spec.relevantDegrees.map((degree) => (
-                  <li key={degree}>
-                    {degree}
-                    {degree.includes("(AACOM)") && ", your degree"}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
+              </div>
+            </section>
+          </div>
         </>
       )}
     </DetailsFrame>

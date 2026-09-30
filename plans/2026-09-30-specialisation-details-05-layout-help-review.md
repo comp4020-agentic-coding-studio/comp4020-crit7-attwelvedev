@@ -177,8 +177,12 @@ wide (after "Widen details"); phone 390×844 (sheet).
 - **Phone, B and E:** the sheet at peek shows the header only, with the
   body `hidden`.
 
-If `spec/layout/specialisation-details.test.ts` would pass 1000 lines,
-move the sweep into a new `spec/layout/specialisation-states.test.ts`.
+The sweep goes in a new `spec/layout/specialisation-states.test.ts`
+*(amended 2026-09-30 at execution, by the user's ruling)*. Its 21 page
+opens, run serially inside one file, would make
+`specialisation-details.test.ts` the slowest file in `pnpm check`, even
+though it would stay under 1000 lines. `workspace-states.test.ts` has its
+own file for the same reason.
 
 ### 4.3 Help copy (Task 13)
 
@@ -207,12 +211,11 @@ move the sweep into a new `spec/layout/specialisation-states.test.ts`.
 
 ### Task 12: Two-column wide body and the all-states sweep
 
-- [ ] **Description.** This file's §4.1 and §4.2.
+- [x] **Description.** This file's §4.1 and §4.2.
 - **Files touched:**
   - `src/components/SpecialisationDetailsPanel.tsx`
   - `src/styles.css`
-  - `spec/layout/specialisation-details.test.ts`, or a new
-    `spec/layout/specialisation-states.test.ts` per §4.2's line rule
+  - a new `spec/layout/specialisation-states.test.ts` (§4.2)
 - **Tests first (red).** The wide equal-tops check fails before the
   wrappers exist. Write the whole sweep first, then fix whatever it finds.
 - **Implementation (green).** The wrappers and CSS per §4.1, plus any fix
@@ -229,7 +232,7 @@ move the sweep into a new `spec/layout/specialisation-states.test.ts`.
 - [ ] **Description.** This file's §4.3.
 - **Files touched:**
   - `src/pages/help.astro`
-  - `spec/layout/specialisation-details.test.ts` (or the states file)
+  - `spec/layout/specialisation-details.test.ts`
 - **Tests first (red).** Fetching `/help/`:
   - The HTML has an `h2#specialisations` reading "Specialisation details".
     It comes after the "Course details" h2 and before "What a course card

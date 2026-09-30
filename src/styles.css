@@ -1765,6 +1765,25 @@ section[aria-label="program checks"] > h3 {
   column-gap: 1.5rem;
 }
 
+/* A specialisation's body is two fixed columns (planning and
+   requirements, then P&C's prose) rather than auto-placed sections,
+   which would pair them off row by row and leave gaps beside the long
+   Requirements. Stacked, the second column's first section keeps its
+   rule. */
+.details-column {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+}
+
+.details-column > .details-section:first-child {
+  border-block-start: 0;
+}
+
+.details-column + .details-column > .details-section:first-child {
+  border-block-start: 1px solid var(--line);
+}
+
 /* Two columns once the panel is 680px wide: 628px is that less its 1px
    borders, 1.25rem padding either side and 10px scrollbar gutter (the
    query measures the content box, and can't do the arithmetic itself).
@@ -1775,7 +1794,8 @@ section[aria-label="program checks"] > h3 {
   }
 
   .details-body:not(:has(> .details-lists)) > .details-section:nth-child(2),
-  .details-body > .details-lists ~ .details-section:nth-child(3) {
+  .details-body > .details-lists ~ .details-section:nth-child(3),
+  .details-column + .details-column > .details-section:first-child {
     border-block-start: 0;
   }
 }
