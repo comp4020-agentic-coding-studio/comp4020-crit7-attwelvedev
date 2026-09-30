@@ -505,6 +505,22 @@ describe("specialisation details", { timeout: 30_000 }, () => {
   });
 });
 
+describe("the Help page on specialisation details", () => {
+  it("has its own section after Course details, which mentions specs too", async () => {
+    const html = await (await fetch(new URL("/help/", baseUrl))).text();
+    const h2s = [...html.matchAll(/<h2([^>]*)>([^<]*)<\/h2>/g)].map(([, attrs, text]) => ({ attrs, text }));
+    const at = (text: string) => h2s.findIndex((h) => h.text === text);
+    const spec = h2s.findIndex((h) => /id="specialisations"/.test(h.attrs));
+    expect(h2s[spec]?.text).toBe("Specialisation details");
+    expect(spec).toBe(at("Course details") + 1);
+    expect(at("What a course card is telling you")).toBe(spec + 1);
+
+    const course = html.slice(html.indexOf(">Course details</h2>"), html.indexOf('id="specialisations"'));
+    expect(course).toContain("courses and specialisations you've opened");
+    expect(course).toMatch(/<dt[^>]*>On the lists of<\/dt>/);
+  });
+});
+
 describe("the what-if endpoint", () => {
   const whatIf = (planId: string, query: string) => fetch(new URL(`/api/plans/${planId}/what-if?${query}`, baseUrl));
 

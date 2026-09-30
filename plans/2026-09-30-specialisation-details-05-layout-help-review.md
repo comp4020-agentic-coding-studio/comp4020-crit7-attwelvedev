@@ -229,7 +229,8 @@ own file for the same reason.
 
 ### Task 13: Help, "Specialisation details" section
 
-- [ ] **Description.** This file's §4.3.
+- [x] **Description.** This file's §4.3. *(Help copy accepted by the user,
+  2026-09-30.)*
 - **Files touched:**
   - `src/pages/help.astro`
   - `spec/layout/specialisation-details.test.ts`
