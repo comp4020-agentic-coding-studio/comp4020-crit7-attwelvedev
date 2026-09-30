@@ -357,18 +357,18 @@ It works on read-only plans too; it reads and never writes.
 | 02 | `…-02-panel.md` | 3–5 | 01 | `?spec=ARIN-SPEC` renders the full P&C content in the panel. Chosen block, Back/Forward, shared frame. **Human review (Task 5).** | [x] |
 | 03 | `…-03-what-if.md` | 6–8 | 01, 02 | What-if endpoint, Fit block in every state, Choose/Switch with the switch toast. **Human review (Task 8).** | [x] |
 | 04 | `…-04-entry-points.md` | 9–11 | 01, 02 | Sidebar Details buttons, heading link and tint; search results; the course panel's "On the lists of" line. **Human review (Task 9).** | [x] |
-| 05 | `…-05-layout-help-review.md` | 12–14 | 02, 03, 04 | Wide two-column body, phone sheet, all-states sweep, Help section, final review. **Human review (Tasks 13, 14).** | [ ] |
+| 05 | `…-05-layout-help-review.md` | 12–14 | 02, 03, 04 | Wide two-column body, phone sheet, all-states sweep, Help section, final review. **Human review (Tasks 13, 14).** | [x] |
 
 Phases 03 and 04 are independent of each other and can run in either order.
 
 ## 6. Feature-level Definition of Done
 
-- [ ] Every phase in §5 is ticked, and every task is complete with tests
+- [x] Every phase in §5 is ticked, and every task is complete with tests
   passing
-- [ ] `pnpm build && pnpm exec vitest run --project spec
+- [x] `pnpm build && pnpm exec vitest run --project spec
   spec/layout/specialisation-details.test.ts` passes
-- [ ] `pnpm check` passes, and so does `pnpm check:evidence`
-- [ ] Manually verified at 1920×1080 and 390×844:
+- [x] `pnpm check` passes, and so does `pnpm check:evidence`
+- [x] Manually verified at 1920×1080 and 390×844:
   1. Open `/plan/example` and select ARIN's Details button. The panel shows
      P&C's content, "● Chosen", and a progress jump that flashes the
      sidebar group.
@@ -379,10 +379,10 @@ Phases 03 and 04 are independent of each other and can run in either order.
   4. Switch specs. The toast reads "Switched Specialisation from … to …".
   5. Search "ARIN" and open the spec result.
   6. Open COMP3670's details and follow "On the lists of".
-- [ ] Every requirement in §2 is covered (see §7)
-- [ ] Every `Human review:` task (5, 8, 9, 13, 14) explicitly accepted by
+- [x] Every requirement in §2 is covered (see §7)
+- [x] Every `Human review:` task (5, 8, 9, 13, 14) explicitly accepted by
   the user
-- [ ] No item remains in §8
+- [x] No item remains in §8
 
 ## 7. Requirements coverage check
 

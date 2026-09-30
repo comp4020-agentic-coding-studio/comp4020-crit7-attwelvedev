@@ -257,7 +257,7 @@ own file for the same reason.
 
 ### Task 14: Final review and wrap-up
 
-- [ ] **Description.**
+- [x] **Description.** *(Accepted by the user, 2026-09-30.)*
   - Run the overview §6 manual steps at 1920×1080 and 390×844, and fix
     only defects that don't change behaviour.
   - Confirm `pnpm check` and `pnpm check:evidence`.
@@ -287,13 +287,13 @@ own file for the same reason.
 
 ## 6. Phase Definition of Done
 
-- [ ] Tasks 12–14 are complete and their tests pass
-- [ ] `pnpm test:unit` passes
-- [ ] `pnpm check` and `pnpm check:evidence` pass
-- [ ] The sweep covers states A–G × three viewports
-- [ ] The human reviews for Tasks 13 and 14 are explicitly accepted by the
+- [x] Tasks 12–14 are complete and their tests pass
+- [x] `pnpm test:unit` passes
+- [x] `pnpm check` and `pnpm check:evidence` pass
+- [x] The sweep covers states A–G × three viewports
+- [x] The human reviews for Tasks 13 and 14 are explicitly accepted by the
   user
-- [ ] Tick Phase 05 in overview §5 and commit
+- [x] Tick Phase 05 in overview §5 and commit
 
 ## 7. Requirements coverage (this phase)
 
