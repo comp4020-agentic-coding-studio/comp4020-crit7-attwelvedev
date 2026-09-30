@@ -1279,3 +1279,30 @@ choice to the user rather than trimming it myself, since it changed an
 approved sentence. They ruled that the line should say only what's left.
 After the change the button's bottom measured 769px, 18px clear, and
 `pnpm check` passed. I amended the plan and spec so the wording matches.
+
+## 2026-09-30 — Rendering the width the plan's CSS wasn't written for
+
+Resolved by bc1da55.
+
+Task 9's plan gave the sidebar's new "Details" button
+`margin-inline-start: auto`, pushing it to the end of its option's row.
+All five of the task's tests and axe passed, and at the default sidebar
+width it looked right: a quiet link at the fieldset's edge. The obvious
+move was to screenshot that width and the phone, and hand it over.
+
+The review's pass conditions named a three-column requirements region
+too, so I rendered one by setting the stored sidebar width to 1150px. At
+that width the rule the plan chose did something no test could see:
+"Details" sat about 1000px from "Systems & Architecture", closer to the
+next column than to the option it belongs to. I measured each row's right
+edge against its button's to confirm it wasn't just the screenshot's
+crop.
+
+It was a settled plan decision, so I didn't change it. I put the render
+in front of the user with the alternative. They accepted the task on the
+condition that Details stays beside its label. After the one-line change
+I re-rendered all five views. At every width, each button's right edge
+now sits just past its label (491–608px at 1920, not 912 or 1347). There's
+still no horizontal overflow, the 2.75rem targets hold, and a long label
+wraps at 390 with Details still on its row. `pnpm check` passed, and I
+amended the plan's §4.1 to match.
